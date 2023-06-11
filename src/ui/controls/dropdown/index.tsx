@@ -40,7 +40,7 @@ export default function DropDown<T>(props: DropDownProps<T>) {
 
         if (store.isOpen) {
             const onOuterClick = (e: MouseEvent) => {
-                window.removeEventListener('mousedown', onOuterClick, false);
+                window.removeEventListener('mousedown', onOuterClick);
 
                 const listRect = store.listNode.getBoundingClientRect();
                 const ex = e.clientX;
@@ -56,7 +56,7 @@ export default function DropDown<T>(props: DropDownProps<T>) {
                 }
             };
 
-            window.addEventListener('mousedown', onOuterClick, false);
+            window.addEventListener('mousedown', onOuterClick, {passive: true});
         }
     }
 

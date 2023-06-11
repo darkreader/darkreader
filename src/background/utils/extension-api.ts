@@ -1,9 +1,9 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
-export function canInjectScript(url: string | null | undefined) {
+export function canInjectScript(url: string | null | undefined): boolean {
     if (isFirefox) {
-        return (url
+        return Boolean(url
             && !url.startsWith('about:')
             && !url.startsWith('moz')
             && !url.startsWith('view-source:')
@@ -15,7 +15,7 @@ export function canInjectScript(url: string | null | undefined) {
         );
     }
     if (isEdge) {
-        return (url
+        return Boolean(url
             && !url.startsWith('chrome')
             && !url.startsWith('data')
             && !url.startsWith('devtools')
@@ -25,7 +25,7 @@ export function canInjectScript(url: string | null | undefined) {
             && !url.startsWith('view-source')
         );
     }
-    return (url
+    return Boolean(url
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
         && !url.startsWith('data')
@@ -70,7 +70,7 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
 
             sync = {
                 ...defaults,
-                ...sync
+                ...sync,
             };
 
             resolve(sync);
@@ -107,7 +107,7 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
                 (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
             }
             (values as any)[key] = {
-                __meta_split_count: minimalKeysNeeded
+                __meta_split_count: minimalKeysNeeded,
             };
         }
     }
@@ -135,7 +135,7 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
     });
 }
 
-export async function getCommands() {
+export async function getCommands(): Promise<chrome.commands.Command[]> {
     return new Promise<chrome.commands.Command[]>((resolve) => {
         if (!chrome.commands) {
             resolve([]);

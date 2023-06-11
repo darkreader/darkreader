@@ -1,6 +1,5 @@
 // @ts-check
 import * as rollup from 'rollup';
-import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
@@ -25,8 +24,10 @@ async function bundleAPI({debug, watch}) {
     const dest = 'darkreader.js';
     const bundle = await rollup.rollup({
         input: src,
+        onwarn: (error) => {
+            throw error;
+        },
         plugins: [
-            rollupPluginNodeResolve(),
             rollupPluginTypescript({
                 rootDir,
                 typescript,
@@ -45,16 +46,16 @@ async function bundleAPI({debug, watch}) {
                 __DEBUG__: false,
                 __CHROMIUM_MV2__: false,
                 __CHROMIUM_MV3__: false,
-                __FIREFOX__: false,
+                __FIREFOX_MV2__: false,
                 __THUNDERBIRD__: false,
                 __TEST__: false,
             }),
-        ].filter((x) => x)
+        ].filter(Boolean),
     });
     watchFiles = bundle.watchFiles;
     await bundle.write({
         banner: `/**\n * Dark Reader v${await getVersion()}\n * https://darkreader.org/\n */\n`,
-        // TODO: Consider remving next line
+        // TODO: Consider removing next line
         esModule: true,
         file: dest,
         strict: true,

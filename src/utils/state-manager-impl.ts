@@ -92,7 +92,7 @@ enum StateManagerImplState {
     SAVING = 3,
     SAVING_OVERRIDE = 4,
     ONCHANGE_RACE = 5,
-    RECOVERY = 6,
+    RECOVERY = 6
 }
 
 export class StateManagerImpl<T extends Record<string, unknown>> {
@@ -111,7 +111,8 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
 
     private listeners: Set<() => void>;
 
-    constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    public constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
         this.localStorageKey = localStorageKey;
         this.parent = parent;
         this.defaults = defaults;
@@ -206,7 +207,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
     }
 
     // This function is not guaranteed to save state before returning
-    async saveState(): Promise<void> {
+    public async saveState(): Promise<void> {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 // Make sure not to overwrite data before it is loaded
@@ -262,7 +263,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
         });
     }
 
-    async loadState(): Promise<void> {
+    public async loadState(): Promise<void> {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 this.meta = StateManagerImplState.LOADING;
@@ -284,11 +285,11 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
         }
     }
 
-    addChangeListener(callback: () => void) {
+    public addChangeListener(callback: () => void): void {
         this.listeners.add(callback);
     }
 
-    getStateForTesting() {
+    public getStateForTesting(): string {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 return 'Initial';

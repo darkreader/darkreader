@@ -56,7 +56,7 @@ export default class Newsmaker {
         }
     };
 
-    public static subscribe() {
+    public static subscribe(): void {
         Newsmaker.init();
         if ((Newsmaker.latestTimestamp === null) || (Newsmaker.latestTimestamp + Newsmaker.UPDATE_INTERVAL < Date.now())) {
             Newsmaker.updateNews();
@@ -65,13 +65,13 @@ export default class Newsmaker {
         chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
     }
 
-    public static unSubscribe() {
+    public static unSubscribe(): void {
         // No need to call Newsmaker.init()
         chrome.alarms.onAlarm.removeListener(Newsmaker.alarmListener);
         chrome.alarms.clear(Newsmaker.ALARM_NAME);
     }
 
-    private static async updateNews() {
+    private static async updateNews(): Promise<void> {
         Newsmaker.init();
         const news = await Newsmaker.getNews();
         if (Array.isArray(news)) {
@@ -86,7 +86,7 @@ export default class Newsmaker {
         Newsmaker.init();
         const [
             sync,
-            local
+            local,
         ] = await Promise.all([
             readSyncStorage({readNews: []}),
             readLocalStorage({readNews: []}),
@@ -101,7 +101,7 @@ export default class Newsmaker {
         Newsmaker.init();
         const [
             sync,
-            local
+            local,
         ] = await Promise.all([
             readSyncStorage({displayedNews: []}),
             readLocalStorage({displayedNews: []}),
@@ -138,7 +138,7 @@ export default class Newsmaker {
         }
     }
 
-    public static async markAsRead(ids: string[]) {
+    public static async markAsRead(ids: string[]): Promise<void> {
         Newsmaker.init();
         const readNews = await Newsmaker.getReadNews();
         const results = readNews.slice();
@@ -164,7 +164,7 @@ export default class Newsmaker {
         }
     }
 
-    public static async markAsDisplayed(ids: string[]) {
+    public static async markAsDisplayed(ids: string[]): Promise<void> {
         Newsmaker.init();
         const displayedNews = await Newsmaker.getDisplayedNews();
         const results = displayedNews.slice();
@@ -190,11 +190,11 @@ export default class Newsmaker {
         }
     }
 
-    private static wasRead(id: string, readNews: string[]) {
+    private static wasRead(id: string, readNews: string[]): boolean {
         return readNews.includes(id);
     }
 
-    private static wasDisplayed(id: string, displayedNews: string[]) {
+    private static wasDisplayed(id: string, displayedNews: string[]): boolean {
         return displayedNews.includes(id);
     }
 }

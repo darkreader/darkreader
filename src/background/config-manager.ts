@@ -32,6 +32,7 @@ const CONFIG_URLs = {
         local: '../config/color-schemes.drconf',
     },
 };
+
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 interface LocalConfig {
@@ -84,7 +85,7 @@ export default class ConfigManager {
             try {
                 $config = await readText({
                     url: `${remoteURL}?nocache=${Date.now()}`,
-                    timeout: REMOTE_TIMEOUT_MS
+                    timeout: REMOTE_TIMEOUT_MS,
                 });
             } catch (err) {
                 console.error(`${name} remote load error`, err);
@@ -149,11 +150,11 @@ export default class ConfigManager {
         ConfigManager.handleStaticThemes();
     }
 
-    public static async load(config?: LocalConfig) {
+    public static async load(config?: LocalConfig): Promise<void> {
         if (!config) {
             await UserStorage.loadSettings();
             config = {
-                local: !UserStorage.settings.syncSitesFixes
+                local: !UserStorage.settings.syncSitesFixes,
             };
         }
 
@@ -166,7 +167,7 @@ export default class ConfigManager {
         ]).catch((err) => console.error('Fatality', err));
     }
 
-    private static handleColorSchemes() {
+    private static handleColorSchemes(): void {
         const $config = ConfigManager.raw.colorSchemes;
         const {result, error} = parseColorSchemeConfig($config || '');
         if (error) {
@@ -177,24 +178,24 @@ export default class ConfigManager {
         ConfigManager.COLOR_SCHEMES_RAW = result;
     }
 
-    private static handleDarkSites() {
+    private static handleDarkSites(): void {
         const $sites = ConfigManager.overrides.darkSites || ConfigManager.raw.darkSites;
         ConfigManager.DARK_SITES_INDEX = indexSiteListConfig($sites || '');
     }
 
-    public static handleDynamicThemeFixes() {
+    public static handleDynamicThemeFixes(): void {
         const $fixes = ConfigManager.overrides.dynamicThemeFixes || ConfigManager.raw.dynamicThemeFixes || '';
         ConfigManager.DYNAMIC_THEME_FIXES_INDEX = indexSitesFixesConfig<DynamicThemeFix>($fixes);
         ConfigManager.DYNAMIC_THEME_FIXES_RAW = $fixes;
     }
 
-    public static handleInversionFixes() {
+    public static handleInversionFixes(): void {
         const $fixes = ConfigManager.overrides.inversionFixes || ConfigManager.raw.inversionFixes || '';
         ConfigManager.INVERSION_FIXES_INDEX = indexSitesFixesConfig<InversionFix>($fixes);
         ConfigManager.INVERSION_FIXES_RAW = $fixes;
     }
 
-    public static handleStaticThemes() {
+    public static handleStaticThemes(): void {
         const $themes = ConfigManager.overrides.staticThemes || ConfigManager.raw.staticThemes || '';
         ConfigManager.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
         ConfigManager.STATIC_THEMES_RAW = $themes;

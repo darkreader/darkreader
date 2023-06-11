@@ -17,7 +17,7 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicThemeFix | null = null) {
+export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicThemeFix | null = null): void {
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngine.dynamicTheme) {
@@ -29,11 +29,11 @@ export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicT
     isDarkReaderEnabled = true;
 }
 
-export function isEnabled() {
+export function isEnabled(): boolean {
     return isDarkReaderEnabled;
 }
 
-export function disable() {
+export function disable(): void {
     removeDynamicTheme();
     isDarkReaderEnabled = false;
 }
@@ -44,7 +44,7 @@ let store = {
     fixes: null as DynamicThemeFix | null,
 };
 
-function handleColorScheme() {
+function handleColorScheme(): void {
     if (darkScheme.matches) {
         enable(store.themeOptions, store.fixes);
     } else {
@@ -52,7 +52,7 @@ function handleColorScheme() {
     }
 }
 
-export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix | null = null) {
+export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix | null = null): void {
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();

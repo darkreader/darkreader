@@ -21,13 +21,13 @@ export default function Toggle(props: ToggleProps) {
     const clsOn = {
         'toggle__btn': true,
         'toggle__on': true,
-        'toggle__btn--active': checked
+        'toggle__btn--active': checked,
     };
 
     const clsOff = {
         'toggle__btn': true,
         'toggle__off': true,
-        'toggle__btn--active': !checked
+        'toggle__btn--active': !checked,
     };
 
     return (

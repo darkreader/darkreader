@@ -10,9 +10,9 @@ function renderBody(data: ExtensionData, devToolsData: DevToolsData, actions: Co
     sync(document.body, <Body data={data} devtools={devToolsData} actions={actions} />);
 }
 
-async function start() {
+async function start(): Promise<void> {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 
     let [data, devToolsData] = await Promise.all([
         connector.getData(),
@@ -41,19 +41,33 @@ if (__TEST__) {
         }));
     };
     socket.onmessage = (e) => {
-        const respond = (message: {id: number; data?: string; error?: string}) => socket.send(JSON.stringify(message));
+        const respond = (message: {id: number; data?: string | boolean; error?: string}) => socket.send(JSON.stringify(message));
         const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-        const {id, data} = message;
+        const {type, id, data} = message;
         try {
             const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor')!;
             const [buttonReset, buttonApply] = document.querySelectorAll('button');
-            switch (message.type) {
-                case 'debug-devtools-paste':
+            switch (type) {
+                case 'devtools-exists': {
+                    // The required element may not exist yet
+                    const check = () => {
+                        const element: HTMLElement | null = document.querySelector(data);
+                        if (element) {
+                            respond({id, data: true});
+                        } else {
+                            requestIdleCallback(check, {timeout: 500});
+                        }
+                    };
+
+                    check();
+                    break;
+                }
+                case 'devtools-paste':
                     textarea.value = data;
                     buttonApply.click();
                     respond({id});
                     break;
-                case 'debug-devtools-reset':
+                case 'devtools-reset':
                     respond({id});
                     buttonReset.click();
                     (document.querySelector('button.message-box__button-ok') as HTMLButtonElement).click();

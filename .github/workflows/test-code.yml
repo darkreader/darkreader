@@ -19,6 +19,11 @@ on:
     paths-ignore:
       - 'src/config/**'
   workflow_dispatch:
+    inputs:
+      node_version:
+        description: 'NodeJS version'
+        required: true
+        default: '16.x'
 
 jobs:
   test:
@@ -32,7 +37,8 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: ${{ inputs.node_version || '16.x' }}
+          cache: npm
 
       - name: Install npm dependencies
         run: npm ci
@@ -45,6 +51,9 @@ jobs:
 
       - name: Check for compatibility issues
         run: npm run lint:bundle
+
+      - name: Check project structure
+        run: npm run test:project
 
       - name: Check NPM dependencies
         run: node tests/dependencies.js

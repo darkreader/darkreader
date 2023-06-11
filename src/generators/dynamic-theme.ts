@@ -15,7 +15,7 @@ const dynamicThemeFixesCommands: { [key: string]: keyof DynamicThemeFix } = {
     'IGNORE IMAGE ANALYSIS': 'ignoreImageAnalysis',
 };
 
-export function parseDynamicThemeFixes(text: string) {
+export function parseDynamicThemeFixes(text: string): DynamicThemeFix[] {
     return parseSitesFixesConfig<DynamicThemeFix>(text, {
         commands: Object.keys(dynamicThemeFixesCommands),
         getCommandPropName: (command) => dynamicThemeFixesCommands[command],
@@ -28,7 +28,7 @@ export function parseDynamicThemeFixes(text: string) {
     });
 }
 
-export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
+export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]): string {
     const fixes = dynamicThemeFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(fixes, {
@@ -66,14 +66,18 @@ export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: 
     }
 
     if (enabledForPDF) {
+        // Copy part of fixes which will be mutated
+        const fixes_: DynamicThemeFix[] = [...fixes];
+        fixes_[0] = {...fixes_[0]};
         if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
-            fixes[0].css += '\nembed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }';
+            fixes_[0].css += '\nembed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }';
         } else {
-            fixes[0].css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
+            fixes_[0].css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
         }
         if (['drive.google.com', 'mail.google.com'].includes(getDomain(url))) {
-            fixes[0].invert.push('div[role="dialog"] div[role="document"]');
+            fixes_[0].invert.push('div[role="dialog"] div[role="document"]');
         }
+        return fixes_;
     }
 
     return fixes;

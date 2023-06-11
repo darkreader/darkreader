@@ -1,8 +1,16 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
-import type {MessageType} from './utils/message';
+import type {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG, MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoBG, MessageTypeUItoCS} from './utils/message';
 import type {AutomationMode} from './utils/automation';
 import type {ThemeEngine} from './generators/theme-engines';
+
+export type ColorScheme = 'dark' | 'light';
+
+// ContextId is a number on Firefox and documentId is a string in Chromium,
+// let's use string for simplicity
+export type documentId = string;
+export type tabId = number;
+export type frameId = number;
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -14,6 +22,7 @@ export interface ExtensionData {
     colorScheme: ParsedColorSchemeConfig;
     forcedScheme: 'dark' | 'light' | null;
     activeTab: TabInfo;
+    uiHighlights: string[];
 }
 
 export interface DevToolsData {
@@ -23,7 +32,7 @@ export interface DevToolsData {
 }
 
 export interface TabData {
-    type: MessageType;
+    type: MessageTypeBGtoCS;
     data?: any;
 }
 
@@ -41,6 +50,7 @@ export interface ExtensionActions {
     resetDevInversionFixes(): void;
     applyDevStaticThemes(text: string): Promise<void>;
     resetDevStaticThemes(): void;
+    hideHighlights(ids: string[]): void;
 }
 
 export interface ExtWrapper {
@@ -125,17 +135,58 @@ export interface LocationSettings {
 
 export interface TabInfo {
     url: string;
+    id: tabId | null;
+    documentId: documentId | null;
     isProtected: boolean;
     isInjected: boolean | null;
     isInDarkList: boolean;
     isDarkThemeDetected: boolean | null;
 }
 
-export interface Message {
-    type: MessageType;
+export interface MessageCStoBG {
+    id?: string;
+    type: MessageTypeCStoBG;
     data?: any;
-    id?: number;
+}
+
+export interface MessageUItoCS {
+    type: MessageTypeUItoCS;
+}
+
+export interface MessageCStoUI {
+    type: MessageTypeCStoUI;
+    data: any;
+}
+
+export interface MessageBGtoCS {
+    id?: string;
+    type: MessageTypeBGtoCS;
+    data?: any;
     error?: any;
+}
+
+export interface MessageUItoBG {
+    type: MessageTypeUItoBG;
+    data?: any;
+    error?: any;
+}
+
+export interface MessageBGtoUI {
+    type: MessageTypeBGtoUI;
+    data?: any;
+}
+
+export interface DebugMessageBGtoCS {
+    type: DebugMessageTypeBGtoCS;
+}
+
+export interface DebugMessageBGtoUI {
+    type: DebugMessageTypeBGtoUI;
+}
+
+export interface DebugMessageCStoBG {
+    type: DebugMessageTypeCStoBG;
+    data?: any;
 }
 
 export interface Shortcuts {
@@ -149,6 +200,7 @@ export interface DynamicThemeFix {
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
     disableStyleSheetsProxy: boolean;
+    disableCustomElementRegistryProxy: boolean;
 }
 
 export interface InversionFix {

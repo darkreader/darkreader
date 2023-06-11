@@ -1,6 +1,6 @@
 import type {RequestListener} from 'http';
 import type {WaitForOptions} from 'puppeteer-core';
-import type {ExtensionData, UserSettings} from '../../src/definitions';
+import type {ColorScheme, ExtensionData, UserSettings} from '../../src/definitions';
 
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};
 type OneStyleExpectation = [selector: string | string[], cssAttributeName: string, expectedValue: string];
@@ -11,9 +11,9 @@ declare global {
     const corsURL: string;
     const popupUtils: {
         click: (selector: string) => Promise<void>;
-        exists: (selector: string) => Promise<boolean>;
     };
     const devtoolsUtils: {
+        exists: (selector: string) => Promise<void>;
         paste: (fixes: string) => Promise<void>;
         reset: () => Promise<void>;
     };
@@ -21,12 +21,17 @@ declare global {
         changeSettings: (settings: Partial<UserSettings>) => Promise<void>;
         collectData: () => Promise<ExtensionData>;
         changeChromeStorage: (region: 'local' | 'sync', data: {[key: string]: any}) => Promise<void>;
+        getColorScheme: () => Promise<ColorScheme>;
         getChromeStorage: (region: 'local' | 'sync', keys: string[]) => Promise<{[key: string]: any}>;
         getManifest: () => Promise<chrome.runtime.Manifest>;
+        createTab: (url: string) => Promise<void>;
     };
-    const emulateMedia: (name: string, value: string) => Promise<void>;
+    const pageUtils: {
+        evaluateScript: (script: () => any) => Promise<any>;
+    };
+    const emulateColorScheme: (value: ColorScheme) => Promise<void>;
     const awaitForEvent: (uuid: string) => Promise<void>;
     const expectPageStyles: (expect: jest.Expect, expectations: StyleExpectations) => Promise<void>;
-    const getColorScheme: () => Promise<'dark' | 'light'>;
-    const evaluateScript: (script: () => any) => Promise<any>;
+    const getColorScheme: () => Promise<ColorScheme>;
+    const product: 'firefox';
 }

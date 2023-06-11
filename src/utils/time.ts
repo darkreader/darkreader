@@ -1,4 +1,4 @@
-export function parseTime($time: string) {
+export function parseTime($time: string): [number, number] {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
     const isAM = lowercased.endsWith('am') || lowercased.endsWith('a.m.');
@@ -23,11 +23,11 @@ export function parseTime($time: string) {
     return [hours, minutes];
 }
 
-function parse24HTime(time: string) {
+function parse24HTime(time: string): number[] {
     return time.split(':').map((x) => parseInt(x));
 }
 
-function compareTime(time1: number[], time2: number[]) {
+function compareTime(time1: number[], time2: number[]): -1 | 0 | 1 {
     if (time1[0] === time2[0] && time1[1] === time2[1]) {
         return 0;
     }
@@ -86,7 +86,7 @@ export function isInTimeIntervalLocal(time0: string, time1: string, date: Date =
     return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
 }
 
-function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number) {
+function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number): boolean {
     if (time1 < time0) {
         return timestamp <= time1 || time0 <= timestamp;
     }
@@ -100,7 +100,7 @@ interface Duration {
     seconds?: number;
 }
 
-export function getDuration(time: Duration) {
+export function getDuration(time: Duration): number {
     let duration = 0;
     if (time.seconds) {
         duration += time.seconds * 1000;
@@ -117,7 +117,7 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
-export function getDurationInMinutes(time: Duration) {
+export function getDurationInMinutes(time: Duration): number {
     return getDuration(time) / 1000 / 60;
 }
 

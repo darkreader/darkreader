@@ -9,7 +9,7 @@ import type {DropDownOption} from '../../../controls/dropdown';
 
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     const context = getContext();
-    const store = context.store as {isConfirmationVisible: boolean};
+    const store: {isConfirmationVisible: boolean} = context.store;
 
     function onRemoveClick(e: MouseEvent) {
         e.stopPropagation();
@@ -68,7 +68,7 @@ export default function PresetPicker(props: ViewProps) {
         }
         return {
             id: preset.id,
-            content: <PresetItem {...props} preset={preset} />
+            content: <PresetItem {...props} preset={preset} />,
         };
     });
     const customSitePresetOption = {
@@ -130,7 +130,7 @@ export default function PresetPicker(props: ViewProps) {
                 if (preset.id === chosenPresetId) {
                     return {
                         ...preset,
-                        urls: preset.urls.concat(host)
+                        urls: preset.urls.concat(host),
                     };
                 }
                 return preset;

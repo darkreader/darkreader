@@ -24,6 +24,10 @@ on:
         description: 'Test results retention (in days)'
         required: true
         default: '7'
+      node_version:
+        description: 'NodeJS version'
+        required: true
+        default: '16.x'
 
 jobs:
   test-browser:
@@ -45,7 +49,8 @@ jobs:
           # Beta releases
           - channel: beta
             chrome: beta
-            firefox: latest-beta
+            # disable Firefox Beta because it fails to install extension
+            # firefox: latest-beta
 
     runs-on: ubuntu-latest
 
@@ -79,7 +84,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: ${{ inputs.node_version || '16.x' }}
           cache: npm
 
       - name: Install NPM dependencies
@@ -93,15 +98,21 @@ jobs:
 
       - name: Run browser tests on Chromium MV2 build
         if: ${{ matrix.chrome }}
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:chrome -- --json --outputFile=test-results-chrome.json
 
       - name: Run browser tests on Chromium MV3 build
         if: ${{ matrix.chrome }}
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:chrome-mv3 -- --json --outputFile=test-results-chrome-mv3.json
+
+      - name: Run browser tests on Firefox MV2 build
+        if: ${{ matrix.firefox }}
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: npm run test:firefox -- --json --outputFile=test-results-firefox-mv2.json
 
       - name: Upload test results
         uses: actions/upload-artifact@v3

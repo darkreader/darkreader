@@ -12,6 +12,28 @@ Sponsor the development of Dark Reader.
 
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/main/src/_locales) a translation. See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
+## Disabling Dark Reader on your site
+
+Website pages can request Dark Reader to disable itself by embedding a "Dark Reader lock". The "lock" is a `<meta>` tag with `name` attribute set to `darkreader-lock` which is a child of `<head>` tag in the document.
+
+### Disabling Dark Reader statically
+
+Add `<meta name="darkreader-lock">` within your HTML document in `<head>` like so:
+```html
+<head>
+    <meta name="darkreader-lock">
+</head>
+```
+
+### Disabling Dark Reader dynamically
+
+Add the "lock" dynamically like so (assuming browser already parsed enough of the document to create a `head` attribute):
+```js
+const lock = document.createElement('meta');
+lock.name = 'darkreader-lock';
+document.head.appendChild(lock);
+```
+
 ## Adding a website that is already dark
 
 If a website is **already dark** and meets the following requirements:

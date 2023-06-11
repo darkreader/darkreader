@@ -28,7 +28,10 @@ export function generateRandomId() {
     return Math.floor(Math.random() * 2 ** 55).toString();
 }
 
-export async function createTestServer(/** @type {number} */port) {
+/**
+ * @param {number} port
+ */
+export async function createTestServer(port) {
     /** @type {import('http').Server} */
     let server;
     /** @type {{[path: string]: string | import('http').RequestListener}} */
@@ -60,6 +63,7 @@ export async function createTestServer(/** @type {number} */port) {
 
         res.statusCode = 200;
         res.setHeader('Content-Type', contentType);
+        res.setHeader('Cache-Control', 'no-cache');
         res.end(content, 'utf8');
     }
 

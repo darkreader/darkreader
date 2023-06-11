@@ -3,7 +3,7 @@ import {compareChromeVersions, chromiumVersion, isWindows, isOpera, isYaBrowser,
 declare const __THUNDERBIRD__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 
-export function popupHasBuiltInBorders() {
+export function popupHasBuiltInBorders(): boolean {
     return !__CHROMIUM_MV3__ && Boolean(
         chromiumVersion &&
         !isVivaldi &&
@@ -14,7 +14,7 @@ export function popupHasBuiltInBorders() {
     );
 }
 
-export function popupHasBuiltInHorizontalBorders() {
+export function popupHasBuiltInHorizontalBorders(): boolean {
     return !__CHROMIUM_MV3__ && Boolean(
         chromiumVersion &&
         !isVivaldi &&
@@ -27,7 +27,8 @@ export function popupHasBuiltInHorizontalBorders() {
     );
 }
 
-export function fixNotClosingPopupOnNavigation() {
+export function fixNotClosingPopupOnNavigation(): void {
+    // This event listener must not be passive since it calls e.preventDefault()
     document.addEventListener('click', (e) => {
         if (e.defaultPrevented || e.button === 2) {
             return;

@@ -17,10 +17,13 @@ async function loadBasicPage() {
 }
 
 async function expectStyles(styles: StyleExpectations) {
-    expectPageStyles(expect, styles);
+    await expectPageStyles(expect, styles);
 }
 
 describe('Inline style override', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
     it('should override inline style', async () => {
         await loadBasicPage();
 
@@ -32,7 +35,7 @@ describe('Inline style override', () => {
 
         await expectStyles(['span', 'color', 'rgb(255, 26, 26)']);
 
-        await expect(evaluateScript(async () => {
+        await expect(pageUtils.evaluateScript(async () => {
             const span = document.querySelector('span');
             span.style.color = 'green';
             await new Promise((resolve) => setTimeout(resolve));

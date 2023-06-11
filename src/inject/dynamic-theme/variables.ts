@@ -27,7 +27,7 @@ const VAR_TYPE_BGIMG = 1 << 3;
 
 export class VariablesStore {
     private varTypes = new Map<string, number>();
-    private rulesQueue = [] as CSSRuleList[];
+    private rulesQueue: CSSRuleList[] = [];
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
     private unknownColorVars = new Set<string>();
@@ -39,7 +39,7 @@ export class VariablesStore {
     private unstableVarValues = new Map<string, string>();
     private onRootVariableDefined: () => void;
 
-    clear() {
+    public clear(): void {
         this.varTypes.clear();
         this.rulesQueue.splice(0);
         this.definedVars.clear();
@@ -60,11 +60,11 @@ export class VariablesStore {
         );
     }
 
-    addRulesForMatching(rules: CSSRuleList) {
+    public addRulesForMatching(rules: CSSRuleList): void {
         this.rulesQueue.push(rules);
     }
 
-    matchVariablesAndDependants() {
+    public matchVariablesAndDependants(): void {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();
@@ -122,7 +122,7 @@ export class VariablesStore {
         this.changedTypeVars.clear();
     }
 
-    getModifierForVariable(options: {
+    public getModifierForVariable(options: {
         varName: string;
         sourceValue: string;
         rule: CSSStyleRule;
@@ -217,7 +217,7 @@ export class VariablesStore {
         };
     }
 
-    getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
+    public getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
         // TODO(gusted): This condition is incorrect, as the sourceValue still contains a variable.
         // Simply replacing it with some definition is incorrect as variables are element-independent.
         // Fully handling this requires having a function that gives the variable's value given an
@@ -255,7 +255,6 @@ export class VariablesStore {
             };
         }
         if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
-            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             return (theme) => {
                 const unknownVars = new Set<string>();
                 const modify = () => {
@@ -478,11 +477,11 @@ export class VariablesStore {
         });
     }
 
-    setOnRootVariableChange(callback: () => void) {
+    public setOnRootVariableChange(callback: () => void): void {
         this.onRootVariableDefined = callback;
     }
 
-    putRootVars(styleElement: HTMLStyleElement, theme: Theme) {
+    public putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
         const sheet = styleElement.sheet!;
         if (sheet.cssRules.length > 0) {
             sheet.deleteRule(0);
@@ -502,7 +501,7 @@ export class VariablesStore {
                 this.subscribeForVarTypeChange(property, this.onRootVariableDefined);
             }
         });
-        const cssLines = [] as string[];
+        const cssLines: string[] = [];
         cssLines.push(':root {');
         for (const [property, value] of declarations) {
             cssLines.push(`    ${property}: ${value};`);

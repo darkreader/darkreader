@@ -28,14 +28,14 @@ declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
-const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
+const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
 let filter: FilterConfig | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
 let ignoredImageAnalysisSelectors: string[] = [];
 let ignoredInlineSelectors: string[] = [];
 
-function createOrUpdateStyle(className: string, root: ParentNode = document.head || document) {
+function createOrUpdateStyle(className: string, root: ParentNode = document.head || document): HTMLStyleElement {
     let element: HTMLStyleElement | null = root.querySelector(`.${className}`);
     if (!element) {
         element = document.createElement('style');
@@ -50,7 +50,7 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
 /**
  * Note: This function is used only with MV2.
  */
-function createOrUpdateScript(className: string, root: ParentNode = document.head || document) {
+function createOrUpdateScript(className: string, root: ParentNode = document.head || document): HTMLScriptElement {
     let element: HTMLScriptElement | null = root.querySelector(`.${className}`);
     if (!element) {
         element = document.createElement('script');
@@ -64,11 +64,11 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
  * Note: This function is used only with MV3.
  * The string passed as the src parameter must be included in the web_accessible_resources manifest key.
  */
-function injectProxyScriptMV3(arg: boolean) {
+function injectProxyScriptMV3(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {
     logInfo('MV3 proxy injector: regular path attempts to inject...');
     const element = document.createElement('script');
     element.src = chrome.runtime.getURL('inject/proxy.js');
-    element.dataset.arg = JSON.stringify(arg);
+    element.dataset.arg = JSON.stringify({enableStyleSheetsProxy, enableCustomElementRegistryProxy});
     document.head.prepend(element);
 }
 
@@ -143,7 +143,7 @@ function createStaticStyleOverrides() {
         `   --darkreader-neutral-text: ${schemeTextColor};`,
         `   --darkreader-selection-background: ${selectionColors.backgroundColorSelection};`,
         `   --darkreader-selection-text: ${selectionColors.foregroundColorSelection};`,
-        `}`
+        `}`,
     ].join('\n');
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupNodePositionWatcher(variableStyle, 'variables');
@@ -151,14 +151,15 @@ function createStaticStyleOverrides() {
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
-    const injectProxyArg = !(fixes && fixes.disableStyleSheetsProxy);
+    const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
+    const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
     if (__CHROMIUM_MV3__) {
-        injectProxyScriptMV3(injectProxyArg);
+        injectProxyScriptMV3(enableStyleSheetsProxy, enableCustomElementRegistryProxy);
         // Notify the dedicated injector of the data.
-        document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: injectProxyArg}));
+        document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: {enableStyleSheetsProxy, enableCustomElementRegistryProxy}}));
     } else {
         const proxyScript = createOrUpdateScript('darkreader--proxy');
-        proxyScript.append(`(${injectProxy})(${injectProxyArg})`);
+        proxyScript.append(`(${injectProxy})(${enableStyleSheetsProxy}, ${enableCustomElementRegistryProxy})`);
         document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
         proxyScript.remove();
     }
@@ -166,7 +167,7 @@ function createStaticStyleOverrides() {
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
 
-function createShadowStaticStyleOverrides(root: ShadowRoot) {
+function createShadowStaticStyleOverridesInner(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
@@ -189,6 +190,37 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     }
     root.insertBefore(invertStyle, overrideStyle.nextSibling);
     shadowRootsWithOverrides.add(root);
+}
+
+function delayedCreateShadowStaticStyleOverrides(root: ShadowRoot): void {
+    const observer = new MutationObserver((mutations, observer) => {
+        // Disconnect observer immediatelly before making any other changes
+        observer.disconnect();
+
+        // Do not make any changes unless Dark Reader's fixes have been removed
+        for (const {type, removedNodes} of mutations) {
+            if (type === 'childList') {
+                for (const {nodeName, className} of removedNodes as any) {
+                    if (nodeName === 'STYLE' && ['darkreader darkreader--inline', 'darkreader darkreader--override', 'darkreader darkreader--invert'].includes(className)) {
+                        createShadowStaticStyleOverridesInner(root);
+                        return;
+                    }
+                }
+            }
+        }
+    });
+    observer.observe(root, {childList: true});
+}
+
+function createShadowStaticStyleOverrides(root: ShadowRoot) {
+    // The shadow DOM may not be populated yet and the custom element implementation
+    // may assume that unpopulated shadow root is empty and inadvertently remove
+    // Dark Reader's overrides
+    const uninit = root.firstChild === null;
+    createShadowStaticStyleOverridesInner(root);
+    if (uninit) {
+        delayedCreateShadowStaticStyleOverrides(root);
+    }
 }
 
 function replaceCSSTemplates($cssText: string) {
@@ -246,7 +278,7 @@ function createDynamicStyleOverrides() {
             push(inlineStyleElements, elements);
         }
     });
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
+    inlineStyleElements.forEach((el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
     handleAdoptedStyleSheets(document);
 }
 
@@ -399,7 +431,7 @@ function watchForUpdates() {
         createShadowStaticStyleOverrides(root);
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
-            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
+            forEach(inlineStyleElements, (el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
         }
     });
 
@@ -467,7 +499,7 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
 /**
  * TODO: expose this function to API builds via src/api function enable()
  */
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean): void {
     const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
 
     // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
@@ -482,7 +514,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
  * only for use in src/api/enable() for backwards compatibility,
  * extension should use only createOrUpdateDynamicTheme()
  */
-export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean) {
+export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {
@@ -534,7 +566,7 @@ function removeProxy() {
     removeNode(document.head.querySelector('.darkreader--proxy'));
 }
 
-export function removeDynamicTheme() {
+export function removeDynamicTheme(): void {
     document.documentElement.removeAttribute(`data-darkreader-mode`);
     document.documentElement.removeAttribute(`data-darkreader-scheme`);
     cleanDynamicThemeCache();
@@ -569,7 +601,7 @@ export function removeDynamicTheme() {
     metaObserver && metaObserver.disconnect();
 }
 
-export function cleanDynamicThemeCache() {
+export function cleanDynamicThemeCache(): void {
     variablesStore.clear();
     parsedURLCache.clear();
     removeDocumentVisibilityListener();

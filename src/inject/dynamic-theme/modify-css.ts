@@ -92,7 +92,7 @@ function joinSelectors(...selectors: string[]) {
     return selectors.filter(Boolean).join(', ');
 }
 
-export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean): string {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
@@ -138,7 +138,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     return lines.join('\n');
 }
 
-export function getSelectionColor(theme: Theme) {
+export function getSelectionColor(theme: Theme): {backgroundColorSelection: string; foregroundColorSelection: string} {
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {
@@ -223,7 +223,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}): string {
     const lines: string[] = [];
     // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
     const isMicrosoft = ['microsoft.com', 'docs.microsoft.com'].includes(location.hostname);
@@ -484,9 +484,7 @@ export function getBgImageModifier(
             }
         });
 
-        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         return (filter: FilterConfig) => {
-            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             const results = modifiers.filter(Boolean).map((modify) => modify!(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results).then((asyncResults) => {
@@ -571,7 +569,7 @@ function getVariableDependantModifier(
     return variablesStore.getModifierForVarDependant(prop, value);
 }
 
-export function cleanModificationCache() {
+export function cleanModificationCache(): void {
     clearColorModificationCache();
     imageDetailsCache.clear();
     cleanImageProcessingCache();

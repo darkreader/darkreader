@@ -1,7 +1,5 @@
-import fs from 'node:fs/promises';
-import JestNodeEnvironment from 'jest-environment-node';
-import path from 'node:path';
-import puppeteer from 'puppeteer-core';
+import {TestEnvironment} from 'jest-environment-node';
+import {launch, connect} from 'puppeteer-core';
 import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
 import {generateHTMLCoverageReports} from './coverage.js';
@@ -13,48 +11,59 @@ const CORS_SERVER_PORT = 8892;
 const FIREFOX_DEVTOOLS_PORT = 8893;
 const POPUP_TEST_PORT = 8894;
 
-class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
+export default class CustomJestEnvironment extends TestEnvironment {
+    /** @type {() => void} */
     extensionStartListeners = [];
     pageEventListeners = new Map();
+
+    /** @type {Browser} */
+    broser;
+    /** @type {WebSocketServer} */
+    messageServer;
 
     async setup() {
         await super.setup();
 
-        const promises = [
+        const promises1 = [
             this.createMessageServer(),
+            this.launchBrowser(),
+        ];
+        const promises2 = [
             createTestServer(TEST_SERVER_PORT),
             createTestServer(CORS_SERVER_PORT),
         ];
-        promises.push();
 
-        this.browser = await this.launchBrowser();
-        this.global.browser = this.browser;
+        const results1 = await Promise.all(promises1);
+        this.messageServer = results1[0];
+        this.browser = results1[1];
 
-        promises.push(
-            this.openPopupPage(),
-            this.openDevtoolsPage(),
+        promises2.push(
             this.createTestPage(),
         );
 
-        const results = await Promise.all(promises);
-        this.messageServer = results[0];
-        this.testServer = results[1];
-        this.corsServer = results[2];
-        this.extensionPopup = results[3];
-        this.extensionDevtools = results[4];
-        this.page = results[5];
+        const results2 = await Promise.all(promises2);
+        this.testServer = results2[0];
+        this.corsServer = results2[1];
+        this.page = results2[2];
 
-        this.assignTestGlobals();
+        // Wait for tabs to load?
+
+        this.assignTestGlobals(this.global, this.testServer, this.corsServer, this.page);
     }
 
+    /**
+     * @returns {Promise<void>}
+     */
     async waitForStartup() {
         if (!this.extensionOrigin) {
             return new Promise((ready) => this.extensionStartListeners.push(ready));
         }
     }
 
+    /**
+     * @returns {Promise<Browser>}
+     */
     async launchBrowser() {
-        /** @type {import('puppeteer-core').Browser} */
         let browser;
         if (this.global.product === 'chrome') {
             browser = await this.launchChrome(true);
@@ -68,6 +77,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         return browser;
     }
 
+    /**
+     * @returns {Promise<Browser>}
+     */
     async launchChrome(mv2) {
         const extensionDir = mv2 ? chromeExtensionDebugDir : chromeMV3ExtensionDebugDir;
         let executablePath;
@@ -76,7 +88,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         } catch (e) {
             console.error(e);
         }
-        return await puppeteer.launch({
+        // Explanation of these options:
+        // https://pptr.dev/guides/chrome-extensions
+        return await launch({
             executablePath,
             headless: false,
             args: [
@@ -87,64 +101,50 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         });
     }
 
+    /**
+     * @returns {Promise<Browser>}
+     */
+    async launchFirefoxPuppeteer() {
+        const retries = 100;
+        const retryIntervalInMs = 100;
+        for (let i = 0; i < retries; i++) {
+            try {
+                return await connect({
+                    browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
+                });
+            } catch (e) {
+                await new Promise((resolve) => setTimeout(resolve, retryIntervalInMs));
+            }
+        }
+        throw new Error('Failed to connect to Puppeteer');
+    }
+
+    /**
+     * @returns {Promise<Browser>}
+     */
     async launchFirefox() {
-        const firefoxPath = await getFirefoxPath();
-        const webExtInstance = await cmd.run({
+        // We need to manually launch Firefox via cmd.run() to install extension
+        // because Firefox does not support installing via CLI arguments
+        const firefox = await getFirefoxPath();
+        await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
-            firefox: firefoxPath,
+            firefox,
+            noReload: true,
             args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],
         }, {
             shouldExitProgram: false,
         });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        this.firefoxInternalUUID = await this.getFirefoxInternalUUID(webExtInstance);
-        return await puppeteer.connect({
-            browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
-        });
-    }
-
-    async getFirefoxInternalUUID(webExtInstance) {
-        const runner = webExtInstance.extensionRunners[0];
-        const firefoxArgs = runner.runningInfo.firefox.spawnargs;
-        const profileDir = firefoxArgs[firefoxArgs.indexOf('-profile') + 1];
-        const prefsFile = await fs.readFile(path.join(profileDir, 'prefs.js'), 'utf8');
-        const extensionsJson = prefsFile
-            .match(/user_pref\("extensions.webextensions.uuids", "(.*?)"\);/)[1]
-            .replace(/\\"/g, '"');
-        const extensionsIds = JSON.parse(extensionsJson);
-        return extensionsIds['addon@darkreader.org'];
+        return await this.launchFirefoxPuppeteer();
     }
 
     async createTestPage() {
-        const page = await this.browser.newPage();
-        page.setCacheEnabled(false);
-        page.on('pageerror', (err) => process.emit('uncaughtException', err));
-        if (this.global.product !== 'firefox') {
-            await page.coverage.startJSCoverage();
-        }
-        return page;
-    }
-
-    /**
-     * @param {string} path
-     * @returns {Promise<puppeteer.Page>}
-     */
-    async openExtensionPage(path) {
-        if (this.global.product === 'chrome' || this.global.product === 'chrome-mv3') {
-            return await this.openChromePage(path);
-        }
         if (this.global.product === 'firefox') {
-            return await this.openFirefoxPage(path);
+            return;
         }
-        return null;
-    }
-
-    async openPopupPage() {
-        return await this.openExtensionPage('/ui/popup/index.html');
-    }
-
-    async openDevtoolsPage() {
-        return await this.openExtensionPage('/ui/devtools/index.html');
+        const page = await this.browser.newPage();
+        page.on('pageerror', (err) => process.emit('uncaughtException', err));
+        await page.coverage.startJSCoverage();
+        return page;
     }
 
     async getURL(path) {
@@ -171,14 +171,33 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         });
     }
 
-    async pageGoto(page, url, gotoOptions) {
+    /**
+     * @param {Page} page
+     * @param {string} url
+     * @param {WaitForOptions} gotoOptions
+     * @returns Promise which resolves when page loads
+     */
+    async pageGoto(url, gotoOptions) {
         // Normalize URL
         const pathname = new URL(url).pathname;
         // Depending on external circumstances, page may connect to server before page.goto() reolves
         const promise = this.awaitForEvent(`ready-${pathname}`);
-        // Firefox does not resolve page.goto()
-        await page.goto(url, gotoOptions);
-        return promise;
+        // Firefox does not resolve promise returned by page.goto()
+        // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
+        // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
+        if (this.global.product !== 'firefox') {
+            await this.page.goto(url, gotoOptions);
+        } else {
+            await this.global.backgroundUtils.createTab(url);
+        }
+        await promise;
+    }
+
+    async openTestPage(url, gotoOptions) {
+        if (this.global.product !== 'firefox') {
+            await this.page.bringToFront();
+        }
+        await this.pageGoto(url, gotoOptions);
     }
 
     onPageEventResponse(eventUUID) {
@@ -187,87 +206,125 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         resolves && resolves.forEach((r) => r());
     }
 
-    async openChromePage(path) {
-        const pageURL = await this.getURL(path);
-        const extensionPage = await this.browser.newPage();
-        await this.pageGoto(extensionPage, pageURL);
+    /**
+     * This function is evaluated within browser's page context
+     * after being passed to page.evaluate()
+     * It can use methods which will be defined in the page context,
+     * but can not use variables defined in this file besides those passed into it.
+     */
+    async checkPageStylesInBrowserContext(expectations) {
+        const checkOne = (expectation) => {
+            const [selector, cssAttributeName, expectedValue] = expectation;
+            const selector_ = Array.isArray(selector) ? selector : [selector];
+            let element = document;
+            for (const part of selector_) {
+                if (element instanceof HTMLIFrameElement) {
+                    element = element.contentDocument;
+                }
+                if (element.shadowRoot instanceof ShadowRoot) {
+                    element = element.shadowRoot;
+                }
+                if (part === 'document') {
+                    element = element.documentElement;
+                } else {
+                    element = element.querySelector(part);
+                }
+                if (!element) {
+                    return `Could not find element ${part}`;
+                }
+            }
+            const style = getComputedStyle(element);
+            if (style[cssAttributeName] !== expectedValue) {
+                return `Got ${style[cssAttributeName]}`;
+            }
+        };
 
-        return extensionPage;
+        const checkAll = () => {
+            /** @type{Array<[number, string]>} */
+            const errors = [];
+            for (let i = 0; i < expectations.length; i++) {
+                const error = checkOne(expectations[i]);
+                if (error) {
+                    errors.push([i, error]);
+                }
+            }
+            return errors;
+        };
+
+        let timeout = 10;
+        let errors = checkAll();
+        for (let i = 0; (errors.length !== 0) && (i < 10); i++) {
+            timeout *= 2;
+            await new Promise((r) => requestIdleCallback(r, {timeout}));
+            errors = checkAll();
+        }
+        return errors;
     }
 
-    async openFirefoxPage(path) {
-        const extensionPage = await this.browser.newPage();
-        // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
-        const url = `moz-extension://${this.firefoxInternalUUID}${path}`;
-        await this.pageGoto(extensionPage, url);
-        return extensionPage;
-    }
-
-    assignTestGlobals() {
-        this.global.getColorScheme = async () => {
-            const isDark = await this.page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
+    assignTestGlobals(global, testServer, corsServer, page) {
+        global.getColorScheme = async () => {
+            if (global.product === 'firefox') {
+                return await global.backgroundUtils.getColorScheme();
+            }
+            const isDark = await page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
             return isDark ? 'dark' : 'light';
         };
 
-        this.global.evaluateScript = async (script) => {
-            return await this.page.evaluate(script);
+        global.pageUtils.evaluateScript = async (script) => {
+            if (global.product === 'firefox') {
+                if (typeof script !== 'function') {
+                    throw new Error('Not implemented');
+                }
+                return await global.pageUtils.evaluate(`(${script.toString()})()`);
+            }
+            return await page.evaluate(script);
         };
 
-        this.global.expectPageStyles = async (expect, expectations) => {
+        global.expectPageStyles = async (expect, expectations) => {
+            if (global.product === 'firefox') {
+                const errors = await global.pageUtils.expectPageStyles(expectations);
+                expect(errors.length).toBe(0);
+                return;
+            }
             if (!Array.isArray(expectations[0])) {
                 expectations = [expectations];
             }
-            const promises = [];
-            for (const [selector, cssAttributeName, expectedValue] of expectations) {
-                const promise = expect(this.page.evaluate(
-                    (selector, cssAttributeName) => {
-                        let element = document;
-                        if (!Array.isArray(selector)) {
-                            selector = [selector];
-                        }
-                        for (const part of selector) {
-                            if (element instanceof HTMLIFrameElement) {
-                                element = element.contentDocument;
-                            }
-                            if (part === 'document') {
-                                element = element.documentElement;
-                            } else {
-                                element = element.querySelector(part);
-                            }
-                        }
-                        const style = getComputedStyle(element);
-                        return style[cssAttributeName];
-                    },
-                    selector, cssAttributeName
-                )).resolves.toBe(expectedValue);
-                promises.push(promise);
-            }
-            return Promise.all(promises);
+            const errors = await page.evaluate(this.checkPageStylesInBrowserContext, expectations);
+            expect(errors.length).toBe(0);
         };
 
-        this.global.emulateMedia = async (name, value) => {
-            if (this.global.product === 'firefox') {
+        global.emulateColorScheme = async (colorScheme) => {
+            if (global.product === 'firefox') {
+                await global.pageUtils.emulateColorScheme(colorScheme);
+                await global.backgroundUtils.emulateColorScheme(colorScheme);
+                const newPageColorScheme = await global.backgroundUtils.getColorScheme();
+                const newBGColorScheme = await global.pageUtils.getColorScheme();
+                if (newPageColorScheme !== colorScheme || newBGColorScheme !== colorScheme) {
+                    throw new Error('Failed to apply new color scheme');
+                }
                 return;
             }
-            await this.page.emulateMediaFeatures([{name, value}]);
-            if (this.global.product === 'chrome') {
+            await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
+            if (global.product === 'chrome') {
                 const page = await this.getChromiumMV2BackgroundPage();
-                await page.emulateMediaFeatures([{name, value}]);
+                await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
             }
         };
 
-        this.global.loadTestPage = async (paths, gotoOptions) => {
+        global.loadTestPage = async (paths, gotoOptions) => {
             const {cors, ...testPaths} = paths;
-            this.testServer.setPaths(testPaths);
-            cors && this.corsServer.setPaths(cors);
-            const {page} = this;
-            await page.bringToFront();
-            await this.pageGoto(page, `http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
+            testServer.setPaths(testPaths);
+            cors && corsServer.setPaths(cors);
+            await this.openTestPage(`http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
         };
 
-        this.global.corsURL = this.corsServer.url;
+        global.corsURL = corsServer.url;
     }
 
+    /**
+     * Creates a server and returns once extension connects to it
+     * @returns {Promise<WebSocketServer>} server
+     */
     async createMessageServer() {
         const awaitForEvent = this.awaitForEvent.bind(this);
 
@@ -282,8 +339,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             const resolvers = new Map();
             const rejectors = new Map();
 
-            wsServer.on('listening', () => resolve(wsServer));
-
             wsServer.on('connection', async (ws) => {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
@@ -294,6 +349,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                         this.extensionStartListeners.forEach((ready) => ready());
                         ws.on('close', () => backgroundSocket = null);
                         backgroundSocket = ws;
+                        resolve(wsServer);
                     } else if (message.id === null && message.data && message.data.type === 'devtools') {
                         ws.on('close', () => devToolsSocket = null);
                         devToolsSocket = ws;
@@ -305,7 +361,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                     } else if (message.id === null && message.data && message.data.type === 'page') {
                         if (message.data.message === 'page-ready') {
                             ws.on('close', () => pageSockets.delete(ws));
-                            pageSockets.add(ws);
+                            // Filter out non-top frames
+                            // this is to simplify expectPageStyle implementation
+                            if (message.data.uuid === 'ready-/') {
+                                pageSockets.add(ws);
+                            }
                         }
                         this.onPageEventResponse(message.data.uuid);
                     } else if (message.error) {
@@ -345,6 +405,10 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 return sendToContext([backgroundSocket], type, data);
             }
 
+            function sendToPage(type, data) {
+                return sendToContext(Array.from(pageSockets), type, data);
+            }
+
             async function applyDevtoolsConfig(type, fixes) {
                 const promise = awaitForEvent('darkreader-dynamic-theme-ready');
                 await sendToDevTools(type, fixes);
@@ -352,13 +416,13 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             }
 
             this.global.popupUtils = {
-                click: async (selector) => await sendToPopup('click', selector),
-                exists: async (selector) => await sendToPopup('exists', selector),
+                click: async (selector) => await sendToPopup('popup-click', selector),
             };
 
             this.global.devtoolsUtils = {
-                paste: async (fixes) => await applyDevtoolsConfig('debug-devtools-paste', fixes),
-                reset: async () => await applyDevtoolsConfig('debug-devtools-reset'),
+                exists: async (selector) => await sendToDevTools('devtools-exists', selector),
+                paste: async (fixes) => await applyDevtoolsConfig('devtools-paste', fixes),
+                reset: async () => await applyDevtoolsConfig('devtools-reset'),
             };
 
             this.global.backgroundUtils = {
@@ -367,12 +431,45 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 changeChromeStorage: async (region, data) => await sendToBackground('changeChromeStorage', {region, data}),
                 getChromeStorage: async (region, keys) => await sendToBackground('getChromeStorage', {region, keys}),
                 getManifest: async () => await sendToBackground('getManifest'),
+                getColorScheme: async () => {
+                    if (this.global.product !== 'firefox') {
+                        throw new Error('Not supported');
+                    }
+                    return await sendToBackground('firefox-getColorScheme');
+                },
+                createTab: async (url) => {
+                    if (this.global.product !== 'firefox') {
+                        throw new Error('Not supported');
+                    }
+                    await sendToBackground('firefox-createTab', url);
+                },
+                emulateColorScheme: async (colorScheme) => {
+                    if (this.global.product !== 'firefox') {
+                        throw new Error('Not supported');
+                    }
+                    await sendToBackground('firefox-emulateColorScheme', colorScheme);
+                },
+            };
+
+            this.global.pageUtils = {
+                evaluate: async (script) => await sendToPage('firefox-eval', script),
+                expectPageStyles: async (expectations) => await sendToPage('firefox-expectPageStyles', expectations),
+                emulateColorScheme: async (colorScheme) => await sendToPage('firefox-emulateColorScheme', colorScheme),
+                getColorScheme: async () => {
+                    if (this.global.product !== 'firefox') {
+                        throw new Error('Not supported');
+                    }
+                    return await sendToPage('firefox-getColorScheme');
+                },
             };
 
             this.global.awaitForEvent = awaitForEvent;
         });
     }
 
+    /**
+     * @returns {Promise<void>}
+     */
     async teardown() {
         await super.teardown();
 
@@ -396,5 +493,3 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         await Promise.all(promises);
     }
 }
-
-export default PuppeteerEnvironment;

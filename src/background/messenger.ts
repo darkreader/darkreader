@@ -1,6 +1,6 @@
 import {isFirefox} from '../utils/platform';
-import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings, DevToolsData} from '../definitions';
-import {MessageType} from '../utils/message';
+import type {ExtensionData, FilterConfig, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
+import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
 import {makeFirefoxHappy} from './make-firefox-happy';
 
 export interface ExtensionAdapter {
@@ -18,13 +18,14 @@ export interface ExtensionAdapter {
     resetDevInversionFixes: () => void;
     applyDevStaticThemes: (text: string) => Error;
     resetDevStaticThemes: () => void;
+    hideHighlights: (ids: string[]) => Promise<void>;
 }
 
 export default class Messenger {
     private static adapter: ExtensionAdapter;
     private static changeListenerCount: number;
 
-    public static init(adapter: ExtensionAdapter) {
+    public static init(adapter: ExtensionAdapter): void {
         Messenger.adapter = adapter;
         Messenger.changeListenerCount = 0;
 
@@ -36,49 +37,49 @@ export default class Messenger {
         }
     }
 
-    private static messageListener(message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string} | 'unsupportedSender') => void) {
+    private static messageListener(message: MessageUItoBG | MessageCStoBG, sender: chrome.runtime.MessageSender, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string} | 'unsupportedSender') => void) {
         if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
             return;
         }
         const allowedSenderURL = [
             chrome.runtime.getURL('/ui/popup/index.html'),
             chrome.runtime.getURL('/ui/devtools/index.html'),
-            chrome.runtime.getURL('/ui/stylesheet-editor/index.html')
+            chrome.runtime.getURL('/ui/stylesheet-editor/index.html'),
         ];
         if (allowedSenderURL.includes(sender.url!)) {
-            Messenger.onUIMessage(message, sendResponse);
+            Messenger.onUIMessage(message as MessageUItoBG, sendResponse);
             return ([
-                MessageType.UI_GET_DATA,
-                MessageType.UI_GET_DEVTOOLS_DATA,
-            ].includes(message.type));
+                MessageTypeUItoBG.GET_DATA,
+                MessageTypeUItoBG.GET_DEVTOOLS_DATA,
+            ].includes(message.type as MessageTypeUItoBG));
         }
     }
 
     private static firefoxPortListener(port: chrome.runtime.Port) {
         let promise: Promise<ExtensionData | DevToolsData | TabInfo | null>;
         switch (port.name) {
-            case MessageType.UI_GET_DATA:
+            case MessageTypeUItoBG.GET_DATA:
                 promise = Messenger.adapter.collect();
                 break;
-            case MessageType.UI_GET_DEVTOOLS_DATA:
+            case MessageTypeUItoBG.GET_DEVTOOLS_DATA:
                 promise = Messenger.adapter.collectDevToolsData();
                 break;
             // These types require data, so we need to add a listener to the port.
-            case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
-            case MessageType.UI_APPLY_DEV_INVERSION_FIXES:
-            case MessageType.UI_APPLY_DEV_STATIC_THEMES:
+            case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES:
+            case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
+            case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
                 promise = new Promise((resolve, reject) => {
-                    port.onMessage.addListener((message: Message) => {
+                    port.onMessage.addListener((message: MessageUItoBG | MessageCStoBG) => {
                         const {data} = message;
                         let error: Error;
                         switch (port.name) {
-                            case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
+                            case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES:
                                 error = Messenger.adapter.applyDevDynamicThemeFixes(data);
                                 break;
-                            case MessageType.UI_APPLY_DEV_INVERSION_FIXES:
+                            case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
                                 error = Messenger.adapter.applyDevInversionFixes(data);
                                 break;
-                            case MessageType.UI_APPLY_DEV_STATIC_THEMES:
+                            case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
                                 error = Messenger.adapter.applyDevStaticThemes(data);
                                 break;
                             default:
@@ -99,72 +100,75 @@ export default class Messenger {
             .catch((error) => port.postMessage({error}));
     }
 
-    private static onUIMessage({type, data}: Message, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string}) => void) {
+    private static onUIMessage({type, data}: MessageUItoBG, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string}) => void) {
         switch (type) {
-            case MessageType.UI_GET_DATA:
+            case MessageTypeUItoBG.GET_DATA:
                 Messenger.adapter.collect().then((data) => sendResponse({data}));
                 break;
-            case MessageType.UI_GET_DEVTOOLS_DATA:
+            case MessageTypeUItoBG.GET_DEVTOOLS_DATA:
                 Messenger.adapter.collectDevToolsData().then((data) => sendResponse({data}));
                 break;
-            case MessageType.UI_SUBSCRIBE_TO_CHANGES:
+            case MessageTypeUItoBG.SUBSCRIBE_TO_CHANGES:
                 Messenger.changeListenerCount++;
                 break;
-            case MessageType.UI_UNSUBSCRIBE_FROM_CHANGES:
+            case MessageTypeUItoBG.UNSUBSCRIBE_FROM_CHANGES:
                 Messenger.changeListenerCount--;
                 break;
-            case MessageType.UI_CHANGE_SETTINGS:
+            case MessageTypeUItoBG.CHANGE_SETTINGS:
                 Messenger.adapter.changeSettings(data);
                 break;
-            case MessageType.UI_SET_THEME:
+            case MessageTypeUItoBG.SET_THEME:
                 Messenger.adapter.setTheme(data);
                 break;
-            case MessageType.UI_TOGGLE_ACTIVE_TAB:
+            case MessageTypeUItoBG.TOGGLE_ACTIVE_TAB:
                 Messenger.adapter.toggleActiveTab();
                 break;
-            case MessageType.UI_MARK_NEWS_AS_READ:
+            case MessageTypeUItoBG.MARK_NEWS_AS_READ:
                 Messenger.adapter.markNewsAsRead(data);
                 break;
-            case MessageType.UI_MARK_NEWS_AS_DISPLAYED:
+            case MessageTypeUItoBG.MARK_NEWS_AS_DISPLAYED:
                 Messenger.adapter.markNewsAsDisplayed(data);
                 break;
-            case MessageType.UI_LOAD_CONFIG:
+            case MessageTypeUItoBG.LOAD_CONFIG:
                 Messenger.adapter.loadConfig(data);
                 break;
-            case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES: {
+            case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES: {
                 const error = Messenger.adapter.applyDevDynamicThemeFixes(data);
                 sendResponse({error: (error ? error.message : undefined)});
                 break;
             }
-            case MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES:
+            case MessageTypeUItoBG.RESET_DEV_DYNAMIC_THEME_FIXES:
                 Messenger.adapter.resetDevDynamicThemeFixes();
                 break;
-            case MessageType.UI_APPLY_DEV_INVERSION_FIXES: {
+            case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES: {
                 const error = Messenger.adapter.applyDevInversionFixes(data);
                 sendResponse({error: (error ? error.message : undefined)});
                 break;
             }
-            case MessageType.UI_RESET_DEV_INVERSION_FIXES:
+            case MessageTypeUItoBG.RESET_DEV_INVERSION_FIXES:
                 Messenger.adapter.resetDevInversionFixes();
                 break;
-            case MessageType.UI_APPLY_DEV_STATIC_THEMES: {
+            case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES: {
                 const error = Messenger.adapter.applyDevStaticThemes(data);
                 sendResponse({error: error ? error.message : undefined});
                 break;
             }
-            case MessageType.UI_RESET_DEV_STATIC_THEMES:
+            case MessageTypeUItoBG.RESET_DEV_STATIC_THEMES:
                 Messenger.adapter.resetDevStaticThemes();
+                break;
+            case MessageTypeUItoBG.HIDE_HIGHLIGHTS:
+                Messenger.adapter.hideHighlights(data);
                 break;
             default:
                 break;
         }
     }
 
-    public static reportChanges(data: ExtensionData) {
+    public static reportChanges(data: ExtensionData): void {
         if (Messenger.changeListenerCount > 0) {
-            chrome.runtime.sendMessage<Message>({
-                type: MessageType.BG_CHANGES,
-                data
+            chrome.runtime.sendMessage<MessageBGtoUI>({
+                type: MessageTypeBGtoUI.CHANGES,
+                data,
             });
         }
     }

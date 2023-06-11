@@ -1,5 +1,5 @@
-import {MessageType} from '../utils/message';
-import type {Message} from '../definitions';
+import {MessageTypeCStoBG, MessageTypeUItoBG} from '../utils/message';
+import type {MessageCStoBG, MessageUItoBG} from '../definitions';
 import {isPanel} from './utils/tab';
 
 declare const __CHROMIUM_MV2__: boolean;
@@ -7,20 +7,20 @@ declare const __CHROMIUM_MV2__: boolean;
 // This function exists to prevent Chrome from logging an error about
 // closed conduit. It just sends a dummy message in response to incomming message
 // to utilise open conduit. This response message is not even used on the other side.
-export function makeChromiumHappy() {
+export function makeChromiumHappy(): void {
     if (!__CHROMIUM_MV2__) {
         return;
     }
-    chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((message: MessageUItoBG | MessageCStoBG, sender, sendResponse) => {
         if (![
             // Messenger
-            MessageType.UI_GET_DATA,
-            MessageType.UI_GET_DEVTOOLS_DATA,
-            MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES,
-            MessageType.UI_APPLY_DEV_INVERSION_FIXES,
-            MessageType.UI_APPLY_DEV_STATIC_THEMES,
-        ].includes(message.type) &&
-            (message.type !== MessageType.CS_FRAME_CONNECT || !isPanel(sender))) {
+            MessageTypeUItoBG.GET_DATA,
+            MessageTypeUItoBG.GET_DEVTOOLS_DATA,
+            MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES,
+            MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES,
+            MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES,
+        ].includes(message.type as MessageTypeUItoBG) &&
+            (message.type !== MessageTypeCStoBG.FRAME_CONNECT || !isPanel(sender))) {
             sendResponse({type: '¯\\_(ツ)_/¯'});
         }
     });

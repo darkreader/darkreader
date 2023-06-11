@@ -46,19 +46,20 @@ async function getLastCommitTime() {
         ))));
 }
 
-async function zip({platforms, debug}) {
+async function zip({platforms, debug, version}) {
     if (debug) {
         throw new Error('zip task does not support debug builds');
     }
+    version = version ? `-${version}` : '';
     const releaseDir = 'build/release';
     const promises = [];
     const date = await getLastCommitTime();
     const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const platform of enabledPlatforms) {
-        const format = [PLATFORM.CHROME, PLATFORM.CHROME_MV3].includes(platform) ? 'zip' : 'xpi';
+        const format = [PLATFORM.CHROMIUM_MV2, PLATFORM.CHROMIUM_MV3].includes(platform) ? 'zip' : 'xpi';
         promises.push(archiveDirectory({
             dir: getDestDir({debug, platform}),
-            dest: `${releaseDir}/darkreader-${platform}.${format}`,
+            dest: `${releaseDir}/darkreader-${platform}${version}.${format}`,
             date,
             // Reproducible builds: set permission flags on file like chmod 644 or -rw-r--r--
             // This is needed because the built file might have different flags on different systems

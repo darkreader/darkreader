@@ -129,7 +129,7 @@ function analyzeImage(image: HTMLImageElement) {
     const height = Math.ceil(naturalHeight * k);
     context!.clearRect(0, 0, width, height);
 
-    context!.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
+    context!.drawImage(image, 0, 0, width, height);
     const imageData = context!.getImageData(0, 0, width, height);
     const d = imageData.data;
 

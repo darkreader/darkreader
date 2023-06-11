@@ -186,7 +186,7 @@ function analyzeImage(image: HTMLImageElement) {
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
     const matrix = getSVGFilterMatrixValue(theme);
     const svg = [
-        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
+        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${width} ${height}">`,
         '<defs>',
         '<filter id="darkreader-image-filter">',
         `<feColorMatrix type="matrix" values="${matrix}" />`,

@@ -86,7 +86,7 @@ export default class TabManager {
                             if (!response) {
                                 return;
                             }
-                            if (__FIREFOX_MV2__ || __THUNDERBIRD__ || (__CHROMIUM_MV2__ && sender.documentId)) {
+                            if (__FIREFOX_MV2__ || __THUNDERBIRD__ || (__CHROMIUM_MV2__ && !sender.documentId)) {
                                 response.documentId = message.documentId;
                             }
                             chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, response,

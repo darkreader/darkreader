@@ -156,7 +156,8 @@ export default class TabManager {
                     const url = sender.url!;
                     const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId! : message.documentId!;
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
-                        const response = TabManager.getTabMessage(tabURL, url, frameId === 0);
+                        const isTopFrame = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
+                        const response = TabManager.getTabMessage(tabURL, url, isTopFrame);
                         if (!__CHROMIUM_MV3__ && !sender.documentId) {
                             response.documentId = message.documentId;
                         }

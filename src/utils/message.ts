@@ -25,6 +25,7 @@ export enum MessageTypeBGtoUI {
 }
 
 export enum DebugMessageTypeBGtoUI {
+    CSS_UPDATE = 'debug-bg-ui-css-update',
     UPDATE = 'debug-bg-ui-update'
 }
 
@@ -39,7 +40,6 @@ export enum MessageTypeBGtoCS {
 }
 
 export enum DebugMessageTypeBGtoCS {
-    CSS_UPDATE = 'debug-bg-cs-css-update',
     RELOAD = 'debug-bg-cs-reload'
 }
 

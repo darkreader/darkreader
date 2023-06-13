@@ -5,7 +5,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
+import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, scriptId} from '../definitions';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
 
@@ -24,7 +24,7 @@ declare const __FIREFOX_MV2__: boolean;
 // Virtual document id used in contexts where chrome.runtime.MessageSender.documentId may not be available,
 // that is all builds besides Chromium MV3 (since it uses Chromium 106+)
 // Have to use placeholder value '' because Rollup does not consider generateUID() pure
-const documentId = __CHROMIUM_MV3__ ? '' : generateUID();
+const scriptId: scriptId = generateUID();
 
 function cleanup() {
     unloaded = true;
@@ -88,7 +88,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
         return;
     }
 
-    if (!__CHROMIUM_MV3__ && (__FIREFOX_MV2__ || __THUNDERBIRD__ || (__CHROMIUM_MV2__ && (message as MessageBGtoCS).documentId)) && (message as MessageBGtoCS).documentId !== documentId && message.type !== MessageTypeUItoCS.EXPORT_CSS) {
+    if ((message as MessageBGtoCS).scriptId !== scriptId && message.type !== MessageTypeUItoCS.EXPORT_CSS) {
         return;
     }
 
@@ -161,26 +161,20 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
 
 function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.FRAME_CONNECT | MessageTypeCStoBG.FRAME_RESUME) {
     sendMessage(
-        __CHROMIUM_MV3__ ? {
+        (__CHROMIUM_MV2__ || __CHROMIUM_MV2__) ? {
             type,
-            data: {
-                isDark: isSystemDarkModeEnabled(),
-                isTopFrame: window === window.top,
-            },
-        } : (__CHROMIUM_MV2__ ? {
-            type,
-            documentId,
+            scriptId,
             data: {
                 isDark: isSystemDarkModeEnabled(),
                 isTopFrame: window === window.top,
             },
         } : {
             type,
-            documentId,
+            scriptId,
             data: {
                 isDark: isSystemDarkModeEnabled(),
             },
-        }));
+        });
 }
 
 runColorSchemeChangeDetector((isDark) =>

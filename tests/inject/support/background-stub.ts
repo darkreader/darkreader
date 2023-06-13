@@ -17,7 +17,7 @@ export function stubChromeRuntimeMessage(): void {
                         throw new Error('Response is missing, use `stubBackgroundFetchResponse()`');
                     }
                     const data = bgResponses.get(url);
-                    listener({type: MessageTypeBGtoCS.FETCH_RESPONSE, data, error: null, id});
+                    listener({type: MessageTypeBGtoCS.FETCH_RESPONSE, data, error: null, id} as any);
                 });
             });
         }

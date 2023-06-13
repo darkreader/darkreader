@@ -159,17 +159,13 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
 
 function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.FRAME_CONNECT | MessageTypeCStoBG.FRAME_RESUME) {
     sendMessage(
-        (__CHROMIUM_MV2__ || __CHROMIUM_MV2__) ? {
+        {
             type,
             scriptId,
-            data: {
+            data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? {
                 isDark: isSystemDarkModeEnabled(),
                 isTopFrame: window === window.top,
-            },
-        } : {
-            type,
-            scriptId,
-            data: {
+            } : {
                 isDark: isSystemDarkModeEnabled(),
             },
         });

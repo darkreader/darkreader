@@ -21,9 +21,7 @@ declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 declare const __FIREFOX_MV2__: boolean;
 
-// Virtual document id used in contexts where chrome.runtime.MessageSender.documentId may not be available,
-// that is all builds besides Chromium MV3 (since it uses Chromium 106+)
-// Have to use placeholder value '' because Rollup does not consider generateUID() pure
+// Identifier for this particular script instance. It is used as an alternative to chrome.runtime.MessageSender.documentId
 const scriptId: scriptId = generateUID();
 
 function cleanup() {

@@ -13,7 +13,6 @@ import {getActiveTab, queryTabs} from '../utils/tabs';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __FIREFOX_MV2__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
 interface TabManagerOptions {

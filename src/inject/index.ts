@@ -5,7 +5,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, scriptId} from '../definitions';
+import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
 
@@ -22,7 +22,7 @@ declare const __THUNDERBIRD__: boolean;
 declare const __FIREFOX_MV2__: boolean;
 
 // Identifier for this particular script instance. It is used as an alternative to chrome.runtime.MessageSender.documentId
-const scriptId: scriptId = generateUID();
+const scriptId = generateUID();
 
 function cleanup() {
     unloaded = true;

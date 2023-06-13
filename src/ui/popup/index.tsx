@@ -5,7 +5,7 @@ import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
-import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI} from '../../utils/message';
+import {DebugMessageTypeBGtoUI} from '../../utils/message';
 import {getFontList} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {

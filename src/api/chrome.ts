@@ -24,10 +24,10 @@ async function sendMessage(...args: any[]) {
             } else {
                 text = await response.text();
             }
-            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: text, error: null, id} as any));
+            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: text, error: null, id}));
         } catch (error) {
             console.error(error);
-            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: null, error, id} as any));
+            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: null, error, id}));
         }
     }
 }

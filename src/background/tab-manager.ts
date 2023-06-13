@@ -84,7 +84,7 @@ export default class TabManager {
                             }
                             response.scriptId = message.scriptId!;
                             chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, response,
-                                (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
+                                (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {documentId: sender.documentId} : {frameId: sender.frameId});
                         });
                     };
 
@@ -149,13 +149,13 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const frameId = sender.frameId!;
                     const url = sender.url!;
-                    const documentId: documentId | null = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId! : null;
+                    const documentId: documentId | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId! || null);
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const isTopFrame = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
                         const response = TabManager.getTabMessage(tabURL, url, isTopFrame);
                         response.scriptId = message.scriptId!;
                         chrome.tabs.sendMessage<MessageBGtoCS>(tabId, response,
-                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {documentId} as chrome.tabs.MessageSendOptions : {frameId});
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         documentId,

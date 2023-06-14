@@ -84,8 +84,7 @@ export default class TabManager {
                                 return;
                             }
                             response.scriptId = message.scriptId!;
-                            chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, response,
-                                (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {documentId: sender.documentId} : {frameId: sender.frameId});
+                            TabManager.sendDocumentMessage(sender.tab!.id!, sender.documentId!, response, sender.frameId!);
                         });
                     };
 
@@ -156,8 +155,7 @@ export default class TabManager {
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const response = TabManager.getTabMessage(tabURL, url, isTopFrame);
                         response.scriptId = message.scriptId!;
-                        chrome.tabs.sendMessage<MessageBGtoCS>(tabId, response,
-                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                        TabManager.sendDocumentMessage(tabId, documentId!, response, frameId!);
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         documentId,
@@ -182,7 +180,7 @@ export default class TabManager {
                     const id = message.id;
                     // We do not need to use scriptId here since every request has a unique id already
                     const sendResponse = (response: Partial<MessageBGtoCS>) => {
-                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {documentId: sender.documentId} : {frameId: sender.frameId});
+                        TabManager.sendDocumentMessage(sender.tab!.id!, sender.documentId!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, sender.frameId!);
                     };
 
                     if (__THUNDERBIRD__) {
@@ -230,6 +228,24 @@ export default class TabManager {
         });
 
         chrome.tabs.onRemoved.addListener(async (tabId) => TabManager.removeFrame(tabId, 0));
+    }
+
+    private static sendDocumentMessage(tabId: tabId, documentId: documentId, message: MessageBGtoCS, frameId: frameId) {
+        if (__CHROMIUM_MV3__) {
+            chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, {documentId})
+                .then((e) => {
+                    if (e.message === 'Could not establish connection. Receiving end does not exist.') {
+                        // TODO: clean up storage
+                        logInfo('Failed to send message to context which does not exist');
+                    }
+                });
+            return;
+        }
+        if (__CHROMIUM_MV2__) {
+            chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, documentId ? {documentId} : {frameId});
+            return;
+        }
+        chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, {frameId});
     }
 
     private static onColorSchemeMessage(message: MessageCStoBG, sender: chrome.runtime.MessageSender) {
@@ -369,10 +385,10 @@ export default class TabManager {
                         message.scriptId = scriptId;
 
                         if (tab.active && isTop) {
-                            chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                            TabManager.sendDocumentMessage(tab!.id!, documentId!, message, frameId);
                         } else {
                             setTimeout(() => {
-                                chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                                TabManager.sendDocumentMessage(tab!.id!, documentId!, message, frameId);
                             });
                         }
                         if (TabManager.tabs[tab.id!][frameId]) {

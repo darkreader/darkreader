@@ -22,9 +22,9 @@ interface TabManagerOptions {
 }
 
 interface DocumentInfo {
+    scriptId: scriptId;
     documentId: documentId | null;
     isTop: true | undefined;
-    scriptId: scriptId;
     url: string | null;
     state: DocumentState;
     timestamp: number;
@@ -131,6 +131,7 @@ export default class TabManager {
                         logWarn('Unexpected message', message, sender);
                         break;
                     }
+                    ASSERT('Has a scriptId', message.scriptId);
                     TabManager.removeFrame(sender.tab!.id!, sender.frameId!);
                     break;
 

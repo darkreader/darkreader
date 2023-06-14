@@ -180,7 +180,7 @@ sendConnectionOrResumeMessage(MessageTypeCStoBG.FRAME_CONNECT);
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        sendMessage({type: MessageTypeCStoBG.FRAME_FORGET});
+        sendMessage({type: MessageTypeCStoBG.FRAME_FORGET, scriptId});
     }
 }
 

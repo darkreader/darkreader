@@ -123,7 +123,7 @@ if (__WATCH__) {
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
                                 if (__CHROMIUM_MV3__) {
-                                    chrome.tabs.sendMessage<DebugMessageBGtoCS>(tab.id!, message).catch(() => {});
+                                    chrome.tabs.sendMessage<DebugMessageBGtoCS>(tab.id!, message).catch(() => { /* noop */ });
                                     continue;
                                 }
                                 chrome.tabs.sendMessage<DebugMessageBGtoCS>(tab.id!, message);

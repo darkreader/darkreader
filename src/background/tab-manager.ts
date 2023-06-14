@@ -75,7 +75,7 @@ export default class TabManager {
                 return;
             }
             switch (message.type) {
-                case MessageTypeCStoBG.FRAME_CONNECT: {
+                case MessageTypeCStoBG.DOCUMENT_CONNECT: {
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
@@ -126,7 +126,7 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.FRAME_FORGET:
+                case MessageTypeCStoBG.DOCUMENT_FORGET:
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
@@ -135,7 +135,7 @@ export default class TabManager {
                     TabManager.removeFrame(sender.tab!.id!, sender.frameId!);
                     break;
 
-                case MessageTypeCStoBG.FRAME_FREEZE: {
+                case MessageTypeCStoBG.DOCUMENT_FREEZE: {
                     await TabManager.stateManager.loadState();
                     const info = TabManager.tabs[sender.tab!.id!][sender.frameId!];
                     info.state = DocumentState.FROZEN;
@@ -144,7 +144,7 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.FRAME_RESUME: {
+                case MessageTypeCStoBG.DOCUMENT_RESUME: {
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const tabId = sender.tab!.id!;

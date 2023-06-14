@@ -48,10 +48,10 @@ export enum MessageTypeCStoBG {
     DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
     DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
     FETCH = 'cs-bg-fetch',
-    FRAME_CONNECT = 'cs-bg-frame-connect',
-    FRAME_FORGET = 'cs-bg-frame-forget',
-    FRAME_FREEZE = 'cs-bg-frame-freeze',
-    FRAME_RESUME = 'cs-bg-frame-resume'
+    DOCUMENT_CONNECT = 'cs-bg-document-connect',
+    DOCUMENT_FORGET = 'cs-bg-document-forget',
+    DOCUMENT_FREEZE = 'cs-bg-document-freeze',
+    DOCUMENT_RESUME = 'cs-bg-document-resume'
 }
 
 export enum DebugMessageTypeCStoBG {

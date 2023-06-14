@@ -157,7 +157,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
     }
 }
 
-function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.FRAME_CONNECT | MessageTypeCStoBG.FRAME_RESUME) {
+function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT | MessageTypeCStoBG.DOCUMENT_RESUME) {
     sendMessage(
         {
             type,
@@ -176,20 +176,20 @@ runColorSchemeChangeDetector((isDark) =>
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendConnectionOrResumeMessage(MessageTypeCStoBG.FRAME_CONNECT);
+sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        sendMessage({type: MessageTypeCStoBG.FRAME_FORGET, scriptId});
+        sendMessage({type: MessageTypeCStoBG.DOCUMENT_FORGET, scriptId});
     }
 }
 
 function onFreeze() {
-    sendMessage({type: MessageTypeCStoBG.FRAME_FREEZE});
+    sendMessage({type: MessageTypeCStoBG.DOCUMENT_FREEZE});
 }
 
 function onResume() {
-    sendConnectionOrResumeMessage(MessageTypeCStoBG.FRAME_RESUME);
+    sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_RESUME);
 }
 
 function onDarkThemeDetected() {

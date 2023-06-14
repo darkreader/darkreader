@@ -20,7 +20,7 @@ export function makeChromiumHappy(): void {
             MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES,
             MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES,
         ].includes(message.type as MessageTypeUItoBG) &&
-            (message.type !== MessageTypeCStoBG.FRAME_CONNECT || !isPanel(sender))) {
+            (message.type !== MessageTypeCStoBG.DOCUMENT_CONNECT || !isPanel(sender))) {
             sendResponse({type: '¯\\_(ツ)_/¯'});
         }
     });

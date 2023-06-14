@@ -233,7 +233,7 @@ export default class TabManager {
     private static sendDocumentMessage(tabId: tabId, documentId: documentId, message: MessageBGtoCS, frameId: frameId) {
         if (__CHROMIUM_MV3__) {
             chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, {documentId})
-                .then((e) => {
+                .catch((e) => {
                     if (e.message === 'Could not establish connection. Receiving end does not exist.') {
                         // TODO: clean up storage
                         logInfo('Failed to send message to context which does not exist');

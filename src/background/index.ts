@@ -122,6 +122,10 @@ if (__WATCH__) {
                         chrome.runtime.sendMessage<DebugMessageBGtoCS>(message);
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
+                                if (__CHROMIUM_MV3__) {
+                                    chrome.tabs.sendMessage<DebugMessageBGtoCS>(tab.id!, message).catch(() => {});
+                                    continue;
+                                }
                                 chrome.tabs.sendMessage<DebugMessageBGtoCS>(tab.id!, message);
                             }
                         }

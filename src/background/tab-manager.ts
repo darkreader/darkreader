@@ -14,6 +14,7 @@ import {getActiveTab, queryTabs} from '../utils/tabs';
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
+declare const __DEBUG__: boolean;
 
 interface TabManagerOptions {
     getConnectionMessage: (tabURl: string, url: string, isTopFrame: boolean) => Promise<MessageBGtoCS>;
@@ -234,7 +235,7 @@ export default class TabManager {
         if (__CHROMIUM_MV3__) {
             chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, {documentId})
                 .catch((e) => {
-                    if (e.message === 'Could not establish connection. Receiving end does not exist.') {
+                    if (__DEBUG__ && e.message === 'Could not establish connection. Receiving end does not exist.') {
                         // TODO: clean up storage
                         logInfo('Failed to send message to context which does not exist');
                     }

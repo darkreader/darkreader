@@ -53,7 +53,7 @@ enum DocumentState {
 
 /**
  * Note: On Chromium builds, we use documentId if it is available.
- * We avoid messaging using farmeId entirely since when document is prerendered, it gets a emporary frameId
+ * We avoid messaging using farmeId entirely since when document is prerendered, it gets a temporary frameId
  * and if we attempt to send to {frameId, documentId} with old frameId, then the message will be dropped.
  */
 export default class TabManager {

@@ -131,7 +131,7 @@ export default class TabManager {
                         logWarn('Unexpected message', message, sender);
                         break;
                     }
-                    ASSERT('Has a scriptId', message.scriptId);
+                    ASSERT('Has a scriptId', () => Boolean(message.scriptId));
                     TabManager.removeFrame(sender.tab!.id!, sender.frameId!);
                     break;
 

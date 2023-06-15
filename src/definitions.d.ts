@@ -9,6 +9,7 @@ export type ColorScheme = 'dark' | 'light';
 // ContextId is a number on Firefox and documentId is a string in Chromium,
 // let's use string for simplicity
 export type documentId = string;
+export type scriptId = string;
 export type tabId = number;
 export type frameId = number;
 
@@ -145,6 +146,7 @@ export interface TabInfo {
 
 export interface MessageCStoBG {
     id?: string;
+    scriptId?: scriptId;
     type: MessageTypeCStoBG;
     data?: any;
 }
@@ -160,6 +162,7 @@ export interface MessageCStoUI {
 
 export interface MessageBGtoCS {
     id?: string;
+    scriptId?: scriptId;
     type: MessageTypeBGtoCS;
     data?: any;
     error?: any;

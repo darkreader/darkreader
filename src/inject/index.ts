@@ -7,6 +7,7 @@ import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeCh
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
+import {generateUID} from '../utils/uid';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
@@ -15,9 +16,13 @@ let unloaded = false;
 
 let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
+declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 declare const __FIREFOX_MV2__: boolean;
+
+// Identifier for this particular script instance. It is used as an alternative to chrome.runtime.MessageSender.documentId
+const scriptId = generateUID();
 
 function cleanup() {
     unloaded = true;
@@ -75,6 +80,16 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
 }
 
 function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) {
+    if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
+        logWarn('Cleaning up before update');
+        cleanup();
+        return;
+    }
+
+    if ((message as MessageBGtoCS).scriptId !== scriptId && message.type !== MessageTypeUItoCS.EXPORT_CSS) {
+        return;
+    }
+
     logInfoCollapsed(`onMessage[${message.type}]`, message);
     switch (message.type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
@@ -140,10 +155,20 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
         default:
             break;
     }
-    if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
-        logWarn('Cleaning up before update');
-        cleanup();
-    }
+}
+
+function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT | MessageTypeCStoBG.DOCUMENT_RESUME) {
+    sendMessage(
+        {
+            type,
+            scriptId,
+            data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? {
+                isDark: isSystemDarkModeEnabled(),
+                isTopFrame: window === window.top,
+            } : {
+                isDark: isSystemDarkModeEnabled(),
+            },
+        });
 }
 
 runColorSchemeChangeDetector((isDark) =>
@@ -151,20 +176,20 @@ runColorSchemeChangeDetector((isDark) =>
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageTypeCStoBG.FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
+sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        sendMessage({type: MessageTypeCStoBG.FRAME_FORGET});
+        sendMessage({type: MessageTypeCStoBG.DOCUMENT_FORGET, scriptId});
     }
 }
 
 function onFreeze() {
-    sendMessage({type: MessageTypeCStoBG.FRAME_FREEZE});
+    sendMessage({type: MessageTypeCStoBG.DOCUMENT_FREEZE});
 }
 
 function onResume() {
-    sendMessage({type: MessageTypeCStoBG.FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
+    sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_RESUME);
 }
 
 function onDarkThemeDetected() {

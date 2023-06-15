@@ -1,7 +1,7 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {FetchRequestParameters} from './utils/network';
-import type {MessageBGtoCS, MessageCStoBG, MessageUItoBG, documentId, frameId, tabId} from '../definitions';
+import type {MessageBGtoCS, MessageCStoBG, MessageUItoBG, documentId, frameId, scriptId, tabId} from '../definitions';
 import {isFirefox} from '../utils/platform';
 import {MessageTypeCStoBG, MessageTypeBGtoCS, MessageTypeUItoBG} from '../utils/message';
 import {ASSERT, logInfo, logWarn} from './utils/log';
@@ -13,8 +13,8 @@ import {getActiveTab, queryTabs} from '../utils/tabs';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __FIREFOX_MV2__: boolean;
 declare const __THUNDERBIRD__: boolean;
+declare const __DEBUG__: boolean;
 
 interface TabManagerOptions {
     getConnectionMessage: (tabURl: string, url: string, isTopFrame: boolean) => Promise<MessageBGtoCS>;
@@ -23,7 +23,9 @@ interface TabManagerOptions {
 }
 
 interface DocumentInfo {
+    scriptId: scriptId;
     documentId: documentId | null;
+    isTop: true | undefined;
     url: string | null;
     state: DocumentState;
     timestamp: number;
@@ -35,7 +37,7 @@ interface TabManagerState extends Record<string, unknown> {
     timestamp: number;
 }
 
-/*
+/**
  * These states correspond to possible document states in Page Lifecycle API:
  * https://developers.google.com/web/updates/2018/07/page-lifecycle-api#developer-recommendations-for-each-state
  * Some states are not currently used (they are declared for future-proofing).
@@ -49,6 +51,11 @@ enum DocumentState {
     DISCARDED = 5
 }
 
+/**
+ * Note: On Chromium builds, we use documentId if it is available.
+ * We avoid messaging using farmeId entirely since when document is prerendered, it gets a temporary frameId
+ * and if we attempt to send to {frameId, documentId} with old frameId, then the message will be dropped.
+ */
 export default class TabManager {
     private static tabs: TabManagerState['tabs'];
     private static stateManager: StateManager<TabManagerState>;
@@ -69,13 +76,16 @@ export default class TabManager {
                 return;
             }
             switch (message.type) {
-                case MessageTypeCStoBG.FRAME_CONNECT: {
+                case MessageTypeCStoBG.DOCUMENT_CONNECT: {
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
-                        getConnectionMessage(tabURL, url, isTopFrame).then((message) => {
-                            message && chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, message,
-                                (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
+                        getConnectionMessage(tabURL, url, isTopFrame).then((response) => {
+                            if (!response) {
+                                return;
+                            }
+                            response.scriptId = message.scriptId!;
+                            TabManager.sendDocumentMessage(sender.tab!.id!, sender.documentId!, response, sender.frameId!);
                         });
                     };
 
@@ -87,6 +97,7 @@ export default class TabManager {
                                 chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab.id,
                                     {
                                         type: MessageTypeBGtoCS.UNSUPPORTED_SENDER,
+                                        scriptId: message.scriptId!,
                                     },
                                     {
                                         frameId: sender && typeof sender.frameId === 'number' ? sender.frameId : undefined,
@@ -98,28 +109,33 @@ export default class TabManager {
                         return;
                     }
 
-                    const tabId = sender.tab!.id!;
-                    const tabURL = sender.tab!.url!;
                     const {frameId} = sender;
+                    const isTopFrame: boolean = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
                     const url = sender.url!;
-                    const documentId: documentId | null = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
+                    const tabId = sender.tab!.id!;
+                    const scriptId = message.scriptId!;
+                    // Chromium 106+ may prerender frames resulting in top-level frames with chrome.runtime.MessageSender.tab.url
+                    // set to chrome://newtab/ and positive chrome.runtime.MessageSender.frameId
+                    const tabURL = ((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && isTopFrame) ? url : sender.tab!.url!;
+                    const documentId: documentId | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId || null);
 
-                    TabManager.addFrame(tabId, frameId!, documentId, url, TabManager.timestamp);
+                    TabManager.addFrame(tabId, frameId!, documentId, scriptId, url, isTopFrame);
 
-                    reply(tabURL, url, frameId === 0);
+                    reply(tabURL, url, isTopFrame);
                     TabManager.stateManager.saveState();
                     break;
                 }
 
-                case MessageTypeCStoBG.FRAME_FORGET:
+                case MessageTypeCStoBG.DOCUMENT_FORGET:
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
                     }
+                    ASSERT('Has a scriptId', () => Boolean(message.scriptId));
                     TabManager.removeFrame(sender.tab!.id!, sender.frameId!);
                     break;
 
-                case MessageTypeCStoBG.FRAME_FREEZE: {
+                case MessageTypeCStoBG.DOCUMENT_FREEZE: {
                     await TabManager.stateManager.loadState();
                     const info = TabManager.tabs[sender.tab!.id!][sender.frameId!];
                     info.state = DocumentState.FROZEN;
@@ -128,22 +144,25 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.FRAME_RESUME: {
+                case MessageTypeCStoBG.DOCUMENT_RESUME: {
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const tabId = sender.tab!.id!;
                     const tabURL = sender.tab!.url!;
                     const frameId = sender.frameId!;
                     const url = sender.url!;
-                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
+                    const documentId: documentId | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId! || null);
+                    const isTopFrame: boolean = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
-                        const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
-                        chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message,
-                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} : {frameId});
+                        const response = TabManager.getTabMessage(tabURL, url, isTopFrame);
+                        response.scriptId = message.scriptId!;
+                        TabManager.sendDocumentMessage(tabId, documentId!, response, frameId!);
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         documentId,
+                        scriptId: message.scriptId!,
                         url,
+                        isTop: isTopFrame || undefined,
                         state: DocumentState.ACTIVE,
                         darkThemeDetected: false,
                         timestamp: TabManager.timestamp,
@@ -160,8 +179,9 @@ export default class TabManager {
                     // Using custom response due to Chrome and Firefox incompatibility
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
+                    // We do not need to use scriptId here since every request has a unique id already
                     const sendResponse = (response: Partial<MessageBGtoCS>) => {
-                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
+                        TabManager.sendDocumentMessage(sender.tab!.id!, sender.documentId!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, sender.frameId!);
                     };
 
                     if (__THUNDERBIRD__) {
@@ -211,6 +231,24 @@ export default class TabManager {
         chrome.tabs.onRemoved.addListener(async (tabId) => TabManager.removeFrame(tabId, 0));
     }
 
+    private static sendDocumentMessage(tabId: tabId, documentId: documentId, message: MessageBGtoCS, frameId: frameId) {
+        if (__CHROMIUM_MV3__) {
+            chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, {documentId})
+                .catch((e) => {
+                    if (__DEBUG__ && e.message === 'Could not establish connection. Receiving end does not exist.') {
+                        // TODO: clean up storage
+                        logInfo('Failed to send message to context which does not exist');
+                    }
+                });
+            return;
+        }
+        if (__CHROMIUM_MV2__) {
+            chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, documentId ? {documentId} : {frameId});
+            return;
+        }
+        chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, {frameId});
+    }
+
     private static onColorSchemeMessage(message: MessageCStoBG, sender: chrome.runtime.MessageSender) {
         ASSERT('TabManager.onColorSchemeMessage is set', () => Boolean(TabManager.onColorSchemeChange));
 
@@ -223,7 +261,7 @@ export default class TabManager {
         }
     }
 
-    private static addFrame(tabId: tabId, frameId: frameId, documentId: documentId | null, url: string, timestamp: number) {
+    private static addFrame(tabId: tabId, frameId: frameId, documentId: documentId | null, scriptId: scriptId, url: string, isTop: boolean) {
         let frames: {[frameId: frameId]: DocumentInfo};
         if (TabManager.tabs[tabId]) {
             frames = TabManager.tabs[tabId];
@@ -233,10 +271,12 @@ export default class TabManager {
         }
         frames[frameId] = {
             documentId,
+            scriptId,
             url,
+            isTop: isTop || undefined,
             state: DocumentState.ACTIVE,
             darkThemeDetected: false,
-            timestamp,
+            timestamp: TabManager.timestamp,
         };
     }
 
@@ -333,20 +373,23 @@ export default class TabManager {
                 const frames = TabManager.tabs[tab.id!];
                 Object.entries(frames)
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
-                    .forEach(async ([id, {url, documentId}]) => {
+                    .forEach(async ([id, {url, documentId, scriptId, isTop}]) => {
                         const frameId = Number(id);
                         const tabURL = await TabManager.getTabURL(tab);
+
                         // Check if hostname are equal when we only want to update active tab.
                         if (onlyUpdateActiveTab && getURLHostOrProtocol(tabURL) !== activeTabHostname) {
                             return;
                         }
 
-                        const message = TabManager.getTabMessage(tabURL, url!, frameId === 0);
-                        if (tab.active && frameId === 0) {
-                            chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                        const message = TabManager.getTabMessage(tabURL, url!, isTop || false);
+                        message.scriptId = scriptId;
+
+                        if (tab.active && isTop) {
+                            TabManager.sendDocumentMessage(tab!.id!, documentId!, message, frameId);
                         } else {
                             setTimeout(() => {
-                                chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                                TabManager.sendDocumentMessage(tab!.id!, documentId!, message, frameId);
                             });
                         }
                         if (TabManager.tabs[tab.id!][frameId]) {

@@ -5,7 +5,7 @@ import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
-import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI} from '../../utils/message';
+import {DebugMessageTypeBGtoUI} from '../../utils/message';
 import {getFontList} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
@@ -55,7 +55,7 @@ if (isFirefox) {
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {
     chrome.runtime.onMessage.addListener(({type}: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
-        if (type === DebugMessageTypeBGtoCS.CSS_UPDATE) {
+        if (type === DebugMessageTypeBGtoUI.CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;

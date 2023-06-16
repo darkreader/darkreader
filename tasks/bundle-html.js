@@ -2,14 +2,14 @@
 import paths_ from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
-import {pathExists, copyFile, getPaths} from './utils.js';
+import {copyFile, getPaths} from './utils.js';
 const {getDestDir, PLATFORM} = paths_;
 
 const srcDir = 'src';
 
 /**
  * @typedef copyEntry
- * @property {string} src
+ * @property {string} dest
  * @property {string} reloadType
  * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
  */
@@ -17,25 +17,25 @@ const srcDir = 'src';
 /** @type {copyEntry[]} */
 const copyEntries = [
     {
-        src: 'config/**/*.{config,drconf}',
+        dest: 'background/index.html',
         reloadType: reload.FULL,
+        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
     },
     {
-        src: 'icons/**/*.*',
-        reloadType: reload.FULL,
-    },
-    {
-        src: 'ui/assets/**/*.*',
+        dest: 'ui/popup/index.html',
         reloadType: reload.UI,
     },
     {
-        src: 'ui/popup/compatibility.js',
+        dest: 'ui/devtools/index.html',
         reloadType: reload.UI,
-        platforms: [PLATFORM.CHROMIUM_MV2],
+    },
+    {
+        dest: 'ui/stylesheet-editor/index.html',
+        reloadType: reload.UI,
     },
 ];
 
-const paths = copyEntries.map((entry) => entry.src).map((path) => `${srcDir}/${path}`);
+const paths = copyEntries.map((entry) => entry.dest).map((path) => `${srcDir}/${path}`);
 
 function getCwdPath(/** @type {string} */srcPath) {
     return srcPath.substring(srcDir.length + 1);
@@ -49,14 +49,14 @@ async function copyEntry(path, {debug, platform}) {
     await copyFile(src, dest);
 }
 
-async function copy({platforms, debug}) {
+async function bundleHTML({platforms, debug}) {
     const promises = [];
     const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const entry of copyEntries) {
         if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
             continue;
         }
-        const files = await getPaths(`${srcDir}/${entry.src}`);
+        const files = await getPaths(`${srcDir}/${entry.dest}`);
         for (const file of files) {
             for (const platform of enabledPlatforms) {
                 if (entry.platforms === undefined || entry.platforms.includes(platform)) {
@@ -68,21 +68,9 @@ async function copy({platforms, debug}) {
     await Promise.all(promises);
 }
 
-const copyTask = createTask(
-    'copy',
-    copy,
-).addWatcher(
-    paths,
-    async (changedFiles, _, platforms) => {
-        for (const file of changedFiles) {
-            if (await pathExists(file)) {
-                for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
-                    await copyEntry(file, {debug: true, platform});
-                }
-            }
-        }
-        reload.reload({type: reload.FULL});
-    },
+const bundleHTMLTask = createTask(
+    'bundle-html',
+    bundleHTML,
 );
 
-export default copyTask;
+export default bundleHTMLTask;

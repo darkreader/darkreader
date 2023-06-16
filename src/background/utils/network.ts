@@ -2,7 +2,10 @@ import {loadAsDataURL, loadAsText} from '../../utils/network';
 import {getStringSize} from '../../utils/text';
 import {getDuration} from '../../utils/time';
 import {isXMLHttpRequestSupported, isFetchSupported} from '../../utils/platform';
+import {scheduleChromiumAlarmFixer} from '../browser-fixes/chromium-alarms';
 
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 declare const __TEST__: boolean;
 
 interface RequestParams {
@@ -101,6 +104,9 @@ class LimitedCacheStorage {
         if (!this.alarmIsActive) {
             chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {delayInMinutes: 1});
             this.alarmIsActive = true;
+            if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
+                scheduleChromiumAlarmFixer();
+            }
         }
     }
 

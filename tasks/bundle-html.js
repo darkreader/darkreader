@@ -16,14 +16,24 @@ const srcDir = 'src';
  * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
  */
 
-function html(platform, title, loader) {
+function html(platform, title, loader, stylesheet, compatibility) {
     return [
         '<!DOCTYPE html>',
         '<html>',
         '    <head>',
         '        <meta charset="utf-8">',
         `        <title>${title}</title>`,
+        !stylesheet ? '' : [
+            '        <meta name="theme-color" content="#0B2228" />',
+            '        <meta name="viewport" content="width=device-width, initial-scale=1" />',
+            '        <link rel="stylesheet" type="text/css" href="style.css" />',
+            '        <link',
+            '            rel="shortcut icon"',
+            '            href="../assets/images/darkreader-icon-256x256.png"',
+            '        />',
+        ],
         '        <script src="index.js"></script>',
+        compatibility ? '        <script src="compatibility.js" defer></script>' : null,
         '    </head>',
         '',
         loader ? [
@@ -50,7 +60,7 @@ const copyEntries = [
     {
         title: 'Dark Reader settings',
         dest: 'ui/popup/index.html',
-        args: [true],
+        args: [true, true, true],
         reloadType: reload.UI,
     },
     {

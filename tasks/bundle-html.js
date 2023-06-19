@@ -47,7 +47,7 @@ function html(platform, title, loader, stylesheet, compatibility) {
         ],
         '</html>',
         '',
-    ].filter((a) => a !== null).flat().join('\r\n');
+    ].filter((s) => s !== null).flat().join('\r\n');
 }
 
 /** @type {copyEntry[]} */

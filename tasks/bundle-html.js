@@ -9,56 +9,68 @@ const srcDir = 'src';
 
 /**
  * @typedef copyEntry
+ * @property {string} title
  * @property {string} dest
- * @property {string} text
+ * @property {boolean[]} args
  * @property {string} reloadType
  * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
  */
 
-const text  = [
-    '<!DOCTYPE html>',
-    '<html>',
-    '',
-    '    <head>',
-    '        <meta charset="utf-8">',
-    '        <title>Dark Reader background</title>',
-    '        <script src="index.js"></script>',
-    '    </head>',
-    '',
-    '<body></body>',
-    '</html>',
-    '',
-].join('\r\n');
+function html(platform, title, loader) {
+    return [
+        '<!DOCTYPE html>',
+        '<html>',
+        '    <head>',
+        '        <meta charset="utf-8">',
+        `        <title>${title}</title>`,
+        '        <script src="index.js"></script>',
+        '    </head>',
+        '',
+        loader ? [
+            '    <body>',
+            '        <div class="loader">',
+            '            <label class="loader__message">Loading, please wait</label>',
+            '        </div>',
+            '    </body>',
+        ]: '    <body></body>',
+        '</html>',
+        '',
+    ].flat().join('\r\n');
+}
 
 /** @type {copyEntry[]} */
 const copyEntries = [
     {
+        title: 'Dark Reader background',
         dest: 'background/index.html',
-        text,
+        args: [false],
         reloadType: reload.FULL,
         platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
     },
     {
+        title: 'Dark Reader settings',
         dest: 'ui/popup/index.html',
-        text,
+        args: [true],
         reloadType: reload.UI,
     },
     {
+        title: 'Dark Reader developer tools',
         dest: 'ui/devtools/index.html',
-        text,
+        args: [false],
         reloadType: reload.UI,
     },
     {
+        title: 'Dark Reader CSS editor',
         dest: 'ui/stylesheet-editor/index.html',
-        text,
+        args: [false],
         reloadType: reload.UI,
     },
 ];
 
-async function writeEntry({dest, text}, {debug, platform}) {
+async function writeEntry({dest, title, args}, {debug, platform}) {
     const destDir = getDestDir({debug, platform});
     const d = `${destDir}/${dest}`;
-    await writeFile(d, text);
+    await writeFile(d, html(platform, title, ...args));
 }
 
 async function bundleHTML({platforms, debug}) {

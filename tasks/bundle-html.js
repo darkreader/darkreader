@@ -21,7 +21,7 @@ function html(platform, title, loader, stylesheet, compatibility) {
         '<!DOCTYPE html>',
         '<html>',
         '    <head>',
-        '        <meta charset="utf-8">',
+        '        <meta charset="utf-8" />',
         `        <title>${title}</title>`,
         !stylesheet ? '' : [
             '        <meta name="theme-color" content="#0B2228" />',
@@ -32,7 +32,7 @@ function html(platform, title, loader, stylesheet, compatibility) {
             '            href="../assets/images/darkreader-icon-256x256.png"',
             '        />',
         ],
-        '        <script src="index.js"></script>',
+        '        <script src="index.js" defer></script>',
         compatibility ? '        <script src="compatibility.js" defer></script>' : null,
         '    </head>',
         '',
@@ -42,7 +42,9 @@ function html(platform, title, loader, stylesheet, compatibility) {
             '            <label class="loader__message">Loading, please wait</label>',
             '        </div>',
             '    </body>',
-        ]: '    <body></body>',
+        ]: [
+            '    <body></body>',
+        ],
         '</html>',
         '',
     ].flat().join('\r\n');
@@ -53,7 +55,7 @@ const copyEntries = [
     {
         title: 'Dark Reader background',
         dest: 'background/index.html',
-        args: [false],
+        args: [false, false, false],
         reloadType: reload.FULL,
         platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
     },
@@ -66,13 +68,13 @@ const copyEntries = [
     {
         title: 'Dark Reader developer tools',
         dest: 'ui/devtools/index.html',
-        args: [false],
+        args: [false, true, false],
         reloadType: reload.UI,
     },
     {
         title: 'Dark Reader CSS editor',
         dest: 'ui/stylesheet-editor/index.html',
-        args: [false],
+        args: [false, true, false],
         reloadType: reload.UI,
     },
 ];

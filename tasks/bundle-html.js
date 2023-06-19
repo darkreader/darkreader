@@ -15,19 +15,20 @@ const srcDir = 'src';
  * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
  */
 
-const text  = `\
-<!DOCTYPE html>\
-<html>\
-\
-<head>\
-    <meta charset="utf-8">\
-    <title>Dark Reader background</title>\
-    <script src="index.js"></script>\
-</head>\
-\
-<body></body>\
-\
-</html>`;
+const text  = [
+    '<!DOCTYPE html>',
+    '<html>',
+    '',
+    '    <head>',
+    '        <meta charset="utf-8">',
+    '        <title>Dark Reader background</title>',
+    '        <script src="index.js"></script>',
+    '    </head>',
+    '',
+    '<body></body>',
+    '</html>',
+    '',
+].join('\r\n');
 
 /** @type {copyEntry[]} */
 const copyEntries = [
@@ -54,26 +55,10 @@ const copyEntries = [
     },
 ];
 
-const paths = copyEntries.map((entry) => entry.dest).map((path) => `${srcDir}/${path}`);
-
-function getCwdPath(/** @type {string} */srcPath) {
-    return srcPath.substring(srcDir.length + 1);
-}
-
-async function copyEntry(path, {debug, platform}) {
-    const cwdPath = getCwdPath(path);
+async function writeEntry({dest, text}, {debug, platform}) {
     const destDir = getDestDir({debug, platform});
-    const src = `${srcDir}/${cwdPath}`;
-    const dest = `${destDir}/${cwdPath}`;
-    await copyFile(src, dest);
-}
-
-async function writeEntry(path, {debug, platform}) {
-    const cwdPath = getCwdPath(path);
-    const destDir = getDestDir({debug, platform});
-    const src = `${srcDir}/${cwdPath}`;
-    const dest = `${destDir}/${cwdPath}`;
-    await writeFile(dest, '');
+    const d = `${destDir}/${dest}`;
+    await writeFile(d, text);
 }
 
 async function bundleHTML({platforms, debug}) {
@@ -83,12 +68,10 @@ async function bundleHTML({platforms, debug}) {
         if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
             continue;
         }
-        const files = await getPaths(`${srcDir}/${entry.dest}`);
-        for (const file of files) {
-            for (const platform of enabledPlatforms) {
-                if (entry.platforms === undefined || entry.platforms.includes(platform)) {
-                    promises.push(copyEntry(file, {debug, platform}));
-                }
+        const {dest} = entry;
+        for (const platform of enabledPlatforms) {
+            if (entry.platforms === undefined || entry.platforms.includes(platform)) {
+                promises.push(writeEntry(entry, {debug, platform}));
             }
         }
     }

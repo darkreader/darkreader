@@ -2,10 +2,8 @@
 import paths_ from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
-import {copyFile, getPaths, writeFile} from './utils.js';
+import {writeFile} from './utils.js';
 const {getDestDir, PLATFORM} = paths_;
-
-const srcDir = 'src';
 
 /**
  * @typedef copyEntry
@@ -42,7 +40,7 @@ function html(platform, title, loader, stylesheet, compatibility) {
             '            <label class="loader__message">Loading, please wait</label>',
             '        </div>',
             '    </body>',
-        ]: [
+        ] : [
             '    <body></body>',
         ],
         '</html>',
@@ -92,7 +90,6 @@ async function bundleHTML({platforms, debug}) {
         if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
             continue;
         }
-        const {dest} = entry;
         for (const platform of enabledPlatforms) {
             if (entry.platforms === undefined || entry.platforms.includes(platform)) {
                 promises.push(writeEntry(entry, {debug, platform}));

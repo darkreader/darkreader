@@ -1,5 +1,6 @@
 // @ts-check
 import bundleAPI from './bundle-api.js';
+import bundleHTML from './bundle-html.js';
 import bundleCSS from './bundle-css.js';
 import bundleJS from './bundle-js.js';
 import bundleLocales from './bundle-locales.js';
@@ -19,6 +20,7 @@ const {PLATFORM} = paths;
 
 const standardTask = [
     clean,
+    bundleHTML,
     bundleJS,
     bundleCSS,
     bundleLocales,

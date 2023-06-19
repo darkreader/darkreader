@@ -2,23 +2,23 @@
     if ('userAgentData' in navigator) {
         return;
     }
-    const match = navigator.userAgent.toLowerCase().match(/chrom[e|ium]\/([^ \.]+)/);
+    var match = navigator.userAgent.toLowerCase().match(/chrom[e|ium]\/([^ \.]+)/);
     if (!match) {
         return;
     }
-    const version = parseInt(match[1]);
-    const minChromeVersion = 63;
+    var version = parseInt(match[1]);
+    var minChromeVersion = 63;
     if (version >= minChromeVersion) {
         return;
     }
-    const warning = document.createElement('div');
+    var warning = document.createElement('div');
     warning.className = 'compatibility-warning';
-    const text = document.createTextNode([
+    var text = document.createTextNode([
         'Your Google Chrome (or Chromium) version ' + version + ' is out of date.',
         'In order to use this extension update your Google Chrome.',
         'If you cannot update, install the old Dark Reader version, which works for at least Chrome 49, from '
     ].join(' '));
-    const link = document.createElement('a');
+    var link = document.createElement('a');
     link.href = 'https://chrome.google.com/webstore/detail/oibheihomapbjogmoabgfbkchjchpdfp';
     link.target = '_blank';
     link.textContent = 'here';

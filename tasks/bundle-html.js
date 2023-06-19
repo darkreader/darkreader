@@ -33,7 +33,7 @@ function html(platform, title, loader, stylesheet, compatibility) {
             '        />',
         ],
         '        <script src="index.js" defer></script>',
-        compatibility ? '        <script src="compatibility.js" defer></script>' : null,
+        (compatibility && platform === PLATFORM.CHROMIUM_MV2) ? '        <script src="compatibility.js" defer></script>' : null,
         '    </head>',
         '',
         loader ? [

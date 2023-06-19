@@ -417,6 +417,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
 
             this.global.popupUtils = {
                 click: async (selector) => await sendToPopup('popup-click', selector),
+                exists: async (selector) => await sendToPopup('popup-exists', selector),
             };
 
             this.global.devtoolsUtils = {
@@ -449,6 +450,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
                     }
                     await sendToBackground('firefox-emulateColorScheme', colorScheme);
                 },
+                setNews: async (news) => await sendToBackground('setNews', news),
             };
 
             this.global.pageUtils = {

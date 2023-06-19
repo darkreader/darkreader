@@ -23,7 +23,7 @@ function html(platform, title, loader, stylesheet, compatibility) {
         '    <head>',
         '        <meta charset="utf-8" />',
         `        <title>${title}</title>`,
-        !stylesheet ? '' : [
+        !stylesheet ? null : [
             '        <meta name="theme-color" content="#0B2228" />',
             '        <meta name="viewport" content="width=device-width, initial-scale=1" />',
             '        <link rel="stylesheet" type="text/css" href="style.css" />',
@@ -47,7 +47,7 @@ function html(platform, title, loader, stylesheet, compatibility) {
         ],
         '</html>',
         '',
-    ].flat().join('\r\n');
+    ].filter((a) => a !== null).flat().join('\r\n');
 }
 
 /** @type {copyEntry[]} */

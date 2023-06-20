@@ -90,19 +90,37 @@ if (__TEST__) {
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
             const {type, id, data: selector} = message;
-            if (type === 'popup-click') {
-                // The required element may not exist yet
-                const check = () => {
-                    const element: HTMLElement | null = document.querySelector(selector);
-                    if (element) {
-                        element.click();
-                        respond({id});
-                    } else {
-                        requestIdleCallback(check, {timeout: 500});
-                    }
-                };
+            switch (type) {
+                case 'popup-click': {
+                    // The required element may not exist yet
+                    const check = () => {
+                        const element: HTMLElement | null = document.querySelector(selector);
+                        if (element) {
+                            element.click();
+                            respond({id});
+                        } else {
+                            requestIdleCallback(check, {timeout: 500});
+                        }
+                    };
 
-                check();
+                    check();
+                    break;
+                }
+                case 'popup-exists': {
+                    // The required element may not exist yet
+                    const check = () => {
+                        const element: HTMLElement | null = document.querySelector(selector);
+                        if (element) {
+                            respond({id, data: true});
+                        } else {
+                            requestIdleCallback(check, {timeout: 500});
+                        }
+                    };
+
+                    check();
+                    break;
+                }
+                default:
             }
         } catch (err) {
             respond({error: String(err)});

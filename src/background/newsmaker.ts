@@ -213,7 +213,7 @@ export default class Newsmaker {
     }
 }
 
-export function setNewsForTesting(news: News[]) {
+export function setNewsForTesting(news: News[]): void {
     if (__TEST__) {
         newsForTesting = news;
     }

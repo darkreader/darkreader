@@ -90,7 +90,7 @@ if (__TEST__) {
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
             const {type, id, data: selector} = message;
-            switch(type) {
+            switch (type) {
                 case 'popup-click': {
                     // The required element may not exist yet
                     const check = () => {
@@ -109,7 +109,7 @@ if (__TEST__) {
                 case 'popup-exists': {
                     // The required element may not exist yet
                     const check = () => {
-                    const element: HTMLElement | null = document.querySelector(selector);
+                        const element: HTMLElement | null = document.querySelector(selector);
                         if (element) {
                             respond({id, data: true});
                         } else {

@@ -1,7 +1,4 @@
 describe('News', () => {
-    // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
-
     const newsSelector = 'div.news.news--expanded';
 
     it('should display news', async () => {

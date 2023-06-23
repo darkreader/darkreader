@@ -7,9 +7,13 @@ import type {ViewProps} from '../../types';
 import {generateUID} from '../../../../utils/uid';
 import type {DropDownOption} from '../../../controls/dropdown';
 
+interface PresetItemStore {
+    isConfirmationVisible: boolean;
+}
+
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     const context = getContext();
-    const store: {isConfirmationVisible: boolean} = context.store;
+    const store: PresetItemStore = context.store;
 
     function onRemoveClick(e: MouseEvent) {
         e.stopPropagation();

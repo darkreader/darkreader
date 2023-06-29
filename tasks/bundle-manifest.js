@@ -25,6 +25,10 @@ async function patchManifest(platform, debug, watch, test) {
     if (debug && (platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV3)) {
         patched.version_name = 'Debug';
     }
+    // Needed to test settings export and CSS theme export via a download
+    if (test || debug) {
+        patched.permissions.push('downloads');
+    }
     return patched;
 }
 

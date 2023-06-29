@@ -6,7 +6,7 @@ import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingP
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
-import {getFontList} from '../utils';
+import {getFontList, saveFile} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
@@ -88,13 +88,13 @@ if (__TEST__) {
     socket.onmessage = (e) => {
         const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
-            const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-            const {type, id, data: selector} = message;
+            const message: {type: string; id: number; data: any} = JSON.parse(e.data);
+            const {type, id, data} = message;
             switch (type) {
                 case 'popup-click': {
                     // The required element may not exist yet
                     const check = () => {
-                        const element: HTMLElement | null = document.querySelector(selector);
+                        const element: HTMLElement | null = document.querySelector(data);
                         if (element) {
                             element.click();
                             respond({id});
@@ -109,7 +109,7 @@ if (__TEST__) {
                 case 'popup-exists': {
                     // The required element may not exist yet
                     const check = () => {
-                        const element: HTMLElement | null = document.querySelector(selector);
+                        const element: HTMLElement | null = document.querySelector(data);
                         if (element) {
                             respond({id, data: true});
                         } else {
@@ -118,6 +118,12 @@ if (__TEST__) {
                     };
 
                     check();
+                    break;
+                }
+                case 'popup-saveFile': {
+                    const {name, content} = data;
+                    saveFile(name, content);
+                    respond({id});
                     break;
                 }
                 default:

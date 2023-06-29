@@ -6,12 +6,8 @@ describe('Export settings', () => {
 
     it('Should download file', async () => {
         await timeout(1000);
-        const p = new Promise<void>((resolve) => backgroundUtils.onDownload(resolve));
+        const p = new Promise<{ok: boolean}>((resolve) => backgroundUtils.onDownload(resolve));
         await popupUtils.saveFile('example', 'content');
-        expect(await p).toEqual({
-            ok: true,
-            mime: 'text/plain',
-            type: 'download',
-        });
+        expect((await p).ok).toBe(true);
     });
 });

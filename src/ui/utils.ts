@@ -38,7 +38,6 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string): void {
-    console.error('saveFile called');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([content]));
     a.download = name;

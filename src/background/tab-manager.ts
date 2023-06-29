@@ -211,18 +211,6 @@ export default class TabManager {
                     TabManager.onColorSchemeMessage(message as MessageCStoBG, sender);
                     break;
 
-                case MessageTypeUItoBG.SAVE_FILE: {
-                    if (__CHROMIUM_MV3__) {
-                        break;
-                    }
-                    const {content, name} = message.data;
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(new Blob([content]));
-                    a.download = name;
-                    a.click();
-                    break;
-                }
-
                 default:
                     break;
             }

@@ -12,6 +12,7 @@ declare global {
     const popupUtils: {
         click: (selector: string) => Promise<void>;
         exists: (selector: string) => Promise<void>;
+        saveFile: (name: string, content: string) => Promise<void>;
     };
     const devtoolsUtils: {
         exists: (selector: string) => Promise<void>;
@@ -27,6 +28,7 @@ declare global {
         getManifest: () => Promise<chrome.runtime.Manifest>;
         createTab: (url: string) => Promise<void>;
         setNews: (news: News[] | null) => Promise<void>;
+        onDownload: (callback: () => void) => void;
     };
     const pageUtils: {
         evaluateScript: (script: () => any) => Promise<any>;

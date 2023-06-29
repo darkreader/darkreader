@@ -70,16 +70,28 @@ export async function createTestServer(port) {
     /**
      * @returns {Promise<void>}
      */
-    function start() {
-        return new Promise((resolve) => {
-            server = http
-                .createServer(handleRequest)
-                .listen(port, () => resolve());
+    function start(delay = 100, retries = 100) {
+        return new Promise(async (resolve) => {
+            for (; retries > 0; retries--) {
+                const s = http.createServer(handleRequest);
+                s.listen(port);
 
-            server.on('connection', (socket) => {
-                sockets.add(socket);
-                socket.on('close', () => sockets.delete(socket));
-            });
+                s.on('connection', (socket) => {
+                    sockets.add(socket);
+                    socket.on('close', () => sockets.delete(socket));
+                });
+
+                await new Promise((r) => {
+                    s.on('error', () => setTimeout(r, delay));
+                    s.on('close', () => setTimeout(r, delay));
+                    s.on('listening', () => {
+                        retries = 0;
+                        r();
+                        server = s;
+                        resolve();
+                    });
+                });
+            }
         });
     }
 

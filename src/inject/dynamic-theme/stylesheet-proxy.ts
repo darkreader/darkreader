@@ -107,7 +107,10 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             const docSheets: StyleSheetList = documentStyleSheetsDescriptor!.get!.call(this);
 
             const filteredSheets = [...docSheets].filter((styleSheet) =>
-                styleSheet.ownerNode && !(styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList && (styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList.contains('darkreader')
+                styleSheet.ownerNode && !(
+                    (styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList &&
+                    (styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList.contains('darkreader')
+                )
             );
 
             (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];

@@ -239,4 +239,11 @@ describe('Toggling the extension', () => {
     it('should have new design button on desktop', async () => {
         expect(await devtoolsUtils.exists('.preview-design-button'));
     });
+
+    it('dynamic themes', async () => {
+        await loadBasicPage('Dynamic styles');
+
+        const numStyles = await pageUtils.evaluateScript(() => document.styleSheets.length);
+        expect(numStyles).toBe(1);
+    });
 });

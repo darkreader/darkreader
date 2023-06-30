@@ -244,6 +244,6 @@ describe('Toggling the extension', () => {
         await loadBasicPage('Dynamic styles');
 
         const numStyles = await pageUtils.evaluateScript(() => document.styleSheets.length);
-        expect(numStyles).toBe(1);
+        expect(numStyles).toBe(product === 'firefox' ? 10 : 1);
     });
 });

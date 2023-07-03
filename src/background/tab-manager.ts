@@ -223,11 +223,14 @@ export default class TabManager {
             // On MV3, Chromium has a bug which prevents sending messages to prerendered frames without specifying frameId
             // Furethermore, if we send a message addressed to a temporary frameId after the document exits prerender state,
             // the message will also fail to be delivered.
+            //
             // To work around this:
-            //  1. Attempt to send the message by documentId. If this fails, this means the document is in prerender state
+            //  1. Attempt to send the message by documentId. If this fails, this means the document is in prerender state.
             //  2. Attempt to send the message by dicumentId and temporary frameId. If this fails, this means the document
-            //     either alteady exited prerendred state or was discarded
-            //  3. Attempt to send the message by documentId. If this fails, this means the document was already discarded.
+            //     either alteady exited prerendred state or was discarded.
+            //  3. Attempt to send the message by documentId (omitting the permanent frameId which is 0).If this fails, this
+            //     means the document was already discarded.
+            //
             // More info: https://crbug.com/1455817
 
             chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message, {documentId}).catch(() =>

@@ -33,6 +33,7 @@ jobs:
   test-browser:
     name: Run browser tests
     strategy:
+      fail-fast: false
       matrix:
         include:
 

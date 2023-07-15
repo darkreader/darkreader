@@ -80,7 +80,6 @@ config.overrides.push({
             before: true,
         }],
         '@typescript-eslint/member-delimiter-style': 'error',
-        '@typescript-eslint/no-duplicate-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-redeclare': 'error',
@@ -90,6 +89,7 @@ config.overrides.push({
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
             ignore: ['^malevic\/'],
         }],

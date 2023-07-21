@@ -22,7 +22,7 @@ const extensions = ['html', 'css', 'js'];
 async function processAPIBuild() {
     const filepath = 'darkreader.js';
     const code = await readFile(filepath);
-    const formatted = prettier.format(code, {
+    const formatted = await prettier.format(code, {
         ...options,
         filepath,
     });
@@ -36,7 +36,7 @@ async function processExtensionPlatform(platform) {
     const files = await getPaths(extensions.map((ext) => `${dir}/**/*.${ext}`));
     for (const file of files) {
         const code = await readFile(file);
-        const formatted = prettier.format(code, {
+        const formatted = await prettier.format(code, {
             ...options,
             filepath: file,
         });

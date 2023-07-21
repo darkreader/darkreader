@@ -1,17 +1,24 @@
 import {isFirefox} from '../../utils/platform';
-import type {ExtensionData, ExtensionActions, FilterConfig, Message, UserSettings} from '../../definitions';
-import {MessageType} from '../../utils/message';
+import type {ExtensionData, ExtensionActions, FilterConfig, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI} from '../../definitions';
+import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../../utils/message';
+
+declare const browser: {
+    commands: {
+        update({name, shortcut}: chrome.commands.Command): Promise<void>;
+        getAll(): Promise<chrome.commands.Command[]>;
+    };
+};
 
 export default class Connector implements ExtensionActions {
     private changeSubscribers: Set<(data: ExtensionData) => void>;
 
-    constructor() {
+    public constructor() {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(type: MessageType, data?: string) {
+    private async sendRequest<T>(type: MessageTypeUItoBG, data?: string): Promise<T> {
         return new Promise<T>((resolve, reject) => {
-            chrome.runtime.sendMessage<Message>({type, data}, ({data, error}: Message) => {
+            chrome.runtime.sendMessage<MessageUItoBG>({type, data}, ({data, error}: MessageUItoBG) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -21,7 +28,7 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: MessageType, data?: string) {
+    private async firefoxSendRequestWithResponse<T>(type: MessageTypeUItoBG, data?: string): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name: type});
             dataPort.onDisconnect.addListener(() => reject());
@@ -37,93 +44,121 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    async getData() {
+    public async getData(): Promise<ExtensionData> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageType.UI_GET_DATA);
+            return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageTypeUItoBG.GET_DATA);
         }
-        return await this.sendRequest<ExtensionData>(MessageType.UI_GET_DATA);
+        return await this.sendRequest<ExtensionData>(MessageTypeUItoBG.GET_DATA);
     }
 
-    private onChangesReceived = ({type, data}: Message) => {
-        if (type === MessageType.BG_CHANGES) {
+    public async getDevToolsData(): Promise<DevToolsData> {
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<DevToolsData>(MessageTypeUItoBG.GET_DEVTOOLS_DATA);
+        }
+        return await this.sendRequest<DevToolsData>(MessageTypeUItoBG.GET_DEVTOOLS_DATA);
+    }
+
+    private onChangesReceived = ({type, data}: MessageBGtoUI) => {
+        if (type === MessageTypeBGtoUI.CHANGES) {
             this.changeSubscribers.forEach((callback) => callback(data));
         }
     };
 
-    subscribeToChanges(callback: (data: ExtensionData) => void) {
+    public subscribeToChanges(callback: (data: ExtensionData) => void): void {
         this.changeSubscribers.add(callback);
         if (this.changeSubscribers.size === 1) {
             chrome.runtime.onMessage.addListener(this.onChangesReceived);
-            chrome.runtime.sendMessage<Message>({type: MessageType.UI_SUBSCRIBE_TO_CHANGES});
+            chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.SUBSCRIBE_TO_CHANGES});
         }
     }
 
-    setShortcut(command: string, shortcut: string) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_SHORTCUT, data: {command, shortcut}});
+    /**
+     *
+     * @param command The command to be updated
+     * @param shortcut The new shortcut pattern after the operation completes
+     */
+    public async setShortcut(command: string, shortcut: string): Promise<string | null> {
+        if (isFirefox && typeof browser !== 'undefined' && browser.commands && browser.commands.update && browser.commands.getAll) {
+            try {
+                await browser.commands.update({name: command, shortcut});
+            } catch {
+                // Ignore this error
+            }
+            // Query the real shortcut to get the exact value displayed by Firefox on about:addons
+            // or in case user has non-standard keyboard layout
+            const commands = await browser.commands.getAll();
+            const cmd = commands.find((cmd) => cmd.name === command);
+            return cmd && cmd.shortcut || null;
+        }
+        return null;
     }
 
-    changeSettings(settings: Partial<UserSettings>) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_CHANGE_SETTINGS, data: settings});
+    public changeSettings(settings: Partial<UserSettings>): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.CHANGE_SETTINGS, data: settings});
     }
 
-    setTheme(theme: Partial<FilterConfig>) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_THEME, data: theme});
+    public setTheme(theme: Partial<FilterConfig>): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.SET_THEME, data: theme});
     }
 
-    toggleActiveTab() {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_ACTIVE_TAB, data: {}});
+    public toggleActiveTab(): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.TOGGLE_ACTIVE_TAB, data: {}});
     }
 
-    markNewsAsRead(ids: string[]) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
+    public markNewsAsRead(ids: string[]): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.MARK_NEWS_AS_READ, data: ids});
     }
 
-    markNewsAsDisplayed(ids: string[]) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_DISPLAYED, data: ids});
+    public markNewsAsDisplayed(ids: string[]): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.MARK_NEWS_AS_DISPLAYED, data: ids});
     }
 
-    loadConfig(options: {local: boolean}) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_LOAD_CONFIG, data: options});
+    public loadConfig(options: {local: boolean}): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.LOAD_CONFIG, data: options});
     }
 
-    async applyDevDynamicThemeFixes(text: string) {
+    public async applyDevDynamicThemeFixes(text: string): Promise<void> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
         }
-        return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
     }
 
-    resetDevDynamicThemeFixes() {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES});
+    public resetDevDynamicThemeFixes(): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_DYNAMIC_THEME_FIXES});
     }
 
-    async applyDevInversionFixes(text: string) {
+    public async applyDevInversionFixes(text: string): Promise<void> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, text);
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
         }
-        return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, text);
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
     }
 
-    resetDevInversionFixes() {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_INVERSION_FIXES});
+    public resetDevInversionFixes(): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_INVERSION_FIXES});
     }
 
-    async applyDevStaticThemes(text: string) {
+    public async applyDevStaticThemes(text: string): Promise<void> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, text);
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
         }
-        return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, text);
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
     }
 
-    resetDevStaticThemes() {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_STATIC_THEMES});
+    public resetDevStaticThemes(): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_STATIC_THEMES});
     }
 
-    disconnect() {
+    public async hideHighlights(ids: string[]): Promise<void> {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.HIDE_HIGHLIGHTS, data: ids});
+    }
+
+    public disconnect(): void {
         if (this.changeSubscribers.size > 0) {
             this.changeSubscribers.clear();
             chrome.runtime.onMessage.removeListener(this.onChangesReceived);
-            chrome.runtime.sendMessage<Message>({type: MessageType.UI_UNSUBSCRIBE_FROM_CHANGES});
+            chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UNSUBSCRIBE_FROM_CHANGES});
         }
     }
 }

@@ -9,7 +9,17 @@ interface SliderProps {
     max: number;
     step: number;
     formatValue: (value: number) => string;
-    onChange: (value: number) => void;
+    onChange: (value: number | null) => void;
+}
+
+interface SliderStore {
+    isActive: boolean;
+    activeValue: number | null;
+    activeProps: SliderProps;
+    trackNode: HTMLElement;
+    thumbNode: HTMLElement;
+    wheelTimeoutId: number;
+    wheelValue: number | null;
 }
 
 function stickToStep(x: number, step: number) {
@@ -25,15 +35,7 @@ function stickToStep(x: number, step: number) {
 
 export default function Slider(props: SliderProps) {
     const context = getContext();
-    const store = context.store as {
-        isActive: boolean;
-        activeValue: number;
-        activeProps: SliderProps;
-        trackNode: HTMLElement;
-        thumbNode: HTMLElement;
-        wheelTimeoutId: number;
-        wheelValue: number;
-    };
+    const store: SliderStore = context.store;
 
     store.activeProps = props;
 
@@ -75,7 +77,7 @@ export default function Slider(props: SliderProps) {
                 : null;
 
             function getTouch(e: TouchEvent) {
-                const find = (touches: TouchList) => Array.from(touches).find((t) => t.identifier === touchId);
+                const find = (touches: TouchList) => Array.from(touches).find((t) => t.identifier === touchId)!;
                 return find(e.changedTouches) || find(e.touches);
             }
 
@@ -135,9 +137,9 @@ export default function Slider(props: SliderProps) {
         }
 
         function subscribe() {
-            window.addEventListener(pointerMoveEvent, onPointerMove, {passive: true});
-            window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
-            window.addEventListener('keypress', onKeyPress);
+            window.addEventListener(pointerMoveEvent, onPointerMove, {once: true, passive: true});
+            window.addEventListener(pointerUpEvent, onPointerUp, {once: true, passive: true});
+            window.addEventListener('keypress', onKeyPress, {once: true, passive: true});
         }
 
         function unsubscribe() {
@@ -168,7 +170,7 @@ export default function Slider(props: SliderProps) {
     }
 
     const refreshOnWheel = throttle(() => {
-        store.activeValue = stickToStep(store.wheelValue, props.step);
+        store.activeValue = stickToStep(store.wheelValue!, props.step);
         store.wheelTimeoutId = setTimeout(() => {
             const {onChange} = store.activeProps;
             onChange(store.activeValue);

@@ -1,9 +1,39 @@
-## Unreleased
+## 4.9.64 (June 21, 2023)
+
+- Using passive event listeners (#11047)
+- Fixed System Automation on Firefox (#10237)
+- Fixed News section.
+
+## 4.9.63 (Apr 10, 2023)
+
+- Site toggle panel (detect dark theme and shortcut).
+- App toggle panel (automation and shortcut).
+- Improved Site List indexing.
+
+## 4.9.62 (Jan 8, 2023)
+
+- Fixed a edge case with extracting color numbers, it's now able to extract `rgb(0 0 0/0.04)`. (#10565)
+- Improved IPv6 check. (#10564)
+- Faster UI loading. (#10589)
+
+## 4.9.61 (Jan 2, 2023)
+
+- Only invert PDFs on mail.google.com and drive.google.com, if the setting for PDF inversion has been enabled. (#10310)
+- Show in the new UI design when a page is disabled, because it's protected by the browser. (#10338)
+- Improved restoring Dark Reader elements, when the whole DOM is being overwritten. (#10372)
+
+## 4.9.60 (Oct 27, 2022)
+
+- Fixed broken hotkeys.
+- Improved IP v6 address support.
+
+## 4.9.59 (Oct 23, 2022)
 
 - Fixes a issue where `darkreader-fallback` wasn't removed from the DOM, when Dark Reader finds a `<meta name="darkreader-lock">` element.
-- Be stricter when the user specifies a last slash for a URL in the sitelist.
-- Hide "System" Automation on Chromium on Linux because Chromium on Linux does not support Media Queries.
-- Improve Kiwi browser support: work around for Kiwi bug in file download during settings import, fix opening open Dark Reader DevTools
+- Be stricter when the user specifies a last slash for a URL in the Site List.
+- Display a warning that "System" Automation might not work properly in Chromium on Linux and Kiwi on Android.
+- Workaround for Kiwi file download during settings import, fix opening Dark Reader DevTools.
+- A button to clear the Site List (v5 Preview UI).
 
 ## 4.9.58 (Sep 22, 2022)
 

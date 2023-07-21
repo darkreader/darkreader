@@ -3,7 +3,7 @@ import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
 import type {Theme, DynamicThemeFix} from '../definitions';
 import {ThemeEngine} from '../generators/theme-engines';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
+import {createOrUpdateDynamicThemeInternal, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
 
@@ -17,32 +17,34 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
+export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicThemeFix | null = null): void {
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngine.dynamicTheme) {
         throw new Error('Theme engine is not supported.');
     }
-    createOrUpdateDynamicTheme(theme, fixes, isIFrame);
+    // TODO: repalce with createOrUpdateDynamicTheme() and make fixes signature
+    // DynamicThemeFix | DynamicThemeFix[]
+    createOrUpdateDynamicThemeInternal(theme, fixes, isIFrame);
     isDarkReaderEnabled = true;
 }
 
-export function isEnabled() {
+export function isEnabled(): boolean {
     return isDarkReaderEnabled;
 }
 
-export function disable() {
+export function disable(): void {
     removeDynamicTheme();
     isDarkReaderEnabled = false;
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
 let store = {
-    themeOptions: null as Partial<Theme>,
-    fixes: null as DynamicThemeFix,
+    themeOptions: null as Partial<Theme> | null,
+    fixes: null as DynamicThemeFix | null,
 };
 
-function handleColorScheme() {
+function handleColorScheme(): void {
     if (darkScheme.matches) {
         enable(store.themeOptions, store.fixes);
     } else {
@@ -50,7 +52,7 @@ function handleColorScheme() {
     }
 }
 
-export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix = null) {
+export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix | null = null): void {
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();

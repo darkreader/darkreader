@@ -1,4 +1,4 @@
-export function getTextPositionMessage(text: string, index: number) {
+export function getTextPositionMessage(text: string, index: number): string {
     if (!isFinite(index)) {
         throw new Error(`Wrong char index ${index}`);
     }
@@ -24,7 +24,7 @@ export function getTextPositionMessage(text: string, index: number) {
     return message;
 }
 
-export function getTextDiffIndex(a: string, b: string) {
+export function getTextDiffIndex(a: string, b: string): number {
     const short = Math.min(a.length, b.length);
     for (let i = 0; i < short; i++) {
         if (a[i] !== b[i]) {
@@ -37,31 +37,31 @@ export function getTextDiffIndex(a: string, b: string) {
     return -1;
 }
 
-export function parseArray(text: string) {
+export function parseArray(text: string): string[] {
     return text.replace(/\r/g, '')
         .split('\n')
         .map((s) => s.trim())
         .filter((s) => s);
 }
 
-export function formatArray(arr: string[]) {
+export function formatArray(arr: Readonly<string[]>): string {
     return arr.concat('').join('\n');
 }
 
-export function getMatches(regex: RegExp, input: string, group = 0) {
+export function getMatches(regex: RegExp, input: string, group = 0): string[] {
     const matches: string[] = [];
-    let m: RegExpMatchArray;
+    let m: RegExpMatchArray | null;
     while ((m = regex.exec(input))) {
         matches.push(m[group]);
     }
     return matches;
 }
 
-export function getStringSize(value: string) {
+export function getStringSize(value: string): number {
     return value.length * 2;
 }
 
-export function formatCSS(text: string) {
+export function formatCSS(text: string): string {
     function trimLeft(text: string) {
         return text.replace(/^\s+/, '');
     }
@@ -91,7 +91,7 @@ export function formatCSS(text: string) {
         .split('\n'));
 
     let depth = 0;
-    const formatted = [];
+    const formatted: string[] = [];
 
     for (let x = 0, len = css.length; x < len; x++) {
         const line = `${css[x] }\n`;
@@ -107,7 +107,12 @@ export function formatCSS(text: string) {
     return formatted.join('').trim();
 }
 
-export function getParenthesesRange(input: string, searchStartIndex = 0) {
+interface ParenthesesRange {
+    start: number;
+    end: number;
+}
+
+export function getParenthesesRange(input: string, searchStartIndex = 0): ParenthesesRange | null {
     const length = input.length;
     let depth = 0;
     let firstOpenIndex = -1;

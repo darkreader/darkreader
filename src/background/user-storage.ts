@@ -11,10 +11,10 @@ const SAVE_TIMEOUT = 1000;
 
 export default class UserStorage {
     private static loadBarrier: PromiseBarrier<UserSettings, void>;
-    private static saveStorageBarrier: PromiseBarrier<void, void>;
-    static settings: Readonly<UserSettings>;
+    private static saveStorageBarrier: PromiseBarrier<void, void> | null;
+    public static settings: Readonly<UserSettings>;
 
-    static async loadSettings() {
+    public static async loadSettings(): Promise<void> {
         if (!UserStorage.settings) {
             UserStorage.settings = await UserStorage.loadSettingsFromStorage();
         }
@@ -86,8 +86,6 @@ export default class UserStorage {
             UserStorage.set({syncSettings: false});
             UserStorage.saveSyncSetting(false);
             UserStorage.loadBarrier.resolve(local);
-            UserStorage.migrateAutomationSettings($sync);
-            UserStorage.fillDefaults($sync);
             return local;
         }
 
@@ -101,7 +99,7 @@ export default class UserStorage {
         return $sync;
     }
 
-    static async saveSettings() {
+    public static async saveSettings(): Promise<void> {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.saveSettings().
@@ -111,7 +109,7 @@ export default class UserStorage {
         await UserStorage.saveSettingsIntoStorage();
     }
 
-    static async saveSyncSetting(sync: boolean) {
+    public static async saveSyncSetting(sync: boolean): Promise<void> {
         const obj = {syncSettings: sync};
         await writeLocalStorage(obj);
         try {
@@ -147,7 +145,7 @@ export default class UserStorage {
         UserStorage.saveStorageBarrier = null;
     });
 
-    static set($settings: Partial<UserSettings>) {
+    public static set($settings: Partial<UserSettings>): void {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.set().

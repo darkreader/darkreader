@@ -21,26 +21,26 @@ export default function Toggle(props: ToggleProps) {
     const clsOn = {
         'toggle__btn': true,
         'toggle__on': true,
-        'toggle__btn--active': checked
+        'toggle__btn--active': checked,
     };
 
     const clsOff = {
         'toggle__btn': true,
         'toggle__off': true,
-        'toggle__btn--active': !checked
+        'toggle__btn--active': !checked,
     };
 
     return (
         <span class={cls}>
             <span
                 class={clsOn}
-                onclick={onChange ? () => !checked && onChange(true) : null}
+                onclick={onChange ? () => !checked && onChange(true) : undefined}
             >
                 {props.labelOn}
             </span>
             <span
                 class={clsOff}
-                onclick={onChange ? () => checked && onChange(false) : null}
+                onclick={onChange ? () => checked && onChange(false) : undefined}
             >
                 {props.labelOff}
             </span>

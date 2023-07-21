@@ -5,10 +5,15 @@ import {isURLInList, isURLMatched, getURLHostOrProtocol} from '../../../../utils
 import {DropDown, MessageBox} from '../../../controls';
 import type {ViewProps} from '../../types';
 import {generateUID} from '../../../../utils/uid';
+import type {DropDownOption} from '../../../controls/dropdown';
+
+interface PresetItemStore {
+    isConfirmationVisible: boolean;
+}
 
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     const context = getContext();
-    const store = context.store as {isConfirmationVisible: boolean};
+    const store: PresetItemStore = context.store;
 
     function onRemoveClick(e: MouseEvent) {
         e.stopPropagation();
@@ -67,7 +72,7 @@ export default function PresetPicker(props: ViewProps) {
         }
         return {
             id: preset.id,
-            content: <PresetItem {...props} preset={preset} />
+            content: <PresetItem {...props} preset={preset} />,
         };
     });
     const customSitePresetOption = {
@@ -80,7 +85,7 @@ export default function PresetPicker(props: ViewProps) {
         ...userPresetsOptions,
         addNewPresetOption,
         customSitePresetOption,
-    ].filter(Boolean);
+    ].filter(Boolean) as Array<DropDownOption<string>>;
 
     function onPresetChange(id: string) {
         const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(tab.url, url));
@@ -115,7 +120,7 @@ export default function PresetPicker(props: ViewProps) {
 
             const extended = filteredPresets.concat({
                 id: `preset-${generateUID()}`,
-                name: newPresetName,
+                name: newPresetName!,
                 urls: [host],
                 theme: {...props.data.settings.theme},
             });
@@ -129,7 +134,7 @@ export default function PresetPicker(props: ViewProps) {
                 if (preset.id === chosenPresetId) {
                     return {
                         ...preset,
-                        urls: preset.urls.concat(host)
+                        urls: preset.urls.concat(host),
                     };
                 }
                 return preset;

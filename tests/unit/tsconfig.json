@@ -8,6 +8,7 @@
             "Dom"
         ],
         "types": [
+            "chrome",
             "node",
             "jest",
             "jest-extended"
@@ -16,6 +17,7 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "noImplicitAny": true,
+        "strictNullChecks": true,
         "inlineSourceMap": true
     }
 }

@@ -10,6 +10,10 @@ interface RequestParams {
     timeout?: number;
 }
 
+interface FileLoader {
+    get: (fetchRequestParameters: FetchRequestParameters) => Promise<string | null>;
+}
+
 export async function readText(params: RequestParams): Promise<string> {
     return new Promise((resolve, reject) => {
         if (isXMLHttpRequestSupported) {
@@ -34,7 +38,7 @@ export async function readText(params: RequestParams): Promise<string> {
             // XMLHttpRequest is not available in Service Worker contexts like
             // Manifest V3 background context
             let abortController: AbortController;
-            let signal: AbortSignal;
+            let signal: AbortSignal | undefined;
             let timedOut = false;
             if (params.timeout) {
                 abortController = new AbortController();
@@ -73,16 +77,16 @@ interface CacheRecord {
 }
 
 class LimitedCacheStorage {
-    // TODO: remove any cast once declarations are updated
-    private static QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
-    private static TTL = getDuration({minutes: 10});
-    private static ALARM_NAME = 'network';
+    // TODO: remove type cast after dependency update
+    private static readonly QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
+    private static readonly TTL = getDuration({minutes: 10});
+    private static readonly ALARM_NAME = 'network';
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
     private static alarmIsActive = false;
 
-    constructor() {
+    public constructor() {
         chrome.alarms.onAlarm.addListener(async (alarm) => {
             if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
                 // We schedule only one-time alarms, so once it goes off,
@@ -100,13 +104,13 @@ class LimitedCacheStorage {
         }
     }
 
-    has(url: string) {
+    public has(url: string) {
         return this.records.has(url);
     }
 
-    get(url: string) {
+    public get(url: string) {
         if (this.records.has(url)) {
-            const record = this.records.get(url);
+            const record = this.records.get(url)!;
             record.expires = Date.now() + LimitedCacheStorage.TTL;
             this.records.delete(url);
             this.records.set(url, record);
@@ -115,7 +119,7 @@ class LimitedCacheStorage {
         return null;
     }
 
-    set(url: string, value: string) {
+    public set(url: string, value: string) {
         LimitedCacheStorage.ensureAlarmIsScheduled();
 
         const size = getStringSize(value);
@@ -161,7 +165,7 @@ export interface FetchRequestParameters {
     origin?: string;
 }
 
-export function createFileLoader() {
+export function createFileLoader(): FileLoader {
     const caches = {
         'data-url': new LimitedCacheStorage(),
         'text': new LimitedCacheStorage(),

@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {DONATE_URL} from '../../../utils/links';
+import {DONATE_URL, HOMEPAGE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
@@ -14,11 +14,15 @@ import type {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
 import {isMobile} from '../../../utils/platform';
 
+interface IndexStore {
+    activePage: PageId;
+}
+
 function Logo() {
     return (
         <a
             class="m-logo"
-            href="https://darkreader.org/"
+            href={HOMEPAGE_URL}
             target="_blank"
             rel="noopener noreferrer"
         >
@@ -36,51 +40,49 @@ type PageId = (
     | 'manage-settings'
 );
 
-let popstate: () => void = null;
-isMobile && window.addEventListener('popstate', () => popstate && popstate());
+let popstate: (() => void) | null = null;
+isMobile && window.addEventListener('popstate', () => popstate && popstate(), {passive: true});
 
 function Pages(props: ViewProps) {
     const context = getContext();
-    const store = context.store as {
-        activePage: PageId;
-    };
+    const store: IndexStore = context.store;
     if (store.activePage == null) {
         store.activePage = 'main';
     }
 
     function onThemeNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'theme';
         context.refresh();
     }
 
     function onSettingsNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'settings';
         context.refresh();
     }
 
     function onAutomationNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'automation';
         context.refresh();
     }
 
     function onManageSettingsClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'manage-settings';
         context.refresh();
     }
 
     function onSiteListNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'site-list';
         context.refresh();
     }
 
     function goBack() {
         const activePage = store.activePage;
-        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        const settingsPageSubpages: PageId[] = ['automation', 'manage-settings', 'site-list'];
         if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {
@@ -158,7 +160,7 @@ export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
         if (isMobile) {
-            window.addEventListener('contextmenu', (e) => e.preventDefault());
+            window.addEventListener('contextmenu', ({preventDefault}) => preventDefault());
         }
     });
     context.onRemove(() => {

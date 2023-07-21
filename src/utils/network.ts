@@ -1,12 +1,12 @@
 import {isFirefox} from './platform';
 
-async function getOKResponse(url: string, mimeType?: string, origin?: string) {
+async function getOKResponse(url: string, mimeType?: string, origin?: string): Promise<Response> {
     const response = await fetch(
         url,
         {
             cache: 'force-cache',
             credentials: 'omit',
-            referrer: origin
+            referrer: origin,
         },
     );
 
@@ -15,7 +15,7 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string) {
         return response;
     }
 
-    if (mimeType && !response.headers.get('Content-Type').startsWith(mimeType)) {
+    if (mimeType && !response.headers.get('Content-Type')!.startsWith(mimeType)) {
         throw new Error(`Mime type mismatch when loading ${url}`);
     }
 
@@ -26,12 +26,12 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string) {
     return response;
 }
 
-export async function loadAsDataURL(url: string, mimeType?: string) {
+export async function loadAsDataURL(url: string, mimeType?: string): Promise<string> {
     const response = await getOKResponse(url, mimeType);
     return await readResponseAsDataURL(response);
 }
 
-export async function readResponseAsDataURL(response: Response) {
+export async function readResponseAsDataURL(response: Response): Promise<string> {
     const blob = await response.blob();
     const dataURL = await (new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -41,7 +41,7 @@ export async function readResponseAsDataURL(response: Response) {
     return dataURL;
 }
 
-export async function loadAsText(url: string, mimeType?: string, origin?: string) {
+export async function loadAsText(url: string, mimeType?: string, origin?: string): Promise<string> {
     const response = await getOKResponse(url, mimeType, origin);
     return await response.text();
 }

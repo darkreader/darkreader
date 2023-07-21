@@ -2,10 +2,11 @@ import type {Readable} from 'stream';
 import {PassThrough} from 'stream';
 import type {ChildProcess} from 'child_process';
 import {once} from 'events';
+import type {OptionsWithEncoding} from 'get-stream';
 import getStream from 'get-stream';
 import {promiseWithTimeout} from '../support/test-utils';
 
-export type ChildClosedOptions = getStream.OptionsWithEncoding & {serialization?: false | 'json'; timeout?: number};
+export type ChildClosedOptions = OptionsWithEncoding & {serialization?: false | 'json'; timeout?: number};
 
 export type ChildClosedPayload = {stdout: string; stderr: string; response?: any};
 
@@ -29,6 +30,11 @@ export async function childClosed(child: ChildProcess, options?: ChildClosedOpti
     return childPromises;
 }
 
+interface WatchStream {
+    forCondition: (cb: (value: string) => boolean) => Promise<void>;
+    forMatch: (regExp: RegExp) => Promise<void>;
+}
+
 /**
  * Returns a promise that resolves when a certain condition has been met, based on the content of a stream.
  *
@@ -36,7 +42,7 @@ export async function childClosed(child: ChildProcess, options?: ChildClosedOpti
  * await watchStream(child.stdout).forMatch(/Config loaded/)
  * thisRunsAfterConfigLoads();
  */
-export const watchStream = (readable: Readable, options?: {encoding: BufferEncoding}) => {
+export const watchStream = (readable: Readable, options?: {encoding: BufferEncoding}): WatchStream => {
     if (!readable.readableEncoding) {
         readable.setEncoding(options?.encoding || 'utf-8');
     }

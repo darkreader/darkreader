@@ -1,13 +1,11 @@
 // @ts-check
-import fs from 'fs';
-import os from 'os';
 import * as rollup from 'rollup';
+// This plugin resolves location of malevic module
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
-import rollupPluginTypescript2 from 'rollup-plugin-typescript2';
 import typescript from 'typescript';
 import paths from './paths.js';
 import * as reload from './reload.js';
@@ -21,7 +19,7 @@ const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
  * @property {string | ((platform: string) => string)} dest
  * @property {string} reloadType
  * @property {string[]} [watchFiles]
- * @property {(typeof PLATFORM.CHROME) | undefined} [platform]
+ * @property {(typeof PLATFORM.CHROMIUM_MV3) | undefined} [platform]
  */
 
 /** @type {JSEntry[]} */
@@ -29,7 +27,7 @@ const jsEntries = [
     {
         src: 'src/background/index.ts',
         // Prior to Chrome 93, background service worker had to be in top-level directory
-        dest: (platform) => platform === PLATFORM.CHROME_MV3 ? 'background.js' : 'background/index.js',
+        dest: (platform) => platform === PLATFORM.CHROMIUM_MV3 ? 'background.js' : 'background/index.js',
         reloadType: reload.FULL,
     },
     {
@@ -41,7 +39,7 @@ const jsEntries = [
         src: 'src/inject/dynamic-theme/mv3-proxy.ts',
         dest: 'inject/proxy.js',
         reloadType: reload.FULL,
-        platform: PLATFORM.CHROME_MV3,
+        platform: PLATFORM.CHROMIUM_MV3,
     },
     {
         src: 'src/inject/fallback.ts',
@@ -52,7 +50,7 @@ const jsEntries = [
         src: 'src/inject/color-scheme-watcher.ts',
         dest: 'inject/color-scheme-watcher.js',
         reloadType: reload.FULL,
-        platform: PLATFORM.CHROME_MV3,
+        platform: PLATFORM.CHROMIUM_MV3,
     },
     {
         src: 'src/ui/devtools/index.tsx',
@@ -99,23 +97,23 @@ function freeRollupPluginInstance(name, key) {
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypesctiptInstanceKey = `${debug}`;
+    const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};
     switch (platform) {
-        case PLATFORM.FIREFOX:
+        case PLATFORM.FIREFOX_MV2:
         case PLATFORM.THUNDERBIRD:
             if (entry.src === 'src/ui/popup/index.tsx') {
                 break;
             }
             replace = {
                 'chrome.fontSettings.getFontList': `chrome['font' + 'Settings']['get' + 'Font' + 'List']`,
-                'chrome.fontSettings': `chrome['font' + 'Settings']`
+                'chrome.fontSettings': `chrome['font' + 'Settings']`,
             };
             break;
-        case PLATFORM.CHROME_MV3:
+        case PLATFORM.CHROMIUM_MV3:
             replace = {
                 'chrome.browserAction.setIcon': 'chrome.action.setIcon',
                 'chrome.browserAction.setBadgeBackgroundColor': 'chrome.action.setBadgeBackgroundColor',
@@ -124,36 +122,59 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             break;
     }
 
+    // See comment below
+    // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
+    const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
+
     const bundle = await rollup.rollup({
         input: rootPath(src),
+        onwarn: (error) => {
+            // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
+            if (error.code === 'EVAL' && !mustRemoveEval) {
+                return;
+            }
+
+            throw error;
+        },
         plugins: [
+            // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
+            // so we have to manually polyfill it via regular eval().
+            // This plugin is necessary to avoid (benign) warnings in the console during builds, it just replaces
+            // literally one occurence of eval() in our code even before TypeSctipt even encounters it.
+            // With this plugin, warning apprears only on Firefox test builds.
+            // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
+            getRollupPluginInstance('removeEval', '', () => mustRemoveEval &&
+                rollupPluginReplace({
+                    preventAssignment: true,
+                    'eval(': 'void(',
+                })
+            ),
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () => {
-                const plugin = debug ? rollupPluginTypescript2 : rollupPluginTypescript;
-                const config = {
+            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
+                rollupPluginTypescript({
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
+                    compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
+                        target: 'ES2022',
+                    } : undefined,
                     noImplicitAny: debug ? false : true,
+                    noUnusedLocals: debug ? false : true,
+                    strictNullChecks: debug ? false : true,
                     removeComments: debug ? false : true,
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
-                    cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : undefined,
-                };
-                if (debug) {
-                    config.verbosty = 3;
-                }
-                return plugin(config);
-            }),
+                })
+            ),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
                 rollupPluginReplace({
                     preventAssignment: true,
                     ...replace,
                     __DEBUG__: debug,
-                    __CHROMIUM_MV2__: platform === PLATFORM.CHROME,
-                    __CHROMIUM_MV3__: platform === PLATFORM.CHROME_MV3,
-                    __FIREFOX__: platform === PLATFORM.FIREFOX,
+                    __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2,
+                    __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
+                    __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
                     __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
                     __PORT__: watch ? String(PORT) : '-1',
                     __TEST__: test,
@@ -161,8 +182,10 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     __LOG__: log ? `"${log}"` : false,
                 })
             ),
-        ].filter((x) => x)
+        ].filter(Boolean),
     });
+    // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
+    freeRollupPluginInstance('removeEval', '');
     freeRollupPluginInstance('nodeResolve', '');
     freeRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey);
     freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);

@@ -4,10 +4,10 @@ function hasBuiltInDarkTheme() {
     const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<HTMLStyleElement & {disabled: boolean}>;
     drStyles.forEach((style) => style.disabled = true);
 
-    const rootColor = parseColorWithCache(getComputedStyle(document.documentElement).backgroundColor);
-    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor) : {r: 0, g: 0, b: 0, a: 0};
-    const rootLightness = (1 - rootColor.a) + rootColor.a * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
-    const finalLightness = (1 - bodyColor.a) * rootLightness + bodyColor.a * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
+    const rootColor = parseColorWithCache(getComputedStyle(document.documentElement).backgroundColor)!;
+    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor)! : {r: 0, g: 0, b: 0, a: 0};
+    const rootLightness = (1 - rootColor.a!) + rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
+    const finalLightness = (1 - bodyColor.a!) * rootLightness + bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
     const darkThemeDetected = finalLightness < 0.5;
 
     drStyles.forEach((style) => style.disabled = false);
@@ -24,17 +24,17 @@ function hasSomeStyle() {
         return true;
     }
     for (const style of document.styleSheets) {
-        if (style && style.ownerNode && !(style.ownerNode as HTMLElement).classList.contains('darkreader')) {
+        if (style && style.ownerNode && !((style.ownerNode as HTMLElement).classList && (style.ownerNode as HTMLElement).classList.contains('darkreader'))) {
             return true;
         }
     }
     return false;
 }
 
-let observer: MutationObserver;
-let readyStateListener: () => void;
+let observer: MutationObserver | null;
+let readyStateListener: (() => void) | null;
 
-export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) {
+export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void): void {
     stopDarkThemeDetector();
     if (document.body && hasSomeStyle()) {
         runCheck(callback);
@@ -56,11 +56,12 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) 
                 runCheck(callback);
             }
         };
+        // readystatechange event is not cancellable and does not bubble
         document.addEventListener('readystatechange', readyStateListener);
     }
 }
 
-export function stopDarkThemeDetector() {
+export function stopDarkThemeDetector(): void {
     if (observer) {
         observer.disconnect();
         observer = null;

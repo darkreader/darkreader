@@ -42,6 +42,18 @@ text: #3c3836
 
 ================================
 
+Kanagawa
+
+DARK
+background: #1f1f28
+text: #dcd7ba
+
+LIGHT
+background: #f4ecca
+text: #1e4887
+
+================================
+
 Nord
 
 DARK
@@ -87,4 +99,3 @@ text: #a9b1d6
 LIGHT
 background: #d5d6db
 text: #343b58
-

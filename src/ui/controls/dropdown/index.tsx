@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
-type DropDownOption<T> = {id: T; content: Malevic.Child};
+export type DropDownOption<T> = {id: T; content: Malevic.Child};
 
 interface DropDownProps<T> {
     class?: string;
@@ -10,13 +10,15 @@ interface DropDownProps<T> {
     onChange: (value: T) => void;
 }
 
+interface DropDownStore {
+    isOpen: boolean;
+    listNode: HTMLElement;
+    selectedNode: HTMLElement;
+}
+
 export default function DropDown<T>(props: DropDownProps<T>) {
     const context = getContext();
-    const store = context.store as {
-        isOpen: boolean;
-        listNode: HTMLElement;
-        selectedNode: HTMLElement;
-    };
+    const store: DropDownStore = context.store;
 
     if (context.prev) {
         const currOptions = props.options.map((o) => o.id);
@@ -40,7 +42,7 @@ export default function DropDown<T>(props: DropDownProps<T>) {
 
         if (store.isOpen) {
             const onOuterClick = (e: MouseEvent) => {
-                window.removeEventListener('mousedown', onOuterClick, false);
+                window.removeEventListener('mousedown', onOuterClick);
 
                 const listRect = store.listNode.getBoundingClientRect();
                 const ex = e.clientX;
@@ -56,7 +58,7 @@ export default function DropDown<T>(props: DropDownProps<T>) {
                 }
             };
 
-            window.addEventListener('mousedown', onOuterClick, false);
+            window.addEventListener('mousedown', onOuterClick, {passive: true});
         }
     }
 
@@ -66,7 +68,7 @@ export default function DropDown<T>(props: DropDownProps<T>) {
                 class={{
                     'dropdown__list__item': true,
                     'dropdown__list__item--selected': value.id === props.selected,
-                    [props.class]: props.class != null,
+                    [props.class!]: Boolean(props.class),
                 }}
                 onclick={() => {
                     store.isOpen = false;
@@ -79,14 +81,14 @@ export default function DropDown<T>(props: DropDownProps<T>) {
         );
     }
 
-    const selectedContent = props.options.find((value) => value.id === props.selected).content;
+    const selectedContent = props.options.find((value) => value.id === props.selected)!.content;
 
     return (
         <span
             class={{
                 'dropdown': true,
                 'dropdown--open': store.isOpen,
-                [props.class]: Boolean(props.class),
+                [props.class!]: Boolean(props.class),
             }}
         >
             <span

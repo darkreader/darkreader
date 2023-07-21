@@ -1,6 +1,6 @@
 // @ts-check
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import paths from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
@@ -23,7 +23,7 @@ async function bundleLocale(/** @type {string} */filePath) {
             messageEnd = file.length;
         }
         messages[messageName] = {
-            message: file.substring(messageStart, messageEnd).trim()
+            message: file.substring(messageStart, messageEnd).trim(),
         };
     }
 

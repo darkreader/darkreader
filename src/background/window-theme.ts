@@ -3,7 +3,7 @@ import {parseColorWithCache} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
 import type {FilterConfig} from '../definitions';
 
-// TODO: remove this after TypeScript declarations are updated
+// TODO: remove type after dependency update
 declare const browser: {
     theme: {
         update: ((theme: any) => Promise<void>);
@@ -11,7 +11,7 @@ declare const browser: {
     };
 };
 
-const themeColorTypes: { [key: string]: string } = {
+const themeColorTypes: { [key: string]: 'bg' | 'text' | 'border' } = {
     accentcolor: 'bg',
     button_background_active: 'text',
     button_background_hover: 'text',
@@ -69,15 +69,15 @@ const $colors: { [key: string]: string } = {
     toolbar_field_text: 'black',
 };
 
-export function setWindowTheme(filter: FilterConfig) {
+export function setWindowTheme(filter: FilterConfig): void {
     const colors = Object.entries($colors).reduce((obj: { [key: string]: string }, [key, value]) => {
-        const type: string = themeColorTypes[key];
+        const type: 'bg' | 'text' | 'border' = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
             'bg': modifyBackgroundColor,
             'text': modifyForegroundColor,
             'border': modifyBorderColor,
         }[type];
-        const rgb = parseColorWithCache(value);
+        const rgb = parseColorWithCache(value)!;
         const modified = modify(rgb, filter);
         obj[key] = modified;
         return obj;
@@ -87,7 +87,7 @@ export function setWindowTheme(filter: FilterConfig) {
     }
 }
 
-export function resetWindowTheme() {
+export function resetWindowTheme(): void {
     if (typeof browser !== 'undefined' && browser.theme && browser.theme.reset) {
         // BUG: resets browser theme to entire
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1415267

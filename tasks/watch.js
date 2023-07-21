@@ -15,7 +15,7 @@ function watch(options) {
     function onChange(path) {
         queue.add(path);
 
-        if (timeoutId != null) {
+        if (timeoutId !== null) {
             return;
         }
 
@@ -26,9 +26,6 @@ function watch(options) {
                 log.ok(`Files changed:${changedFiles.map((path) => `\n${path}`)}`);
                 queue.clear();
                 await options.onChange(changedFiles);
-                if (timeoutId) {
-                    return;
-                }
             } catch (err) {
                 log.error(err);
             }

@@ -49,7 +49,7 @@ export default function TextList(props: TextListProps) {
     let shouldFocus = false;
 
     const node = context.node;
-    const prevProps = context.prev ? context.prev.props as TextListProps : null;
+    const prevProps: TextListProps | null = context.prev ? context.prev.props : null;
     if (node && props.isFocused && (
         !prevProps ||
         !prevProps.isFocused ||

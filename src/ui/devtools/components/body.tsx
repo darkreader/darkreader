@@ -4,15 +4,15 @@ import {withState, useState} from 'malevic/state';
 import {Button, MessageBox, Overlay} from '../../controls';
 import {ThemeEngine} from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import type {ExtWrapper} from '../../../definitions';
+import type {DevToolsData, ExtWrapper} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
-import {isFirefox} from '../../../utils/platform';
+import {isFirefox, isMobile} from '../../../utils/platform';
 
-type BodyProps = ExtWrapper;
+type BodyProps = ExtWrapper & {devtools: DevToolsData};
 
-function Body({data, actions}: BodyProps) {
+function Body({data, actions, devtools}: BodyProps) {
     const context = getContext();
-    const {state, setState} = useState({errorText: null as string});
+    const {state, setState} = useState<{errorText: string | null}>({errorText: null});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, actions});
@@ -20,17 +20,17 @@ function Body({data, actions}: BodyProps) {
     const wrapper = (theme.engine === ThemeEngine.staticTheme
         ? {
             header: 'Static Theme Editor',
-            fixesText: data.devtools.staticThemesText,
+            fixesText: devtools.staticThemesText,
             apply: (text: string) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
         } : theme.engine === ThemeEngine.cssFilter || theme.engine === ThemeEngine.svgFilter ? {
             header: 'Inversion Fix Editor',
-            fixesText: data.devtools.filterFixesText,
+            fixesText: devtools.filterFixesText,
             apply: (text: string) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
         } : {
             header: 'Dynamic Theme Editor',
-            fixesText: data.devtools.dynamicFixesText,
+            fixesText: devtools.dynamicFixesText,
             apply: (text: string) => actions.applyDevDynamicThemeFixes(text),
             reset: () => actions.resetDevDynamicThemeFixes(),
         });
@@ -40,9 +40,10 @@ function Body({data, actions}: BodyProps) {
         if (!state.errorText) {
             textNode.value = wrapper.fixesText;
         }
-        node.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
+        // Must not be passive because it calls preventDefault(), must not be once
+        node.addEventListener('keydown', ({key, preventDefault}) => {
+            if (key === 'Tab') {
+                preventDefault();
                 const indent = ' '.repeat(4);
                 if (isFirefox) {
                     // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
@@ -61,7 +62,7 @@ function Body({data, actions}: BodyProps) {
         });
     }
 
-    async function apply() {
+    async function apply(): Promise<void> {
         const text = textNode.value;
         try {
             await wrapper.apply(text);
@@ -73,12 +74,12 @@ function Body({data, actions}: BodyProps) {
         }
     }
 
-    function showDialog() {
+    function showDialog(): void {
         context.store.isDialogVisible = true;
         context.refresh();
     }
 
-    function hideDialog() {
+    function hideDialog(): void {
         context.store.isDialogVisible = false;
         context.refresh();
     }
@@ -91,13 +92,13 @@ function Body({data, actions}: BodyProps) {
         />
     ) : null;
 
-    function reset() {
+    function reset(): void {
         context.store.isDialogVisible = false;
         wrapper.reset();
         setState({errorText: null});
     }
 
-    function toggleDesign() {
+    function toggleDesign(): void {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
     }
 
@@ -123,7 +124,7 @@ function Body({data, actions}: BodyProps) {
                     {dialog}
                 </Button>
                 <Button onclick={apply}>Apply</Button>
-                <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>
+                {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
             </div>
             <p id="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.

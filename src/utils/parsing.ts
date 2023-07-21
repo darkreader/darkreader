@@ -27,7 +27,7 @@ export function parseGradient(value: string): parsedGradient[] {
     let index = 0;
     let startIndex = conicGradient.length;
     while ((index = value.indexOf('gradient', startIndex)) !== -1) {
-        let typeGradient: string;
+        let typeGradient: string | undefined;
         // Now we check the type of gradient.
         // the current index starts at `g` of gradient.
         // So we have to do a reverse lookup to find the type of gradient.
@@ -59,7 +59,7 @@ export function parseGradient(value: string): parsedGradient[] {
 
         // Now we know the type of gradient.
         // We can go parse the rest of the value as a gradient.
-        const {start, end} = getParenthesesRange(value, index + gradientLength);
+        const {start, end} = getParenthesesRange(value, index + gradientLength)!;
 
         const match = value.substring(start + 1, end - 1);
         startIndex = end + 1 + conicGradientLength;

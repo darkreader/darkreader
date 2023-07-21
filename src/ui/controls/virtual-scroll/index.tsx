@@ -4,7 +4,7 @@ import {render, getContext} from 'malevic/dom';
 interface VirtualScrollProps {
     root: Malevic.Spec;
     items: Malevic.Spec[];
-    scrollToIndex?: number;
+    scrollToIndex?: number | null | undefined;
 }
 
 export default function VirtualScroll(props: VirtualScrollProps) {
@@ -29,7 +29,7 @@ export default function VirtualScroll(props: VirtualScrollProps) {
                     onrender: null,
                 },
             };
-            const tempNode = render(root, tempItem).firstElementChild;
+            const tempNode = render(root, tempItem).firstElementChild!;
             store.itemHeight = tempNode.getBoundingClientRect().height;
         }
         const {itemHeight} = store;
@@ -55,7 +55,7 @@ export default function VirtualScroll(props: VirtualScrollProps) {
         if (document.activeElement) {
             let current = document.activeElement;
             while (current && current.parentElement !== wrapper) {
-                current = current.parentElement;
+                current = current.parentElement!;
             }
             if (current) {
                 focusedIndex = store.nodesIndices.get(current);
@@ -93,7 +93,7 @@ export default function VirtualScroll(props: VirtualScrollProps) {
                 </div>
             ));
 
-        render(wrapper, items);
+        render(wrapper!, items);
     }
 
     let rootNode: Element;
@@ -111,7 +111,8 @@ export default function VirtualScroll(props: VirtualScrollProps) {
             onrender: (node) => {
                 rootNode = node;
                 rootDidRender && rootDidRender(rootNode);
-                renderContent(rootNode, isNaN(props.scrollToIndex) ? -1 : props.scrollToIndex);
+                // TODO: remove type cast after dependency update
+                renderContent(rootNode, isNaN(props.scrollToIndex!) ? -1 : props.scrollToIndex!);
             },
             onscroll: () => {
                 if (rootNode.scrollTop === prevScrollTop) {
@@ -121,6 +122,6 @@ export default function VirtualScroll(props: VirtualScrollProps) {
                 renderContent(rootNode, -1);
             },
         },
-        children: []
+        children: [],
     } as Malevic.Spec;
 }

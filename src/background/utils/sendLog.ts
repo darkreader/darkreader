@@ -1,20 +1,21 @@
 declare const __DEBUG__: boolean;
-declare const __LOG__: 'info' | 'warn';
+declare const __LOG__: 'info' | 'warn' | 'assert';
 
-let socket: WebSocket = null;
-let messageQueue: string[] | null = [];
-function createSocket() {
+let socket: WebSocket | null = null;
+let messageQueue: string[] = [];
+function createSocket(): void {
     if (socket) {
         return;
     }
-    socket = new WebSocket(`ws://localhost:${9000}`);
-    socket.addEventListener('open', () => {
-        messageQueue.forEach((message) => socket.send(message));
-        messageQueue = null;
+    const newSocket = new WebSocket(`ws://localhost:${9000}`);
+    socket = newSocket;
+    newSocket.addEventListener('open', () => {
+        messageQueue.forEach((message) => newSocket.send(message));
+        messageQueue = [];
     });
 }
 
-export function sendLog(level: 'info' | 'warn', ...args: any[]) {
+export function sendLog(level: 'info' | 'warn' | 'assert', ...args: any[]): void {
     if (!__DEBUG__ || !__LOG__) {
         return;
     }

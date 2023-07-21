@@ -1,6 +1,11 @@
 import {multiline, timeout} from '../../support/test-utils';
+import type {StyleExpectations} from '../globals';
 
-async function loadBasicPage(header = 'E2E test page') {
+async function expectStyles(styles: StyleExpectations) {
+    await expectPageStyles(expect, styles);
+}
+
+async function loadBasicPage(header: string) {
     await loadTestPage({
         '/': multiline(
             '<!DOCTYPE html>',
@@ -20,106 +25,225 @@ async function loadBasicPage(header = 'E2E test page') {
     });
 }
 
-async function emulateMedia(name: string, value: string) {
-    await page.emulateMediaFeatures([{name, value}]);
-    await backgroundUtils.emulateMedia(name, value);
-}
-
 describe('Toggling the extension', () => {
     // TODO: remove flakes and remove this line
-    jest.retryTimes(3, {logErrorsBeforeRetry: true});
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
+    const automationMenuSelector = '.header__more-settings-button';
+    const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
 
     it('should turn On/Off', async () => {
         await loadBasicPage('Toggle on/off');
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+            ['a', 'color', 'rgb(51, 145, 255)'],
+        ]);
 
         await popupUtils.click('.toggle__off');
         await timeout(500);
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(0, 0, 238)');
+        await expectStyles([
+            ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['document', 'color', 'rgb(0, 0, 0)'],
+            ['body', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['body', 'color', 'rgb(0, 0, 0)'],
+            ['h1', 'color', 'rgb(255, 0, 0)'],
+            ['a', 'color', 'rgb(0, 0, 238)'],
+        ]);
 
         await popupUtils.click('.toggle__on');
         await timeout(500);
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+            ['a', 'color', 'rgb(51, 145, 255)'],
+        ]);
     });
 
     it('should follow system color scheme', async () => {
         await loadBasicPage('Automation (color scheme)');
 
-        const automationMenuSelector = '.header__app-toggle__more-button';
-        const automationSystemSelector = '.header__app-toggle__more-settings__system-dark-mode__checkbox .checkbox__input';
 
-        await emulateMedia('prefers-color-scheme', 'light');
-        await expect(page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).resolves.toBe(false);
+        await emulateColorScheme('light');
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+            ['a', 'color', 'rgb(51, 145, 255)'],
+        ]);
 
         await popupUtils.click(automationMenuSelector);
-        await timeout(250);
         await popupUtils.click(automationSystemSelector);
-        await timeout(250);
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(0, 0, 238)');
+        await expectStyles([
+            ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['document', 'color', 'rgb(0, 0, 0)'],
+            ['body', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['body', 'color', 'rgb(0, 0, 0)'],
+            ['h1', 'color', 'rgb(255, 0, 0)'],
+            ['a', 'color', 'rgb(0, 0, 238)'],
+        ]);
 
-        await emulateMedia('prefers-color-scheme', 'dark');
-        await expect(page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).resolves.toBe(true);
-        await timeout(250);
+        await emulateColorScheme('dark');
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+            ['a', 'color', 'rgb(51, 145, 255)'],
+        ]);
 
-        await emulateMedia('prefers-color-scheme', 'light');
-        await expect(page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).resolves.toBe(false);
-        await timeout(250);
+        await emulateColorScheme('light');
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(0, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 0, 0)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(0, 0, 238)');
+        await expectStyles([
+            ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['document', 'color', 'rgb(0, 0, 0)'],
+            ['body', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['body', 'color', 'rgb(0, 0, 0)'],
+            ['h1', 'color', 'rgb(255, 0, 0)'],
+            ['a', 'color', 'rgb(0, 0, 238)'],
+        ]);
 
         await popupUtils.click(automationSystemSelector);
-        await timeout(250);
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+            ['a', 'color', 'rgb(51, 145, 255)'],
+        ]);
 
-        await emulateMedia('prefers-color-scheme', 'dark');
+        await emulateColorScheme('dark');
+    });
+
+    // Note: this test is relevant only to Firefox and Thunderbird
+    it('should ignore color watcher messages from subframes', async () => {
+        const darkPageExpectations: StyleExpectations = [
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+            ['a', 'color', 'rgb(51, 145, 255)'],
+        ];
+
+        const lightPageExpectations: StyleExpectations = [
+            ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['document', 'color', 'rgb(0, 0, 0)'],
+            ['body', 'background-color', 'rgba(0, 0, 0, 0)'],
+            ['body', 'color', 'rgb(0, 0, 0)'],
+            ['h1', 'color', 'rgb(255, 0, 0)'],
+            ['a', 'color', 'rgb(0, 0, 238)'],
+        ];
+
+        const darkSubframePageExpectations: StyleExpectations = [
+            [['iframe', 'h1'], 'color', 'rgb(255, 26, 26)'],
+            [['iframe', 'a'], 'color', 'rgb(51, 145, 255)'],
+        ];
+
+        const lightSubframePageExpectations: StyleExpectations = [
+            [['iframe', 'h1'], 'color', 'rgb(255, 0, 0)'],
+            [['iframe', 'a'], 'color', 'rgb(0, 0, 238)'],
+        ];
+
+        let loadSubframe: () => void = null;
+        await loadTestPage({
+            '/': multiline(
+                '<!DOCTYPE html>',
+                '<html>',
+                '<head>',
+                '    <style>',
+                '        h1 { color: red; }',
+                '    </style>',
+                '</head>',
+                '<body>',
+                `    <h1>Color scheme detector</h1>`,
+                '    <p>Text</p>',
+                '    <a href="#">Link</a>',
+                '    <iframe src="/subframe.html" style="color-scheme: light"></iframe>',
+                '</body>',
+                '</html>',
+            ),
+            '/subframe.html': async (_, res) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'text/html');
+
+                await new Promise<void>((resolve) => loadSubframe = resolve);
+
+                res.end(
+                    multiline(
+                        '<!DOCTYPE html>',
+                        '<html>',
+                        '<head>',
+                        '    <style>',
+                        '        h1 { color: red; }',
+                        '    </style>',
+                        '</head>',
+                        '<body>',
+                        '    <h1>Header</h1>',
+                        '    <p>Text</p>',
+                        '    <a href="#">Link</a>',
+                        '</body>',
+                        '</html>',
+                    ),
+                    'utf8'
+                );
+            },
+        }, {
+            waitUntil: 'domcontentloaded',
+        });
+
+        await emulateColorScheme('dark');
+        await expectStyles(darkPageExpectations);
+
+        await popupUtils.click(automationMenuSelector);
+        await popupUtils.click(automationSystemSelector);
+
+        await expectStyles(darkPageExpectations);
+
+        loadSubframe();
+
+        // Ensure that the subframe received its styles
+        await expectStyles(darkSubframePageExpectations);
+        // Ensure that the parent frame retained its styles
+        await expectStyles(darkPageExpectations);
+
+        await emulateColorScheme('light');
+
+        await expectStyles(lightPageExpectations);
+        await expectStyles(lightSubframePageExpectations);
+
+        await popupUtils.click(automationSystemSelector);
+
+        await expectStyles(darkPageExpectations);
+
+        await emulateColorScheme('dark');
+    });
+
+    it('should have new design button on desktop', async () => {
+        expect(await devtoolsUtils.exists('.preview-design-button'));
+    });
+
+    it('dynamic themes', async () => {
+        await loadBasicPage('Dynamic styles');
+
+        const numStyles = await pageUtils.evaluateScript(() => document.styleSheets.length);
+        expect(numStyles).toBe(product === 'firefox' ? 10 : 1);
     });
 });

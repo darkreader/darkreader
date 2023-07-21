@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import type {ViewProps} from '../types';
 import SiteList from './site-list';
 import CheckButton from '../check-button';
+import RemoveAllButton from '../remove-all-sites-button/remove-site-list-button';
 import {isFirefox} from '../../../utils/platform';
 
 export default function SiteListPage(props: ViewProps) {
@@ -23,6 +24,7 @@ export default function SiteListPage(props: ViewProps) {
     return (
         <div class="site-list-page">
             <label class="site-list-page__label">{label}</label>
+            {props.data.settings.siteList.length ? <RemoveAllButton {...props} /> : null}
             <SiteList
                 siteList={props.data.settings.siteList}
                 onChange={onSiteListChange}

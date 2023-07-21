@@ -1,3 +1,5 @@
+'use strict';
+
 /** @type {import('eslint').Linter.Config} */
 const config = {overrides: []};
 
@@ -15,8 +17,8 @@ config.overrides.push({
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
         'block-spacing': ['error', 'always'],
-        'brace-style': 'off',
-        'comma-spacing': 'off',
+        'brace-style': 'error',
+        'comma-spacing': 'error',
         'curly': 'error',
         'eol-last': ['error', 'always'],
         'eqeqeq': ['error', 'smart'],
@@ -24,7 +26,7 @@ config.overrides.push({
             'SwitchCase': 1,
         }],
         'jsx-quotes': ['error', 'prefer-double'],
-        'keyword-spacing': 'off',
+        'keyword-spacing': 'error',
         'object-curly-spacing': ['error', 'never'],
         'operator-assignment': ['error', 'always'],
         'prefer-template': 'error',
@@ -34,7 +36,7 @@ config.overrides.push({
         'no-lonely-if': 'error',
         'no-multi-spaces': 'error',
         'no-implicit-coercion': 'error',
-        'no-redeclare': 'off',
+        'no-redeclare': 'error',
         'no-useless-concat': 'error',
         'no-useless-return': 'error',
         'no-trailing-spaces': 'error',
@@ -42,7 +44,7 @@ config.overrides.push({
         'padded-blocks': ['error', 'never'],
         'prefer-exponentiation-operator': 'error',
         'prefer-regex-literals': 'error',
-        'semi': 'off',
+        'semi': 'error',
         'space-before-function-paren': ['error', {
             anonymous: 'always',
             asyncArrow: 'always',
@@ -51,39 +53,43 @@ config.overrides.push({
         'space-in-parens': ['error', 'never'],
         'space-infix-ops': 'error',
         'spaced-comment': ['error', 'always', {exceptions: ['-']}],
-        'quotes': 'off',
         '@typescript-eslint/array-type': ['error', {
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
         'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
-        '@typescript-eslint/camelcase': 'off',
+        '@typescript-eslint/comma-dangle': ['error', {
+            arrays: 'always-multiline',
+            objects: 'always-multiline',
+            imports: 'always-multiline',
+            exports: 'always-multiline',
+            functions: 'only-multiline',
+        }],
         '@typescript-eslint/comma-spacing': ['error', {
             before: false,
             after: true,
         }],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
-        '@typescript-eslint/explicit-function-return-type': 'off',
-        '@typescript-eslint/explicit-member-accessibility': 'off',
-        '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/func-call-spacing': ['error', 'never'],
         '@typescript-eslint/keyword-spacing': ['error', {
             after: true,
             before: true,
         }],
         '@typescript-eslint/member-delimiter-style': 'error',
-        '@typescript-eslint/no-duplicate-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-redeclare': 'error',
-        '@typescript-eslint/no-object-literal-type-assertion': 'off',
-        '@typescript-eslint/no-use-before-define': 'off',
+        '@typescript-eslint/no-unused-vars': 'error',
         '@typescript-eslint/semi': ['error', 'always'],
         '@typescript-eslint/quotes': ['error', 'single', {
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
             ignore: ['^malevic\/'],
         }],
@@ -147,8 +153,32 @@ config.overrides.push({
         {
             files: ['tasks/**/*.js', 'tests/**/*.js', '.eslintplugin.js'],
             rules: {
-                '@typescript-eslint/no-var-requires': 'off',
-                '@typescript-eslint/no-implicit-any-catch': 'off',
+                '@typescript-eslint/no-var-requires': 'error',
+                '@typescript-eslint/explicit-module-boundary-types': 'off',
+            },
+        },
+        {
+            files: [
+                'tasks/task.js',
+                'tests/browser/environment.js',
+            ],
+            rules: {
+                '@typescript-eslint/explicit-member-accessibility': 'off',
+            },
+        },
+        {
+            files: [
+                'src/ui/controls/**/*.tsx',
+                'src/ui/popup/**/*.tsx',
+                'src/ui/stylesheet-editor/components/body.tsx'
+            ],
+            rules: {
+                '@typescript-eslint/explicit-module-boundary-types': 'off',
+            },
+        },
+        {
+            files: ['.eslintplugin.js'],
+            rules: {
                 '@typescript-eslint/ban-ts-comment': 'off',
             },
         },
@@ -162,13 +192,12 @@ config.overrides.push({
         {
             files: ['src/**/*.ts'],
             parserOptions: {
-                ecmaVersion: 2019,
+                ecmaVersion: 2022,
                 project: 'src/tsconfig.json',
             },
             rules: {
                 '@typescript-eslint/no-implied-eval': 'error',
                 '@typescript-eslint/switch-exhaustiveness-check': 'error',
-                '@typescript-eslint/promise-function-async': 'error',
             }
         },
     ],

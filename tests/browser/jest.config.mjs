@@ -1,7 +1,7 @@
 // @ts-check
 
-import {dirname} from 'path';
-import {createRequire} from 'module';
+import {dirname} from 'node:path';
+import {createRequire} from 'node:module';
 const rootDir = dirname(createRequire(import.meta.url).resolve('../../package.json'));
 
 /** @type {import('@jest/types').Config.InitialOptions} */
@@ -16,7 +16,7 @@ const config = {
         __DEBUG__: false,
         __CHROMIUM_MV2__: true,
         __CHROMIUM_MV3__: false,
-        __FIREFOX__: false,
+        __FIREFOX_MV2__: false,
         __THUNDERBIRD__: false,
         __TEST__: true,
         product: 'chrome',

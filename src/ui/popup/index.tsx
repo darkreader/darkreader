@@ -3,10 +3,10 @@ import {sync} from 'malevic/dom';
 import Connector from '../connect/connector';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
-import type {ExtensionData, ExtensionActions} from '../../definitions';
+import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
-import {MessageType} from '../../utils/message';
-import {getFontList} from '../utils';
+import {DebugMessageTypeBGtoUI} from '../../utils/message';
+import {getFontList, saveFile} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
@@ -31,17 +31,17 @@ function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActi
 
 async function start() {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 
     const [data, fonts] = await Promise.all([
         connector.getData(),
-        getFontList()
+        getFontList(),
     ]);
     renderBody(data, fonts, connector);
     connector.subscribeToChanges((data) => renderBody(data, fonts, connector));
 }
 
-addEventListener('load', start);
+addEventListener('load', start, {passive: true});
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);
@@ -52,48 +52,84 @@ if (isFirefox) {
     fixNotClosingPopupOnNavigation();
 }
 
-declare const __TEST__: boolean;
-if (__TEST__) {
-    chrome.runtime.onMessage.addListener(({type}) => {
-        if (type === MessageType.BG_CSS_UPDATE) {
+declare const __DEBUG__: boolean;
+if (__DEBUG__) {
+    chrome.runtime.onMessage.addListener(({type}: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
+        if (type === DebugMessageTypeBGtoUI.CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;
                 const newLink = document.createElement('link');
                 newLink.rel = 'stylesheet';
                 newLink.href = url.replace(/\?.*$/, `?nocache=${Date.now()}`);
-                link.parentElement.insertBefore(newLink, link);
+                link.parentElement!.insertBefore(newLink, link);
                 link.remove();
             });
         }
 
-        if (type === MessageType.BG_UI_UPDATE) {
+        if (type === DebugMessageTypeBGtoUI.UPDATE) {
             location.reload();
         }
     });
+}
 
+declare const __TEST__: boolean;
+if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        socket.send(JSON.stringify({
+            data: {
+                type: 'popup',
+                uuid: `ready-${document.location.pathname}`,
+            },
+            id: null,
+        }));
+    };
     socket.onmessage = (e) => {
-        const respond = (message: {type: string; id?: number; data?: any}) => socket.send(JSON.stringify(message));
+        const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
-            const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-            if (message.type === 'click') {
-                const selector = message.data;
-                const element: HTMLElement = document.querySelector(selector);
-                element.click();
-                respond({type: 'click-response', id: message.id});
-            } else if (message.type === 'exists') {
-                const selector = message.data;
-                const element = document.querySelector(selector);
-                respond({type: 'exists-response', id: message.id, data: element != null});
-            } else if (message.type === 'rect') {
-                const selector = message.data;
-                const element: HTMLElement = document.querySelector(selector);
-                const rect = element.getBoundingClientRect();
-                respond({type: 'rect-response', id: message.id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
+            const message: {type: string; id: number; data: any} = JSON.parse(e.data);
+            const {type, id, data} = message;
+            switch (type) {
+                case 'popup-click': {
+                    // The required element may not exist yet
+                    const check = () => {
+                        const element: HTMLElement | null = document.querySelector(data);
+                        if (element) {
+                            element.click();
+                            respond({id});
+                        } else {
+                            requestIdleCallback(check, {timeout: 500});
+                        }
+                    };
+
+                    check();
+                    break;
+                }
+                case 'popup-exists': {
+                    // The required element may not exist yet
+                    const check = () => {
+                        const element: HTMLElement | null = document.querySelector(data);
+                        if (element) {
+                            respond({id, data: true});
+                        } else {
+                            requestIdleCallback(check, {timeout: 500});
+                        }
+                    };
+
+                    check();
+                    break;
+                }
+                case 'popup-saveFile': {
+                    const {name, content} = data;
+                    saveFile(name, content);
+                    respond({id});
+                    break;
+                }
+                default:
             }
         } catch (err) {
-            respond({type: 'error', data: String(err)});
+            respond({error: String(err)});
         }
     };
 }

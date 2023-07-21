@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Question
+  - name: Questions
     url: https://github.com/darkreader/darkreader/discussions
-    about: If you'd like to ask a question about dark reader.
+    about: Ask a question about Dark Reader.

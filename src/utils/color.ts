@@ -18,10 +18,10 @@ export interface HSLA {
 const hslaParseCache = new Map<string, HSLA>();
 const rgbaParseCache = new Map<string, RGBA>();
 
-export function parseColorWithCache($color: string) {
+export function parseColorWithCache($color: string): RGBA | null {
     $color = $color.trim();
     if (rgbaParseCache.has($color)) {
-        return rgbaParseCache.get($color);
+        return rgbaParseCache.get($color)!;
     }
     // We cannot _really_ parse any color which has the calc() expression,
     // so we try our best to remove those and then parse the value.
@@ -33,9 +33,9 @@ export function parseColorWithCache($color: string) {
     return color;
 }
 
-export function parseToHSLWithCache(color: string) {
+export function parseToHSLWithCache(color: string): HSLA | null {
     if (hslaParseCache.has(color)) {
-        return hslaParseCache.get(color);
+        return hslaParseCache.get(color)!;
     }
     const rgb = parseColorWithCache(color);
     if (!rgb) {
@@ -46,7 +46,7 @@ export function parseToHSLWithCache(color: string) {
     return hsl;
 }
 
-export function clearColorCache() {
+export function clearColorCache(): void {
     hslaParseCache.clear();
     rgbaParseCache.clear();
 }
@@ -103,7 +103,7 @@ export function rgbToHSL({r: r255, g: g255, b: b255, a = 1}: RGBA): HSLA {
     return {h, s, l, a};
 }
 
-function toFixed(n: number, digits = 0) {
+function toFixed(n: number, digits = 0): string {
     const fixed = n.toFixed(digits);
     if (digits === 0) {
         return fixed;
@@ -121,7 +121,7 @@ function toFixed(n: number, digits = 0) {
     return fixed;
 }
 
-export function rgbToString(rgb: RGBA) {
+export function rgbToString(rgb: RGBA): string {
     const {r, g, b, a} = rgb;
     if (a != null && a < 1) {
         return `rgba(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)}, ${toFixed(a, 2)})`;
@@ -129,13 +129,13 @@ export function rgbToString(rgb: RGBA) {
     return `rgb(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)})`;
 }
 
-export function rgbToHexString({r, g, b, a}: RGBA) {
+export function rgbToHexString({r, g, b, a}: RGBA): string {
     return `#${(a != null && a < 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x) => {
         return `${x < 16 ? '0' : ''}${x.toString(16)}`;
     }).join('')}`;
 }
 
-export function hslToString(hsl: HSLA) {
+export function hslToString(hsl: HSLA): string {
     const {h, s, l, a} = hsl;
     if (a != null && a < 1) {
         return `hsla(${toFixed(h)}, ${toFixed(s * 100)}%, ${toFixed(l * 100)}%, ${toFixed(a, 2)})`;
@@ -147,7 +147,7 @@ const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
 
-export function parse($color: string): RGBA {
+export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
 
     if (c.match(rgbMatch)) {
@@ -178,7 +178,7 @@ export function parse($color: string): RGBA {
 }
 
 function getNumbers($color: string) {
-    const numbers = [];
+    const numbers: string[] = [];
     let prevPos = 0;
     let isMining = false;
     // Get the first `(`.
@@ -190,7 +190,7 @@ function getNumbers($color: string) {
         if (c >= '0' && c <= '9' || c === '.' || c === '+' || c === '-') {
             // Enable the mining flag.
             isMining = true;
-        } else if (isMining && (c === ' ' || c === ',')) {
+        } else if (isMining && (c === ' ' || c === ',' || c === '/')) {
             // isMining is true and we got a terminating
             // character. So we can push the current number
             // into the array.
@@ -233,7 +233,7 @@ function getNumbersFromString(str: string, range: number[], units: {[unit: strin
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
-function parseRGB($rgb: string) {
+function parseRGB($rgb: string): RGBA {
     const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
     return {r, g, b, a};
 }
@@ -241,12 +241,12 @@ function parseRGB($rgb: string) {
 const hslRange = [360, 1, 1, 1];
 const hslUnits = {'%': 100, 'deg': 360, 'rad': 2 * Math.PI, 'turn': 1};
 
-function parseHSL($hsl: string) {
+function parseHSL($hsl: string): RGBA {
     const [h, s, l, a = 1] = getNumbersFromString($hsl, hslRange, hslUnits);
     return hslToRGB({h, s, l, a});
 }
 
-function parseHex($hex: string) {
+function parseHex($hex: string): RGBA | null {
     const h = $hex.substring(1);
     switch (h.length) {
         case 3:
@@ -265,23 +265,23 @@ function parseHex($hex: string) {
     return null;
 }
 
-function getColorByName($color: string) {
-    const n = knownColors.get($color);
+function getColorByName($color: string): RGBA {
+    const n = knownColors.get($color)!;
     return {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
         b: (n >> 0) & 255,
-        a: 1
+        a: 1,
     };
 }
 
-function getSystemColor($color: string) {
-    const n = systemColors.get($color);
+function getSystemColor($color: string): RGBA {
+    const n = systemColors.get($color)!;
     return {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
         b: (n >> 0) & 255,
-        a: 1
+        a: 1,
     };
 }
 
@@ -502,10 +502,10 @@ const systemColors: Map<string, number> = new Map(Object.entries({
     Window: 0xececec,
     WindowFrame: 0xaaaaaa,
     WindowText: 0x000000,
-    '-webkit-focus-ring-color': 0xe59700
+    '-webkit-focus-ring-color': 0xe59700,
 }).map(([key, value]) => [key.toLowerCase(), value] as [string, number]));
 
 // https://en.wikipedia.org/wiki/Relative_luminance
-export function getSRGBLightness(r: number, g: number, b: number) {
+export function getSRGBLightness(r: number, g: number, b: number): number {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }

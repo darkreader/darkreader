@@ -20,7 +20,7 @@ export default function Mode(props: {mode: ThemeEngine; onChange: (mode: ThemeEn
         <ThemeControl label="Mode">
             <div class="mode-control-container">
                 <DropDown
-                    selected={modes.find((m) => m.id === props.mode).id}
+                    selected={modes.find((m) => m.id === props.mode)!.id}
                     options={modes}
                     onChange={props.onChange}
                 />

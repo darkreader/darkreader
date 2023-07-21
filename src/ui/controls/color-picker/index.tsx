@@ -12,6 +12,12 @@ interface ColorPickerProps {
     onReset: () => void;
 }
 
+interface ColorPickerStore {
+    isFocused: boolean;
+    textBoxNode: HTMLInputElement;
+    previewNode: HTMLElement;
+}
+
 function isValidColor(color: string) {
     return Boolean(parseColorWithCache(color));
 }
@@ -19,14 +25,14 @@ function isValidColor(color: string) {
 const colorPickerFocuses = new WeakMap<Node, () => void>();
 
 function focusColorPicker(node: Node) {
-    const focus = colorPickerFocuses.get(node);
+    const focus = colorPickerFocuses.get(node)!;
     focus();
 }
 
 function ColorPicker(props: ColorPickerProps) {
     const context = getContext();
     context.onRender((node) => colorPickerFocuses.set(node, focus));
-    const store = context.store as {isFocused: boolean; textBoxNode: HTMLInputElement; previewNode: HTMLElement};
+    const store: ColorPickerStore = context.store;
 
     const isColorValid = isValidColor(props.color);
 
@@ -51,7 +57,7 @@ function ColorPicker(props: ColorPickerProps) {
         }
         store.isFocused = true;
         context.refresh();
-        window.addEventListener('mousedown', onOuterClick);
+        window.addEventListener('mousedown', onOuterClick, {passive: true});
     }
 
     function blur() {

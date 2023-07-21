@@ -1,4 +1,5 @@
-import {createWriteStream} from 'fs';
+import {createWriteStream} from 'node:fs';
+import process from 'node:process';
 import {WebSocketServer} from 'ws';
 import {createTask} from './task.js';
 import {log} from './utils.js';
@@ -33,7 +34,7 @@ function createServer(logLevel) {
                 stream.write(`${message}\n`);
             });
             ws.on('close', () => sockets.delete(ws));
-            if (connectionAwaiter != null) {
+            if (connectionAwaiter !== null) {
                 connectionAwaiter();
             }
         });

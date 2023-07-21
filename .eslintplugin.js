@@ -1,9 +1,11 @@
 // @ts-check
 
+'use strict';
+
 /**
  * To handle PrivateIdentifier and Identifier nodes.
  * @param { {type: string, name?: string;} } node
- * @returns {string}
+ * @returns {string | undefined}
  */
 function handleIdentifier(node) {
     if (node.type === 'PrivateIdentifier' || node.type === 'Identifier') {
@@ -112,7 +114,7 @@ function filterNodes(node) {
 const rules = {
     'jsx-uses-m-pragma': {
         /**
-        * @param {{ name: any; }} node
+        * @param {import('eslint').Rule.RuleContext} context
         */
         create(context) {
             const pragma = 'm';
@@ -227,7 +229,7 @@ const rules = {
                         // Simply add a new line after the function declaration.
                         fix: (fixer) => {
                             return fixer.insertTextAfterRange(range, '\n');
-                        }
+                        },
                     });
                 }
                 // Check for the line AFTER the should be empty line.
@@ -265,7 +267,7 @@ const rules = {
                             // of all the unecassary new lines.
                             fix: (fixer) => {
                                 return fixer.removeRange(range);
-                            }
+                            },
                         });
                     }
                 }
@@ -276,10 +278,10 @@ const rules = {
                 'FunctionExpression': checkNewLine,
                 'ArrowFunctionExpression': checkNewLine,
             };
-        }
-    }
+        },
+    },
 };
 
 module.exports = {
-    rules
+    rules,
 };

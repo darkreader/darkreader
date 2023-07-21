@@ -1,5 +1,5 @@
 // @ts-check
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import {readFile, writeFile, httpsRequest, timeout, log} from './utils.js';
 
 // To use this tool:
@@ -24,6 +24,9 @@ async function translateEnLine(lineNumber) {
     const enLocale = locales.find((l) => l.locale === 'en');
     const otherLocales = locales.filter((l) => l.locale !== 'en');
 
+    if (!enLocale) {
+        throw new Error('Could not find English (en) locale.');
+    }
     const enLines = enLocale.content.split('\n');
     const index = lineNumber - 1;
     const line = enLines[index];

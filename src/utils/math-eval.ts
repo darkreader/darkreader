@@ -10,7 +10,7 @@ export function evalMath(expression: string): number {
     // The working stack where new tokens are pushed.
     const workingStack: string[] = [];
 
-    let lastToken: string;
+    let lastToken: string | undefined;
     // Iterate over the expression.
     for (let i = 0, len = expression.length; i < len; i++) {
         const token = expression[i];
@@ -33,8 +33,8 @@ export function evalMath(expression: string): number {
 
                 // Is the current operation equal or less than the current operation?
                 // Then move that operation to the rpnStack.
-                if (op.lessOrEqualThan(currentOp)) {
-                    rpnStack.push(workingStack.shift());
+                if (op!.lessOrEqualThan(currentOp)) {
+                    rpnStack.push(workingStack.shift()!);
                 } else {
                     break;
                 }
@@ -78,7 +78,7 @@ class Operator {
     private precendce: number;
     private execMethod: (left: number, right: number) => number;
 
-    constructor(precedence: number, method: (left: number, right: number) => number) {
+    public constructor(precedence: number, method: (left: number, right: number) => number) {
         this.precendce = precedence;
         this.execMethod = method;
     }
@@ -92,7 +92,7 @@ class Operator {
     }
 }
 
-const operators: Map<string, Operator> = new Map([
+const operators: Readonly<Map<string, Operator>> = new Map([
     ['+', new Operator(1, (left: number, right: number): number => left + right)],
     ['-', new Operator(1, (left: number, right: number): number => left - right)],
     ['*', new Operator(2, (left: number, right: number): number => left * right)],

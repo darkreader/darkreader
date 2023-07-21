@@ -15,10 +15,10 @@ function getOverlayDOMNode(key: any) {
         node.classList.add('overlay');
         node.addEventListener('click', (e) => {
             if (clickListeners.has(node) && e.currentTarget === node) {
-                const listener = clickListeners.get(node);
+                const listener = clickListeners.get(node)!;
                 listener();
             }
-        });
+        }, {passive: true});
         overlayNodes.set(key, node);
     }
     return overlayNodes.get(key);
@@ -40,11 +40,11 @@ interface OverlayPortalProps {
     onOuterClick?: () => void;
 }
 
-function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
+function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]): void {
     const context = getContext();
 
     context.onRender(() => {
-        const node = getOverlayDOMNode(props.key);
+        const node = getOverlayDOMNode(props.key)!;
         if (props.onOuterClick) {
             clickListeners.set(node, props.onOuterClick);
         } else {
@@ -54,11 +54,11 @@ function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
     });
 
     context.onRemove(() => {
-        const container = getOverlayDOMNode(props.key);
+        const container = getOverlayDOMNode(props.key)!;
         render(container, null);
     });
 
-    return context.leave() as void;
+    return context.leave();
 }
 
 export default Object.assign(Overlay, {Portal});

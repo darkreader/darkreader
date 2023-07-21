@@ -8,7 +8,7 @@ interface TrackProps {
 
 export default function Track(props: TrackProps) {
     const valueStyle = {'width': `${props.value * 100}%`};
-    const isClickable = props.onChange != null;
+    const isClickable = Boolean(props.onChange);
 
     function onMouseDown(e: MouseEvent) {
         const targetNode = e.currentTarget as HTMLElement;
@@ -31,7 +31,7 @@ export default function Track(props: TrackProps) {
 
         function onMouseUp(e: MouseEvent) {
             const value = getValue(e.clientX);
-            props.onChange(value);
+            props.onChange!(value);
             cleanup();
         }
 
@@ -49,9 +49,9 @@ export default function Track(props: TrackProps) {
             targetNode.classList.remove('track--active');
         }
 
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-        window.addEventListener('keypress', onKeyPress);
+        window.addEventListener('mousemove', onMouseMove, {passive: true});
+        window.addEventListener('mouseup', onMouseUp, {passive: true});
+        window.addEventListener('keypress', onKeyPress, {passive: true});
 
         const value = getValue(e.clientX);
         setWidth(value);
@@ -63,7 +63,7 @@ export default function Track(props: TrackProps) {
                 'track': true,
                 'track--clickable': Boolean(props.onChange),
             }}
-            onmousedown={isClickable ? onMouseDown : null}
+            onmousedown={isClickable ? onMouseDown : undefined}
         >
             <span class="track__value" style={valueStyle}></span>
             <label class="track__label">

@@ -1,12 +1,12 @@
 import {timeout} from '../support/test-utils';
 import {childClosed, watchStream} from './utils';
-import {join, resolve} from 'path';
-import {tmpdir} from 'os';
-import {mkdtemp} from 'fs/promises';
-import {fork} from 'child_process';
+import {join, resolve} from 'node:path';
+import {tmpdir} from 'node:os';
+import {mkdtemp} from 'node:fs/promises';
+import {fork} from 'node:child_process';
 
 const rootPath = (path: string) => resolve(__dirname, '../..', path);
-const buildModule = rootPath('tasks/build.js');
+const buildModule = rootPath('tasks/cli.js');
 
 describe('tasks/build-js.js', () => {
     it('should respond to SIGINT signals by exiting immediately', async () => {
@@ -16,7 +16,7 @@ describe('tasks/build-js.js', () => {
 
         // Execute build
         // Give it a chance to reach compilation stage
-        const child = fork(buildModule, ['--debug'], {cwd: tmpDir, silent: true});
+        const child = fork(buildModule, ['build', '--debug', '--chrome'], {cwd: tmpDir, silent: true});
 
         // Wait for "clean" step to complete
         await watchStream(child.stdout).forMatch(/ clean \(\d+ms\)/);
@@ -43,7 +43,7 @@ describe('tasks/build.js', () => {
         const tmpDir: string = await mkdtemp(join(tmpdir(), 'darkreader'));
 
         // Fire
-        const child = fork(buildModule, ['--debug', '--release', '--api'], {cwd: tmpDir, silent: true});
+        const child = fork(buildModule, ['build', '--debug', '--release', '--api'], {cwd: tmpDir, silent: true});
 
         const {stdout} = await childClosed(child);
         expect(stdout).toInclude('MISSION PASSED');

@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "minimum_chrome_version": "102.0.0.0",
+    "minimum_chrome_version": "106.0.0.0",
     "action": {
         "default_title": "Dark Reader",
         "default_icon": {
@@ -14,6 +14,9 @@
     },
     "background": {
         "service_worker": "background.js"
+    },
+    "content_security_policy": {
+        "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src * data:; connect-src *; navigate-to 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://opencollective.com/darkreader/donate https://twitter.com/darkreaderapp; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
     },
     "content_scripts": [
         {

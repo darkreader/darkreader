@@ -1,7 +1,7 @@
 // @ts-check
-import {exec} from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import {exec} from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import * as url from 'url';
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -68,7 +68,22 @@ export async function getFirefoxPath() {
     const possibleLinuxPaths = ['firefox-nightly', 'firefox'];
     for (const possiblePath of possibleLinuxPaths) {
         try {
-            return await linuxAppPath(possiblePath);
+            // snap profile folders do not get loaded
+            const option = await linuxAppPath(possiblePath);
+            // Firefox snap can not access the regular system-wide temporary directory,
+            // so we create a separate one within build folder
+            // See also: https://github.com/mozilla/web-ext/issues/1696
+            if (!option.includes('/snap/')) {
+                return option;
+            }
+            const firefoxProfile = './build/firefox-profile-for-testing';
+            process.env.TMPDIR = firefoxProfile;
+            try {
+                fs.mkdirSync(firefoxProfile);
+            } catch (e) {
+                // Do nothing
+            }
+            return option;
         } catch (e) {
             // ignore
         }

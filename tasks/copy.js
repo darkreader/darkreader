@@ -11,16 +11,11 @@ const srcDir = 'src';
  * @typedef copyEntry
  * @property {string} src
  * @property {string} reloadType
- * @property {(typeof PLATFORM.CHROME)[] | undefined} [platforms]
+ * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
  */
 
 /** @type {copyEntry[]} */
 const copyEntries = [
-    {
-        src: 'background/index.html',
-        reloadType: reload.FULL,
-        platforms: [PLATFORM.CHROME, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD]
-    },
     {
         src: 'config/**/*.{config,drconf}',
         reloadType: reload.FULL,
@@ -36,18 +31,7 @@ const copyEntries = [
     {
         src: 'ui/popup/compatibility.js',
         reloadType: reload.UI,
-    },
-    {
-        src: 'ui/popup/index.html',
-        reloadType: reload.UI,
-    },
-    {
-        src: 'ui/devtools/index.html',
-        reloadType: reload.UI,
-    },
-    {
-        src: 'ui/stylesheet-editor/index.html',
-        reloadType: reload.UI,
+        platforms: [PLATFORM.CHROMIUM_MV2],
     },
 ];
 
@@ -74,8 +58,10 @@ async function copy({platforms, debug}) {
         }
         const files = await getPaths(`${srcDir}/${entry.src}`);
         for (const file of files) {
-            for (const platform of (entry.platforms || enabledPlatforms)) {
-                promises.push(copyEntry(file, {debug, platform}));
+            for (const platform of enabledPlatforms) {
+                if (entry.platforms === undefined || entry.platforms.includes(platform)) {
+                    promises.push(copyEntry(file, {debug, platform}));
+                }
             }
         }
     }

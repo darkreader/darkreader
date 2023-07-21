@@ -1,15 +1,9 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
-declare const browser: {
-    commands: {
-        update({name, shortcut}: chrome.commands.Command): void;
-    };
-};
-
-export function canInjectScript(url: string) {
+export function canInjectScript(url: string | null | undefined): boolean {
     if (isFirefox) {
-        return (url
+        return Boolean(url
             && !url.startsWith('about:')
             && !url.startsWith('moz')
             && !url.startsWith('view-source:')
@@ -21,7 +15,7 @@ export function canInjectScript(url: string) {
         );
     }
     if (isEdge) {
-        return (url
+        return Boolean(url
             && !url.startsWith('chrome')
             && !url.startsWith('data')
             && !url.startsWith('devtools')
@@ -31,7 +25,7 @@ export function canInjectScript(url: string) {
             && !url.startsWith('view-source')
         );
     }
-    return (url
+    return Boolean(url
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
         && !url.startsWith('data')
@@ -40,8 +34,8 @@ export function canInjectScript(url: string) {
     );
 }
 
-export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
-    return new Promise<T>((resolve) => {
+export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T | null> {
+    return new Promise<T | null>((resolve) => {
         chrome.storage.sync.get(null, (sync: any) => {
             if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError.message);
@@ -76,7 +70,7 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
 
             sync = {
                 ...defaults,
-                ...sync
+                ...sync,
             };
 
             resolve(sync);
@@ -113,7 +107,7 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
                 (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
             }
             (values as any)[key] = {
-                __meta_split_count: minimalKeysNeeded
+                __meta_split_count: minimalKeysNeeded,
             };
         }
     }
@@ -141,7 +135,7 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
     });
 }
 
-export async function getCommands() {
+export async function getCommands(): Promise<chrome.commands.Command[]> {
     return new Promise<chrome.commands.Command[]>((resolve) => {
         if (!chrome.commands) {
             resolve([]);
@@ -155,10 +149,4 @@ export async function getCommands() {
             }
         });
     });
-}
-
-export function setShortcut(command: string, shortcut: string) {
-    if (typeof browser !== 'undefined' && browser.commands && browser.commands.update) {
-        browser.commands.update({name: command, shortcut});
-    }
 }

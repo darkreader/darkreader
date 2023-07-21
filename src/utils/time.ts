@@ -1,4 +1,4 @@
-export function parseTime($time: string) {
+export function parseTime($time: string): [number, number] {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
     const isAM = lowercased.endsWith('am') || lowercased.endsWith('a.m.');
@@ -23,11 +23,11 @@ export function parseTime($time: string) {
     return [hours, minutes];
 }
 
-function parse24HTime(time: string) {
+function parse24HTime(time: string): number[] {
     return time.split(':').map((x) => parseInt(x));
 }
 
-function compareTime(time1: number[], time2: number[]) {
+function compareTime(time1: number[], time2: number[]): -1 | 0 | 1 {
     if (time1[0] === time2[0] && time1[1] === time2[1]) {
         return 0;
     }
@@ -37,7 +37,7 @@ function compareTime(time1: number[], time2: number[]) {
     return 1;
 }
 
-export function nextTimeInterval(time0: string, time1: string, date: Date = new Date()): number {
+export function nextTimeInterval(time0: string, time1: string, date: Date = new Date()): number | null {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
@@ -86,7 +86,7 @@ export function isInTimeIntervalLocal(time0: string, time1: string, date: Date =
     return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
 }
 
-function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number) {
+function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number): boolean {
     if (time1 < time0) {
         return timestamp <= time1 || time0 <= timestamp;
     }
@@ -100,7 +100,7 @@ interface Duration {
     seconds?: number;
 }
 
-export function getDuration(time: Duration) {
+export function getDuration(time: Duration): number {
     let duration = 0;
     if (time.seconds) {
         duration += time.seconds * 1000;
@@ -117,7 +117,7 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
-export function getDurationInMinutes(time: Duration) {
+export function getDurationInMinutes(time: Duration): number {
     return getDuration(time) / 1000 / 60;
 }
 
@@ -215,17 +215,25 @@ function getSunsetSunriseUTCTime(
 
     if (sunriseTime.alwaysDay || sunsetTime.alwaysDay) {
         return {
-            alwaysDay: true
+            alwaysDay: true,
+            alwaysNight: false,
+            sunriseTime: 0,
+            sunsetTime: 0,
         };
     } else if (sunriseTime.alwaysNight || sunsetTime.alwaysNight) {
         return {
-            alwaysNight: true
+            alwaysDay: false,
+            alwaysNight: true,
+            sunriseTime: 0,
+            sunsetTime: 0,
         };
     }
 
     return {
+        alwaysDay: false,
+        alwaysNight: false,
         sunriseTime: sunriseTime.time,
-        sunsetTime: sunsetTime.time
+        sunsetTime: sunsetTime.time,
     };
 }
 
@@ -275,14 +283,14 @@ export function nextTimeChangeAtLocation(
         date.getUTCMilliseconds()
     );
 
-    if (currentTime <= firstTimeOnDay) {
+    if (currentTime <= firstTimeOnDay!) {
         // Timeline:
         // --- firstTimeOnDay <---> lastTimeOnDay ---
         //  ^
         // Current time
         return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, firstTimeOnDay);
     }
-    if (currentTime <= lastTimeOnDay) {
+    if (currentTime <= lastTimeOnDay!) {
         // Timeline:
         // --- firstTimeOnDay <---> lastTimeOnDay ---
         //                      ^

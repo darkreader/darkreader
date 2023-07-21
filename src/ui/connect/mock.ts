@@ -27,6 +27,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             customThemes: [],
             siteList: [],
             siteListEnabled: [],
+            syncSitesFixes: false,
+            enableContextMenus: false,
             applyToListedOnly: false,
             changeBrowserTheme: false,
             enableForPDF: true,
@@ -54,12 +56,12 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             'monospace',
             'cursive',
             'fantasy',
-            'system-ui'
+            'system-ui',
         ],
         news: [],
         shortcuts: {
             'addSite': 'Alt+Shift+A',
-            'toggle': 'Alt+Shift+D'
+            'toggle': 'Alt+Shift+D',
         },
         devtools: {
             dynamicFixesText: '',
@@ -82,11 +84,14 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
         },
         forcedScheme: null,
         activeTab: {
+            id: 1,
+            documentId: 'id',
             url: 'https://darkreader.org/',
             isProtected: false,
             isInDarkList: false,
             isInjected: true,
             isDarkThemeDetected: false,
         },
+        uiHighlights: [],
     } as ExtensionData, override);
 }

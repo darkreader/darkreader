@@ -1,5 +1,5 @@
 export function getLocalMessage(messageName: string): string {
-    return chrome.i18n.getMessage(messageName);
+    return chrome.i18n.getMessage(messageName) || messageName;
 }
 
 export function getUILanguage(): string {

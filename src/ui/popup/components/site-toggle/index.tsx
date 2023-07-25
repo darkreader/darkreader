@@ -38,7 +38,7 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
             class={{
                 'site-toggle': true,
                 'site-toggle--active': isSiteEnabled,
-                'site-toggle--disabled': __THUNDERBIRD__ || !toggleHasEffect
+                'site-toggle--disabled': __THUNDERBIRD__ || !toggleHasEffect,
             }}
             onclick={onSiteToggleClick}
         >

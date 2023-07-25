@@ -2,8 +2,8 @@ import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
 import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
 import DropDown from '../../controls/dropdown/index';
-import {MessageType} from '../../../utils/message';
-import type {Message} from '../../../definitions';
+import {MessageTypeUItoBG} from '../../../utils/message';
+import type {MessageUItoBG} from '../../../definitions';
 import type {ViewProps} from '../types';
 import type {Automation} from 'definitions';
 import {AutomationMode} from '../../../utils/automation';
@@ -17,7 +17,7 @@ export default function AutomationPage(props: ViewProps) {
     const values = {
         'latitude': {
             min: -90,
-            max: 90
+            max: 90,
         },
         'longitude': {
             min: -180,
@@ -144,9 +144,9 @@ export default function AutomationPage(props: ViewProps) {
                     }}
                     onclick={() => {
                         if (__CHROMIUM_MV3__) {
-                            chrome.runtime.sendMessage<Message>({
-                                type: MessageType.UI_COLOR_SCHEME_CHANGE,
-                                data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}
+                            chrome.runtime.sendMessage<MessageUItoBG>({
+                                type: MessageTypeUItoBG.COLOR_SCHEME_CHANGE,
+                                data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches},
                             });
                         }
                         changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM);

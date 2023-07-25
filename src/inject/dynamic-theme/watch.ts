@@ -4,10 +4,7 @@ import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import type {StyleElement} from './style-manager';
 import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
-import {logAssert} from '../utils/log';
-
-declare const __DEBUG__: boolean;
-declare const __TEST__: boolean;
+import {ASSERT} from '../utils/log';
 
 const observers: Array<{disconnect(): void}> = [];
 let observedRoots: WeakSet<Node>;
@@ -23,6 +20,13 @@ interface ChangedStyles {
 const definedCustomElements = new Set<string>();
 const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: ((elements: Element[]) => void) | null;
+
+function isCustomElement(element: Element): boolean {
+    if (element.tagName.includes('-') || element.getAttribute('is')) {
+        return true;
+    }
+    return false;
+}
 
 function recordUndefinedElement(element: Element): void {
     let tag = element.tagName.toLowerCase();
@@ -40,6 +44,7 @@ function recordUndefinedElement(element: Element): void {
         customElementsWhenDefined(tag).then(() => {
             if (elementsDefinitionCallback) {
                 const elements = undefinedGroups.get(tag);
+                ASSERT('recordUndefinedElement() undefined groups should not be empty', elements);
                 undefinedGroups.delete(tag);
                 elementsDefinitionCallback(Array.from(elements!));
             }
@@ -65,6 +70,7 @@ const resolvers = new Map<string, Array<() => void>>();
 function handleIsDefined(e: CustomEvent<{tag: string}>) {
     canOptimizeUsingProxy = true;
     const tag = e.detail.tag;
+    ASSERT('handleIsDefined() expects lower-case node names', () => tag.toLowerCase() === tag);
     definedCustomElements.add(tag);
     if (resolvers.has(tag)) {
         const r = resolvers.get(tag)!;
@@ -74,12 +80,7 @@ function handleIsDefined(e: CustomEvent<{tag: string}>) {
 }
 
 async function customElementsWhenDefined(tag: string): Promise<void> {
-    if ((__TEST__ || __DEBUG__)) {
-        if (tag.toLowerCase() !== tag) {
-            logAssert('customElementsWhenDefined expects lower-case node names');
-            throw new Error('customElementsWhenDefined expects lower-case node names');
-        }
-    }
+    ASSERT('customElementsWhenDefined() expects lower-case node names', () => tag.toLowerCase() === tag);
     // Custom element is already defined
     if (definedCustomElements.has(tag)) {
         return;
@@ -185,6 +186,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             extendedIterateShadowHosts(n);
             collectUndefinedElements(n);
         });
+
+        // Firefox ocasionally fails to reflect existence of a node in both CSS's view of the DOM (':not(:defined)'),
+        // and in DOM walker's view of the DOM. So instead we also check these mutations just in case.
+        // In practice, at least one place reflects apperance of the node.
+        // URL for testing: https://chromestatus.com/roadmap
+        additions.forEach((node) => isCustomElement(node) && recordUndefinedElement(node));
     }
 
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
@@ -239,12 +246,15 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     function observe(root: Document | ShadowRoot) {
+        if (observedRoots.has(root)) {
+            return;
+        }
         const treeObserver = createOptimizedTreeObserver(root, {
             onMinorMutations: handleMinorTreeMutations,
             onHugeMutations: handleHugeTreeMutations,
         });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled', 'media', 'href'], subtree: true});
+        attrObserver.observe(root, {attributeFilter: ['rel', 'disabled', 'media', 'href'], subtree: true});
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
     }

@@ -7,6 +7,12 @@ export function rootPath(...paths: string[]): string {
 }
 
 export function multiline(...lines: string[]): string {
+    if (lines.length < 1) {
+        return '\n';
+    }
+    if (lines[lines.length - 1] !== '') {
+        lines.push('');
+    }
     return lines.join('\n');
 }
 
@@ -22,7 +28,7 @@ export function promiseWithTimeout<T>(ms: number, promise: Promise<T>): Promise<
 }
 
 class TimeoutError extends Error {
-    constructor(delay: number) {
+    public constructor(delay: number) {
         super(`timeout exceeded (${delay} ms)`);
         this.name = 'TimeoutError';
     }

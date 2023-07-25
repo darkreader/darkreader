@@ -1,5 +1,6 @@
 // @ts-check
 import bundleAPI from './bundle-api.js';
+import bundleHTML from './bundle-html.js';
 import bundleCSS from './bundle-css.js';
 import bundleJS from './bundle-js.js';
 import bundleLocales from './bundle-locales.js';
@@ -19,6 +20,7 @@ const {PLATFORM} = paths;
 
 const standardTask = [
     clean,
+    bundleHTML,
     bundleJS,
     bundleCSS,
     bundleLocales,
@@ -42,6 +44,10 @@ const signedBuildTask = [
 
 async function build({platforms, debug, watch, log: logging, test, version}) {
     log.ok('BUILD');
+    platforms = {
+        ...platforms,
+        [PLATFORM.API]: false,
+    };
     try {
         await runTasks(debug ? standardTask : (version ? signedBuildTask : buildTask), {platforms, debug, watch, log: logging, test, version});
         if (watch) {
@@ -133,8 +139,8 @@ function getParams(args) {
     const watch = args.includes('--watch');
     const logInfo = watch && args.includes('--log-info');
     const logWarn = watch && args.includes('--log-warn');
-    const log = logWarn ? 'warn' : (logInfo ? 'info' : null);
-
+    const logAssert = watch && args.includes('--log-assert');
+    const log = logWarn ? 'warn' : (logInfo ? 'info' : (logAssert ? 'assert' : null));
     const test = args.includes('--test');
 
     return {release, debug, platforms, watch, log, test, version};

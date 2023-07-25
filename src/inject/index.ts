@@ -3,20 +3,26 @@ import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 import {logWarn, logInfoCollapsed} from './utils/log';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DynamicThemeFix, Message, Theme} from '../definitions';
-import {MessageType} from '../utils/message';
+import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
+import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
+import {generateUID} from '../utils/uid';
 
+declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
 
 let unloaded = false;
 
 let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
+declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 declare const __FIREFOX_MV2__: boolean;
+
+// Identifier for this particular script instance. It is used as an alternative to chrome.runtime.MessageSender.documentId
+const scriptId = generateUID();
 
 function cleanup() {
     unloaded = true;
@@ -32,11 +38,11 @@ function sendMessageForTesting(uuid: string) {
     document.dispatchEvent(new CustomEvent('test-message', {detail: uuid}));
 }
 
-function sendMessage(message: Message) {
+function sendMessage(message: MessageCStoBG | MessageCStoUI) {
     if (unloaded) {
         return;
     }
-    const responseHandler = (response: Message | 'unsupportedSender' | undefined) => {
+    const responseHandler = (response: MessageBGtoCS | 'unsupportedSender' | undefined) => {
         // Vivaldi bug workaround. See TabManager for details.
         if (response === 'unsupportedSender') {
             removeStyle();
@@ -48,10 +54,10 @@ function sendMessage(message: Message) {
 
     try {
         if (__CHROMIUM_MV3__) {
-            const promise = chrome.runtime.sendMessage<Message, Message | 'unsupportedSender'>(message);
+            const promise = chrome.runtime.sendMessage<MessageCStoBG | MessageCStoUI, MessageBGtoCS | 'unsupportedSender'>(message);
             promise.then(responseHandler).catch(cleanup);
         } else {
-            chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);
+            chrome.runtime.sendMessage<MessageCStoBG | MessageCStoUI, 'unsupportedSender' | undefined>(message, responseHandler);
         }
     } catch (error) {
         /*
@@ -73,14 +79,24 @@ function sendMessage(message: Message) {
     }
 }
 
-function onMessage({type, data}: Message) {
-    logInfoCollapsed(`onMessage[${type}]`, data);
-    switch (type) {
-        case MessageType.BG_ADD_CSS_FILTER:
-        case MessageType.BG_ADD_STATIC_THEME: {
-            const {css, detectDarkTheme} = data;
+function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) {
+    if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
+        logWarn('Cleaning up before update');
+        cleanup();
+        return;
+    }
+
+    if ((message as MessageBGtoCS).scriptId !== scriptId && message.type !== MessageTypeUItoCS.EXPORT_CSS) {
+        return;
+    }
+
+    logInfoCollapsed(`onMessage[${message.type}]`, message);
+    switch (message.type) {
+        case MessageTypeBGtoCS.ADD_CSS_FILTER:
+        case MessageTypeBGtoCS.ADD_STATIC_THEME: {
+            const {css, detectDarkTheme} = message.data;
             removeDynamicTheme();
-            createOrUpdateStyle(css, type === MessageType.BG_ADD_STATIC_THEME ? 'static' : 'filter');
+            createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -91,8 +107,8 @@ function onMessage({type, data}: Message) {
             }
             break;
         }
-        case MessageType.BG_ADD_SVG_FILTER: {
-            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = data;
+        case MessageTypeBGtoCS.ADD_SVG_FILTER: {
+            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = message.data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
@@ -107,8 +123,8 @@ function onMessage({type, data}: Message) {
             }
             break;
         }
-        case MessageType.BG_ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
+        case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
+            const {theme, fixes, isIFrame, detectDarkTheme} = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {
@@ -126,48 +142,58 @@ function onMessage({type, data}: Message) {
             }
             break;
         }
-        case MessageType.BG_EXPORT_CSS:
-            collectCSS().then((collectedCSS) => sendMessage({type: MessageType.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
+        case MessageTypeUItoCS.EXPORT_CSS:
+            collectCSS().then((collectedCSS) => sendMessage({type: MessageTypeCStoUI.EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
-        case MessageType.BG_UNSUPPORTED_SENDER:
-        case MessageType.BG_CLEAN_UP:
+        case MessageTypeBGtoCS.UNSUPPORTED_SENDER:
+        case MessageTypeBGtoCS.CLEAN_UP:
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
-            break;
-        case MessageType.BG_RELOAD:
-            logWarn('Cleaning up before update');
-            cleanup();
             break;
         default:
             break;
     }
 }
 
+function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT | MessageTypeCStoBG.DOCUMENT_RESUME) {
+    sendMessage(
+        {
+            type,
+            scriptId,
+            data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? {
+                isDark: isSystemDarkModeEnabled(),
+                isTopFrame: window === window.top,
+            } : {
+                isDark: isSystemDarkModeEnabled(),
+            },
+        });
+}
+
 runColorSchemeChangeDetector((isDark) =>
-    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}})
+    sendMessage({type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE, data: {isDark}})
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
+sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        sendMessage({type: MessageType.CS_FRAME_FORGET});
+        sendMessage({type: MessageTypeCStoBG.DOCUMENT_FORGET, scriptId});
     }
 }
 
 function onFreeze() {
-    sendMessage({type: MessageType.CS_FRAME_FREEZE});
+    sendMessage({type: MessageTypeCStoBG.DOCUMENT_FREEZE});
 }
 
 function onResume() {
-    sendMessage({type: MessageType.CS_FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
+    sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_RESUME);
 }
 
 function onDarkThemeDetected() {
-    sendMessage({type: MessageType.CS_DARK_THEME_DETECTED});
+    sendMessage({type: MessageTypeCStoBG.DARK_THEME_DETECTED});
 }
 
 // Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.
@@ -295,6 +321,16 @@ if (__TEST__) {
 
                     const interval: number = setInterval(checkPageStylesNow, 200);
                     checkPageStylesNow();
+                    break;
+                }
+                case 'firefox-getColorScheme': {
+                    respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
+                    break;
+                }
+                case 'firefox-emulateColorScheme': {
+                    emulateColorScheme(data);
+                    respond(undefined);
+                    break;
                 }
             }
         };

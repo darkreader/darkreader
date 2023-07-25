@@ -1,6 +1,4 @@
-import {MessageType} from '../utils/message';
-import {isFirefox, isMobile} from '../utils/platform';
-import type {Message} from '../definitions';
+import {isMobile} from '../utils/platform';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -40,14 +38,10 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string): void {
-    if (__CHROMIUM_MV3__ || isFirefox || isMobile) {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([content]));
-        a.download = name;
-        a.click();
-    } else {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SAVE_FILE, data: {name, content}});
-    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content]));
+    a.download = name;
+    a.click();
 }
 
 type AnyVoidFunction = (...args: any[]) => void;

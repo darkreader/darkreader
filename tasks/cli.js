@@ -56,7 +56,7 @@ function printHelp() {
         '  --log-warn     Log only warnings',
         '',
         'Build for testing (not to be used by humans):',
-        '  --test'
+        '  --test',
     ].join('\n'));
 }
 
@@ -181,7 +181,7 @@ async function run() {
             debug: false,
             watch: false,
             log: false,
-            test: false
+            test: false,
         });
     }
 }

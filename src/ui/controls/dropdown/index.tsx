@@ -10,13 +10,15 @@ interface DropDownProps<T> {
     onChange: (value: T) => void;
 }
 
+interface DropDownStore {
+    isOpen: boolean;
+    listNode: HTMLElement;
+    selectedNode: HTMLElement;
+}
+
 export default function DropDown<T>(props: DropDownProps<T>) {
     const context = getContext();
-    const store = context.store as {
-        isOpen: boolean;
-        listNode: HTMLElement;
-        selectedNode: HTMLElement;
-    };
+    const store: DropDownStore = context.store;
 
     if (context.prev) {
         const currOptions = props.options.map((o) => o.id);

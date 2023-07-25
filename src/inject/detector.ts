@@ -24,7 +24,7 @@ function hasSomeStyle() {
         return true;
     }
     for (const style of document.styleSheets) {
-        if (style && style.ownerNode && !(style.ownerNode as HTMLElement).classList.contains('darkreader')) {
+        if (style && style.ownerNode && !((style.ownerNode as HTMLElement).classList && (style.ownerNode as HTMLElement).classList.contains('darkreader'))) {
             return true;
         }
     }

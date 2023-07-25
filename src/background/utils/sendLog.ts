@@ -1,5 +1,5 @@
 declare const __DEBUG__: boolean;
-declare const __LOG__: 'info' | 'warn';
+declare const __LOG__: 'info' | 'warn' | 'assert';
 
 let socket: WebSocket | null = null;
 let messageQueue: string[] = [];
@@ -15,7 +15,7 @@ function createSocket(): void {
     });
 }
 
-export function sendLog(level: 'info' | 'warn', ...args: any[]): void {
+export function sendLog(level: 'info' | 'warn' | 'assert', ...args: any[]): void {
     if (!__DEBUG__ || !__LOG__) {
         return;
     }

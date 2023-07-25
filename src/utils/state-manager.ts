@@ -11,7 +11,7 @@ export class StateManager<T extends Record<string, unknown>> {
     private stateManager: StateManagerImpl<T> | null;
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
+    public constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
         if (isNonPersistent) {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.local.onChanged.addListener((changes) => {
@@ -32,13 +32,13 @@ export class StateManager<T extends Record<string, unknown>> {
         }
     }
 
-    async saveState(): Promise<void> {
+    public async saveState(): Promise<void> {
         if (this.stateManager) {
             return this.stateManager.saveState();
         }
     }
 
-    async loadState(): Promise<void> {
+    public async loadState(): Promise<void> {
         if (this.stateManager) {
             return this.stateManager.loadState();
         }

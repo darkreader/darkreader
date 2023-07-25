@@ -12,6 +12,12 @@ interface ColorPickerProps {
     onReset: () => void;
 }
 
+interface ColorPickerStore {
+    isFocused: boolean;
+    textBoxNode: HTMLInputElement;
+    previewNode: HTMLElement;
+}
+
 function isValidColor(color: string) {
     return Boolean(parseColorWithCache(color));
 }
@@ -26,7 +32,7 @@ function focusColorPicker(node: Node) {
 function ColorPicker(props: ColorPickerProps) {
     const context = getContext();
     context.onRender((node) => colorPickerFocuses.set(node, focus));
-    const store: {isFocused: boolean; textBoxNode: HTMLInputElement; previewNode: HTMLElement} = context.store;
+    const store: ColorPickerStore = context.store;
 
     const isColorValid = isValidColor(props.color);
 

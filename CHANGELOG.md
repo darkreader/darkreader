@@ -1,6 +1,8 @@
-## 4.9.64 (TBD)
+## 4.9.64 (June 21, 2023)
 
-- Use passive event listeners (#11047)
+- Using passive event listeners (#11047)
+- Fixed System Automation on Firefox (#10237)
+- Fixed News section.
 
 ## 4.9.63 (Apr 10, 2023)
 

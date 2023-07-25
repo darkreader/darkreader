@@ -59,12 +59,20 @@ config.overrides.push({
         'yoda': ['error', 'never'],
         'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
+        '@typescript-eslint/comma-dangle': ['error', {
+            arrays: 'always-multiline',
+            objects: 'always-multiline',
+            imports: 'always-multiline',
+            exports: 'always-multiline',
+            functions: 'only-multiline',
+        }],
         '@typescript-eslint/comma-spacing': ['error', {
             before: false,
             after: true,
         }],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/func-call-spacing': ['error', 'never'],
         '@typescript-eslint/keyword-spacing': ['error', {
@@ -72,7 +80,6 @@ config.overrides.push({
             before: true,
         }],
         '@typescript-eslint/member-delimiter-style': 'error',
-        '@typescript-eslint/no-duplicate-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-redeclare': 'error',
@@ -82,6 +89,7 @@ config.overrides.push({
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
             ignore: ['^malevic\/'],
         }],
@@ -147,6 +155,15 @@ config.overrides.push({
             rules: {
                 '@typescript-eslint/no-var-requires': 'error',
                 '@typescript-eslint/explicit-module-boundary-types': 'off',
+            },
+        },
+        {
+            files: [
+                'tasks/task.js',
+                'tests/browser/environment.js',
+            ],
+            rules: {
+                '@typescript-eslint/explicit-member-accessibility': 'off',
             },
         },
         {

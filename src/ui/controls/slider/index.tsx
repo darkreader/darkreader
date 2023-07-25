@@ -12,6 +12,16 @@ interface SliderProps {
     onChange: (value: number | null) => void;
 }
 
+interface SliderStore {
+    isActive: boolean;
+    activeValue: number | null;
+    activeProps: SliderProps;
+    trackNode: HTMLElement;
+    thumbNode: HTMLElement;
+    wheelTimeoutId: number;
+    wheelValue: number | null;
+}
+
 function stickToStep(x: number, step: number) {
     const s = Math.round(x / step) * step;
     const exp = Math.floor(Math.log10(step));
@@ -25,15 +35,7 @@ function stickToStep(x: number, step: number) {
 
 export default function Slider(props: SliderProps) {
     const context = getContext();
-    const store = context.store as {
-        isActive: boolean;
-        activeValue: number | null;
-        activeProps: SliderProps;
-        trackNode: HTMLElement;
-        thumbNode: HTMLElement;
-        wheelTimeoutId: number;
-        wheelValue: number | null;
-    };
+    const store: SliderStore = context.store;
 
     store.activeProps = props;
 

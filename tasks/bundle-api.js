@@ -50,7 +50,7 @@ async function bundleAPI({debug, watch}) {
                 __THUNDERBIRD__: false,
                 __TEST__: false,
             }),
-        ].filter(Boolean)
+        ].filter(Boolean),
     });
     watchFiles = bundle.watchFiles;
     await bundle.write({

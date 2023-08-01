@@ -40,7 +40,7 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                 >
                     <CheckBox
                         class="header__more-settings__enabled-by-default__checkbox"
-                        checked={data.settings.detectDarkTheme}
+                        checked={!data.settings.applyToListedOnly}
                         onchange={toggleEnabledByDefault}
                     />
                     <Button

@@ -496,9 +496,6 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
     return relevantFixIndex ? combineFixes([fixes[0], fixes[relevantFixIndex]]) : fixes[0];
 }
 
-/**
- * TODO: expose this function to API builds via src/api function enable()
- */
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean): void {
     const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
 
@@ -509,12 +506,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     createOrUpdateDynamicThemeInternal(filterConfig, dynamicThemeFix, iframe);
 }
 
-/**
- * Note: This function should be directly used only in API builds, it is exported by this fle
- * only for use in src/api/enable() for backwards compatibility,
- * extension should use only createOrUpdateDynamicTheme()
- */
-export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
+function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {

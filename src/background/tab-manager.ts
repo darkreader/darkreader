@@ -16,7 +16,7 @@ declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
 interface TabManagerOptions {
-    getConnectionMessage: (tabURl: string, url: string, isTopFrame: boolean) => Promise<MessageBGtoCS>;
+    getConnectionMessage: (tabURL: string, url: string, isTopFrame: boolean) => Promise<MessageBGtoCS>;
     getTabMessage: (tabURL: string, url: string, isTopFrame: boolean) => MessageBGtoCS;
     onColorSchemeChange: (isDark: boolean) => void;
 }

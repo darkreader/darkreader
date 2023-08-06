@@ -1,4 +1,4 @@
-@import "../../theme";
+@import '../../theme';
 
 .tab-panel {
     align-items: stretch;
@@ -50,7 +50,7 @@
         &::before,
         &::after {
             border-bottom: @size-border solid @color-border;
-            content: "";
+            content: '';
             flex: auto;
         }
     }
@@ -69,13 +69,17 @@
         opacity: 0;
         overflow: hidden;
         pointer-events: none;
-        transition: width @time-slow, opacity @time-fast;
+        transition:
+            width @time-slow,
+            opacity @time-fast;
         width: 0;
 
         &--active {
             opacity: 1;
             pointer-events: all;
-            transition: width @time-slow, opacity @time-slow;
+            transition:
+                width @time-slow,
+                opacity @time-slow;
             width: 100%;
         }
     }

@@ -1,5 +1,5 @@
-import {m} from 'malevic';
-import {render, getContext} from 'malevic/dom';
+import { m } from 'malevic';
+import { render, getContext } from 'malevic/dom';
 
 interface VirtualScrollProps {
     root: Malevic.Spec;
@@ -12,7 +12,7 @@ export default function VirtualScroll(props: VirtualScrollProps) {
         return props.root;
     }
 
-    const {store} = getContext();
+    const { store } = getContext();
 
     function renderContent(root: Element, scrollToIndex: number) {
         if (root.clientWidth === 0) {
@@ -32,23 +32,26 @@ export default function VirtualScroll(props: VirtualScrollProps) {
             const tempNode = render(root, tempItem).firstElementChild!;
             store.itemHeight = tempNode.getBoundingClientRect().height;
         }
-        const {itemHeight} = store;
+        const { itemHeight } = store;
 
-        const wrapper = render(root, (
+        const wrapper = render(
+            root,
             <div
                 style={{
-                    'flex': 'none',
-                    'height': `${props.items.length * itemHeight}px`,
-                    'overflow': 'hidden',
-                    'position': 'relative',
+                    flex: 'none',
+                    height: `${props.items.length * itemHeight}px`,
+                    overflow: 'hidden',
+                    position: 'relative',
                 }}
-            />
-        )).firstElementChild;
+            />,
+        ).firstElementChild;
 
         if (scrollToIndex >= 0) {
             root.scrollTop = scrollToIndex * itemHeight;
         }
-        const containerHeight = document.documentElement.clientHeight - root.getBoundingClientRect().top; // Use this height as a fix for animated height
+        const containerHeight =
+            document.documentElement.clientHeight -
+            root.getBoundingClientRect().top; // Use this height as a fix for animated height
 
         // Prevent removing focused element
         let focusedIndex = -1;
@@ -63,30 +66,36 @@ export default function VirtualScroll(props: VirtualScrollProps) {
         }
 
         store.nodesIndices = store.nodesIndices || new WeakMap();
-        const saveNodeIndex = (node: Element, index: number) => store.nodesIndices.set(node, index);
+        const saveNodeIndex = (node: Element, index: number) =>
+            store.nodesIndices.set(node, index);
 
         const items = props.items
             .map((item, index) => {
-                return {item, index};
+                return { item, index };
             })
-            .filter(({index}) => {
+            .filter(({ index }) => {
                 const eTop = index * itemHeight;
                 const eBottom = (index + 1) * itemHeight;
                 const rTop = root.scrollTop;
                 const rBottom = root.scrollTop + containerHeight;
                 const isTopBoundVisible = eTop >= rTop && eTop <= rBottom;
-                const isBottomBoundVisible = eBottom >= rTop && eBottom <= rBottom;
-                return isTopBoundVisible || isBottomBoundVisible || focusedIndex === index;
+                const isBottomBoundVisible =
+                    eBottom >= rTop && eBottom <= rBottom;
+                return (
+                    isTopBoundVisible ||
+                    isBottomBoundVisible ||
+                    focusedIndex === index
+                );
             })
-            .map(({item, index}) => (
+            .map(({ item, index }) => (
                 <div
                     key={index}
                     onrender={(node) => saveNodeIndex(node, index)}
                     style={{
-                        'left': '0',
-                        'position': 'absolute',
-                        'top': `${index * itemHeight}px`,
-                        'width': '100%',
+                        left: '0',
+                        position: 'absolute',
+                        top: `${index * itemHeight}px`,
+                        width: '100%',
                     }}
                 >
                     {item}
@@ -112,7 +121,10 @@ export default function VirtualScroll(props: VirtualScrollProps) {
                 rootNode = node;
                 rootDidRender && rootDidRender(rootNode);
                 // TODO: remove type cast after dependency update
-                renderContent(rootNode, isNaN(props.scrollToIndex!) ? -1 : props.scrollToIndex!);
+                renderContent(
+                    rootNode,
+                    isNaN(props.scrollToIndex!) ? -1 : props.scrollToIndex!,
+                );
             },
             onscroll: () => {
                 if (rootNode.scrollTop === prevScrollTop) {

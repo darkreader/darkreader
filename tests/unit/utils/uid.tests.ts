@@ -1,5 +1,5 @@
-import {randomFillSync} from 'crypto';
-import {generateUID} from '../../../src/utils/uid';
+import { randomFillSync } from 'crypto';
+import { generateUID } from '../../../src/utils/uid';
 
 test('Unique identifier generation (popyfilled)', () => {
     if ('crypto' in globalThis) {

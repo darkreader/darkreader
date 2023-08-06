@@ -1,8 +1,12 @@
-import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
-import type {Theme, UserSettings} from './definitions';
-import {ThemeEngine} from './generators/theme-engines';
-import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
-import {AutomationMode} from './utils/automation';
+import type { ParsedColorSchemeConfig } from './utils/colorscheme-parser';
+import type { Theme, UserSettings } from './definitions';
+import { ThemeEngine } from './generators/theme-engines';
+import {
+    isMacOS,
+    isWindows,
+    isCSSColorSchemePropSupported,
+} from './utils/platform';
+import { AutomationMode } from './utils/automation';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -24,7 +28,11 @@ export const DEFAULT_THEME: Theme = {
     grayscale: 0,
     sepia: 0,
     useFont: false,
-    fontFamily: isMacOS ? 'Helvetica Neue' : isWindows ? 'Segoe UI' : 'Open Sans',
+    fontFamily: isMacOS
+        ? 'Helvetica Neue'
+        : isWindows
+        ? 'Segoe UI'
+        : 'Open Sans',
     textStroke: 0,
     engine: ThemeEngine.dynamicTheme,
     stylesheet: '',
@@ -34,7 +42,9 @@ export const DEFAULT_THEME: Theme = {
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
     scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
-    styleSystemControls: __CHROMIUM_MV3__ ? false : !isCSSColorSchemePropSupported,
+    styleSystemControls: __CHROMIUM_MV3__
+        ? false
+        : !isCSSColorSchemePropSupported,
     lightColorScheme: 'Default',
     darkColorScheme: 'Default',
     immediateModify: false,

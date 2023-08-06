@@ -2,16 +2,8 @@
     "compilerOptions": {
         "target": "ES2019",
         "module": "CommonJS",
-        "lib": [
-            "ES2015",
-            "Dom"
-        ],
-        "types": [
-            "chrome",
-            "jest",
-            "offscreencanvas",
-            "puppeteer-core"
-        ],
+        "lib": ["ES2015", "Dom"],
+        "types": ["chrome", "jest", "offscreencanvas", "puppeteer-core"],
         "allowJs": true,
         "downlevelIteration": true,
         "esModuleInterop": true,
@@ -19,6 +11,6 @@
         "jsxFactory": "m",
         "moduleResolution": "Node",
         "noEmit": true,
-        "noImplicitAny": true,
+        "noImplicitAny": true
     }
 }

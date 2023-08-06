@@ -1,5 +1,5 @@
 // @ts-check
-import {exec} from 'node:child_process';
+import { exec } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -44,7 +44,11 @@ export async function getChromePath() {
     if (process.platform === 'win32') {
         return winProgramFiles('Google\\Chrome\\Application\\chrome.exe');
     }
-    const possibleLinuxPaths = ['google-chrome', 'google-chrome-stable', 'chromium'];
+    const possibleLinuxPaths = [
+        'google-chrome',
+        'google-chrome-stable',
+        'chromium',
+    ];
     for (const possiblePath of possibleLinuxPaths) {
         try {
             return await linuxAppPath(possiblePath);
@@ -91,6 +95,15 @@ export async function getFirefoxPath() {
     throw new Error('Could not find firefox-nightly');
 }
 
-export const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
-export const chromeMV3ExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome-mv3');
-export const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');
+export const chromeExtensionDebugDir = path.join(
+    __dirname,
+    '../../build/debug/chrome',
+);
+export const chromeMV3ExtensionDebugDir = path.join(
+    __dirname,
+    '../../build/debug/chrome-mv3',
+);
+export const firefoxExtensionDebugDir = path.join(
+    __dirname,
+    '../../build/debug/firefox',
+);

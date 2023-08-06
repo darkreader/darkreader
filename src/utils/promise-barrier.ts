@@ -6,7 +6,7 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
     private resolution: RESOLVUTION;
     private reason: REJECTION;
 
-    public async entry(): Promise<RESOLVUTION>{
+    public async entry(): Promise<RESOLVUTION> {
         if (this.wasResolved) {
             return Promise.resolve(this.resolution);
         }

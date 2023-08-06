@@ -1,4 +1,4 @@
-@import "../../../theme";
+@import '../../../theme';
 
 .custom-settings-toggle {
     color: @color-fore;
@@ -9,7 +9,9 @@
     &--checked:hover {
         background-color: @color-control-active;
         color: mix(@color-fore, @color-control-fore, 80%);
-        transition: background-color @time-fast, color @time-fast;
+        transition:
+            background-color @time-fast,
+            color @time-fast;
     }
 
     &--disabled {

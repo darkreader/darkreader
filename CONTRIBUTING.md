@@ -19,15 +19,17 @@ Website pages can request Dark Reader to disable itself by embedding a "Dark Rea
 ### Disabling Dark Reader statically
 
 Add `<meta name="darkreader-lock">` within your HTML document in `<head>` like so:
+
 ```html
 <head>
-    <meta name="darkreader-lock">
+    <meta name="darkreader-lock" />
 </head>
 ```
 
 ### Disabling Dark Reader dynamically
 
 Add the "lock" dynamically like so (assuming browser already parsed enough of the document to create a `head` attribute):
+
 ```js
 const lock = document.createElement('meta');
 lock.name = 'darkreader-lock';
@@ -38,9 +40,9 @@ document.head.appendChild(lock);
 
 If a website is **already dark** and meets the following requirements:
 
-- The entire website, including all subpages, is dark by default, regardless of the system's preferred color scheme.
-- The URL is the actual website address. No redirects of any kind are allowed.
-- The website is complete and finished. Any website in the design or development phase or any other incomplete status is not permitted. These statuses can include any placeholder web pages or verbiage about coming soon, the website being under construction, the website having moved, etc.
+-   The entire website, including all subpages, is dark by default, regardless of the system's preferred color scheme.
+-   The URL is the actual website address. No redirects of any kind are allowed.
+-   The website is complete and finished. Any website in the design or development phase or any other incomplete status is not permitted. These statuses can include any placeholder web pages or verbiage about coming soon, the website being under construction, the website having moved, etc.
 
 Then you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/main/src/config/dark-sites.config) file**.
 
@@ -62,25 +64,25 @@ In **Dynamic mode**, if the page looks partially dark and bright, it is consider
 
 In **Filter mode**, it is a common practice to invert elements on the page that are already dark.
 
-- Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
-- Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
-- Pick an incorrectly inverted element.
-- Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (for example, if it has `class="icon small"`, the selector may look like `.icon`).
-- Click **Dark Reader icon**.
-- Click **Open developer tools** (at the bottom of the Dark Reader popup).
-- Edit or add a block containing the URL and selectors to invert.
-- Click **Apply**.
-- Check how it looks both in **Light** and **Dark** mode.
-- If the **fix works** open **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config) file** or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config) file**.
-- Click **Edit** (login to GitHub first).
-- **Insert your fix** there. Preserve **alphabetic order** by URL.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- GitHub actions will run tests to make sure it has the right code style.
-- If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- A Dark Reader developer will **review** and merge your changes, making them available.
+-   Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
+-   Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
+-   Pick an incorrectly inverted element.
+-   Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (for example, if it has `class="icon small"`, the selector may look like `.icon`).
+-   Click **Dark Reader icon**.
+-   Click **Open developer tools** (at the bottom of the Dark Reader popup).
+-   Edit or add a block containing the URL and selectors to invert.
+-   Click **Apply**.
+-   Check how it looks both in **Light** and **Dark** mode.
+-   If the **fix works** open **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config) file** or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config) file**.
+-   Click **Edit** (login to GitHub first).
+-   **Insert your fix** there. Preserve **alphabetic order** by URL.
+-   Provide a **short description** of what you have done.
+-   Click **Propose file change**.
+-   Review your changes. Click **Create pull request**.
+-   GitHub actions will run tests to make sure it has the right code style.
+-   If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
+-   When you see a **green checkmark** then everything is fine.
+-   A Dark Reader developer will **review** and merge your changes, making them available.
 
 ```CSS
 dynamic-theme-fixes.config
@@ -104,27 +106,27 @@ IGNORE IMAGE ANALYSIS
 .logo
 ```
 
-| Rule | Description | Notes / Examples |
-|---|---|---|
-| **INVERT** | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
-| **CSS** | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
-| **IGNORE&nbsp;INLINE&nbsp;STYLE** | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
-| **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |  |
+| Rule                                | Description                                                           | Notes / Examples                                                                                                                                                                                                                                                                |
+| ----------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **INVERT**                          | Inverts specified elements.                                           | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds.                                                                                                                                                                                           |
+| **CSS**                             | Adds custom CSS to a web page.                                        | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>_Example_: `${white}` will become `${black}` in dark mode. |
+| **IGNORE&nbsp;INLINE&nbsp;STYLE**   | Prevents inline style analysis of matched elements.                   | _Example_: `<p style="color: red">` element's style attribute will not be changed.                                                                                                                                                                                              |
+| **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |                                                                                                                                                                                                                                                                                 |
 
 ## Adding a new color scheme
 
 If you can add a new _popular_ or _unique_ but usable predefined color scheme to Dark Reader, you can add it to the `src/config/color-schemes.drconf` file. Please use the following steps to add a new color scheme:
 
-- Open **[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/main/src/config/color-schemes.drconf) file**.
-- Click **Edit** (login to GitHub first).
-- **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- GitHub actions will run tests to make sure it has the right code style.
-- If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- A Dark Reader developer will **review** and merge your changes, making them available.
+-   Open **[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/main/src/config/color-schemes.drconf) file**.
+-   Click **Edit** (login to GitHub first).
+-   **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
+-   Provide a **short description** of what you have done.
+-   Click **Propose file change**.
+-   Review your changes. Click **Create pull request**.
+-   GitHub actions will run tests to make sure it has the right code style.
+-   If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
+-   When you see a **green checkmark** then everything is fine.
+-   A Dark Reader developer will **review** and merge your changes, making them available.
 
 ## Dynamic variables
 
@@ -147,12 +149,12 @@ CSS
 
 Here is a full table of available CSS variables:
 
-| Variable | Description | Use |
-|---|---|---|
-| **`--darkreader-neutral-background`** | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>the wrong background color. |
-| **`--darkreader-neutral-text`** | Neutral text color that <br>corresponds to the user's settings. | Used for elements with the wrong text color. |
-| **`--darkreader-selection-background`** | The background color setting <br>defined by the user. | The user's Background Color setting. |
-| **`--darkreader-selection-text`** | The text color setting <br>defined by the user. | The user's Text Color setting. |
+| Variable                                | Description                                                           | Use                                                                |
+| --------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **`--darkreader-neutral-background`**   | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>the wrong background color. |
+| **`--darkreader-neutral-text`**         | Neutral text color that <br>corresponds to the user's settings.       | Used for elements with the wrong text color.                       |
+| **`--darkreader-selection-background`** | The background color setting <br>defined by the user.                 | The user's Background Color setting.                               |
+| **`--darkreader-selection-text`**       | The text color setting <br>defined by the user.                       | The user's Text Color setting.                                     |
 
 ## Fixes for Filter and Filter+ mode
 
@@ -179,9 +181,9 @@ CSS
 }
 ```
 
-- Filter and Filter+ work by inverting the entire web page and reverting necessary elements (images, videos, etc.) listed in the `INVERT` section.
-- If an inverted element contains images or other content that becomes incorrectly displayed, use the `NO INVERT` rule.
-- `REMOVE BG` removes the background image from an element and forces a black background.
+-   Filter and Filter+ work by inverting the entire web page and reverting necessary elements (images, videos, etc.) listed in the `INVERT` section.
+-   If an inverted element contains images or other content that becomes incorrectly displayed, use the `NO INVERT` rule.
+-   `REMOVE BG` removes the background image from an element and forces a black background.
 
 ## Adding new features or fixing bugs
 
@@ -193,19 +195,19 @@ Then execute `npm run debug`.
 
 #### Chrome and Edge
 
-- Open the `chrome://extensions` page.
-- Disable the official Dark Reader version.
-- Enable the **Developer mode**.
-- Click **Load unpacked extension** button.
-- Navigate to the project's `build/debug/chrome` folder.
+-   Open the `chrome://extensions` page.
+-   Disable the official Dark Reader version.
+-   Enable the **Developer mode**.
+-   Click **Load unpacked extension** button.
+-   Navigate to the project's `build/debug/chrome` folder.
 
 #### Firefox
 
-- Open the `about:addons` page.
-- Disable the official Dark Reader version.
-- Open the `about:debugging#addons` page.
-- Click the **Load Temporary Add-on** button.
-- Open the `build/debug/firefox/manifest.json` file.
+-   Open the `about:addons` page.
+-   Disable the official Dark Reader version.
+-   Open the `about:debugging#addons` page.
+-   Click the **Load Temporary Add-on** button.
+-   Open the `build/debug/firefox/manifest.json` file.
 
 If you execute `npm run debug:watch` instead of `npm run debug`, it will automatically recompile after making any code changes.
 

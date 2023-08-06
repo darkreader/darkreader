@@ -1,5 +1,5 @@
-import {readJSON, writeJSON} from './utils.js';
-import {resolve} from 'node:path';
+import { readJSON, writeJSON } from './utils.js';
+import { resolve } from 'node:path';
 
 function resolvePath(path) {
     return resolve(import.meta.url.replace('file:/', ''), '../../', path);
@@ -37,7 +37,7 @@ async function writeDenoJSON() {
 
     const tasks = createTasks(pkg.scripts);
 
-    writeJSON(denoJSON, {imports, tasks});
+    writeJSON(denoJSON, { imports, tasks });
 }
 
 async function main() {

@@ -1,5 +1,5 @@
-import type {Theme} from '../../definitions';
-import {createStyleSheetModifier} from './stylesheet-modifier';
+import type { Theme } from '../../definitions';
+import { createStyleSheetModifier } from './stylesheet-modifier';
 
 const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 const overrideList = new WeakSet<CSSStyleSheet>();
@@ -9,7 +9,9 @@ export interface AdoptedStyleSheetManager {
     destroy(): void;
 }
 
-export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
+export function createAdoptedStyleSheetOverride(
+    node: Document | ShadowRoot,
+): AdoptedStyleSheetManager {
     let cancelAsyncOperations = false;
 
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {

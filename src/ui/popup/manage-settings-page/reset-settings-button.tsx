@@ -1,9 +1,9 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
-import {DEFAULT_SETTINGS} from '../../../defaults';
-import {MessageBox, ResetButton} from '../../controls';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
+import { DEFAULT_SETTINGS } from '../../../defaults';
+import { MessageBox, ResetButton } from '../../controls';
 import ControlGroup from '../control-group';
-import type {ViewProps} from '../types';
+import type { ViewProps } from '../types';
 
 export default function ResetButtonGroup(props: ViewProps) {
     const context = getContext();
@@ -25,7 +25,7 @@ export default function ResetButtonGroup(props: ViewProps) {
 
     const dialog = context.store.isDialogVisible ? (
         <MessageBox
-            caption="Are you sure you want to remove all your settings? You cannot restore them later"
+            caption='Are you sure you want to remove all your settings? You cannot restore them later'
             onOK={reset}
             onCancel={hideDialog}
         />

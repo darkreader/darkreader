@@ -50,14 +50,17 @@ export interface ParsedColorSchemeConfig {
     dark: { [name: string]: ColorSchemeVariant };
 }
 
-export function parseColorSchemeConfig(config: string): { result: ParsedColorSchemeConfig; error: string | null } {
+export function parseColorSchemeConfig(config: string): {
+    result: ParsedColorSchemeConfig;
+    error: string | null;
+} {
     // Let's first get all "possible" sections of the text.
     // We're adding `\n` so the sections "first" word is the
     // name of the color scheme. We could remove this and
     // skip this in the process of parsing, but because
     // the first entry will not have this first '\n' it will
     // be more complicated to otherwise just add this '\n' here.
-    const sections = config.split(`${SEPERATOR }\n\n`);
+    const sections = config.split(`${SEPERATOR}\n\n`);
 
     const definedColorSchemeNames: Set<string> = new Set();
     let lastDefinedColorSchemeName: string | undefined = '';
@@ -110,8 +113,14 @@ export function parseColorSchemeConfig(config: string): { result: ParsedColorSch
             return;
         }
         // Check if the name is on alphabetical order.
-        if (lastDefinedColorSchemeName && lastDefinedColorSchemeName !== 'Default' && name.localeCompare(lastDefinedColorSchemeName) < 0) {
-            throwError(`The color scheme name "${name}" is not in alphabetical order.`);
+        if (
+            lastDefinedColorSchemeName &&
+            lastDefinedColorSchemeName !== 'Default' &&
+            name.localeCompare(lastDefinedColorSchemeName) < 0
+        ) {
+            throwError(
+                `The color scheme name "${name}" is not in alphabetical order.`,
+            );
             return;
         }
         lastDefinedColorSchemeName = name;
@@ -121,60 +130,102 @@ export function parseColorSchemeConfig(config: string): { result: ParsedColorSch
 
         // Check if line[1] is empty, which is must be.
         if (lines[1]) {
-            throwError(`The second line of the color scheme "${name}" is not empty.`);
+            throwError(
+                `The second line of the color scheme "${name}" is not empty.`,
+            );
             return;
         }
 
-        const checkVariant = (lineIndex: number, isSecondVariant: boolean): (ColorSchemeVariant & { variant?: string }) | undefined => {
+        const checkVariant = (
+            lineIndex: number,
+            isSecondVariant: boolean,
+        ): (ColorSchemeVariant & { variant?: string }) | undefined => {
             // Get the possible variant name.
             const variant = lines[lineIndex];
             if (!variant) {
-                throwError(`The third line of the color scheme "${name}" is not defined.`);
+                throwError(
+                    `The third line of the color scheme "${name}" is not defined.`,
+                );
                 return;
             }
 
             // Check if the variant is valid.
             // if isSecondVariant is true, then we will check if the variant is 'Light', 'Dark' is not considered valid.
-            if (variant !== 'LIGHT' && variant !== 'DARK' && (isSecondVariant && variant === 'Light')) {
-                throwError(`The ${humanizeNumber(lineIndex)} line of the color scheme "${name}" is not a valid variant.`);
+            if (
+                variant !== 'LIGHT' &&
+                variant !== 'DARK' &&
+                isSecondVariant &&
+                variant === 'Light'
+            ) {
+                throwError(
+                    `The ${humanizeNumber(
+                        lineIndex,
+                    )} line of the color scheme "${name}" is not a valid variant.`,
+                );
                 return;
             }
 
             // Get the possible background color.
             const firstProperty = lines[lineIndex + 1];
             if (!firstProperty) {
-                throwError(`The ${humanizeNumber(lineIndex + 1)} line of the color scheme "${name}" is not defined.`);
+                throwError(
+                    `The ${humanizeNumber(
+                        lineIndex + 1,
+                    )} line of the color scheme "${name}" is not defined.`,
+                );
                 return;
             }
 
             // Check if the property is background color.
             if (!firstProperty.startsWith('background: ')) {
-                throwError(`The ${humanizeNumber(lineIndex + 1)} line of the color scheme "${name}" is not background-color property.`);
+                throwError(
+                    `The ${humanizeNumber(
+                        lineIndex + 1,
+                    )} line of the color scheme "${name}" is not background-color property.`,
+                );
                 return;
             }
 
             // Get the background color and check if it is a valid hex color.
-            const backgroundColor = firstProperty.slice(backgroundPropertyLength);
+            const backgroundColor = firstProperty.slice(
+                backgroundPropertyLength,
+            );
             if (!isValidHexColor(backgroundColor)) {
-                throwError(`The ${humanizeNumber(lineIndex + 1)} line of the color scheme "${name}" is not a valid hex color.`);
+                throwError(
+                    `The ${humanizeNumber(
+                        lineIndex + 1,
+                    )} line of the color scheme "${name}" is not a valid hex color.`,
+                );
                 return;
             }
 
             // Get the possible text color.
             const secondProperty = lines[lineIndex + 2];
             if (!secondProperty) {
-                throwError(`The ${humanizeNumber(lineIndex + 2)} line of the color scheme "${name}" is not defined.`);
+                throwError(
+                    `The ${humanizeNumber(
+                        lineIndex + 2,
+                    )} line of the color scheme "${name}" is not defined.`,
+                );
                 return;
             }
             // Check if the property is text color.
             if (!secondProperty.startsWith('text: ')) {
-                throwError(`The ${humanizeNumber(lineIndex + 2)} line of the color scheme "${name}" is not text-color property.`);
+                throwError(
+                    `The ${humanizeNumber(
+                        lineIndex + 2,
+                    )} line of the color scheme "${name}" is not text-color property.`,
+                );
                 return;
             }
             // Get the text color and check if it is a valid hex color.
             const textColor = secondProperty.slice(textPropertyLength);
             if (!isValidHexColor(textColor)) {
-                throwError(`The ${humanizeNumber(lineIndex + 2)} line of the color scheme "${name}" is not a valid hex color.`);
+                throwError(
+                    `The ${humanizeNumber(
+                        lineIndex + 2,
+                    )} line of the color scheme "${name}" is not a valid hex color.`,
+                );
                 return;
             }
             // If the variant is the second variant, then we will return the variant and the variant name.
@@ -205,16 +256,22 @@ export function parseColorSchemeConfig(config: string): { result: ParsedColorSch
             }
             // Must end with 1 new line(two Variants).
             if (lines.length > 11 || lines[9] || lines[10]) {
-                throwError(`The color scheme "${name}" doesn't end with 1 new line.`);
+                throwError(
+                    `The color scheme "${name}" doesn't end with 1 new line.`,
+                );
                 return;
             }
         } else if (lines.length > 7) {
-            throwError(`The color scheme "${name}" doesn't end with 1 new line.`);
+            throwError(
+                `The color scheme "${name}" doesn't end with 1 new line.`,
+            );
             return;
         }
         if (secondVariant) {
             if (isFirstVariantLight === isSecondVariantLight) {
-                throwError(`The color scheme "${name}" has the same variant twice.`);
+                throwError(
+                    `The color scheme "${name}" has the same variant twice.`,
+                );
                 return;
             }
             if (isFirstVariantLight) {
@@ -231,5 +288,5 @@ export function parseColorSchemeConfig(config: string): { result: ParsedColorSch
         }
     });
 
-    return {result: definedColorSchemes, error: error};
+    return { result: definedColorSchemes, error: error };
 }

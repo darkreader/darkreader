@@ -1,8 +1,17 @@
-import {isFirefox} from '../utils/platform';
-import type {ExtensionData, FilterConfig, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
-import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
-import {makeFirefoxHappy} from './make-firefox-happy';
-import {ASSERT} from './utils/log';
+import { isFirefox } from '../utils/platform';
+import type {
+    ExtensionData,
+    FilterConfig,
+    TabInfo,
+    MessageUItoBG,
+    UserSettings,
+    DevToolsData,
+    MessageCStoBG,
+    MessageBGtoUI,
+} from '../definitions';
+import { MessageTypeBGtoUI, MessageTypeUItoBG } from '../utils/message';
+import { makeFirefoxHappy } from './make-firefox-happy';
+import { ASSERT } from './utils/log';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -12,7 +21,7 @@ export interface ExtensionAdapter {
     markNewsAsRead: (ids: string[]) => Promise<void>;
     markNewsAsDisplayed: (ids: string[]) => Promise<void>;
     toggleActiveTab: () => void;
-    loadConfig: (options: {local: boolean}) => Promise<void>;
+    loadConfig: (options: { local: boolean }) => Promise<void>;
     applyDevDynamicThemeFixes: (json: string) => Error;
     resetDevDynamicThemeFixes: () => void;
     applyDevInversionFixes: (json: string) => Error;
@@ -38,7 +47,18 @@ export default class Messenger {
         }
     }
 
-    private static messageListener(message: MessageUItoBG | MessageCStoBG, sender: chrome.runtime.MessageSender, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string} | 'unsupportedSender') => void) {
+    private static messageListener(
+        message: MessageUItoBG | MessageCStoBG,
+        sender: chrome.runtime.MessageSender,
+        sendResponse: (
+            response:
+                | {
+                      data?: ExtensionData | DevToolsData | TabInfo;
+                      error?: string;
+                  }
+                | 'unsupportedSender',
+        ) => void,
+    ) {
         if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
             return;
         }
@@ -49,15 +69,18 @@ export default class Messenger {
         ];
         if (allowedSenderURL.includes(sender.url!)) {
             Messenger.onUIMessage(message as MessageUItoBG, sendResponse);
-            return ([
+            return [
                 MessageTypeUItoBG.GET_DATA,
                 MessageTypeUItoBG.GET_DEVTOOLS_DATA,
-            ].includes(message.type as MessageTypeUItoBG));
+            ].includes(message.type as MessageTypeUItoBG);
         }
     }
 
     private static firefoxPortListener(port: chrome.runtime.Port) {
-        ASSERT('Messenger.firefoxPortListener() is used only on Firefox', isFirefox);
+        ASSERT(
+            'Messenger.firefoxPortListener() is used only on Firefox',
+            isFirefox,
+        );
 
         if (!isFirefox) {
             return;
@@ -76,44 +99,68 @@ export default class Messenger {
             case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
             case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
                 promise = new Promise((resolve, reject) => {
-                    port.onMessage.addListener((message: MessageUItoBG | MessageCStoBG) => {
-                        const {data} = message;
-                        let error: Error;
-                        switch (port.name) {
-                            case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES:
-                                error = Messenger.adapter.applyDevDynamicThemeFixes(data);
-                                break;
-                            case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
-                                error = Messenger.adapter.applyDevInversionFixes(data);
-                                break;
-                            case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
-                                error = Messenger.adapter.applyDevStaticThemes(data);
-                                break;
-                            default:
-                                throw new Error(`Unknown port name: ${port.name}`);
-                        }
-                        if (error) {
-                            reject(error);
-                        } else {
-                            resolve(null);
-                        }
-                    });
+                    port.onMessage.addListener(
+                        (message: MessageUItoBG | MessageCStoBG) => {
+                            const { data } = message;
+                            let error: Error;
+                            switch (port.name) {
+                                case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES:
+                                    error =
+                                        Messenger.adapter.applyDevDynamicThemeFixes(
+                                            data,
+                                        );
+                                    break;
+                                case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
+                                    error =
+                                        Messenger.adapter.applyDevInversionFixes(
+                                            data,
+                                        );
+                                    break;
+                                case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
+                                    error =
+                                        Messenger.adapter.applyDevStaticThemes(
+                                            data,
+                                        );
+                                    break;
+                                default:
+                                    throw new Error(
+                                        `Unknown port name: ${port.name}`,
+                                    );
+                            }
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(null);
+                            }
+                        },
+                    );
                 });
                 break;
             default:
                 return;
         }
-        promise.then((data) => port.postMessage({data}))
-            .catch((error) => port.postMessage({error}));
+        promise
+            .then((data) => port.postMessage({ data }))
+            .catch((error) => port.postMessage({ error }));
     }
 
-    private static onUIMessage({type, data}: MessageUItoBG, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string}) => void) {
+    private static onUIMessage(
+        { type, data }: MessageUItoBG,
+        sendResponse: (response: {
+            data?: ExtensionData | DevToolsData | TabInfo;
+            error?: string;
+        }) => void,
+    ) {
         switch (type) {
             case MessageTypeUItoBG.GET_DATA:
-                Messenger.adapter.collect().then((data) => sendResponse({data}));
+                Messenger.adapter
+                    .collect()
+                    .then((data) => sendResponse({ data }));
                 break;
             case MessageTypeUItoBG.GET_DEVTOOLS_DATA:
-                Messenger.adapter.collectDevToolsData().then((data) => sendResponse({data}));
+                Messenger.adapter
+                    .collectDevToolsData()
+                    .then((data) => sendResponse({ data }));
                 break;
             case MessageTypeUItoBG.SUBSCRIBE_TO_CHANGES:
                 Messenger.changeListenerCount++;
@@ -141,7 +188,7 @@ export default class Messenger {
                 break;
             case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES: {
                 const error = Messenger.adapter.applyDevDynamicThemeFixes(data);
-                sendResponse({error: (error ? error.message : undefined)});
+                sendResponse({ error: error ? error.message : undefined });
                 break;
             }
             case MessageTypeUItoBG.RESET_DEV_DYNAMIC_THEME_FIXES:
@@ -149,7 +196,7 @@ export default class Messenger {
                 break;
             case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES: {
                 const error = Messenger.adapter.applyDevInversionFixes(data);
-                sendResponse({error: (error ? error.message : undefined)});
+                sendResponse({ error: error ? error.message : undefined });
                 break;
             }
             case MessageTypeUItoBG.RESET_DEV_INVERSION_FIXES:
@@ -157,7 +204,7 @@ export default class Messenger {
                 break;
             case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES: {
                 const error = Messenger.adapter.applyDevStaticThemes(data);
-                sendResponse({error: error ? error.message : undefined});
+                sendResponse({ error: error ? error.message : undefined });
                 break;
             }
             case MessageTypeUItoBG.RESET_DEV_STATIC_THEMES:

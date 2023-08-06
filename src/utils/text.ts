@@ -38,7 +38,8 @@ export function getTextDiffIndex(a: string, b: string): number {
 }
 
 export function parseArray(text: string): string[] {
-    return text.replace(/\r/g, '')
+    return text
+        .replace(/\r/g, '')
         .split('\n')
         .map((s) => s.trim())
         .filter((s) => s);
@@ -81,25 +82,28 @@ export function formatCSS(text: string): string {
             text = text.replace(emptyRuleRegexp, '');
         }
     }
-    const css = (text
+    const css = text
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
         .replace(/\{/g, '{\n') // {
         .replace(/\}/g, '\n}\n') // }
         .replace(/\;(?![^\(|\"]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
         .replace(/\,(?![^\(|\"]*(\)|\"))/g, ',\n') // , and do not target between () and ""
         .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
-        .split('\n'));
+        .split('\n');
 
     let depth = 0;
     const formatted: string[] = [];
 
     for (let x = 0, len = css.length; x < len; x++) {
-        const line = `${css[x] }\n`;
-        if (line.includes('{')) { // {
+        const line = `${css[x]}\n`;
+        if (line.includes('{')) {
+            // {
             formatted.push(getIndent(depth++) + trimLeft(line));
-        } else if (line.includes('\}')) { // }
+        } else if (line.includes('}')) {
+            // }
             formatted.push(getIndent(--depth) + trimLeft(line));
-        } else { // CSS line
+        } else {
+            // CSS line
             formatted.push(getIndent(depth) + trimLeft(line));
         }
     }
@@ -112,7 +116,10 @@ interface ParenthesesRange {
     end: number;
 }
 
-export function getParenthesesRange(input: string, searchStartIndex = 0): ParenthesesRange | null {
+export function getParenthesesRange(
+    input: string,
+    searchStartIndex = 0,
+): ParenthesesRange | null {
     const length = input.length;
     let depth = 0;
     let firstOpenIndex = -1;
@@ -134,7 +141,7 @@ export function getParenthesesRange(input: string, searchStartIndex = 0): Parent
             if (openIndex < 0 || closingIndex < openIndex) {
                 depth--;
                 if (depth === 0) {
-                    return {start: firstOpenIndex, end: closingIndex + 1};
+                    return { start: firstOpenIndex, end: closingIndex + 1 };
                 }
                 i = closingIndex;
             } else {

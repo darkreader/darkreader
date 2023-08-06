@@ -1,6 +1,6 @@
-import {generateUID} from '../../utils/uid';
-import type {MessageBGtoCS, MessageCStoBG} from '../../definitions';
-import {MessageTypeBGtoCS, MessageTypeCStoBG} from '../../utils/message';
+import { generateUID } from '../../utils/uid';
+import type { MessageBGtoCS, MessageCStoBG } from '../../definitions';
+import { MessageTypeBGtoCS, MessageTypeCStoBG } from '../../utils/message';
 
 interface FetchRequest {
     url: string;
@@ -17,20 +17,26 @@ export async function bgFetch(request: FetchRequest): Promise<string> {
         const id = generateUID();
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
-        chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.FETCH, data: request, id});
+        chrome.runtime.sendMessage<MessageCStoBG>({
+            type: MessageTypeCStoBG.FETCH,
+            data: request,
+            id,
+        });
     });
 }
 
-chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) => {
-    if (type === MessageTypeBGtoCS.FETCH_RESPONSE) {
-        const resolve = resolvers.get(id!);
-        const reject = rejectors.get(id!);
-        resolvers.delete(id!);
-        rejectors.delete(id!);
-        if (error) {
-            reject && reject(error);
-        } else {
-            resolve && resolve(data);
+chrome.runtime.onMessage.addListener(
+    ({ type, data, error, id }: MessageBGtoCS) => {
+        if (type === MessageTypeBGtoCS.FETCH_RESPONSE) {
+            const resolve = resolvers.get(id!);
+            const reject = rejectors.get(id!);
+            resolvers.delete(id!);
+            rejectors.delete(id!);
+            if (error) {
+                reject && reject(error);
+            } else {
+                resolve && resolve(data);
+            }
         }
-    }
-});
+    },
+);

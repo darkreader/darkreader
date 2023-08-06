@@ -1,11 +1,14 @@
 import './chrome';
-import {setFetchMethod as setFetch} from './fetch';
-import {DEFAULT_THEME} from '../defaults';
-import type {Theme, DynamicThemeFix} from '../definitions';
-import {ThemeEngine} from '../generators/theme-engines';
-import {createOrUpdateDynamicThemeInternal, removeDynamicTheme} from '../inject/dynamic-theme';
-import {collectCSS} from '../inject/dynamic-theme/css-collection';
-import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
+import { setFetchMethod as setFetch } from './fetch';
+import { DEFAULT_THEME } from '../defaults';
+import type { Theme, DynamicThemeFix } from '../definitions';
+import { ThemeEngine } from '../generators/theme-engines';
+import {
+    createOrUpdateDynamicThemeInternal,
+    removeDynamicTheme,
+} from '../inject/dynamic-theme';
+import { collectCSS } from '../inject/dynamic-theme/css-collection';
+import { isMatchMediaChangeEventListenerSupported } from '../utils/platform';
 
 let isDarkReaderEnabled = false;
 const isIFrame = (() => {
@@ -17,8 +20,11 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicThemeFix | null = null): void {
-    const theme = {...DEFAULT_THEME, ...themeOptions};
+export function enable(
+    themeOptions: Partial<Theme> | null = {},
+    fixes: DynamicThemeFix | null = null,
+): void {
+    const theme = { ...DEFAULT_THEME, ...themeOptions };
 
     if (theme.engine !== ThemeEngine.dynamicTheme) {
         throw new Error('Theme engine is not supported.');
@@ -52,9 +58,12 @@ function handleColorScheme(): void {
     }
 }
 
-export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix | null = null): void {
+export function auto(
+    themeOptions: Partial<Theme> | false = {},
+    fixes: DynamicThemeFix | null = null,
+): void {
     if (themeOptions) {
-        store = {themeOptions, fixes};
+        store = { themeOptions, fixes };
         handleColorScheme();
         if (isMatchMediaChangeEventListenerSupported) {
             darkScheme.addEventListener('change', handleColorScheme);

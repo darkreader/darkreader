@@ -1,4 +1,4 @@
-@import "../../../theme";
+@import '../../../theme';
 
 @size-news-icon: 2.5rem;
 
@@ -25,8 +25,12 @@
     }
 
     &::before {
-        background-image: linear-gradient(to top, @color-back, fade(@color-back, 0%));
-        content: "";
+        background-image: linear-gradient(
+            to top,
+            @color-back,
+            fade(@color-back, 0%)
+        );
+        content: '';
         display: block;
         height: @size-control-inner;
         pointer-events: none;
@@ -35,7 +39,11 @@
 
     &__header {
         align-items: flex-end;
-        background-image: linear-gradient(to bottom, fade(@color-back, 90%), fade(@color-back, 95%));
+        background-image: linear-gradient(
+            to bottom,
+            fade(@color-back, 90%),
+            fade(@color-back, 95%)
+        );
         border-top: @size-border solid @color-border;
         color: @color-heading;
         display: flex;
@@ -130,7 +138,7 @@
         &--important&--unread {
             &::before {
                 background-color: @color-heading;
-                content: "";
+                content: '';
                 height: 100%;
                 position: absolute;
                 right: calc(100% + @indent-large / 2);

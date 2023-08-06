@@ -1,37 +1,49 @@
-import {m} from 'malevic';
+import { m } from 'malevic';
 import CheckmarkIcon from './checkmark-icon';
-import {Button} from '../../../controls';
-import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
-import type {ExtWrapper} from '../../../../definitions';
+import { Button } from '../../../controls';
+import {
+    getURLHostOrProtocol,
+    isURLEnabled,
+    isPDF,
+} from '../../../../utils/url';
+import type { ExtWrapper } from '../../../../definitions';
 
 declare const __THUNDERBIRD__: boolean;
 
-export default function SiteToggleButton({data, actions}: ExtWrapper) {
+export default function SiteToggleButton({ data, actions }: ExtWrapper) {
     const tab = data.activeTab;
 
     function onSiteToggleClick() {
         if (pdf) {
-            actions.changeSettings({enableForPDF: !data.settings.enableForPDF});
+            actions.changeSettings({
+                enableForPDF: !data.settings.enableForPDF,
+            });
         } else {
             actions.toggleActiveTab();
         }
     }
 
     const pdf = isPDF(tab.url);
-    const toggleHasEffect = (
+    const toggleHasEffect =
         data.settings.enableForProtectedPages ||
         (!tab.isProtected && !pdf) ||
-        tab.isInjected
-    );
-    const isSiteEnabled: boolean = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && Boolean(tab.isInjected);
+        tab.isInjected;
+    const isSiteEnabled: boolean =
+        isURLEnabled(
+            tab.url,
+            data.settings,
+            tab,
+            data.isAllowedFileSchemeAccess,
+        ) && Boolean(tab.isInjected);
     const host = getURLHostOrProtocol(tab.url);
 
     const urlText = host
         .split('.')
-        .reduce<string[]>((elements, part, i) => elements.concat(
-            <wbr />,
-            `${i > 0 ? '.' : ''}${part}`
-        ), []);
+        .reduce<string[]>(
+            (elements, part, i) =>
+                elements.concat(<wbr />, `${i > 0 ? '.' : ''}${part}`),
+            [],
+        );
 
     return (
         <Button
@@ -42,9 +54,10 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
             }}
             onclick={onSiteToggleClick}
         >
-            <span class="site-toggle__mark"><CheckmarkIcon isChecked={isSiteEnabled} /></span>
-            {' '}
-            <span class="site-toggle__url" >{pdf ? 'PDF' : urlText}</span>
+            <span class='site-toggle__mark'>
+                <CheckmarkIcon isChecked={isSiteEnabled} />
+            </span>{' '}
+            <span class='site-toggle__url'>{pdf ? 'PDF' : urlText}</span>
         </Button>
     );
 }

@@ -1,13 +1,13 @@
-import {readLocalStorage, writeLocalStorage} from './utils/extension-api';
+import { readLocalStorage, writeLocalStorage } from './utils/extension-api';
 
-const proposedHighlights = [
-    'new-toggle-menus',
-];
+const proposedHighlights = ['new-toggle-menus'];
 
 const KEY_UI_HIDDEN_HIGHLIGHTS = 'ui-hidden-highlights';
 
 async function getHiddenHighlights() {
-    const options = await readLocalStorage({[KEY_UI_HIDDEN_HIGHLIGHTS]: [] as string[]});
+    const options = await readLocalStorage({
+        [KEY_UI_HIDDEN_HIGHLIGHTS]: [] as string[],
+    });
     return options[KEY_UI_HIDDEN_HIGHLIGHTS];
 }
 
@@ -19,7 +19,7 @@ async function getHighlightsToShow(): Promise<string[]> {
 async function hideHighlights(keys: string[]): Promise<void> {
     const hiddenHighlights = await getHiddenHighlights();
     const update = Array.from(new Set([...hiddenHighlights, ...keys]));
-    await writeLocalStorage({[KEY_UI_HIDDEN_HIGHLIGHTS]: update});
+    await writeLocalStorage({ [KEY_UI_HIDDEN_HIGHLIGHTS]: update });
 }
 
 export default {

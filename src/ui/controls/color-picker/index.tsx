@@ -1,6 +1,6 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
-import {parseColorWithCache} from '../../../utils/color';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
+import { parseColorWithCache } from '../../../utils/color';
 import TextBox from '../textbox';
 import HSBPicker from './hsb-picker';
 
@@ -57,7 +57,7 @@ function ColorPicker(props: ColorPickerProps) {
         }
         store.isFocused = true;
         context.refresh();
-        window.addEventListener('mousedown', onOuterClick, {passive: true});
+        window.addEventListener('mousedown', onOuterClick, { passive: true });
     }
 
     function blur() {
@@ -85,7 +85,7 @@ function ColorPicker(props: ColorPickerProps) {
 
     const textBox = (
         <TextBox
-            class="color-picker__input"
+            class='color-picker__input'
             onrender={(el) => {
                 store.textBoxNode = el as HTMLInputElement;
                 store.textBoxNode.value = isColorValid ? props.color : '';
@@ -93,7 +93,7 @@ function ColorPicker(props: ColorPickerProps) {
             onkeypress={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (e.key === 'Enter') {
-                    const {value} = input;
+                    const { value } = input;
                     onColorChange(value);
                     blur();
                     onColorPreview(value);
@@ -105,19 +105,21 @@ function ColorPicker(props: ColorPickerProps) {
 
     const previewElement = (
         <span
-            class="color-picker__preview"
+            class='color-picker__preview'
             onclick={toggleFocus}
             onrender={(el: HTMLElement) => {
                 store.previewNode = el;
-                el.style.backgroundColor = isColorValid ? props.color : 'transparent';
+                el.style.backgroundColor = isColorValid
+                    ? props.color
+                    : 'transparent';
             }}
         ></span>
     );
 
     const resetButton = props.canReset ? (
         <span
-            role="button"
-            class="color-picker__reset"
+            role='button'
+            class='color-picker__reset'
             onclick={() => {
                 props.onReset();
                 blur();
@@ -126,7 +128,7 @@ function ColorPicker(props: ColorPickerProps) {
     ) : null;
 
     const textBoxLine = (
-        <span class="color-picker__textbox-line">
+        <span class='color-picker__textbox-line'>
             {textBox}
             {previewElement}
             {resetButton}
@@ -134,7 +136,7 @@ function ColorPicker(props: ColorPickerProps) {
     );
 
     const hsbLine = isColorValid ? (
-        <span class="color-picker__hsb-line">
+        <span class='color-picker__hsb-line'>
             <HSBPicker
                 color={props.color}
                 onChange={onColorChange}
@@ -144,8 +146,14 @@ function ColorPicker(props: ColorPickerProps) {
     ) : null;
 
     return (
-        <span class={['color-picker', store.isFocused && 'color-picker--focused', props.class]}>
-            <span class="color-picker__wrapper">
+        <span
+            class={[
+                'color-picker',
+                store.isFocused && 'color-picker--focused',
+                props.class,
+            ]}
+        >
+            <span class='color-picker__wrapper'>
                 {textBoxLine}
                 {hsbLine}
             </span>
@@ -153,4 +161,4 @@ function ColorPicker(props: ColorPickerProps) {
     );
 }
 
-export default Object.assign(ColorPicker, {focus: focusColorPicker});
+export default Object.assign(ColorPicker, { focus: focusColorPicker });

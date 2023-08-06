@@ -15,11 +15,14 @@ function createSocket(): void {
     });
 }
 
-export function sendLog(level: 'info' | 'warn' | 'assert', ...args: any[]): void {
+export function sendLog(
+    level: 'info' | 'warn' | 'assert',
+    ...args: any[]
+): void {
     if (!__DEBUG__ || !__LOG__) {
         return;
     }
-    const message = JSON.stringify({level, log: args});
+    const message = JSON.stringify({ level, log: args });
     if (socket && socket.readyState === socket.OPEN) {
         socket.send(message);
     } else {

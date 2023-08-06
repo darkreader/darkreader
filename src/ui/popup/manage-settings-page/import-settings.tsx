@@ -1,11 +1,11 @@
-import {m} from 'malevic';
-import type {ViewProps} from '../types';
+import { m } from 'malevic';
+import type { ViewProps } from '../types';
 import ControlGroup from '../control-group';
-import type {UserSettings} from '../../../definitions';
-import {Button, MessageBox} from '../../controls';
-import {openFile} from '../../utils';
-import {getContext} from 'malevic/dom';
-import {validateSettings} from '../../../utils/validation';
+import type { UserSettings } from '../../../definitions';
+import { Button, MessageBox } from '../../controls';
+import { openFile } from '../../utils';
+import { getContext } from 'malevic/dom';
+import { validateSettings } from '../../../utils/validation';
 
 export default function ImportButton(props: ViewProps) {
     const context = getContext();
@@ -21,24 +21,36 @@ export default function ImportButton(props: ViewProps) {
         context.refresh();
     }
 
-    const dialog = context && context.store.isDialogVisible ? (
-        <MessageBox
-            caption={context.store.caption}
-            onOK={hideDialog}
-            onCancel={hideDialog}
-            hideCancel={true}
-        />
-    ) : null;
+    const dialog =
+        context && context.store.isDialogVisible ? (
+            <MessageBox
+                caption={context.store.caption}
+                onOK={hideDialog}
+                onCancel={hideDialog}
+                hideCancel={true}
+            />
+        ) : null;
 
     function importSettings() {
-        openFile({extensions: ['json']}, (result: string) => {
+        openFile({ extensions: ['json'] }, (result: string) => {
             try {
                 const content: UserSettings = JSON.parse(result);
-                const {settings, errors} = validateSettings(content);
+                const { settings, errors } = validateSettings(content);
                 const count = errors.length;
                 if (count) {
-                    console.error('Could not validate imported settings', errors, result, content);
-                    showDialog(`The given file has incorrect JSON: ${count > 1 ? `${count} errors, including ${errors[0]}` : errors[0]}`);
+                    console.error(
+                        'Could not validate imported settings',
+                        errors,
+                        result,
+                        content,
+                    );
+                    showDialog(
+                        `The given file has incorrect JSON: ${
+                            count > 1
+                                ? `${count} errors, including ${errors[0]}`
+                                : errors[0]
+                        }`,
+                    );
                     return;
                 }
                 props.actions.changeSettings(settings);
@@ -53,10 +65,7 @@ export default function ImportButton(props: ViewProps) {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Button
-                    onclick={importSettings}
-                    class="settings-button"
-                >
+                <Button onclick={importSettings} class='settings-button'>
                     Import Settings
                     {dialog}
                 </Button>

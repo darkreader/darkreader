@@ -1,6 +1,6 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
-import {TextBox} from '../../controls';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
+import { TextBox } from '../../controls';
 import VirtualScroll from '../../controls/virtual-scroll';
 
 interface SiteListProps {
@@ -25,7 +25,7 @@ export default function SiteList(props: SiteListProps) {
 
     context.onRender((node: HTMLElement) => {
         const isVisible = node.clientWidth > 0;
-        const {wasVisible} = store;
+        const { wasVisible } = store;
         store.wasVisible = isVisible;
         if (!wasVisible && isVisible) {
             store.shouldFocusAtIndex = props.siteList.length;
@@ -33,7 +33,7 @@ export default function SiteList(props: SiteListProps) {
         }
     });
 
-    function onTextChange(e: Event & {target: HTMLInputElement}) {
+    function onTextChange(e: Event & { target: HTMLInputElement }) {
         const index = store.indices.get(e.target)!;
         const values = props.siteList.slice();
         const value = e.target.value.trim();
@@ -56,7 +56,8 @@ export default function SiteList(props: SiteListProps) {
     }
 
     function removeValue(event: MouseEvent) {
-        const previousSibling = ((event.target as HTMLInputElement).previousSibling as HTMLInputElement);
+        const previousSibling = (event.target as HTMLInputElement)
+            .previousSibling as HTMLInputElement;
         const index = store.indices.get(previousSibling)!;
         const filtered = props.siteList.slice();
         filtered.splice(index, 1);
@@ -74,31 +75,33 @@ export default function SiteList(props: SiteListProps) {
         };
 
         return (
-            <div class="site-list__item">
+            <div class='site-list__item'>
                 <TextBox
-                    class="site-list__textbox"
+                    class='site-list__textbox'
                     value={text}
                     onrender={onRender}
-                    placeholder="google.com/maps"
+                    placeholder='google.com/maps'
                 />
-                {text ? <span
-                    class="site-list__item__remove"
-                    role="button"
-                    onclick={removeValue}
-                /> : null}
+                {text ? (
+                    <span
+                        class='site-list__item__remove'
+                        role='button'
+                        onclick={removeValue}
+                    />
+                ) : null}
             </div>
         );
     }
 
     return (
-        <div class="site-list">
+        <div class='site-list'>
             <VirtualScroll
-                root={(
+                root={
                     <div
-                        class="site-list__v-scroll-root"
+                        class='site-list__v-scroll-root'
                         onchange={onTextChange}
                     />
-                )}
+                }
                 items={props.siteList
                     .map((site, index) => createTextBox(site, index))
                     .concat(createTextBox('', props.siteList.length))}

@@ -1,7 +1,7 @@
-import {m} from 'malevic';
+import { m } from 'malevic';
 
 function ControlGroup(
-    props: {class?: string},
+    props: { class?: string },
     control: Malevic.Spec,
     description: Malevic.Spec,
 ) {
@@ -13,20 +13,18 @@ function ControlGroup(
     );
 }
 
-function Control(props: {class?: string}, control: Malevic.Child) {
+function Control(props: { class?: string }, control: Malevic.Child) {
     return (
-        <span class={['control-group__control', props.class]} >
-            {control}
-        </span>
+        <span class={['control-group__control', props.class]}>{control}</span>
     );
 }
 
-function Description(props: {class?: string}, description: Malevic.Child) {
+function Description(props: { class?: string }, description: Malevic.Child) {
     return (
-        <span class={['control-group__description', props.class]} >
+        <span class={['control-group__description', props.class]}>
             {description}
         </span>
     );
 }
 
-export default Object.assign(ControlGroup, {Control, Description});
+export default Object.assign(ControlGroup, { Control, Description });

@@ -4,7 +4,11 @@ export function getLocalMessage(messageName: string): string {
 
 export function getUILanguage(): string {
     let code: string;
-    if ('i18n' in chrome && 'getUILanguage' in chrome.i18n && typeof chrome.i18n.getUILanguage === 'function') {
+    if (
+        'i18n' in chrome &&
+        'getUILanguage' in chrome.i18n &&
+        typeof chrome.i18n.getUILanguage === 'function'
+    ) {
         code = chrome.i18n.getUILanguage();
     } else {
         // Background serivice workers do not have access to "foreground" APIs like chrome.i18n

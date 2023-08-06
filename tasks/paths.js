@@ -1,6 +1,8 @@
-import {dirname, join} from 'node:path';
-import {createRequire} from 'node:module';
-const rootDir = dirname(createRequire(import.meta.url).resolve('../package.json'));
+import { dirname, join } from 'node:path';
+import { createRequire } from 'node:module';
+const rootDir = dirname(
+    createRequire(import.meta.url).resolve('../package.json'),
+);
 const rootPath = (...paths) => join(rootDir, ...paths);
 
 export default {
@@ -12,7 +14,7 @@ export default {
         FIREFOX_MV3: 'firefox-mv3',
         THUNDERBIRD: 'thunderbird',
     },
-    getDestDir: function ({debug, platform}) {
+    getDestDir: function ({ debug, platform }) {
         const buildTypeDir = `build/${debug ? 'debug' : 'release'}`;
         return `${buildTypeDir}/${platform}`;
     },

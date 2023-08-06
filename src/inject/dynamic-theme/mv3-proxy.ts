@@ -1,5 +1,5 @@
-import {injectProxy} from './stylesheet-proxy';
-import {logInfo} from '../utils/log';
+import { injectProxy } from './stylesheet-proxy';
+import { logInfo } from '../utils/log';
 
 document.currentScript && document.currentScript.remove();
 
@@ -9,8 +9,14 @@ const EVENT_ARG = '__darkreader__stylesheetProxy__arg';
 
 const registerdScriptPath = !document.currentScript;
 
-function injectProxyAndCleanup(args: {enableStyleSheetsProxy: boolean; enableCustomElementRegistryProxy: boolean}) {
-    injectProxy(args.enableStyleSheetsProxy, args.enableCustomElementRegistryProxy);
+function injectProxyAndCleanup(args: {
+    enableStyleSheetsProxy: boolean;
+    enableCustomElementRegistryProxy: boolean;
+}) {
+    injectProxy(
+        args.enableStyleSheetsProxy,
+        args.enableCustomElementRegistryProxy,
+    );
     doneReceiver();
     document.dispatchEvent(new CustomEvent(EVENT_DONE));
 }
@@ -19,8 +25,13 @@ function regularPath() {
     const argString = document.currentScript!.dataset.arg;
     if (argString !== undefined) {
         document.documentElement.dataset[key] = 'true';
-        const args: {enableStyleSheetsProxy: boolean; enableCustomElementRegistryProxy: boolean} = JSON.parse(argString);
-        logInfo(`MV3 proxy injector: regular path runs injectProxy(${argString}).`);
+        const args: {
+            enableStyleSheetsProxy: boolean;
+            enableCustomElementRegistryProxy: boolean;
+        } = JSON.parse(argString);
+        logInfo(
+            `MV3 proxy injector: regular path runs injectProxy(${argString}).`,
+        );
         injectProxyAndCleanup(args);
     }
 }
@@ -28,11 +39,19 @@ function regularPath() {
 function dataReceiver(e: any) {
     document.removeEventListener(EVENT_ARG, dataReceiver);
     if (document.documentElement.dataset[key] !== undefined) {
-        logInfo(`MV3 proxy injector: ${registerdScriptPath ? 'registerd' : 'dedicated'} path exits because everything is done.`);
+        logInfo(
+            `MV3 proxy injector: ${
+                registerdScriptPath ? 'registerd' : 'dedicated'
+            } path exits because everything is done.`,
+        );
         return;
     }
     document.documentElement.dataset[key] = 'true';
-    logInfo(`MV3 proxy injector: ${registerdScriptPath ? 'registerd' : 'dedicated'} path runs injectProxy(${e.detail}).`);
+    logInfo(
+        `MV3 proxy injector: ${
+            registerdScriptPath ? 'registerd' : 'dedicated'
+        } path runs injectProxy(${e.detail}).`,
+    );
     injectProxyAndCleanup(e.detail);
 }
 
@@ -42,7 +61,11 @@ function doneReceiver() {
 }
 
 function dedicatedPath() {
-    logInfo(`MV3 proxy injector: ${registerdScriptPath ? 'registerd' : 'dedicated'} path setup...`);
+    logInfo(
+        `MV3 proxy injector: ${
+            registerdScriptPath ? 'registerd' : 'dedicated'
+        } path setup...`,
+    );
     // TODO: use EventListenerOptions class once it is updated
     // Note: make sure capture is not set
     const listenerOptions: any = {

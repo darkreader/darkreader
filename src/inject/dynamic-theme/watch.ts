@@ -1,12 +1,12 @@
-import {forEach, push} from '../../utils/array';
-import type {ElementsTreeOperations} from '../utils/dom';
-import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
-import type {StyleElement} from './style-manager';
-import {shouldManageStyle, getManageableStyles} from './style-manager';
-import {isDefinedSelectorSupported} from '../../utils/platform';
-import {ASSERT} from '../utils/log';
+import { forEach, push } from '../../utils/array';
+import type { ElementsTreeOperations } from '../utils/dom';
+import { iterateShadowHosts, createOptimizedTreeObserver } from '../utils/dom';
+import type { StyleElement } from './style-manager';
+import { shouldManageStyle, getManageableStyles } from './style-manager';
+import { isDefinedSelectorSupported } from '../../utils/platform';
+import { ASSERT } from '../utils/log';
 
-const observers: Array<{disconnect(): void}> = [];
+const observers: Array<{ disconnect(): void }> = [];
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
@@ -44,7 +44,10 @@ function recordUndefinedElement(element: Element): void {
         customElementsWhenDefined(tag).then(() => {
             if (elementsDefinitionCallback) {
                 const elements = undefinedGroups.get(tag);
-                ASSERT('recordUndefinedElement() undefined groups should not be empty', elements);
+                ASSERT(
+                    'recordUndefinedElement() undefined groups should not be empty',
+                    elements,
+                );
                 undefinedGroups.delete(tag);
                 elementsDefinitionCallback(Array.from(elements!));
             }
@@ -61,16 +64,23 @@ function collectUndefinedElements(root: ParentNode): void {
 }
 
 let canOptimizeUsingProxy = false;
-document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
-    canOptimizeUsingProxy = true;
-}, {once: true, passive: true});
+document.addEventListener(
+    '__darkreader__inlineScriptsAllowed',
+    () => {
+        canOptimizeUsingProxy = true;
+    },
+    { once: true, passive: true },
+);
 
 const resolvers = new Map<string, Array<() => void>>();
 
-function handleIsDefined(e: CustomEvent<{tag: string}>) {
+function handleIsDefined(e: CustomEvent<{ tag: string }>) {
     canOptimizeUsingProxy = true;
     const tag = e.detail.tag;
-    ASSERT('handleIsDefined() expects lower-case node names', () => tag.toLowerCase() === tag);
+    ASSERT(
+        'handleIsDefined() expects lower-case node names',
+        () => tag.toLowerCase() === tag,
+    );
     definedCustomElements.add(tag);
     if (resolvers.has(tag)) {
         const r = resolvers.get(tag)!;
@@ -80,7 +90,10 @@ function handleIsDefined(e: CustomEvent<{tag: string}>) {
 }
 
 async function customElementsWhenDefined(tag: string): Promise<void> {
-    ASSERT('customElementsWhenDefined() expects lower-case node names', () => tag.toLowerCase() === tag);
+    ASSERT(
+        'customElementsWhenDefined() expects lower-case node names',
+        () => tag.toLowerCase() === tag,
+    );
     // Custom element is already defined
     if (definedCustomElements.has(tag)) {
         return;
@@ -89,7 +102,10 @@ async function customElementsWhenDefined(tag: string): Promise<void> {
     return new Promise<void>((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
-        if (window.customElements && typeof customElements.whenDefined === 'function') {
+        if (
+            window.customElements &&
+            typeof customElements.whenDefined === 'function'
+        ) {
             customElements.whenDefined(tag).then(() => resolve());
         } else if (canOptimizeUsingProxy) {
             if (resolvers.has(tag)) {
@@ -97,7 +113,11 @@ async function customElementsWhenDefined(tag: string): Promise<void> {
             } else {
                 resolvers.set(tag, [resolve]);
             }
-            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
+            document.dispatchEvent(
+                new CustomEvent('__darkreader__addUndefinedResolver', {
+                    detail: { tag },
+                }),
+            );
         } else {
             const checkIfDefined = () => {
                 const elements = undefinedGroups.get(tag);
@@ -115,7 +135,9 @@ async function customElementsWhenDefined(tag: string): Promise<void> {
     });
 }
 
-function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void): void {
+function watchWhenCustomElementsDefined(
+    callback: (elements: Element[]) => void,
+): void {
     elementsDefinitionCallback = callback;
 }
 
@@ -125,7 +147,11 @@ function unsubscribeFromDefineCustomElements(): void {
     document.removeEventListener('__darkreader__isDefined', handleIsDefined);
 }
 
-export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void): void {
+export function watchForStyleChanges(
+    currentStyles: StyleElement[],
+    update: (styles: ChangedStyles) => void,
+    shadowRootDiscovered: (root: ShadowRoot) => void,
+): void {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);
@@ -151,8 +177,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
     currentStyles.forEach(saveStylePosition);
 
-    function handleStyleOperations(operations: {createdStyles: Set<StyleElement>; movedStyles: Set<StyleElement>; removedStyles: Set<StyleElement>}) {
-        const {createdStyles, removedStyles, movedStyles} = operations;
+    function handleStyleOperations(operations: {
+        createdStyles: Set<StyleElement>;
+        movedStyles: Set<StyleElement>;
+        removedStyles: Set<StyleElement>;
+    }) {
+        const { createdStyles, removedStyles, movedStyles } = operations;
 
         createdStyles.forEach((s) => saveStylePosition(s));
         movedStyles.forEach((s) => saveStylePosition(s));
@@ -171,16 +201,32 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         }
     }
 
-    function handleMinorTreeMutations({additions, moves, deletions}: ElementsTreeOperations) {
+    function handleMinorTreeMutations({
+        additions,
+        moves,
+        deletions,
+    }: ElementsTreeOperations) {
         const createdStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         const movedStyles = new Set<StyleElement>();
 
-        additions.forEach((node) => getManageableStyles(node).forEach((style) => createdStyles.add(style)));
-        deletions.forEach((node) => getManageableStyles(node).forEach((style) => removedStyles.add(style)));
-        moves.forEach((node) => getManageableStyles(node).forEach((style) => movedStyles.add(style)));
+        additions.forEach((node) =>
+            getManageableStyles(node).forEach((style) =>
+                createdStyles.add(style),
+            ),
+        );
+        deletions.forEach((node) =>
+            getManageableStyles(node).forEach((style) =>
+                removedStyles.add(style),
+            ),
+        );
+        moves.forEach((node) =>
+            getManageableStyles(node).forEach((style) =>
+                movedStyles.add(style),
+            ),
+        );
 
-        handleStyleOperations({createdStyles, removedStyles, movedStyles});
+        handleStyleOperations({ createdStyles, removedStyles, movedStyles });
 
         additions.forEach((n) => {
             extendedIterateShadowHosts(n);
@@ -191,7 +237,9 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         // and in DOM walker's view of the DOM. So instead we also check these mutations just in case.
         // In practice, at least one place reflects apperance of the node.
         // URL for testing: https://chromestatus.com/roadmap
-        additions.forEach((node) => isCustomElement(node) && recordUndefinedElement(node));
+        additions.forEach(
+            (node) => isCustomElement(node) && recordUndefinedElement(node),
+        );
     }
 
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
@@ -211,12 +259,16 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             }
         });
         styles.forEach((s) => {
-            if (!createdStyles.has(s) && !removedStyles.has(s) && didStylePositionChange(s)) {
+            if (
+                !createdStyles.has(s) &&
+                !removedStyles.has(s) &&
+                didStylePositionChange(s)
+            ) {
                 movedStyles.add(s);
             }
         });
 
-        handleStyleOperations({createdStyles, removedStyles, movedStyles});
+        handleStyleOperations({ createdStyles, removedStyles, movedStyles });
 
         extendedIterateShadowHosts(root);
         collectUndefinedElements(root);
@@ -226,11 +278,14 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         const updatedStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
-            const {target} = m;
+            const { target } = m;
             if (target.isConnected) {
                 if (shouldManageStyle(target)) {
                     updatedStyles.add(target as StyleElement);
-                } else if (target instanceof HTMLLinkElement && target.disabled) {
+                } else if (
+                    target instanceof HTMLLinkElement &&
+                    target.disabled
+                ) {
                     removedStyles.add(target as StyleElement);
                 }
             }
@@ -254,13 +309,16 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             onHugeMutations: handleHugeTreeMutations,
         });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        attrObserver.observe(root, {attributeFilter: ['rel', 'disabled', 'media', 'href'], subtree: true});
+        attrObserver.observe(root, {
+            attributeFilter: ['rel', 'disabled', 'media', 'href'],
+            subtree: true,
+        });
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        const {shadowRoot} = node;
+        const { shadowRoot } = node;
         if (shadowRoot == null || observedRoots.has(shadowRoot)) {
             return;
         }
@@ -277,10 +335,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
     watchWhenCustomElementsDefined((hosts) => {
         const newStyles: StyleElement[] = [];
-        hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
-        update({created: newStyles, updated: [], removed: [], moved: []});
+        hosts.forEach((host) =>
+            push(newStyles, getManageableStyles(host.shadowRoot)),
+        );
+        update({ created: newStyles, updated: [], removed: [], moved: [] });
         hosts.forEach((host) => {
-            const {shadowRoot} = host;
+            const { shadowRoot } = host;
             if (shadowRoot == null) {
                 return;
             }
@@ -289,7 +349,9 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             collectUndefinedElements(shadowRoot);
         });
     });
-    document.addEventListener('__darkreader__isDefined', handleIsDefined, {passive: true});
+    document.addEventListener('__darkreader__isDefined', handleIsDefined, {
+        passive: true,
+    });
     collectUndefinedElements(document);
 }
 

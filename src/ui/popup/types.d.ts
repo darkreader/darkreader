@@ -1,4 +1,4 @@
-import type {ExtensionData, ExtensionActions} from '../../definitions';
+import type { ExtensionData, ExtensionActions } from '../../definitions';
 
 export interface ViewProps {
     actions: ExtensionActions;

@@ -4,15 +4,8 @@
         "baseUrl": "./",
         "module": "ES2015",
         "moduleResolution": "node",
-        "lib": [
-            "ES2022",
-            "Dom",
-            "DOM.Iterable"
-        ],
-        "types": [
-            "chrome",
-            "offscreencanvas"
-        ],
+        "lib": ["ES2022", "Dom", "DOM.Iterable"],
+        "types": ["chrome", "offscreencanvas"],
         "allowJs": true,
         "downlevelIteration": true,
         "noImplicitAny": true,

@@ -1,8 +1,8 @@
-import {validateSettings, validateTheme} from '../../../src/utils/validation';
-import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../../../src/defaults';
-import type {Theme, UserSettings} from '../../../src/definitions';
-import {AutomationMode} from '../../../src/utils/automation';
-import {ThemeEngine} from '../../../src/generators/theme-engines';
+import { validateSettings, validateTheme } from '../../../src/utils/validation';
+import { DEFAULT_SETTINGS, DEFAULT_THEME } from '../../../src/defaults';
+import type { Theme, UserSettings } from '../../../src/definitions';
+import { AutomationMode } from '../../../src/utils/automation';
+import { ThemeEngine } from '../../../src/generators/theme-engines';
 
 test('Settings Validation', () => {
     const defaultTheme = JSON.parse(JSON.stringify(DEFAULT_THEME));
@@ -78,26 +78,36 @@ test('Settings Validation', () => {
             immediateModify: 1,
         },
         presets: [
-            {id: '', name: 'P1', urls: ['a.com'], theme: {brightness: 100}},
-            {id: 'p2', name: '', urls: ['a.com'], theme: {brightness: 100}},
-            {id: 'p3', name: 'P3', urls: [], theme: {brightness: 100}},
-            {id: 'p4', name: 'P4', urls: ['a.com'], theme: {brightness: -50}},
-            {id: 'p5', name: 'P5', urls: ['a.com'], theme: {brightness: 100}},
-            {id: 'p6', urls: ['a.com'], theme: {brightness: 100}},
-            {id: 'p7', name: 'P7', urls: ['a.com'], theme: null},
+            { id: '', name: 'P1', urls: ['a.com'], theme: { brightness: 100 } },
+            { id: 'p2', name: '', urls: ['a.com'], theme: { brightness: 100 } },
+            { id: 'p3', name: 'P3', urls: [], theme: { brightness: 100 } },
+            {
+                id: 'p4',
+                name: 'P4',
+                urls: ['a.com'],
+                theme: { brightness: -50 },
+            },
+            {
+                id: 'p5',
+                name: 'P5',
+                urls: ['a.com'],
+                theme: { brightness: 100 },
+            },
+            { id: 'p6', urls: ['a.com'], theme: { brightness: 100 } },
+            { id: 'p7', name: 'P7', urls: ['a.com'], theme: null },
             null,
         ],
         customThemes: [
-            {url: [] as any[], theme: {brightness: 100}},
-            {url: [''], theme: {brightness: 100}},
-            {url: ['a.com'], theme: {brightness: 100}},
-            {url: ['a.com'], theme: {brightness: -50}},
-            {url: ['a.com']},
-            {url: ['a.com'], theme: null},
+            { url: [] as any[], theme: { brightness: 100 } },
+            { url: [''], theme: { brightness: 100 } },
+            { url: ['a.com'], theme: { brightness: 100 } },
+            { url: ['a.com'], theme: { brightness: -50 } },
+            { url: ['a.com'] },
+            { url: ['a.com'], theme: null },
             null,
         ],
         siteList: ['a.com', '', 'b.com'],
-        siteListEnabled: {0: 'a.com', 1: 'b.com'},
+        siteListEnabled: { 0: 'a.com', 1: 'b.com' },
         applyToListedOnly: null as boolean | null,
         changeBrowserTheme: 1,
         syncSettings: null as boolean | null,
@@ -126,8 +136,15 @@ test('Settings Validation', () => {
     expect(wonkySet as any).toEqual({
         ...DEFAULT_SETTINGS,
         siteList: ['a.com', 'b.com'],
-        presets: [{id: 'p5', name: 'P5', urls: ['a.com'], theme: {brightness: 100}}],
-        customThemes: [{url: ['a.com'], theme: {brightness: 100}}],
+        presets: [
+            {
+                id: 'p5',
+                name: 'P5',
+                urls: ['a.com'],
+                theme: { brightness: 100 },
+            },
+        ],
+        customThemes: [{ url: ['a.com'], theme: { brightness: 100 } }],
     });
 
     const nullishSet = {
@@ -173,11 +190,14 @@ test('Settings Validation', () => {
             immediateModify: true,
         },
         presets: [
-            {id: 'p5', name: 'P5', urls: ['a.com'], theme: {brightness: 100} as Theme},
+            {
+                id: 'p5',
+                name: 'P5',
+                urls: ['a.com'],
+                theme: { brightness: 100 } as Theme,
+            },
         ],
-        customThemes: [
-            {url: ['a.com'], theme: {brightness: 100} as Theme},
-        ],
+        customThemes: [{ url: ['a.com'], theme: { brightness: 100 } as Theme }],
         siteList: ['a.com', 'b.com'],
         siteListEnabled: ['c.com'],
         applyToListedOnly: true,

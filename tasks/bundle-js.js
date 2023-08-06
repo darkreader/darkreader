@@ -9,9 +9,9 @@ import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 import paths from './paths.js';
 import * as reload from './reload.js';
-const {PORT} = reload;
-import {createTask} from './task.js';
-const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
+const { PORT } = reload;
+import { createTask } from './task.js';
+const { getDestDir, PLATFORM, rootDir, rootPath } = paths;
 
 /**
  * @typedef JSEntry
@@ -27,7 +27,10 @@ const jsEntries = [
     {
         src: 'src/background/index.ts',
         // Prior to Chrome 93, background service worker had to be in top-level directory
-        dest: (platform) => platform === PLATFORM.CHROMIUM_MV3 ? 'background.js' : 'background/index.js',
+        dest: (platform) =>
+            platform === PLATFORM.CHROMIUM_MV3
+                ? 'background.js'
+                : 'background/index.js',
         reloadType: reload.FULL,
     },
     {
@@ -95,10 +98,19 @@ function freeRollupPluginInstance(name, key) {
     }
 }
 
-async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
-    const {src, dest} = entry;
+async function bundleJS(
+    /** @type {JSEntry} */ entry,
+    platform,
+    debug,
+    watch,
+    log,
+    test,
+) {
+    const { src, dest } = entry;
     const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
-    const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
+    const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${
+        entry.src === 'src/ui/popup/index.tsx'
+    }`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};
@@ -116,15 +128,20 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
         case PLATFORM.CHROMIUM_MV3:
             replace = {
                 'chrome.browserAction.setIcon': 'chrome.action.setIcon',
-                'chrome.browserAction.setBadgeBackgroundColor': 'chrome.action.setBadgeBackgroundColor',
-                'chrome.browserAction.setBadgeText': 'chrome.action.setBadgeText',
+                'chrome.browserAction.setBadgeBackgroundColor':
+                    'chrome.action.setBadgeBackgroundColor',
+                'chrome.browserAction.setBadgeText':
+                    'chrome.action.setBadgeText',
             };
             break;
     }
 
     // See comment below
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-    const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
+    const mustRemoveEval =
+        !test &&
+        platform === PLATFORM.FIREFOX_MV2 &&
+        entry.src === 'src/inject/index.ts';
 
     const bundle = await rollup.rollup({
         input: rootPath(src),
@@ -143,44 +160,57 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             // literally one occurence of eval() in our code even before TypeSctipt even encounters it.
             // With this plugin, warning apprears only on Firefox test builds.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-            getRollupPluginInstance('removeEval', '', () => mustRemoveEval &&
-                rollupPluginReplace({
-                    preventAssignment: true,
-                    'eval(': 'void(',
-                })
+            getRollupPluginInstance(
+                'removeEval',
+                '',
+                () =>
+                    mustRemoveEval &&
+                    rollupPluginReplace({
+                        preventAssignment: true,
+                        'eval(': 'void(',
+                    }),
             ),
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
-                rollupPluginTypescript({
-                    rootDir,
-                    typescript,
-                    tsconfig: rootPath('src/tsconfig.json'),
-                    compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
-                        target: 'ES2022',
-                    } : undefined,
-                    noImplicitAny: debug ? false : true,
-                    noUnusedLocals: debug ? false : true,
-                    strictNullChecks: debug ? false : true,
-                    removeComments: debug ? false : true,
-                    sourceMap: debug ? true : false,
-                    inlineSources: debug ? true : false,
-                    noEmitOnError: watch ? false : true,
-                })
+            getRollupPluginInstance(
+                'typesctipt',
+                rollupPluginTypesctiptInstanceKey,
+                () =>
+                    rollupPluginTypescript({
+                        rootDir,
+                        typescript,
+                        tsconfig: rootPath('src/tsconfig.json'),
+                        compilerOptions:
+                            platform === PLATFORM.CHROMIUM_MV3
+                                ? {
+                                      target: 'ES2022',
+                                  }
+                                : undefined,
+                        noImplicitAny: debug ? false : true,
+                        noUnusedLocals: debug ? false : true,
+                        strictNullChecks: debug ? false : true,
+                        removeComments: debug ? false : true,
+                        sourceMap: debug ? true : false,
+                        inlineSources: debug ? true : false,
+                        noEmitOnError: watch ? false : true,
+                    }),
             ),
-            getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
-                rollupPluginReplace({
-                    preventAssignment: true,
-                    ...replace,
-                    __DEBUG__: debug,
-                    __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2,
-                    __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
-                    __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
-                    __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
-                    __PORT__: watch ? String(PORT) : '-1',
-                    __TEST__: test,
-                    __WATCH__: watch,
-                    __LOG__: log ? `"${log}"` : false,
-                })
+            getRollupPluginInstance(
+                'replace',
+                rollupPluginReplaceInstanceKey,
+                () =>
+                    rollupPluginReplace({
+                        preventAssignment: true,
+                        ...replace,
+                        __DEBUG__: debug,
+                        __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2,
+                        __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
+                        __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
+                        __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
+                        __PORT__: watch ? String(PORT) : '-1',
+                        __TEST__: test,
+                        __WATCH__: watch,
+                        __LOG__: log ? `"${log}"` : false,
+                    }),
             ),
         ].filter(Boolean),
     });
@@ -191,7 +221,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug, platform})}/${destination}`,
+        file: `${getDestDir({ debug, platform })}/${destination}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,
@@ -209,16 +239,35 @@ function getWatchFiles() {
 /** @type {string[]} */
 let watchFiles;
 
-const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, log, test) =>
-    entries.map((entry) =>
-        (entry.platform ? [entry.platform] : Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API))
-            .filter((platform) => platforms[platform])
-            .map((platform) => bundleJS(entry, platform, debug, watch, log, test))
-    ).flat();
+const hydrateTask = (
+    /** @type {JSEntry[]} */ entries,
+    platforms,
+    /** @type {boolean} */ debug,
+    /** @type {boolean} */ watch,
+    log,
+    test,
+) =>
+    entries
+        .map((entry) =>
+            (entry.platform
+                ? [entry.platform]
+                : Object.values(PLATFORM).filter(
+                      (platform) => platform !== PLATFORM.API,
+                  )
+            )
+                .filter((platform) => platforms[platform])
+                .map((platform) =>
+                    bundleJS(entry, platform, debug, watch, log, test),
+                ),
+        )
+        .flat();
 
 const bundleJSTask = createTask(
     'bundle-js',
-    async ({platforms, debug, watch, log, test}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch, log, test)),
+    async ({ platforms, debug, watch, log, test }) =>
+        await Promise.all(
+            hydrateTask(jsEntries, platforms, debug, watch, log, test),
+        ),
 ).addWatcher(
     () => {
         watchFiles = getWatchFiles();
@@ -234,13 +283,15 @@ const bundleJSTask = createTask(
 
         const newWatchFiles = getWatchFiles();
         watcher.unwatch(
-            watchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
+            watchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile)),
         );
         watcher.add(
-            newWatchFiles.filter((newFile) => watchFiles.includes(newFile))
+            newWatchFiles.filter((newFile) => watchFiles.includes(newFile)),
         );
 
-        const isUIOnly = entries.every((entry) => entry.reloadType === reload.UI);
+        const isUIOnly = entries.every(
+            (entry) => entry.reloadType === reload.UI,
+        );
         reload.reload({
             type: isUIOnly ? reload.UI : reload.FULL,
         });

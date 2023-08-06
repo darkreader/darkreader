@@ -1,5 +1,5 @@
-import {m} from 'malevic';
-import {Button} from '../../controls';
+import { m } from 'malevic';
+import { Button } from '../../controls';
 
 interface PageProps {
     id: string;
@@ -10,12 +10,13 @@ interface PageProps {
 
 export function Page(props: PageProps, content: Malevic.Spec) {
     return (
-        <div class={{'page': true, 'page--active': props.active}}>
-            <div class="page__content">
-                {content}
-            </div>
+        <div class={{ page: true, 'page--active': props.active }}>
+            <div class='page__content'>{content}</div>
             {props.first ? null : (
-                <Button class="page__back-button" onclick={props.onBackButtonClick}>
+                <Button
+                    class='page__back-button'
+                    onclick={props.onBackButtonClick}
+                >
                     Back
                 </Button>
             )}
@@ -33,7 +34,7 @@ export function PageViewer(
     ...pages: Array<Malevic.ComponentSpec<PageProps>>
 ) {
     return (
-        <div class="page-viewer">
+        <div class='page-viewer'>
             {pages.map((pageSpec, i) => {
                 return {
                     ...pageSpec,

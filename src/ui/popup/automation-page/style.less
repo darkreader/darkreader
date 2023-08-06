@@ -1,4 +1,4 @@
-@import "../../theme";
+@import '../../theme';
 
 .automation-page {
     display: flex;
@@ -75,8 +75,12 @@
     }
 
     &::after {
-        background-image: linear-gradient(to bottom, fadeout(@color-back, 10%), fadeout(@color-back, 100%));
-        content: "";
+        background-image: linear-gradient(
+            to bottom,
+            fadeout(@color-back, 10%),
+            fadeout(@color-back, 100%)
+        );
+        content: '';
         display: block;
         height: @size-control-inner;
         left: 0;
@@ -133,7 +137,7 @@
             background-color: @color-control-hover;
         }
     }
-    
+
     .toggle {
         width: 100%;
     }

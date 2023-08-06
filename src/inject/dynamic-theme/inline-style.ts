@@ -1,13 +1,18 @@
-import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
-import {iterateCSSDeclarations} from './css-rules';
-import {getModifiableCSSDeclaration} from './modify-css';
-import type {CSSVariableModifier} from './variables';
-import {variablesStore} from './variables';
-import type {FilterConfig} from '../../definitions';
-import {isShadowDomSupported} from '../../utils/platform';
-import {getDuration} from '../../utils/time';
-import {throttle} from '../../utils/throttle';
+import { forEach, push } from '../../utils/array';
+import {
+    iterateShadowHosts,
+    createOptimizedTreeObserver,
+    isReadyStateComplete,
+    addReadyStateCompleteListener,
+} from '../utils/dom';
+import { iterateCSSDeclarations } from './css-rules';
+import { getModifiableCSSDeclaration } from './modify-css';
+import type { CSSVariableModifier } from './variables';
+import { variablesStore } from './variables';
+import type { FilterConfig } from '../../definitions';
+import { isShadowDomSupported } from '../../utils/platform';
+import { getDuration } from '../../utils/time';
+import { throttle } from '../../utils/throttle';
 
 interface Overrides {
     [cssProp: string]: {
@@ -58,17 +63,17 @@ const overrides: Overrides = {
         cssProp: 'box-shadow',
         dataAttr: 'data-darkreader-inline-boxshadow',
     },
-    'color': {
+    color: {
         customProp: '--darkreader-inline-color',
         cssProp: 'color',
         dataAttr: 'data-darkreader-inline-color',
     },
-    'fill': {
+    fill: {
         customProp: '--darkreader-inline-fill',
         cssProp: 'fill',
         dataAttr: 'data-darkreader-inline-fill',
     },
-    'stroke': {
+    stroke: {
         customProp: '--darkreader-inline-stroke',
         cssProp: 'stroke',
         dataAttr: 'data-darkreader-inline-stroke',
@@ -87,19 +92,32 @@ const overrides: Overrides = {
 
 const overridesList = Object.values(overrides);
 const normalizedPropList: { [key: string]: string } = {};
-overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
+overridesList.forEach(
+    ({ cssProp, customProp }) => (normalizedPropList[customProp] = cssProp),
+);
 
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
-export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
+const INLINE_STYLE_ATTRS = [
+    'style',
+    'fill',
+    'stop-color',
+    'stroke',
+    'bgcolor',
+    'color',
+];
+export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map(
+    (attr) => `[${attr}]`,
+).join(', ');
 
 export function getInlineOverrideStyle(): string {
-    return overridesList.map(({dataAttr, customProp, cssProp}) => {
-        return [
-            `[${dataAttr}] {`,
-            `  ${cssProp}: var(${customProp}) !important;`,
-            '}',
-        ].join('\n');
-    }).join('\n');
+    return overridesList
+        .map(({ dataAttr, customProp, cssProp }) => {
+            return [
+                `[${dataAttr}] {`,
+                `  ${cssProp}: var(${customProp}) !important;`,
+                '}',
+            ].join('\n');
+        })
+        .join('\n');
 }
 
 function getInlineStyleElements(root: Node) {
@@ -107,22 +125,34 @@ function getInlineStyleElements(root: Node) {
     if (root instanceof Element && root.matches(INLINE_STYLE_SELECTOR)) {
         results.push(root);
     }
-    if (root instanceof Element || (isShadowDomSupported && root instanceof ShadowRoot) || root instanceof Document) {
+    if (
+        root instanceof Element ||
+        (isShadowDomSupported && root instanceof ShadowRoot) ||
+        root instanceof Document
+    ) {
         push(results, root.querySelectorAll(INLINE_STYLE_SELECTOR));
     }
     return results;
 }
 
-const treeObservers = new Map<Node, {disconnect(): void}>();
+const treeObservers = new Map<Node, { disconnect(): void }>();
 const attrObservers = new Map<Node, MutationObserver>();
 
 export function watchForInlineStyles(
     elementStyleDidChange: (element: HTMLElement) => void,
     shadowRootDiscovered: (root: ShadowRoot) => void,
 ): void {
-    deepWatchForInlineStyles(document, elementStyleDidChange, shadowRootDiscovered);
+    deepWatchForInlineStyles(
+        document,
+        elementStyleDidChange,
+        shadowRootDiscovered,
+    );
     iterateShadowHosts(document.documentElement, (host) => {
-        deepWatchForInlineStyles(host.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
+        deepWatchForInlineStyles(
+            host.shadowRoot!,
+            elementStyleDidChange,
+            shadowRootDiscovered,
+        );
     });
 }
 
@@ -152,12 +182,16 @@ function deepWatchForInlineStyles(
             }
             discoveredNodes.add(node);
             shadowRootDiscovered(n.shadowRoot!);
-            deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
+            deepWatchForInlineStyles(
+                n.shadowRoot!,
+                elementStyleDidChange,
+                shadowRootDiscovered,
+            );
         });
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
-        onMinorMutations: ({additions}) => {
+        onMinorMutations: ({ additions }) => {
             additions.forEach((added) => discoverNodes(added));
         },
         onHugeMutations: () => {
@@ -168,8 +202,8 @@ function deepWatchForInlineStyles(
 
     let attemptCount = 0;
     let start: number | null = null;
-    const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
-    const RETRY_TIMEOUT = getDuration({seconds: 2});
+    const ATTEMPTS_INTERVAL = getDuration({ seconds: 10 });
+    const RETRY_TIMEOUT = getDuration({ seconds: 2 });
     const MAX_ATTEMPTS_COUNT = 50;
     let cache: MutationRecord[] = [];
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -210,7 +244,9 @@ function deepWatchForInlineStyles(
     });
     attrObserver.observe(root, {
         attributes: true,
-        attributeFilter: INLINE_STYLE_ATTRS.concat(overridesList.map(({dataAttr}) => dataAttr)),
+        attributeFilter: INLINE_STYLE_ATTRS.concat(
+            overridesList.map(({ dataAttr }) => dataAttr),
+        ),
         subtree: true,
     });
     attrObservers.set(root, attrObserver);
@@ -224,16 +260,26 @@ export function stopWatchingForInlineStyles(): void {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const filterProps: Array<keyof FilterConfig> = [
+    'brightness',
+    'contrast',
+    'grayscale',
+    'sepia',
+    'mode',
+];
 
 function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig): string {
-    return INLINE_STYLE_ATTRS
-        .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
+    return INLINE_STYLE_ATTRS.map(
+        (attr) => `${attr}="${el.getAttribute(attr)}"`,
+    )
         .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
         .join(' ');
 }
 
-function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boolean {
+function shouldIgnoreInlineStyle(
+    element: HTMLElement,
+    selectors: string[],
+): boolean {
     for (let i = 0, len = selectors.length; i < len; i++) {
         const ingnoredSelector = selectors[i];
         if (element.matches(ingnoredSelector)) {
@@ -243,7 +289,12 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boo
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+export function overrideInlineStyle(
+    element: HTMLElement,
+    theme: FilterConfig,
+    ignoreInlineSelectors: string[],
+    ignoreImageSelectors: string[],
+): void {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -251,14 +302,20 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
 
     const unsetProps = new Set(Object.keys(overrides));
 
-    function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
+    function setCustomProp(
+        targetCSSProp: string,
+        modifierCSSProp: string,
+        cssVal: string,
+    ) {
         const isPropertyVariable = targetCSSProp.startsWith('--');
-        const {customProp, dataAttr} = isPropertyVariable ? ({} as Overrides['']) : overrides[targetCSSProp];
+        const { customProp, dataAttr } = isPropertyVariable
+            ? ({} as Overrides[''])
+            : overrides[targetCSSProp];
 
         const mod = getModifiableCSSDeclaration(
             modifierCSSProp,
             cssVal,
-            {style: element.style} as CSSStyleRule,
+            { style: element.style } as CSSStyleRule,
             variablesStore,
             ignoreImageSelectors,
             null,
@@ -277,8 +334,9 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         // string type.
         if (isPropertyVariable && typeof value === 'object') {
             const typedValue: ReturnType<CSSVariableModifier> = value;
-            typedValue.declarations.forEach(({property, value}) => {
-                !(value instanceof Promise) && element.style.setProperty(property, value);
+            typedValue.declarations.forEach(({ property, value }) => {
+                !(value instanceof Promise) &&
+                    element.style.setProperty(property, value);
             });
 
             // TODO: add listener for `onTypeChange`.
@@ -311,7 +369,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     // We can catch some link elements here, that are from `<link rel="mask-icon" color="#000000">`.
     // It's valid HTML code according to the specs, https://html.spec.whatwg.org/#attr-link-color
     // We don't want to touch such link as it cause weird behavior of the browser(Silent DOMException).
-    if (element.hasAttribute('color') && (element as HTMLLinkElement).rel !== 'mask-icon') {
+    if (
+        element.hasAttribute('color') &&
+        (element as HTMLLinkElement).rel !== 'mask-icon'
+    ) {
         let value = element.getAttribute('color')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
@@ -329,9 +390,15 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
                     // And it will cause a layout of unstyled content which results in white flashes.
                     // Therefor the check if the DOM is at the `complete` readystate.
                     const handleSVGElement = () => {
-                        const {width, height} = element.getBoundingClientRect();
-                        const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
-                        setCustomProp('fill', isBg ? 'background-color' : 'color', value);
+                        const { width, height } =
+                            element.getBoundingClientRect();
+                        const isBg =
+                            width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT;
+                        setCustomProp(
+                            'fill',
+                            isBg ? 'background-color' : 'color',
+                            value,
+                        );
                     };
 
                     if (isReadyStateComplete()) {
@@ -345,34 +412,59 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             }
         }
         if (element.hasAttribute('stop-color')) {
-            setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color')!);
+            setCustomProp(
+                'stop-color',
+                'background-color',
+                element.getAttribute('stop-color')!,
+            );
         }
     }
     if (element.hasAttribute('stroke')) {
         const value = element.getAttribute('stroke')!;
-        setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
+        setCustomProp(
+            'stroke',
+            element instanceof SVGLineElement ||
+                element instanceof SVGTextElement
+                ? 'border-color'
+                : 'color',
+            value,
+        );
     }
-    element.style && iterateCSSDeclarations(element.style, (property, value) => {
-        // Temporaty ignore background images
-        // due to possible performance issues
-        // and complexity of handling async requests
-        if (property === 'background-image' && value.includes('url')) {
-            return;
-        }
-        if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {
-            setCustomProp(property, property, value);
-        } else {
-            const overridenProp = normalizedPropList[property];
-            if (overridenProp &&
-                (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp))) {
-                if (overridenProp === 'background-color' && element.hasAttribute('bgcolor')) {
-                    return;
-                }
-                element.style.setProperty(property, '');
+    element.style &&
+        iterateCSSDeclarations(element.style, (property, value) => {
+            // Temporaty ignore background images
+            // due to possible performance issues
+            // and complexity of handling async requests
+            if (property === 'background-image' && value.includes('url')) {
+                return;
             }
-        }
-    });
-    if (element.style && element instanceof SVGTextElement && element.style.fill) {
+            if (
+                overrides.hasOwnProperty(property) ||
+                (property.startsWith('--') && !normalizedPropList[property])
+            ) {
+                setCustomProp(property, property, value);
+            } else {
+                const overridenProp = normalizedPropList[property];
+                if (
+                    overridenProp &&
+                    !element.style.getPropertyValue(overridenProp) &&
+                    !element.hasAttribute(overridenProp)
+                ) {
+                    if (
+                        overridenProp === 'background-color' &&
+                        element.hasAttribute('bgcolor')
+                    ) {
+                        return;
+                    }
+                    element.style.setProperty(property, '');
+                }
+            }
+        });
+    if (
+        element.style &&
+        element instanceof SVGTextElement &&
+        element.style.fill
+    ) {
         setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
     }
 

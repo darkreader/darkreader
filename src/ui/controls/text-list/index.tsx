@@ -1,5 +1,5 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
 import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 
@@ -15,7 +15,7 @@ export default function TextList(props: TextListProps) {
     const context = getContext();
     context.store.indices = context.store.indices || new WeakMap();
 
-    function onTextChange(e: {target: HTMLInputElement}) {
+    function onTextChange(e: { target: HTMLInputElement }) {
         const index = context.store.indices.get(e.target);
         const values = props.values.slice();
         const value = e.target.value.trim();
@@ -35,10 +35,11 @@ export default function TextList(props: TextListProps) {
     }
 
     function createTextBox(text: string, index: number) {
-        const saveIndex = (node: Element) => context.store.indices.set(node, index);
+        const saveIndex = (node: Element) =>
+            context.store.indices.set(node, index);
         return (
             <TextBox
-                class="text-list__textbox"
+                class='text-list__textbox'
                 value={text}
                 onrender={saveIndex}
                 placeholder={props.placeholder}
@@ -49,12 +50,16 @@ export default function TextList(props: TextListProps) {
     let shouldFocus = false;
 
     const node = context.node;
-    const prevProps: TextListProps | null = context.prev ? context.prev.props : null;
-    if (node && props.isFocused && (
-        !prevProps ||
-        !prevProps.isFocused ||
-        prevProps.values.length < props.values.length
-    )) {
+    const prevProps: TextListProps | null = context.prev
+        ? context.prev.props
+        : null;
+    if (
+        node &&
+        props.isFocused &&
+        (!prevProps ||
+            !prevProps.isFocused ||
+            prevProps.values.length < props.values.length)
+    ) {
         focusLastNode();
     }
 
@@ -77,13 +82,13 @@ export default function TextList(props: TextListProps) {
 
     return (
         <VirtualScroll
-            root={(
+            root={
                 <div
                     class={['text-list', props.class]}
                     onchange={onTextChange}
                     oncreate={didMount}
                 />
-            )}
+            }
             items={props.values
                 .map(createTextBox)
                 .concat(createTextBox('', props.values.length))}

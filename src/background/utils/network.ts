@@ -1,7 +1,10 @@
-import {loadAsDataURL, loadAsText} from '../../utils/network';
-import {getStringSize} from '../../utils/text';
-import {getDuration} from '../../utils/time';
-import {isXMLHttpRequestSupported, isFetchSupported} from '../../utils/platform';
+import { loadAsDataURL, loadAsText } from '../../utils/network';
+import { getStringSize } from '../../utils/text';
+import { getDuration } from '../../utils/time';
+import {
+    isXMLHttpRequestSupported,
+    isFetchSupported,
+} from '../../utils/platform';
 
 declare const __TEST__: boolean;
 
@@ -11,7 +14,9 @@ interface RequestParams {
 }
 
 interface FileLoader {
-    get: (fetchRequestParameters: FetchRequestParameters) => Promise<string | null>;
+    get: (
+        fetchRequestParameters: FetchRequestParameters,
+    ) => Promise<string | null>;
 }
 
 export async function readText(params: RequestParams): Promise<string> {
@@ -25,13 +30,17 @@ export async function readText(params: RequestParams): Promise<string> {
                 if (request.status >= 200 && request.status < 300) {
                     resolve(request.responseText);
                 } else {
-                    reject(new Error(`${request.status}: ${request.statusText}`));
+                    reject(
+                        new Error(`${request.status}: ${request.statusText}`),
+                    );
                 }
             };
-            request.onerror = () => reject(new Error(`${request.status}: ${request.statusText}`));
+            request.onerror = () =>
+                reject(new Error(`${request.status}: ${request.statusText}`));
             if (params.timeout) {
                 request.timeout = params.timeout;
-                request.ontimeout = () => reject(new Error('File loading stopped due to timeout'));
+                request.ontimeout = () =>
+                    reject(new Error('File loading stopped due to timeout'));
             }
             request.send();
         } else if (isFetchSupported) {
@@ -49,22 +58,33 @@ export async function readText(params: RequestParams): Promise<string> {
                 }, params.timeout);
             }
 
-            fetch(params.url, {signal})
+            fetch(params.url, { signal })
                 .then((response) => {
-                    if (response.status >= 200 && (response.status < 300)) {
+                    if (response.status >= 200 && response.status < 300) {
                         resolve(response.text());
                     } else {
-                        reject(new Error(`${response.status}: ${response.statusText}`));
+                        reject(
+                            new Error(
+                                `${response.status}: ${response.statusText}`,
+                            ),
+                        );
                     }
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     if (timedOut) {
-                        reject(new Error('File loading stopped due to timeout'));
+                        reject(
+                            new Error('File loading stopped due to timeout'),
+                        );
                     } else {
                         reject(error);
                     }
                 });
         } else {
-            reject(new Error(`Neither XMLHttpRequest nor Fetch API are accessible!`));
+            reject(
+                new Error(
+                    `Neither XMLHttpRequest nor Fetch API are accessible!`,
+                ),
+            );
         }
     });
 }
@@ -78,8 +98,12 @@ interface CacheRecord {
 
 class LimitedCacheStorage {
     // TODO: remove type cast after dependency update
-    private static readonly QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
-    private static readonly TTL = getDuration({minutes: 10});
+    private static readonly QUOTA_BYTES =
+        ((!__TEST__ && (navigator as any).deviceMemory) || 4) *
+        16 *
+        1024 *
+        1024;
+    private static readonly TTL = getDuration({ minutes: 10 });
     private static readonly ALARM_NAME = 'network';
 
     private bytesInUse = 0;
@@ -97,9 +121,11 @@ class LimitedCacheStorage {
         });
     }
 
-    private static ensureAlarmIsScheduled(){
+    private static ensureAlarmIsScheduled() {
         if (!this.alarmIsActive) {
-            chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {delayInMinutes: 1});
+            chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {
+                delayInMinutes: 1,
+            });
             this.alarmIsActive = true;
         }
     }
@@ -137,7 +163,7 @@ class LimitedCacheStorage {
         }
 
         const expires = Date.now() + LimitedCacheStorage.TTL;
-        this.records.set(url, {url, value, size, expires});
+        this.records.set(url, { url, value, size, expires });
         this.bytesInUse += size;
     }
 
@@ -168,15 +194,20 @@ export interface FetchRequestParameters {
 export function createFileLoader(): FileLoader {
     const caches = {
         'data-url': new LimitedCacheStorage(),
-        'text': new LimitedCacheStorage(),
+        text: new LimitedCacheStorage(),
     };
 
     const loaders = {
         'data-url': loadAsDataURL,
-        'text': loadAsText,
+        text: loadAsText,
     };
 
-    async function get({url, responseType, mimeType, origin}: FetchRequestParameters) {
+    async function get({
+        url,
+        responseType,
+        mimeType,
+        origin,
+    }: FetchRequestParameters) {
         const cache = caches[responseType];
         const load = loaders[responseType];
         if (cache.has(url)) {
@@ -188,5 +219,5 @@ export function createFileLoader(): FileLoader {
         return data;
     }
 
-    return {get};
+    return { get };
 }

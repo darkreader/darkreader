@@ -8,9 +8,9 @@ import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 
-import {createEchoServer} from './support/echo-server.js';
+import { createEchoServer } from './support/echo-server.js';
 import paths from '../../tasks/paths.js';
-const {rootPath} = paths;
+const { rootPath } = paths;
 
 /**
  * @param {Partial<LocalConfig>} config
@@ -29,7 +29,7 @@ export function configureKarma(config, env) {
         files: [
             'tests/inject/support/customize.ts',
             'tests/inject/support/polyfills.ts',
-            {pattern: 'tests/inject/**/*.tests.ts', watched: false},
+            { pattern: 'tests/inject/**/*.tests.ts', watched: false },
         ],
         plugins: [
             'karma-chrome-launcher',
@@ -46,7 +46,9 @@ export function configureKarma(config, env) {
                 rollupPluginTypescript({
                     typescript,
                     tsconfig: rootPath('tests/inject/tsconfig.json'),
-                    cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
+                    cacheDir: `${fs.realpathSync(
+                        os.tmpdir(),
+                    )}/darkreader_typescript_test_cache`,
                 }),
                 rollupPluginReplace({
                     preventAssignment: true,
@@ -74,7 +76,11 @@ export function configureKarma(config, env) {
         autoWatch: true,
         browsers: headless
             ? ['ChromeHeadless', 'FirefoxHeadless']
-            : ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
+            : [
+                  'Chrome',
+                  'Firefox',
+                  process.platform === 'darwin' ? 'Safari' : null,
+              ].filter(Boolean),
         singleRun: true,
         concurrency: 1,
     };
@@ -120,7 +126,10 @@ export function configureKarma(config, env) {
     if (config.coverage) {
         options.plugins.push('karma-coverage');
         const plugin = rollupPluginIstanbul({
-            exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
+            exclude: [
+                'tests/**/*.*',
+                'src/inject/dynamic-theme/stylesheet-proxy.ts',
+            ],
         });
         options.rollupPreprocessor.plugins.push(plugin);
         options.reporters.push('coverage');
@@ -133,7 +142,9 @@ export function configureKarma(config, env) {
     // HACK: Create CORS server here
     // Previously a separate Karma runner file was used
     const corsServerPort = 9966;
-    createEchoServer(corsServerPort).then(() => console.log(`CORS echo server running on port ${corsServerPort}`));
+    createEchoServer(corsServerPort).then(() =>
+        console.log(`CORS echo server running on port ${corsServerPort}`),
+    );
 
     return options;
 }

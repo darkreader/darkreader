@@ -1,9 +1,18 @@
-import {logInfo} from './utils/log';
-import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
-import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
-import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
+import { logInfo } from './utils/log';
+import {
+    parseInversionFixes,
+    formatInversionFixes,
+} from '../generators/css-filter';
+import {
+    parseDynamicThemeFixes,
+    formatDynamicThemeFixes,
+} from '../generators/dynamic-theme';
+import {
+    parseStaticThemes,
+    formatStaticThemes,
+} from '../generators/static-theme';
 import ConfigManager from './config-manager';
-import {isFirefox} from '../utils/platform';
+import { isFirefox } from '../utils/platform';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
@@ -16,7 +25,7 @@ interface DevToolsStorage {
 
 class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.
-    private cache: {[key: string]: string | null} = {};
+    private cache: { [key: string]: string | null } = {};
 
     public async get(key: string) {
         if (key in this.cache) {
@@ -34,7 +43,10 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 }
 
                 if (chrome.runtime.lastError) {
-                    console.error('Failed to query DevTools data', chrome.runtime.lastError);
+                    console.error(
+                        'Failed to query DevTools data',
+                        chrome.runtime.lastError,
+                    );
                     resolve(null);
                     return;
                 }
@@ -47,24 +59,34 @@ class PersistentStorageWrapper implements DevToolsStorage {
 
     public async set(key: string, value: string) {
         this.cache[key] = value;
-        return new Promise<void>((resolve) => chrome.storage.local.set({[key]: value}, () => {
-            if (chrome.runtime.lastError) {
-                console.error('Failed to write DevTools data', chrome.runtime.lastError);
-            } else {
-                resolve();
-            }
-        }));
+        return new Promise<void>((resolve) =>
+            chrome.storage.local.set({ [key]: value }, () => {
+                if (chrome.runtime.lastError) {
+                    console.error(
+                        'Failed to write DevTools data',
+                        chrome.runtime.lastError,
+                    );
+                } else {
+                    resolve();
+                }
+            }),
+        );
     }
 
     public async remove(key: string) {
         this.cache[key] = null;
-        return new Promise<void>((resolve) => chrome.storage.local.remove(key, () => {
-            if (chrome.runtime.lastError) {
-                console.error('Failed to delete DevTools data', chrome.runtime.lastError);
-            } else {
-                resolve();
-            }
-        }));
+        return new Promise<void>((resolve) =>
+            chrome.storage.local.remove(key, () => {
+                if (chrome.runtime.lastError) {
+                    console.error(
+                        'Failed to delete DevTools data',
+                        chrome.runtime.lastError,
+                    );
+                } else {
+                    resolve();
+                }
+            }),
+        );
     }
 
     public async has(key: string) {
@@ -99,7 +121,11 @@ export default class DevTools {
     public static init(onChange: () => void): void {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
-        if (!isFirefox && typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
+        if (
+            !isFirefox &&
+            typeof chrome.storage.local !== 'undefined' &&
+            chrome.storage.local !== null
+        ) {
             DevTools.store = new PersistentStorageWrapper();
         } else {
             DevTools.store = new TempStorage();
@@ -113,15 +139,12 @@ export default class DevTools {
     private static KEY_STATIC = 'dev_static_themes';
 
     private static async loadConfigOverrides(): Promise<void> {
-        const [
-            dynamicThemeFixes,
-            inversionFixes,
-            staticThemes,
-        ] = await Promise.all([
-            DevTools.getSavedDynamicThemeFixes(),
-            DevTools.getSavedInversionFixes(),
-            DevTools.getSavedStaticThemes(),
-        ]);
+        const [dynamicThemeFixes, inversionFixes, staticThemes] =
+            await Promise.all([
+                DevTools.getSavedDynamicThemeFixes(),
+                DevTools.getSavedInversionFixes(),
+                DevTools.getSavedStaticThemes(),
+            ]);
         ConfigManager.overrides.dynamicThemeFixes = dynamicThemeFixes || null;
         ConfigManager.overrides.inversionFixes = inversionFixes || null;
         ConfigManager.overrides.staticThemes = staticThemes || null;
@@ -155,7 +178,9 @@ export default class DevTools {
     // TODO(Anton): remove any
     public static applyDynamicThemeFixes(text: string): any {
         try {
-            const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
+            const formatted = formatDynamicThemeFixes(
+                parseDynamicThemeFixes(text),
+            );
             ConfigManager.overrides.dynamicThemeFixes = formatted;
             ConfigManager.handleDynamicThemeFixes();
             DevTools.saveDynamicThemeFixes(formatted);

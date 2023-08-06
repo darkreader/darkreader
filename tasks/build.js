@@ -12,11 +12,11 @@ import saveLog from './log.js';
 import * as reload from './reload.js';
 import codeStyle from './code-style.js';
 import zip from './zip.js';
-import {runTasks} from './task.js';
-import {log} from './utils.js';
+import { runTasks } from './task.js';
+import { log } from './utils.js';
 import process from 'node:process';
 import paths from './paths.js';
-const {PLATFORM} = paths;
+const { PLATFORM } = paths;
 
 const standardTask = [
     clean,
@@ -29,30 +29,24 @@ const standardTask = [
     saveLog,
 ];
 
-const buildTask = [
-    ...standardTask,
-    codeStyle,
-    zip,
-];
+const buildTask = [...standardTask, codeStyle, zip];
 
-const signedBuildTask = [
-    ...standardTask,
-    codeStyle,
-    bundleSignature,
-    zip,
-];
+const signedBuildTask = [...standardTask, codeStyle, bundleSignature, zip];
 
-async function build({platforms, debug, watch, log: logging, test, version}) {
+async function build({ platforms, debug, watch, log: logging, test, version }) {
     log.ok('BUILD');
     platforms = {
         ...platforms,
         [PLATFORM.API]: false,
     };
     try {
-        await runTasks(debug ? standardTask : (version ? signedBuildTask : buildTask), {platforms, debug, watch, log: logging, test, version});
+        await runTasks(
+            debug ? standardTask : version ? signedBuildTask : buildTask,
+            { platforms, debug, watch, log: logging, test, version },
+        );
         if (watch) {
             standardTask.forEach((task) => task.watch(platforms));
-            reload.reload({type: reload.FULL});
+            reload.reload({ type: reload.FULL });
             log.ok('Watching...');
         } else {
             log.ok('MISSION PASSED! RESPECT +');
@@ -71,7 +65,14 @@ async function api(debug, watch) {
         if (!debug) {
             tasks.push(codeStyle);
         }
-        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: null, log: false, test: false});
+        await runTasks(tasks, {
+            platforms: { [PLATFORM.API]: true },
+            debug,
+            watch,
+            version: null,
+            log: false,
+            test: false,
+        });
         if (watch) {
             bundleAPI.watch();
             log.ok('Watching...');
@@ -84,13 +85,22 @@ async function api(debug, watch) {
     }
 }
 
-async function run({release, debug, platforms, watch, log, test, version}) {
-    const regular = Object.keys(platforms).some((platform) => platform !== PLATFORM.API && platforms[platform]);
+async function run({ release, debug, platforms, watch, log, test, version }) {
+    const regular = Object.keys(platforms).some(
+        (platform) => platform !== PLATFORM.API && platforms[platform],
+    );
     if (release && regular) {
-        await build({platforms, version, debug: false, watch: false, log: null, test: false});
+        await build({
+            platforms,
+            version,
+            debug: false,
+            watch: false,
+            log: null,
+            test: false,
+        });
     }
     if (debug && regular) {
-        await build({platforms, version, debug, watch, log, test});
+        await build({ platforms, version, debug, watch, log, test });
     }
     if (platforms[PLATFORM.API]) {
         await api(debug, watch);
@@ -122,7 +132,9 @@ function getParams(args) {
         }
     }
     if (allPlatforms) {
-        Object.keys(platforms).forEach((platform) => platforms[platform] = true);
+        Object.keys(platforms).forEach(
+            (platform) => (platforms[platform] = true),
+        );
     }
 
     // TODO(Anton): remove me
@@ -132,7 +144,9 @@ function getParams(args) {
     }
 
     const versionArg = args.find((a) => a.startsWith('--version='));
-    const version = versionArg ? versionArg.substring('--version='.length) : null;
+    const version = versionArg
+        ? versionArg.substring('--version='.length)
+        : null;
 
     const release = args.includes('--release');
     const debug = args.includes('--debug');
@@ -140,10 +154,16 @@ function getParams(args) {
     const logInfo = watch && args.includes('--log-info');
     const logWarn = watch && args.includes('--log-warn');
     const logAssert = watch && args.includes('--log-assert');
-    const log = logWarn ? 'warn' : (logInfo ? 'info' : (logAssert ? 'assert' : null));
+    const log = logWarn
+        ? 'warn'
+        : logInfo
+        ? 'info'
+        : logAssert
+        ? 'assert'
+        : null;
     const test = args.includes('--test');
 
-    return {release, debug, platforms, watch, log, test, version};
+    return { release, debug, platforms, watch, log, test, version };
 }
 
 const args = process.argv.slice(2);

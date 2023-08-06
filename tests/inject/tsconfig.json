@@ -3,16 +3,8 @@
     "compilerOptions": {
         "target": "ES2019",
         "module": "ES2015",
-        "lib": [
-            "ES2022",
-            "DOM",
-            "DOM.Iterable"
-        ],
-        "types": [
-            "chrome",
-            "offscreencanvas",
-            "jasmine"
-        ],
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "types": ["chrome", "offscreencanvas", "jasmine"],
         "allowJs": true,
         "downlevelIteration": true,
         "esModuleInterop": true,
@@ -26,7 +18,5 @@
         "inlineSources": true,
         "noEmitOnError": true
     },
-    "exclude": [
-        "./coverage"
-    ]
+    "exclude": ["./coverage"]
 }

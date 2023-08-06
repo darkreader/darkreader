@@ -1,7 +1,14 @@
-import {tmpdir} from 'node:os';
-import {mkdir, rm, copyFile, writeFile, readFile, stat} from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import {
+    mkdir,
+    rm,
+    copyFile,
+    writeFile,
+    readFile,
+    stat,
+} from 'node:fs/promises';
 import unzipper from 'adm-zip';
-import {log} from './utils.js';
+import { log } from './utils.js';
 
 const tmpDirParent = `${tmpdir()}/darkreader-integrity`;
 
@@ -20,13 +27,14 @@ async function firefoxFetchAllReleases() {
         log.ok('Fetching release URLs from Mozilla');
     }
     const versions = [];
-    let dataUrl = 'https://addons.mozilla.org/api/v5/addons/addon/darkreader/versions/';
+    let dataUrl =
+        'https://addons.mozilla.org/api/v5/addons/addon/darkreader/versions/';
     while (dataUrl) {
-        const {next, results} = await (await fetch(dataUrl)).json();
+        const { next, results } = await (await fetch(dataUrl)).json();
         dataUrl = next;
-        for (const {file, version} of results) {
-            const {hash, url, size} = file;
-            versions.push({version, hash, url, size});
+        for (const { file, version } of results) {
+            const { hash, url, size } = file;
+            versions.push({ version, hash, url, size });
         }
     }
     return versions;
@@ -50,10 +58,7 @@ function firefoxExtractHashMetaInfOrder(manifest) {
                 lineCount: 5,
                 digestFormat: {
                     digestHeader,
-                    digestLines: [
-                        'MD5-Digest: ',
-                        'SHA1-Digest: ',
-                    ],
+                    digestLines: ['MD5-Digest: ', 'SHA1-Digest: '],
                     digestLinesLengths: [36, 41],
                 },
             };
@@ -77,10 +82,7 @@ function firefoxExtractHashMetaInfOrder(manifest) {
                 lineCount: 5,
                 digestFormat: {
                     digestHeader,
-                    digestLines: [
-                        'SHA1-Digest: ',
-                        'SHA256-Digest: ',
-                    ],
+                    digestLines: ['SHA1-Digest: ', 'SHA256-Digest: '],
                     digestLinesLengths: [41, 59],
                 },
             };
@@ -115,19 +117,23 @@ function firefoxExtractHashMetaInfOrder(manifest) {
     const lines = manifest.split('\n');
     assert(lines[0] === 'Manifest-Version: 1.0');
 
-    const {type, lineCount, digestFormat} = getDigestAlgos(lines);
+    const { type, lineCount, digestFormat } = getDigestAlgos(lines);
     const fileCount = getFileCount(lines, lineCount);
 
     const realOrder = [];
     for (let i = 0; i < fileCount; i++) {
         const fileName = getFileName(lines, i, lineCount, digestFormat);
-        if (fileName !== 'manifest.json' && fileName !== 'mozilla-recommendation.json' && !fileName.startsWith('META-INF/')) {
+        if (
+            fileName !== 'manifest.json' &&
+            fileName !== 'mozilla-recommendation.json' &&
+            !fileName.startsWith('META-INF/')
+        ) {
             realOrder.push(fileName);
         }
     }
 
     if (isSorted(realOrder)) {
-        return {type};
+        return { type };
     }
 
     const desiredOrder = [...realOrder].sort();
@@ -136,7 +142,7 @@ function firefoxExtractHashMetaInfOrder(manifest) {
         order.push(realOrder.indexOf(desiredOrder[i]));
     }
 
-    return {type, order};
+    return { type, order };
 }
 
 function getIndent(fileJSON) {
@@ -145,7 +151,9 @@ function getIndent(fileJSON) {
 
 function getManifestJSONData(fileJSON) {
     const indent = getIndent(fileJSON);
-    const settings = JSON.parse(fileJSON).browser_specific_settings ? 1 : undefined;
+    const settings = JSON.parse(fileJSON).browser_specific_settings
+        ? 1
+        : undefined;
     if (indent !== 2 || settings !== undefined) {
         return {
             settings,
@@ -156,19 +164,22 @@ function getManifestJSONData(fileJSON) {
 
 async function firefoxFetchAllMetadata(noCache = false) {
     if (noCache) {
-        await rm(tmpDirParent, {force: true, recursive: true});
+        await rm(tmpDirParent, { force: true, recursive: true });
     }
     try {
-        await mkdir(tmpDirParent, {recursive: true});
+        await mkdir(tmpDirParent, { recursive: true });
     } catch (e) {
         // No need to create already existing directory
     }
 
     const versions = await firefoxFetchAllReleases();
     log.ok(`Fetched release URLs (${versions.length})`);
-    await writeFile(`${tmpDirParent}/firefox-index.json`, JSON.stringify(versions, null, 2));
+    await writeFile(
+        `${tmpDirParent}/firefox-index.json`,
+        JSON.stringify(versions, null, 2),
+    );
 
-    for (const {version, url, size} of versions) {
+    for (const { version, url, size } of versions) {
         const fileName = `${tmpDirParent}/firefox-${version}.xpi`;
         const dest = `./integrity/firefox/${version}`;
         const tempDest = `${tmpDirParent}/firefox-${version}`;
@@ -187,19 +198,22 @@ async function firefoxFetchAllMetadata(noCache = false) {
             log.ok(`Wrote release file (${version})`);
         }
 
-        await rm(tempDest, {force: true, recursive: true});
-        await mkdir(tempDest, {recursive: true});
-        await rm(dest, {force: true, recursive: true});
-        await mkdir(dest, {recursive: true});
+        await rm(tempDest, { force: true, recursive: true });
+        await mkdir(tempDest, { recursive: true });
+        await rm(dest, { force: true, recursive: true });
+        await mkdir(dest, { recursive: true });
 
         const zip = new unzipper(fileName);
         zip.extractAllTo(tempDest);
 
+        const manifestMf = await readFile(`${tempDest}/META-INF/manifest.mf`, {
+            encoding: 'utf-8',
+        });
+        const { type, order } = firefoxExtractHashMetaInfOrder(manifestMf);
 
-        const manifestMf = await readFile(`${tempDest}/META-INF/manifest.mf`, {encoding: 'utf-8'});
-        const {type, order} = firefoxExtractHashMetaInfOrder(manifestMf);
-
-        const manifestJSON = await readFile(`${tempDest}/manifest.json`, {encoding: 'utf-8'});
+        const manifestJSON = await readFile(`${tempDest}/manifest.json`, {
+            encoding: 'utf-8',
+        });
         const manifest = getManifestJSONData(manifestJSON);
 
         const info = {
@@ -208,14 +222,20 @@ async function firefoxFetchAllMetadata(noCache = false) {
             order,
         };
         await writeFile(`${dest}/info.json`, `${JSON.stringify(info)}\n`);
-        await copyFile(`${tempDest}/META-INF/mozilla.rsa`, `${dest}/mozilla.rsa`);
+        await copyFile(
+            `${tempDest}/META-INF/mozilla.rsa`,
+            `${dest}/mozilla.rsa`,
+        );
         try {
             await copyFile(`${tempDest}/META-INF/cose.sig`, `${dest}/cose.sig`);
         } catch (e) {
             // Nothing
         }
         try {
-            await copyFile(`${tempDest}/mozilla-recommendation.json`, `${dest}/mozilla-recommendation.json`);
+            await copyFile(
+                `${tempDest}/mozilla-recommendation.json`,
+                `${dest}/mozilla-recommendation.json`,
+            );
         } catch (e) {
             // Nothing
         }

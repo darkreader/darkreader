@@ -1,5 +1,5 @@
 import chokidar from 'chokidar';
-import {log} from './utils.js';
+import { log } from './utils.js';
 
 const DEBOUNCE = 200;
 
@@ -23,7 +23,9 @@ function watch(options) {
             timeoutId = null;
             try {
                 const changedFiles = Array.from(queue).sort();
-                log.ok(`Files changed:${changedFiles.map((path) => `\n${path}`)}`);
+                log.ok(
+                    `Files changed:${changedFiles.map((path) => `\n${path}`)}`,
+                );
                 queue.clear();
                 await options.onChange(changedFiles);
             } catch (err) {
@@ -32,7 +34,8 @@ function watch(options) {
         }, DEBOUNCE);
     }
 
-    const watcher = chokidar.watch(options.files, {ignoreInitial: true})
+    const watcher = chokidar
+        .watch(options.files, { ignoreInitial: true })
         .on('add', onChange)
         .on('change', onChange)
         .on('unlink', onChange);

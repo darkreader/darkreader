@@ -1,23 +1,38 @@
-import {MessageTypeBGtoCS, MessageTypeCStoBG} from '../../../src/utils/message';
-import type {MessageBGtoCS, MessageCStoBG} from '../../../src/definitions';
+import {
+    MessageTypeBGtoCS,
+    MessageTypeCStoBG,
+} from '../../../src/utils/message';
+import type { MessageBGtoCS, MessageCStoBG } from '../../../src/definitions';
 
 let nativeSendMessage: typeof chrome.runtime.sendMessage;
 const bgResponses = new Map<string, string>();
 
 export function stubChromeRuntimeMessage(): void {
     nativeSendMessage = chrome.runtime.sendMessage;
-    const listeners: Array<(message: MessageBGtoCS) => void> = (chrome.runtime.onMessage as any)['__listeners__'];
+    const listeners: Array<(message: MessageBGtoCS) => void> = (
+        chrome.runtime.onMessage as any
+    )['__listeners__'];
 
     (chrome.runtime as any).sendMessage = (message: MessageCStoBG) => {
         if (message.type === MessageTypeCStoBG.FETCH) {
-            const {id, data: {url}} = message;
+            const {
+                id,
+                data: { url },
+            } = message;
             setTimeout(() => {
                 listeners.forEach((listener) => {
                     if (!bgResponses.has(url)) {
-                        throw new Error('Response is missing, use `stubBackgroundFetchResponse()`');
+                        throw new Error(
+                            'Response is missing, use `stubBackgroundFetchResponse()`',
+                        );
                     }
                     const data = bgResponses.get(url);
-                    listener({type: MessageTypeBGtoCS.FETCH_RESPONSE, data, error: null, id});
+                    listener({
+                        type: MessageTypeBGtoCS.FETCH_RESPONSE,
+                        data,
+                        error: null,
+                        id,
+                    });
                 });
             });
         }
@@ -29,7 +44,10 @@ export function resetChromeRuntimeMessageStub(): void {
     bgResponses.clear();
 }
 
-export function stubBackgroundFetchResponse(url: string, content: string): void {
+export function stubBackgroundFetchResponse(
+    url: string,
+    content: string,
+): void {
     bgResponses.set(url, content);
 }
 

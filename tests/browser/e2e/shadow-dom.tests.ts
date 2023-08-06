@@ -1,5 +1,5 @@
-import {multiline} from '../../support/test-utils';
-import type {StyleExpectations} from '../globals';
+import { multiline } from '../../support/test-utils';
+import type { StyleExpectations } from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
     await expectPageStyles(expect, styles);
@@ -7,7 +7,7 @@ async function expectStyles(styles: StyleExpectations) {
 
 describe('Custom HTML elements', () => {
     // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+    jest.retryTimes(10, { logErrorsBeforeRetry: true });
 
     it('Asunchroneous define', async () => {
         // Temprorarily disable this test on Firefox
@@ -31,14 +31,16 @@ describe('Custom HTML elements', () => {
             class ElementWitAsync extends HTMLElement {
                 public constructor() {
                     super();
-                    const root = this.attachShadow({mode: 'open'});
-                    setTimeout(() => root.innerHTML =
-                        '<style>\
+                    const root = this.attachShadow({ mode: 'open' });
+                    setTimeout(
+                        () =>
+                            (root.innerHTML =
+                                '<style>\
                             p { color: red; }\
                         </style>\
                         <p>\
                             Should be red initially and then change to green.\
-                        </p>'
+                        </p>'),
                     );
                 }
             }
@@ -52,14 +54,16 @@ describe('Custom HTML elements', () => {
             [['elem-with-async', 'p'], 'color', 'rgb(255, 26, 26)'],
         ]);
 
-        await devtoolsUtils.paste(multiline(
-            '*',
-            '',
-            'CSS',
-            'p {',
-            '    color: green !important;',
-            '}',
-        ));
+        await devtoolsUtils.paste(
+            multiline(
+                '*',
+                '',
+                'CSS',
+                'p {',
+                '    color: green !important;',
+                '}',
+            ),
+        );
 
         await expectStyles([
             [['elem-with-async', 'p'], 'color', 'rgb(0, 128, 0)'],

@@ -1,8 +1,8 @@
-import {createWriteStream} from 'node:fs';
+import { createWriteStream } from 'node:fs';
 import process from 'node:process';
-import {WebSocketServer} from 'ws';
-import {createTask} from './task.js';
-import {log} from './utils.js';
+import { WebSocketServer } from 'ws';
+import { createTask } from './task.js';
+import { log } from './utils.js';
 
 export const PORT = 9000;
 const WAIT_FOR_CONNECTION = 2000;
@@ -20,8 +20,10 @@ const times = new WeakMap();
  */
 function createServer(logLevel) {
     return new Promise((resolve) => {
-        const server = new WebSocketServer({port: PORT});
-        const stream = createWriteStream(`${Date.now()}-${logLevel}.txt`, {flags:'a'});
+        const server = new WebSocketServer({ port: PORT });
+        const stream = createWriteStream(`${Date.now()}-${logLevel}.txt`, {
+            flags: 'a',
+        });
         server.on('listening', () => {
             log.ok('Loggings started');
             resolve(server);
@@ -73,7 +75,7 @@ function waitForConnection() {
  * @param {Object} options
  * @param {string} options.log
  */
-export async function logging({log}) {
+export async function logging({ log }) {
     if (!log) {
         return;
     }
@@ -85,10 +87,6 @@ export async function logging({log}) {
     }
 }
 
-const loggingTask = createTask(
-    'logging',
-    logging,
-);
+const loggingTask = createTask('logging', logging);
 
 export default loggingTask;
-

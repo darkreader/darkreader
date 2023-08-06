@@ -1,6 +1,6 @@
-import {m} from 'malevic';
+import { m } from 'malevic';
 import TextBox from '../textbox';
-import {parseTime} from '../../../utils/time';
+import { parseTime } from '../../../utils/time';
 
 interface TimePickerProps {
     startTime: string;
@@ -39,13 +39,15 @@ export default function TimeRangePicker(props: TimePickerProps) {
     }
 
     return (
-        <span class="time-range-picker">
+        <span class='time-range-picker'>
             <TextBox
-                class="time-range-picker__input time-range-picker__input--start"
-                type="time"
-                placeholder="18:00"
+                class='time-range-picker__input time-range-picker__input--start'
+                type='time'
+                placeholder='18:00'
                 onrender={setStartTime}
-                onchange={(e) => onStartTimeChange((e.target as HTMLInputElement).value)}
+                onchange={(e) =>
+                    onStartTimeChange((e.target as HTMLInputElement).value)
+                }
                 onkeypress={(e) => {
                     if (e.key === 'Enter') {
                         const input = e.target as HTMLInputElement;
@@ -53,14 +55,15 @@ export default function TimeRangePicker(props: TimePickerProps) {
                         onStartTimeChange(input.value);
                     }
                 }}
-
             />
             <TextBox
-                class="time-range-picker__input time-range-picker__input--end"
-                type="time"
-                placeholder="09:00"
+                class='time-range-picker__input time-range-picker__input--end'
+                type='time'
+                placeholder='09:00'
                 onrender={setEndTime}
-                onchange={(e) => onEndTimeChange((e.target as HTMLInputElement).value)}
+                onchange={(e) =>
+                    onEndTimeChange((e.target as HTMLInputElement).value)
+                }
                 onkeypress={(e) => {
                     if (e.key === 'Enter') {
                         const input = e.target as HTMLInputElement;

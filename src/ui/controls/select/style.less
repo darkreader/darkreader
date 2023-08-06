@@ -1,4 +1,4 @@
-@import "../../theme";
+@import '../../theme';
 
 .select {
     display: inline-flex;
@@ -29,7 +29,7 @@
             &::before,
             &::after {
                 background-color: @color-control-fore;
-                content: "";
+                content: '';
                 display: inline-block;
                 height: @size-control-inner * 0.125;
                 position: absolute;
@@ -61,7 +61,7 @@
         overflow-x: hidden;
         overflow-y: auto;
         position: absolute;
-        top: ~"calc(100% - @{size-border})";
+        top: ~'calc(100% - @{size-border})';
         transition: max-height @time-fast;
         width: 100%;
         z-index: 999;

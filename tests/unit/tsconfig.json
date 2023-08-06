@@ -3,16 +3,8 @@
     "compilerOptions": {
         "target": "ESNext",
         "module": "CommonJS",
-        "lib": [
-            "ESNext",
-            "Dom"
-        ],
-        "types": [
-            "chrome",
-            "node",
-            "jest",
-            "jest-extended"
-        ],
+        "lib": ["ESNext", "Dom"],
+        "types": ["chrome", "node", "jest", "jest-extended"],
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,

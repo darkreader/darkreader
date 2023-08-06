@@ -1,8 +1,8 @@
-import {m} from 'malevic';
-import {MultiSwitch} from '../../../controls';
-import {ThemeEngine} from '../../../../generators/theme-engines';
-import {getLocalMessage} from '../../../../utils/locales';
-import {openExtensionPage} from '../../../utils';
+import { m } from 'malevic';
+import { MultiSwitch } from '../../../controls';
+import { ThemeEngine } from '../../../../generators/theme-engines';
+import { getLocalMessage } from '../../../../utils/locales';
+import { openExtensionPage } from '../../../utils';
 
 const engineNames: Array<[ThemeEngine, string]> = [
     [ThemeEngine.cssFilter, getLocalMessage('engine_filter')],
@@ -20,22 +20,27 @@ function openCSSEditor() {
     openExtensionPage('stylesheet-editor');
 }
 
-export default function EngineSwitch({engine, onChange}: EngineSwitchProps) {
+export default function EngineSwitch({ engine, onChange }: EngineSwitchProps) {
     return (
-        <div class="engine-switch">
+        <div class='engine-switch'>
             <MultiSwitch
                 value={engineNames.find(([code]) => code === engine)![1]}
                 options={engineNames.map(([, name]) => name)}
-                onChange={(value) => onChange(engineNames.find(([, name]) => name === value)![0])}
+                onChange={(value) =>
+                    onChange(engineNames.find(([, name]) => name === value)![0])
+                }
             />
             <span
                 class={{
                     'engine-switch__css-edit-button': true,
-                    'engine-switch__css-edit-button_active': engine === ThemeEngine.staticTheme,
+                    'engine-switch__css-edit-button_active':
+                        engine === ThemeEngine.staticTheme,
                 }}
                 onclick={openCSSEditor}
             ></span>
-            <label class="engine-switch__description">{getLocalMessage('theme_generation_mode')}</label>
+            <label class='engine-switch__description'>
+                {getLocalMessage('theme_generation_mode')}
+            </label>
         </div>
     );
 }

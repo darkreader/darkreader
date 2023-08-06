@@ -1,5 +1,5 @@
-import {m} from 'malevic';
-import {ColorPicker} from '../../../controls';
+import { m } from 'malevic';
+import { ColorPicker } from '../../../controls';
 import ThemeControl from './theme-control';
 
 type BgColorValue = 'auto' | string;
@@ -13,7 +13,7 @@ interface BgColorEditorProps {
 
 export default function BackgroundColorEditor(props: BgColorEditorProps) {
     return (
-        <ThemeControl label="Background">
+        <ThemeControl label='Background'>
             <ColorPicker
                 color={props.value}
                 onChange={props.onChange}

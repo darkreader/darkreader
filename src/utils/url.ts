@@ -1,5 +1,5 @@
-import type {UserSettings, TabInfo} from '../definitions';
-import {isIPV6, compareIPV6} from './ipv6';
+import type { UserSettings, TabInfo } from '../definitions';
+import { isIPV6, compareIPV6 } from './ipv6';
 
 declare const __THUNDERBIRD__: boolean;
 
@@ -117,17 +117,16 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
 function createUrlRegex(urlTemplate: string): RegExp | null {
     try {
         urlTemplate = urlTemplate.trim();
-        const exactBeginning = (urlTemplate[0] === '^');
-        const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
+        const exactBeginning = urlTemplate[0] === '^';
+        const exactEnding = urlTemplate[urlTemplate.length - 1] === '$';
         const hasLastSlash = /\/\$?$/.test(urlTemplate);
 
-        urlTemplate = (urlTemplate
+        urlTemplate = urlTemplate
             .replace(/^\^/, '') // Remove ^ at start
             .replace(/\$$/, '') // Remove $ at end
             .replace(/^.*?\/{2,3}/, '') // Remove scheme
             .replace(/\?.*$/, '') // Remove query
-            .replace(/\/$/, '') // Remove last slash
-        );
+            .replace(/\/$/, ''); // Remove last slash
 
         let slashIndex: number;
         let beforeSlash: string;
@@ -142,10 +141,9 @@ function createUrlRegex(urlTemplate: string): RegExp | null {
         //
         // SCHEME and SUBDOMAINS
 
-        let result = (exactBeginning ?
-            '^(.*?\\:\\/{2,3})?' // Scheme
-            : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
-        );
+        let result = exactBeginning
+            ? '^(.*?\\:\\/{2,3})?' // Scheme
+            : '^(.*?\\:\\/{2,3})?([^/]*?\\.)?'; // Scheme and subdomains
 
         //
         // HOST and PORT
@@ -169,10 +167,9 @@ function createUrlRegex(urlTemplate: string): RegExp | null {
             result += ')';
         }
 
-        result += (exactEnding ?
-            '(\\/?(\\?[^\/]*?)?)$' // All following queries
-            : `(\\/${hasLastSlash ? '' : '?'}.*?)$` // All following paths and queries
-        );
+        result += exactEnding
+            ? '(\\/?(\\?[^/]*?)?)$' // All following queries
+            : `(\\/${hasLastSlash ? '' : '?'}.*?)$`; // All following paths and queries
 
         //
         // Result
@@ -185,12 +182,17 @@ function createUrlRegex(urlTemplate: string): RegExp | null {
 
 export function isPDF(url: string): boolean {
     try {
-        const {hostname, pathname} = new URL(url);
+        const { hostname, pathname } = new URL(url);
         if (pathname.includes('.pdf')) {
             if (
-                (hostname.match(/(wikipedia|wikimedia)\.org$/i) && pathname.match(/^\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
-                (hostname.match(/timetravel\.mementoweb\.org$/i) && pathname.match(/^\/reconstruct/i) && pathname.match(/\.pdf$/i)) ||
-                (hostname.match(/dropbox\.com$/i) && pathname.match(/^\/s\//i) && pathname.match(/\.pdf$/i))
+                (hostname.match(/(wikipedia|wikimedia)\.org$/i) &&
+                    pathname.match(/^\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
+                (hostname.match(/timetravel\.mementoweb\.org$/i) &&
+                    pathname.match(/^\/reconstruct/i) &&
+                    pathname.match(/\.pdf$/i)) ||
+                (hostname.match(/dropbox\.com$/i) &&
+                    pathname.match(/^\/s\//i) &&
+                    pathname.match(/\.pdf$/i))
             ) {
                 return false;
             }
@@ -212,7 +214,12 @@ export function isPDF(url: string): boolean {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true): boolean {
+export function isURLEnabled(
+    url: string,
+    userSettings: UserSettings,
+    { isProtected, isInDarkList, isDarkThemeDetected }: Partial<TabInfo>,
+    isAllowedFileSchemeAccess = true,
+): boolean {
     if (isLocalFile(url) && !isAllowedFileSchemeAccess) {
         return false;
     }
@@ -259,7 +266,10 @@ export function isFullyQualifiedDomainWildcard(candidate: string): boolean {
     return true;
 }
 
-export function fullyQualifiedDomainMatchesWildcard(wildcard: string, candidate: string): boolean {
+export function fullyQualifiedDomainMatchesWildcard(
+    wildcard: string,
+    candidate: string,
+): boolean {
     const wildcardLabels = wildcard.toLowerCase().split('.');
     const candidateLabels = candidate.toLowerCase().split('.');
     if (candidateLabels.length < wildcardLabels.length) {

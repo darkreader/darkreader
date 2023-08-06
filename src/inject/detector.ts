@@ -1,16 +1,27 @@
-import {getSRGBLightness, parseColorWithCache} from '../utils/color';
+import { getSRGBLightness, parseColorWithCache } from '../utils/color';
 
 function hasBuiltInDarkTheme() {
-    const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<HTMLStyleElement & {disabled: boolean}>;
-    drStyles.forEach((style) => style.disabled = true);
+    const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<
+        HTMLStyleElement & { disabled: boolean }
+    >;
+    drStyles.forEach((style) => (style.disabled = true));
 
-    const rootColor = parseColorWithCache(getComputedStyle(document.documentElement).backgroundColor)!;
-    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor)! : {r: 0, g: 0, b: 0, a: 0};
-    const rootLightness = (1 - rootColor.a!) + rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
-    const finalLightness = (1 - bodyColor.a!) * rootLightness + bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
+    const rootColor = parseColorWithCache(
+        getComputedStyle(document.documentElement).backgroundColor,
+    )!;
+    const bodyColor = document.body
+        ? parseColorWithCache(getComputedStyle(document.body).backgroundColor)!
+        : { r: 0, g: 0, b: 0, a: 0 };
+    const rootLightness =
+        1 -
+        rootColor.a! +
+        rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
+    const finalLightness =
+        (1 - bodyColor.a!) * rootLightness +
+        bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
     const darkThemeDetected = finalLightness < 0.5;
 
-    drStyles.forEach((style) => style.disabled = false);
+    drStyles.forEach((style) => (style.disabled = false));
     return darkThemeDetected;
 }
 
@@ -20,11 +31,23 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
 }
 
 function hasSomeStyle() {
-    if (document.documentElement.style.backgroundColor || (document.body && document.body.style.backgroundColor)) {
+    if (
+        document.documentElement.style.backgroundColor ||
+        (document.body && document.body.style.backgroundColor)
+    ) {
         return true;
     }
     for (const style of document.styleSheets) {
-        if (style && style.ownerNode && !((style.ownerNode as HTMLElement).classList && (style.ownerNode as HTMLElement).classList.contains('darkreader'))) {
+        if (
+            style &&
+            style.ownerNode &&
+            !(
+                (style.ownerNode as HTMLElement).classList &&
+                (style.ownerNode as HTMLElement).classList.contains(
+                    'darkreader',
+                )
+            )
+        ) {
             return true;
         }
     }
@@ -34,7 +57,9 @@ function hasSomeStyle() {
 let observer: MutationObserver | null;
 let readyStateListener: (() => void) | null;
 
-export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void): void {
+export function runDarkThemeDetector(
+    callback: (hasDarkTheme: boolean) => void,
+): void {
     stopDarkThemeDetector();
     if (document.body && hasSomeStyle()) {
         runCheck(callback);
@@ -47,7 +72,7 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void):
             runCheck(callback);
         }
     });
-    observer.observe(document.documentElement, {childList: true});
+    observer.observe(document.documentElement, { childList: true });
 
     if (document.readyState !== 'complete') {
         readyStateListener = () => {

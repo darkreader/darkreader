@@ -1,15 +1,22 @@
 // @ts-check
 
-import {dirname} from 'node:path';
-import {createRequire} from 'node:module';
-const rootDir = dirname(createRequire(import.meta.url).resolve('../../package.json'));
+import { dirname } from 'node:path';
+import { createRequire } from 'node:module';
+const rootDir = dirname(
+    createRequire(import.meta.url).resolve('../../package.json'),
+);
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {
     rootDir,
     testMatch: ['<rootDir>/tests/unit/**/*.tests.ts'],
     moduleFileExtensions: ['ts', 'tsx', 'js'],
-    transform: {'^.+\\.ts(x?)$': ['ts-jest', {tsconfig: '<rootDir>/tests/unit/tsconfig.json'}]},
+    transform: {
+        '^.+\\.ts(x?)$': [
+            'ts-jest',
+            { tsconfig: '<rootDir>/tests/unit/tsconfig.json' },
+        ],
+    },
     globals: {
         __FIREFOX_MV2__: false,
         __CHROMIUM_MV2__: false,

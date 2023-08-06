@@ -1,6 +1,9 @@
-import {createNodeAsap, removeNode} from './utils/dom';
+import { createNodeAsap, removeNode } from './utils/dom';
 
-export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: string): void {
+export function createOrUpdateSVGFilter(
+    svgMatrix: string,
+    svgReverseMatrix: string,
+): void {
     createNodeAsap({
         selectNode: () => document.getElementById('dark-reader-svg')!,
         createNode: (target) => {
@@ -21,7 +24,10 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
             };
 
             const createColorMatrix = (matrix: string) => {
-                const colorMatrix = document.createElementNS(SVG_NS, 'feColorMatrix');
+                const colorMatrix = document.createElementNS(
+                    SVG_NS,
+                    'feColorMatrix',
+                );
                 colorMatrix.setAttribute('type', 'matrix');
                 colorMatrix.setAttribute('values', matrix);
                 return colorMatrix;
@@ -31,12 +37,20 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
             svg.id = 'dark-reader-svg';
             svg.style.height = '0';
             svg.style.width = '0';
-            svg.appendChild(createMatrixFilter('dark-reader-filter', svgMatrix));
-            svg.appendChild(createMatrixFilter('dark-reader-reverse-filter', svgReverseMatrix));
+            svg.appendChild(
+                createMatrixFilter('dark-reader-filter', svgMatrix),
+            );
+            svg.appendChild(
+                createMatrixFilter(
+                    'dark-reader-reverse-filter',
+                    svgReverseMatrix,
+                ),
+            );
             target.appendChild(svg);
         },
         updateNode: (existing) => {
-            const existingMatrix = existing.firstChild!.firstChild as SVGFEColorMatrixElement;
+            const existingMatrix = existing.firstChild!
+                .firstChild as SVGFEColorMatrixElement;
             if (existingMatrix.getAttribute('values') !== svgMatrix) {
                 existingMatrix.setAttribute('values', svgMatrix);
 
@@ -50,10 +64,14 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
         selectTarget: () => document.head,
         createTarget: () => {
             const head = document.createElement('head');
-            document.documentElement.insertBefore(head, document.documentElement.firstElementChild);
+            document.documentElement.insertBefore(
+                head,
+                document.documentElement.firstElementChild,
+            );
             return head;
         },
-        isTargetMutation: (mutation) => mutation.target.nodeName.toLowerCase() === 'head',
+        isTargetMutation: (mutation) =>
+            mutation.target.nodeName.toLowerCase() === 'head',
     });
 }
 

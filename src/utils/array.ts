@@ -1,10 +1,15 @@
-function isArrayLike<T>(items: Iterable<T> | ArrayLike<T>): items is ArrayLike<T> {
+function isArrayLike<T>(
+    items: Iterable<T> | ArrayLike<T>,
+): items is ArrayLike<T> {
     return (items as ArrayLike<T>).length != null;
 }
 
 // NOTE: Iterating Array-like items using `for .. of` is 3x slower in Firefox
 // https://jsben.ch/kidOp
-export function forEach<T>(items: Iterable<T> | ArrayLike<T>, iterator: (item: T) => void): void {
+export function forEach<T>(
+    items: Iterable<T> | ArrayLike<T>,
+    iterator: (item: T) => void,
+): void {
     if (isArrayLike(items)) {
         for (let i = 0, len = items.length; i < len; i++) {
             iterator(items[i]);
@@ -18,7 +23,10 @@ export function forEach<T>(items: Iterable<T> | ArrayLike<T>, iterator: (item: T
 
 // NOTE: Pushing items like `arr.push(...items)` is 3x slower in Firefox
 // https://jsben.ch/nr9OF
-export function push<T>(array: T[], addition: Iterable<T> | ArrayLike<T>): void {
+export function push<T>(
+    array: T[],
+    addition: Iterable<T> | ArrayLike<T>,
+): void {
     forEach(addition, (a) => array.push(a));
 }
 

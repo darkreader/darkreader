@@ -42,7 +42,9 @@ function getNameOfFunction(node) {
             // @ts-ignore
             return node.id.name;
         default:
-            throw new Error('Incorrect type of node has been passed to getNameOfFunction');
+            throw new Error(
+                'Incorrect type of node has been passed to getNameOfFunction',
+            );
     }
 }
 
@@ -114,8 +116,8 @@ function filterNodes(node) {
 const rules = {
     'jsx-uses-m-pragma': {
         /**
-        * @param {import('eslint').Rule.RuleContext} context
-        */
+         * @param {import('eslint').Rule.RuleContext} context
+         */
         create(context) {
             const pragma = 'm';
             const usePragma = () => context.markVariableAsUsed(pragma);
@@ -149,13 +151,15 @@ const rules = {
     'consistent-new-lines': {
         meta: {
             messages: {
-                'incorrect-end': 'Function "{{ name }}" doesn\'t end at {{ loc }}.',
-                'no-newline-after-declaration': 'Function "{{ name }}" doesn\'t has a new line after it\'s declaration.',
-                'too-many-new-lines': 'Function "{{ name }}" has too many new lines after it\'s declaration, it should only have 1 new line.',
+                'incorrect-end':
+                    'Function "{{ name }}" doesn\'t end at {{ loc }}.',
+                'no-newline-after-declaration':
+                    'Function "{{ name }}" doesn\'t has a new line after it\'s declaration.',
+                'too-many-new-lines':
+                    'Function "{{ name }}" has too many new lines after it\'s declaration, it should only have 1 new line.',
             },
             fixable: 'whitespace',
             type: 'layout',
-
         },
         create(context) {
             // Request the splitted(on \n) lines from eslint.
@@ -177,7 +181,10 @@ const rules = {
                     // A special edge-case,
                     //
                     // We might have `};`, let's check for that.
-                    if (endLine.length !== endLoc.column + 1 && endLine[endLoc.column] === ';') {
+                    if (
+                        endLine.length !== endLoc.column + 1 &&
+                        endLine[endLoc.column] === ';'
+                    ) {
                         // Cannot really apply any fix here without a expensive
                         // context-aware system. Developer should be smart enough
                         // to know why linter will error such message on code like:
@@ -191,8 +198,8 @@ const rules = {
                             node,
                             messageId: 'incorrect-end',
                             data: {
-                                'name': getNameOfFunction(node),
-                                'loc': `${endLoc.line}:${endLoc.column}`,
+                                name: getNameOfFunction(node),
+                                loc: `${endLoc.line}:${endLoc.column}`,
                             },
                         });
                     }
@@ -220,7 +227,7 @@ const rules = {
                         node,
                         messageId: 'no-newline-after-declaration',
                         data: {
-                            'name': getNameOfFunction(node),
+                            name: getNameOfFunction(node),
                         },
                         loc: {
                             line: endLoc.line + 1,
@@ -256,7 +263,7 @@ const rules = {
                             node,
                             messageId: 'too-many-new-lines',
                             data: {
-                                'name': getNameOfFunction(node),
+                                name: getNameOfFunction(node),
                             },
                             loc: {
                                 line: endLoc.line + 2,
@@ -274,9 +281,9 @@ const rules = {
             };
 
             return {
-                'FunctionDeclaration': checkNewLine,
-                'FunctionExpression': checkNewLine,
-                'ArrowFunctionExpression': checkNewLine,
+                FunctionDeclaration: checkNewLine,
+                FunctionExpression: checkNewLine,
+                ArrowFunctionExpression: checkNewLine,
             };
         },
     },

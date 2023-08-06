@@ -1,6 +1,6 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
-import {withState, useState} from 'malevic/state';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
+import { withState, useState } from 'malevic/state';
 import Button from '../button';
 import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
@@ -20,12 +20,17 @@ interface SelectState {
 }
 
 function Select(props: SelectProps) {
-    const {state, setState} = useState<SelectState>({isExpanded: false, focusedIndex: null});
+    const { state, setState } = useState<SelectState>({
+        isExpanded: false,
+        focusedIndex: null,
+    });
     const values = Object.keys(props.options);
 
-    const {store} = getContext();
-    const valueNodes: Map<string, Element> = store.valueNodes || (store.valueNodes = new Map());
-    const nodesValues: WeakMap<Element, string> = store.nodesValues || (store.nodesValues = new WeakMap());
+    const { store } = getContext();
+    const valueNodes: Map<string, Element> =
+        store.valueNodes || (store.valueNodes = new Map());
+    const nodesValues: WeakMap<Element, string> =
+        store.nodesValues || (store.nodesValues = new WeakMap());
 
     function onRender(node: Element) {
         store.rootNode = node;
@@ -33,17 +38,19 @@ function Select(props: SelectProps) {
 
     function onOuterClick(e: MouseEvent) {
         const r = (store.rootNode as Element).getBoundingClientRect();
-        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+        if (
+            e.clientX < r.left ||
+            e.clientX > r.right ||
+            e.clientY < r.top ||
+            e.clientY > r.bottom
+        ) {
             window.removeEventListener('click', onOuterClick);
             collapseList();
         }
     }
 
     function onTextInput(e: Event) {
-        const text = (e.target as HTMLInputElement)
-            .value
-            .toLowerCase()
-            .trim();
+        const text = (e.target as HTMLInputElement).value.toLowerCase().trim();
 
         expandList();
 
@@ -66,7 +73,7 @@ function Select(props: SelectProps) {
     }
 
     function scrollToValue(value: string) {
-        setState({focusedIndex: values.indexOf(value)});
+        setState({ focusedIndex: values.indexOf(value) });
     }
 
     function onExpandClick() {
@@ -78,13 +85,13 @@ function Select(props: SelectProps) {
     }
 
     function expandList() {
-        setState({isExpanded: true});
+        setState({ isExpanded: true });
         scrollToValue(props.value);
-        window.addEventListener('click', onOuterClick, {passive: true});
+        window.addEventListener('click', onOuterClick, { passive: true });
     }
 
     function collapseList() {
-        setState({isExpanded: false});
+        setState({ isExpanded: false });
     }
 
     function onSelectOption(e: MouseEvent) {
@@ -121,32 +128,32 @@ function Select(props: SelectProps) {
             ]}
             onrender={onRender}
         >
-            <span class="select__line">
+            <span class='select__line'>
                 <TextBox
-                    class="select__textbox"
+                    class='select__textbox'
                     value={props.value}
                     oninput={onTextInput}
                     onkeypress={onKeyPress}
                 />
-                <Button
-                    class="select__expand"
-                    onclick={onExpandClick}
-                >
-                    <span class="select__expand__icon"></span>
+                <Button class='select__expand' onclick={onExpandClick}>
+                    <span class='select__expand__icon'></span>
                 </Button>
             </span>
             <VirtualScroll
-                root={<span
-                    class={{
-                        'select__list': true,
-                        'select__list--expanded': state.isExpanded,
-                        'select__list--short': Object.keys(props.options).length <= 7,
-                    }}
-                    onclick={onSelectOption}
-                />}
+                root={
+                    <span
+                        class={{
+                            select__list: true,
+                            'select__list--expanded': state.isExpanded,
+                            'select__list--short':
+                                Object.keys(props.options).length <= 7,
+                        }}
+                        onclick={onSelectOption}
+                    />
+                }
                 items={Object.entries(props.options).map(([value, content]) => (
                     <span
-                        class="select__option"
+                        class='select__option'
                         data={value}
                         onrender={(domNode) => saveValueNode(value, domNode)}
                         onremove={() => removeValueNode(value)}

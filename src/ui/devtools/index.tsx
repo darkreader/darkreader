@@ -1,18 +1,27 @@
-import {m} from 'malevic';
-import {sync} from 'malevic/dom';
+import { m } from 'malevic';
+import { sync } from 'malevic/dom';
 import Body from './components/body';
 import Connector from '../connect/connector';
-import type {DevToolsData, ExtensionData} from '../../definitions';
+import type { DevToolsData, ExtensionData } from '../../definitions';
 
 declare const __CHROMIUM_MV3__: boolean;
 
-function renderBody(data: ExtensionData, devToolsData: DevToolsData, actions: Connector) {
-    sync(document.body, <Body data={data} devtools={devToolsData} actions={actions} />);
+function renderBody(
+    data: ExtensionData,
+    devToolsData: DevToolsData,
+    actions: Connector,
+) {
+    sync(
+        document.body,
+        <Body data={data} devtools={devToolsData} actions={actions} />,
+    );
 }
 
 async function start(): Promise<void> {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
+    window.addEventListener('unload', () => connector.disconnect(), {
+        passive: true,
+    });
 
     let [data, devToolsData] = await Promise.all([
         connector.getData(),
@@ -32,30 +41,41 @@ declare const __TEST__: boolean;
 if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
-        socket.send(JSON.stringify({
-            data: {
-                type: 'devtools',
-                uuid: `ready-${document.location.pathname}`,
-            },
-            id: null,
-        }));
+        socket.send(
+            JSON.stringify({
+                data: {
+                    type: 'devtools',
+                    uuid: `ready-${document.location.pathname}`,
+                },
+                id: null,
+            }),
+        );
     };
     socket.onmessage = (e) => {
-        const respond = (message: {id: number; data?: string | boolean; error?: string}) => socket.send(JSON.stringify(message));
-        const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-        const {type, id, data} = message;
+        const respond = (message: {
+            id: number;
+            data?: string | boolean;
+            error?: string;
+        }) => socket.send(JSON.stringify(message));
+        const message: { type: string; id: number; data: string } = JSON.parse(
+            e.data,
+        );
+        const { type, id, data } = message;
         try {
-            const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor')!;
-            const [buttonReset, buttonApply] = document.querySelectorAll('button');
+            const textarea: HTMLTextAreaElement =
+                document.querySelector('textarea#editor')!;
+            const [buttonReset, buttonApply] =
+                document.querySelectorAll('button');
             switch (type) {
                 case 'devtools-exists': {
                     // The required element may not exist yet
                     const check = () => {
-                        const element: HTMLElement | null = document.querySelector(data);
+                        const element: HTMLElement | null =
+                            document.querySelector(data);
                         if (element) {
-                            respond({id, data: true});
+                            respond({ id, data: true });
                         } else {
-                            requestIdleCallback(check, {timeout: 500});
+                            requestIdleCallback(check, { timeout: 500 });
                         }
                     };
 
@@ -65,16 +85,20 @@ if (__TEST__) {
                 case 'devtools-paste':
                     textarea.value = data;
                     buttonApply.click();
-                    respond({id});
+                    respond({ id });
                     break;
                 case 'devtools-reset':
-                    respond({id});
+                    respond({ id });
                     buttonReset.click();
-                    (document.querySelector('button.message-box__button-ok') as HTMLButtonElement).click();
+                    (
+                        document.querySelector(
+                            'button.message-box__button-ok',
+                        ) as HTMLButtonElement
+                    ).click();
                     break;
             }
         } catch (err) {
-            respond({id, error: String(err)});
+            respond({ id, error: String(err) });
         }
     };
 }

@@ -1,4 +1,4 @@
-import {PromiseBarrier} from './promise-barrier';
+import { PromiseBarrier } from './promise-barrier';
 
 /*
  * This class synchronizes some JS object's attributes and data stored in
@@ -94,7 +94,7 @@ enum StateManagerImplState {
     SAVING = 3,
     SAVING_OVERRIDE = 4,
     ONCHANGE_RACE = 5,
-    RECOVERY = 6
+    RECOVERY = 6,
 }
 
 export class StateManagerImpl<T extends Record<string, unknown>> {
@@ -107,14 +107,30 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
     private barrier: PromiseBarrier<void, void> | null = null;
 
     private storage: {
-        get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void;
+        get: (
+            storageKey: string,
+            callback: (items: { [key: string]: any }) => void,
+        ) => void;
         set: (items: { [key: string]: any }, callback: () => void) => void;
     };
 
     private listeners: Set<() => void>;
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    public constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
+    public constructor(
+        localStorageKey: string,
+        parent: any,
+        defaults: T,
+        storage: {
+            get: (
+                storageKey: string,
+                callback: (items: { [key: string]: any }) => void,
+            ) => void;
+            set: (items: { [key: string]: any }, callback: () => void) => void;
+        },
+        addListener: (listener: (data: T) => void) => void,
+        logWarn: (log: string) => void,
+    ) {
         this.localStorageKey = localStorageKey;
         this.parent = parent;
         this.defaults = defaults;
@@ -156,7 +172,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 this.meta = StateManagerImplState.READY;
-                // fallthrough
+            // fallthrough
             case StateManagerImplState.READY:
                 this.applyState(state);
                 this.notifyListeners();
@@ -180,32 +196,35 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
     }
 
     private saveStateInternal() {
-        this.storage.set({[this.localStorageKey]: this.collectState()}, () => {
-            switch (this.meta) {
-                case StateManagerImplState.INITIAL:
+        this.storage.set(
+            { [this.localStorageKey]: this.collectState() },
+            () => {
+                switch (this.meta) {
+                    case StateManagerImplState.INITIAL:
                     // fallthrough
-                case StateManagerImplState.LOADING:
+                    case StateManagerImplState.LOADING:
                     // fallthrough
-                case StateManagerImplState.READY:
+                    case StateManagerImplState.READY:
                     // fallthrough
-                case StateManagerImplState.RECOVERY:
-                    this.logWarn('Unexpected state. Possible data race!');
-                    this.meta = StateManagerImplState.ONCHANGE_RACE;
-                    this.loadStateInternal();
-                    return;
-                case StateManagerImplState.SAVING:
-                    this.meta = StateManagerImplState.READY;
-                    this.releaseBarrier();
-                    return;
-                case StateManagerImplState.SAVING_OVERRIDE:
-                    this.meta = StateManagerImplState.SAVING;
-                    this.saveStateInternal();
-                    return;
-                case StateManagerImplState.ONCHANGE_RACE:
-                    this.meta = StateManagerImplState.RECOVERY;
-                    this.loadStateInternal();
-            }
-        });
+                    case StateManagerImplState.RECOVERY:
+                        this.logWarn('Unexpected state. Possible data race!');
+                        this.meta = StateManagerImplState.ONCHANGE_RACE;
+                        this.loadStateInternal();
+                        return;
+                    case StateManagerImplState.SAVING:
+                        this.meta = StateManagerImplState.READY;
+                        this.releaseBarrier();
+                        return;
+                    case StateManagerImplState.SAVING_OVERRIDE:
+                        this.meta = StateManagerImplState.SAVING;
+                        this.saveStateInternal();
+                        return;
+                    case StateManagerImplState.ONCHANGE_RACE:
+                        this.meta = StateManagerImplState.RECOVERY;
+                        this.loadStateInternal();
+                }
+            },
+        );
     }
 
     // This function is not guaranteed to save state before returning
@@ -213,11 +232,15 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 // Make sure not to overwrite data before it is loaded
-                this.logWarn('StateManager.saveState was called before StateManager.loadState(). Possible data race! Loading data instead.');
+                this.logWarn(
+                    'StateManager.saveState was called before StateManager.loadState(). Possible data race! Loading data instead.',
+                );
                 return this.loadState();
             case StateManagerImplState.LOADING:
                 // Need to wait for active read operation to end
-                this.logWarn('StateManager.saveState was called before StateManager.loadState() resolved. Possible data race! Loading data instead.');
+                this.logWarn(
+                    'StateManager.saveState was called before StateManager.loadState() resolved. Possible data race! Loading data instead.',
+                );
                 return this.barrier!.entry();
             case StateManagerImplState.READY:
                 this.meta = StateManagerImplState.SAVING;
@@ -231,10 +254,14 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
             case StateManagerImplState.SAVING_OVERRIDE:
                 return this.barrier!.entry();
             case StateManagerImplState.ONCHANGE_RACE:
-                this.logWarn('StateManager.saveState was called during active read/write operation. Possible data race! Loading data instead.');
+                this.logWarn(
+                    'StateManager.saveState was called during active read/write operation. Possible data race! Loading data instead.',
+                );
                 return this.barrier!.entry();
             case StateManagerImplState.RECOVERY:
-                this.logWarn('StateManager.saveState was called during active read operation. Possible data race! Waiting for data load instead.');
+                this.logWarn(
+                    'StateManager.saveState was called during active read operation. Possible data race! Waiting for data load instead.',
+                );
                 return this.barrier!.entry();
         }
     }

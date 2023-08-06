@@ -28,8 +28,8 @@ You can install the extension from a file.
 Install [Node.js](https://nodejs.org/) (we recommend LTS or higher, but any version at or above 15 will work). Download the source code (or check out from git).
 Open the terminal in the root folder and run:
 
-- `npm install`
-- `npm run build` or `npm run build [-- flags]`
+-   `npm install`
+-   `npm run build` or `npm run build [-- flags]`
 
 This will create a `build/release/darkreader-chrome.zip` file for use in a Chromium-based browser and a `build/release/darkreader-firefox.xpi` file for use in Firefox.
 
@@ -46,6 +46,7 @@ Please note that if you encounter error `Too many open files (os error 24)`, the
 Prior to publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that extension bundle did not get corrupted or bit-rotted) and that extension store preformed very basic extension validation.
 
 Dark Reader repository contains these digital signatures and you can add them to the extension bundle. The following will build Dark Reader for Firefox version 4.9.63:
+
 ```
 npm run build -- --firefox --version=4.9.63
 ```
@@ -56,16 +57,17 @@ Please note that only Firefox Add-ons store signatures are present in the reposi
 
 You can use Dark Reader to enable dark mode on your website!
 
-- Install the package from NPM (`npm install darkreader`)
-- or build from the source code (`npm run api`)
-- or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
+-   Install the package from NPM (`npm install darkreader`)
+-   or build from the source code (`npm run api`)
+-   or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
 
 Then you can use the following code to control Dark Reader's API:
+
 ```javascript
 DarkReader.enable({
     brightness: 100,
     contrast: 90,
-    sepia: 10
+    sepia: 10,
 });
 
 DarkReader.disable();
@@ -74,7 +76,7 @@ DarkReader.disable();
 DarkReader.auto({
     brightness: 100,
     contrast: 90,
-    sepia: 10
+    sepia: 10,
 });
 
 // Stop watching for the system color scheme.
@@ -95,7 +97,7 @@ import {
     disable as disableDarkMode,
     auto as followSystemColorScheme,
     exportGeneratedCSS as collectCSS,
-    isEnabled as isDarkReaderEnabled
+    isEnabled as isDarkReaderEnabled,
 } from 'darkreader';
 
 enableDarkMode({
@@ -121,16 +123,16 @@ Automatically syncing the site fixes to every Dark Reader user was disabled beca
 
 However, this can be enabled using the following steps:
 
-- Click on the Dark Reader icon.
-- Click on the Dev tools button (in the bottom-right corner).
-- Click on the Preview new design button.
-- Enable the `Synchronize site fixes` setting under `Settings -> Manage Settings`.
+-   Click on the Dark Reader icon.
+-   Click on the Dev tools button (in the bottom-right corner).
+-   Click on the Preview new design button.
+-   Enable the `Synchronize site fixes` setting under `Settings -> Manage Settings`.
 
 To force a synchronization of the sites fixes (when the corresponding setting is enabled), perform the following steps:
 
-- Click on the Dark Reader icon.
-- Click on the Dev tools button (in the bottom-right corner).
-- Click on the Reset button. This will remove any custom site fixes you may have.
+-   Click on the Dark Reader icon.
+-   Click on the Dev tools button (in the bottom-right corner).
+-   Click on the Reset button. This will remove any custom site fixes you may have.
 
 <h2 align="center">Contributors</h2>
 <br/>

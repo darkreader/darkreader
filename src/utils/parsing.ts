@@ -1,4 +1,4 @@
-import {getParenthesesRange} from './text';
+import { getParenthesesRange } from './text';
 
 const gradientLength = 'gradient'.length;
 const conicGradient = 'conic-';
@@ -35,15 +35,28 @@ export function parseGradient(value: string): parsedGradient[] {
         // will we get the substring of the possible gradient types.
         [linearGradient, radialGradient, conicGradient].find((possibleType) => {
             if (index - possibleType.length >= 0) {
-                const possibleGradient = value.substring(index - possibleType.length, index);
+                const possibleGradient = value.substring(
+                    index - possibleType.length,
+                    index,
+                );
                 if (possibleGradient === possibleType) {
                     // Check if the type has a `-` before the `type-gradient` keyword.
                     // If it does, it's a repeating gradient.
-                    if (value.slice(index - possibleType.length - 10, index - possibleType.length - 1) === 'repeating') {
+                    if (
+                        value.slice(
+                            index - possibleType.length - 10,
+                            index - possibleType.length - 1,
+                        ) === 'repeating'
+                    ) {
                         typeGradient = `repeating-${possibleType}gradient`;
                         return true;
                     }
-                    if (value.slice(index - possibleType.length - 8, index - possibleType.length - 1) === '-webkit') {
+                    if (
+                        value.slice(
+                            index - possibleType.length - 8,
+                            index - possibleType.length - 1,
+                        ) === '-webkit'
+                    ) {
                         typeGradient = `-webkit-${possibleType}gradient`;
                         return true;
                     }
@@ -59,7 +72,10 @@ export function parseGradient(value: string): parsedGradient[] {
 
         // Now we know the type of gradient.
         // We can go parse the rest of the value as a gradient.
-        const {start, end} = getParenthesesRange(value, index + gradientLength)!;
+        const { start, end } = getParenthesesRange(
+            value,
+            index + gradientLength,
+        )!;
 
         const match = value.substring(start + 1, end - 1);
         startIndex = end + 1 + conicGradientLength;
@@ -79,7 +95,6 @@ export function parseGradient(value: string): parsedGradient[] {
     if (result.length) {
         result[result.length - 1].hasComma = false;
     }
-
 
     return result;
 }

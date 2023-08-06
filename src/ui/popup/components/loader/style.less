@@ -1,4 +1,4 @@
-@import "../../../theme";
+@import '../../../theme';
 
 @loading-fade-duration: @time-fast;
 @loading-slide-duration: 2s;
@@ -30,9 +30,13 @@
     }
 
     &::before {
-        animation: @loading-slide-duration loading-slide @loading-slide-delay ease-in-out infinite, @loading-slide-duration * 2 @loading-slide-delay loading-color linear infinite;
+        animation:
+            @loading-slide-duration loading-slide @loading-slide-delay
+                ease-in-out infinite,
+            @loading-slide-duration * 2 @loading-slide-delay loading-color
+                linear infinite;
         background-color: @color-border;
-        content: "";
+        content: '';
         display: block;
         height: @size-border-inner;
         left: 0%;
@@ -42,17 +46,19 @@
     }
 
     &__message {
-        animation: @loading-fade-duration loading-fade-in @loading-slide-delay ease-in forwards;
+        animation: @loading-fade-duration loading-fade-in @loading-slide-delay
+            ease-in forwards;
         color: @color-heading;
         font-size: @size-text-small;
         opacity: 0;
         position: absolute;
         right: @popup-content-padding;
-        bottom: @popup-content-height + @popup-content-padding - @size-control-inner - @indent-small;
+        bottom: @popup-content-height + @popup-content-padding -
+            @size-control-inner - @indent-small;
     }
 
     &__error {
-        font-size: @size-text-normal; 
+        font-size: @size-text-normal;
     }
 
     &--complete &__message {
@@ -77,10 +83,12 @@
 }
 
 @keyframes loading-color {
-    0%, 49% {
+    0%,
+    49% {
         background-color: @color-border;
     }
-    50%, 100% {
+    50%,
+    100% {
         background-color: @color-heading;
     }
 }

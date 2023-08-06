@@ -1,5 +1,8 @@
 export function getEchoURL(content: string, type = 'text/plain'): string {
-    return `http://localhost:9966/echo?${new URLSearchParams({type, content})}`;
+    return `http://localhost:9966/echo?${new URLSearchParams({
+        type,
+        content,
+    })}`;
 }
 
 export function getCSSEchoURL(content: string): string {

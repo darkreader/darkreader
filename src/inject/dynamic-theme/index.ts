@@ -1,28 +1,63 @@
-import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
-import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
-import type {StyleElement, StyleManager} from './style-manager';
-import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
-import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
-import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
-import {logInfo, logWarn} from '../utils/log';
-import {throttle} from '../../utils/throttle';
-import {clamp} from '../../utils/math';
-import {getCSSFilterValue} from '../../generators/css-filter';
-import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
-import {createTextStyle} from '../../generators/text-style';
-import type {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {generateUID} from '../../utils/uid';
-import type {AdoptedStyleSheetManager} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
-import {isFirefox} from '../../utils/platform';
-import {injectProxy} from './stylesheet-proxy';
-import {clearColorCache, parseColorWithCache} from '../../utils/color';
-import {parsedURLCache} from '../../utils/url';
-import {variablesStore} from './variables';
-import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
-import {combineFixes, findRelevantFix} from './fixes';
+import {
+    overrideInlineStyle,
+    getInlineOverrideStyle,
+    watchForInlineStyles,
+    stopWatchingForInlineStyles,
+    INLINE_STYLE_SELECTOR,
+} from './inline-style';
+import {
+    changeMetaThemeColorWhenAvailable,
+    restoreMetaThemeColor,
+} from './meta-theme-color';
+import {
+    getModifiedUserAgentStyle,
+    getModifiedFallbackStyle,
+    cleanModificationCache,
+    getSelectionColor,
+} from './modify-css';
+import type { StyleElement, StyleManager } from './style-manager';
+import {
+    manageStyle,
+    getManageableStyles,
+    cleanLoadingLinks,
+} from './style-manager';
+import { watchForStyleChanges, stopWatchingForStyleChanges } from './watch';
+import { forEach, push, toArray } from '../../utils/array';
+import {
+    removeNode,
+    watchForNodePosition,
+    iterateShadowHosts,
+    isDOMReady,
+    removeDOMReadyListener,
+    cleanReadyStateCompleteListeners,
+    addDOMReadyListener,
+    setIsDOMReady,
+} from '../utils/dom';
+import { logInfo, logWarn } from '../utils/log';
+import { throttle } from '../../utils/throttle';
+import { clamp } from '../../utils/math';
+import { getCSSFilterValue } from '../../generators/css-filter';
+import {
+    modifyBackgroundColor,
+    modifyColor,
+    modifyForegroundColor,
+} from '../../generators/modify-colors';
+import { createTextStyle } from '../../generators/text-style';
+import type { FilterConfig, DynamicThemeFix } from '../../definitions';
+import { generateUID } from '../../utils/uid';
+import type { AdoptedStyleSheetManager } from './adopted-style-manger';
+import { createAdoptedStyleSheetOverride } from './adopted-style-manger';
+import { isFirefox } from '../../utils/platform';
+import { injectProxy } from './stylesheet-proxy';
+import { clearColorCache, parseColorWithCache } from '../../utils/color';
+import { parsedURLCache } from '../../utils/url';
+import { variablesStore } from './variables';
+import {
+    setDocumentVisibilityListener,
+    documentIsVisible,
+    removeDocumentVisibilityListener,
+} from '../../utils/visibility';
+import { combineFixes, findRelevantFix } from './fixes';
 
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -35,7 +70,10 @@ let isIFrame: boolean | null = null;
 let ignoredImageAnalysisSelectors: string[] = [];
 let ignoredInlineSelectors: string[] = [];
 
-function createOrUpdateStyle(className: string, root: ParentNode = document.head || document): HTMLStyleElement {
+function createOrUpdateStyle(
+    className: string,
+    root: ParentNode = document.head || document,
+): HTMLStyleElement {
     let element: HTMLStyleElement | null = root.querySelector(`.${className}`);
     if (!element) {
         element = document.createElement('style');
@@ -50,7 +88,10 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
 /**
  * Note: This function is used only with MV2.
  */
-function createOrUpdateScript(className: string, root: ParentNode = document.head || document): HTMLScriptElement {
+function createOrUpdateScript(
+    className: string,
+    root: ParentNode = document.head || document,
+): HTMLScriptElement {
     let element: HTMLScriptElement | null = root.querySelector(`.${className}`);
     if (!element) {
         element = document.createElement('script');
@@ -64,15 +105,24 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
  * Note: This function is used only with MV3.
  * The string passed as the src parameter must be included in the web_accessible_resources manifest key.
  */
-function injectProxyScriptMV3(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {
+function injectProxyScriptMV3(
+    enableStyleSheetsProxy: boolean,
+    enableCustomElementRegistryProxy: boolean,
+): void {
     logInfo('MV3 proxy injector: regular path attempts to inject...');
     const element = document.createElement('script');
     element.src = chrome.runtime.getURL('inject/proxy.js');
-    element.dataset.arg = JSON.stringify({enableStyleSheetsProxy, enableCustomElementRegistryProxy});
+    element.dataset.arg = JSON.stringify({
+        enableStyleSheetsProxy,
+        enableCustomElementRegistryProxy,
+    });
     document.head.prepend(element);
 }
 
-const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
+const nodePositionWatchers = new Map<
+    string,
+    ReturnType<typeof watchForNodePosition>
+>();
 
 function setupNodePositionWatcher(node: Node, alias: string) {
     nodePositionWatchers.has(alias) && nodePositionWatchers.get(alias)!.stop();
@@ -86,12 +136,18 @@ function stopStylePositionWatchers() {
 
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
-    fallbackStyle.textContent = getModifiedFallbackStyle(filter!, {strict: true});
+    fallbackStyle.textContent = getModifiedFallbackStyle(filter!, {
+        strict: true,
+    });
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
     setupNodePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter!, isIFrame!, filter!.styleSystemControls);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(
+        filter!,
+        isIFrame!,
+        filter!.styleSystemControls,
+    );
     document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupNodePositionWatcher(userAgentStyle, 'user-agent');
 
@@ -110,7 +166,10 @@ function createStaticStyleOverrides() {
             `${fixes.invert.join(', ')} {`,
             `    filter: ${getCSSFilterValue({
                 ...filter!,
-                contrast: filter!.mode === 0 ? filter!.contrast : clamp(filter!.contrast - 10, 0, 100),
+                contrast:
+                    filter!.mode === 0
+                        ? filter!.contrast
+                        : clamp(filter!.contrast - 10, 0, 100),
             })} !important;`,
             '}',
         ].join('\n');
@@ -126,17 +185,32 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(inlineStyle, 'inline');
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
-    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    overrideStyle.textContent =
+        fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     document.head.appendChild(overrideStyle);
     setupNodePositionWatcher(overrideStyle, 'override');
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
     const selectionColors = getSelectionColor(filter!);
-    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode} = filter!;
-    let schemeBackgroundColor = mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor;
-    let schemeTextColor = mode === 0 ? lightSchemeTextColor : darkSchemeTextColor;
-    schemeBackgroundColor = modifyBackgroundColor(parseColorWithCache(schemeBackgroundColor)!, filter!);
-    schemeTextColor = modifyForegroundColor(parseColorWithCache(schemeTextColor)!, filter!);
+    const {
+        darkSchemeBackgroundColor,
+        darkSchemeTextColor,
+        lightSchemeBackgroundColor,
+        lightSchemeTextColor,
+        mode,
+    } = filter!;
+    let schemeBackgroundColor =
+        mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor;
+    let schemeTextColor =
+        mode === 0 ? lightSchemeTextColor : darkSchemeTextColor;
+    schemeBackgroundColor = modifyBackgroundColor(
+        parseColorWithCache(schemeBackgroundColor)!,
+        filter!,
+    );
+    schemeTextColor = modifyForegroundColor(
+        parseColorWithCache(schemeTextColor)!,
+        filter!,
+    );
     variableStyle.textContent = [
         `:root {`,
         `   --darkreader-neutral-background: ${schemeBackgroundColor};`,
@@ -152,14 +226,28 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
-    const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
+    const enableCustomElementRegistryProxy = !(
+        fixes && fixes.disableCustomElementRegistryProxy
+    );
     if (__CHROMIUM_MV3__) {
-        injectProxyScriptMV3(enableStyleSheetsProxy, enableCustomElementRegistryProxy);
+        injectProxyScriptMV3(
+            enableStyleSheetsProxy,
+            enableCustomElementRegistryProxy,
+        );
         // Notify the dedicated injector of the data.
-        document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: {enableStyleSheetsProxy, enableCustomElementRegistryProxy}}));
+        document.dispatchEvent(
+            new CustomEvent('__darkreader__stylesheetProxy__arg', {
+                detail: {
+                    enableStyleSheetsProxy,
+                    enableCustomElementRegistryProxy,
+                },
+            }),
+        );
     } else {
         const proxyScript = createOrUpdateScript('darkreader--proxy');
-        proxyScript.append(`(${injectProxy})(${enableStyleSheetsProxy}, ${enableCustomElementRegistryProxy})`);
+        proxyScript.append(
+            `(${injectProxy})(${enableStyleSheetsProxy}, ${enableCustomElementRegistryProxy})`,
+        );
         document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
         proxyScript.remove();
     }
@@ -172,7 +260,8 @@ function createShadowStaticStyleOverridesInner(root: ShadowRoot) {
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
     const overrideStyle = createOrUpdateStyle('darkreader--override', root);
-    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    overrideStyle.textContent =
+        fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     root.insertBefore(overrideStyle, inlineStyle.nextSibling);
 
     const invertStyle = createOrUpdateStyle('darkreader--invert', root);
@@ -181,7 +270,10 @@ function createShadowStaticStyleOverridesInner(root: ShadowRoot) {
             `${fixes.invert.join(', ')} {`,
             `    filter: ${getCSSFilterValue({
                 ...filter!,
-                contrast: filter!.mode === 0 ? filter!.contrast : clamp(filter!.contrast - 10, 0, 100),
+                contrast:
+                    filter!.mode === 0
+                        ? filter!.contrast
+                        : clamp(filter!.contrast - 10, 0, 100),
             })} !important;`,
             '}',
         ].join('\n');
@@ -198,10 +290,17 @@ function delayedCreateShadowStaticStyleOverrides(root: ShadowRoot): void {
         observer.disconnect();
 
         // Do not make any changes unless Dark Reader's fixes have been removed
-        for (const {type, removedNodes} of mutations) {
+        for (const { type, removedNodes } of mutations) {
             if (type === 'childList') {
-                for (const {nodeName, className} of removedNodes as any) {
-                    if (nodeName === 'STYLE' && ['darkreader darkreader--inline', 'darkreader darkreader--override', 'darkreader darkreader--invert'].includes(className)) {
+                for (const { nodeName, className } of removedNodes as any) {
+                    if (
+                        nodeName === 'STYLE' &&
+                        [
+                            'darkreader darkreader--inline',
+                            'darkreader darkreader--override',
+                            'darkreader darkreader--invert',
+                        ].includes(className)
+                    ) {
                         createShadowStaticStyleOverridesInner(root);
                         return;
                     }
@@ -209,7 +308,7 @@ function delayedCreateShadowStaticStyleOverrides(root: ShadowRoot): void {
             }
         }
     });
-    observer.observe(root, {childList: true});
+    observer.observe(root, { childList: true });
 }
 
 function createShadowStaticStyleOverrides(root: ShadowRoot) {
@@ -250,7 +349,7 @@ function createDynamicStyleOverrides() {
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
     newManagers
-        .map((manager) => manager.details({secondRound: false}))
+        .map((manager) => manager.details({ secondRound: false }))
         .filter((detail) => detail && detail.rules.length > 0)
         .forEach((detail) => {
             variablesStore.addRulesForMatching(detail!.rules);
@@ -264,21 +363,34 @@ function createDynamicStyleOverrides() {
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     variablesStore.putRootVars(rootVarsStyle, filter!);
 
-    styleManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors!));
+    styleManagers.forEach((manager) =>
+        manager.render(filter!, ignoredImageAnalysisSelectors!),
+    );
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
     }
     newManagers.forEach((manager) => manager.watch());
 
-    const inlineStyleElements = toArray(document.querySelectorAll(INLINE_STYLE_SELECTOR));
+    const inlineStyleElements = toArray(
+        document.querySelectorAll(INLINE_STYLE_SELECTOR),
+    );
     iterateShadowHosts(document.documentElement, (host) => {
         createShadowStaticStyleOverrides(host.shadowRoot!);
-        const elements = host.shadowRoot!.querySelectorAll(INLINE_STYLE_SELECTOR);
+        const elements = host.shadowRoot!.querySelectorAll(
+            INLINE_STYLE_SELECTOR,
+        );
         if (elements.length > 0) {
             push(inlineStyleElements, elements);
         }
     });
-    inlineStyleElements.forEach((el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
+    inlineStyleElements.forEach((el: HTMLElement) =>
+        overrideInlineStyle(
+            el,
+            filter!,
+            ignoredInlineSelectors,
+            ignoredImageAnalysisSelectors,
+        ),
+    );
     handleAdoptedStyleSheets(document);
 }
 
@@ -287,22 +399,31 @@ const loadingStyles = new Set<number>();
 
 function createManager(element: StyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
-    logInfo(`New manager for element, with loadingStyleID ${loadingStyleId}`, element);
+    logInfo(
+        `New manager for element, with loadingStyleID ${loadingStyleId}`,
+        element,
+    );
     function loadingStart() {
         if (!isDOMReady() || !documentIsVisible()) {
             loadingStyles.add(loadingStyleId);
             logInfo(`Current amount of styles loading: ${loadingStyles.size}`);
 
-            const fallbackStyle = document.querySelector('.darkreader--fallback')!;
+            const fallbackStyle = document.querySelector(
+                '.darkreader--fallback',
+            )!;
             if (!fallbackStyle.textContent) {
-                fallbackStyle.textContent = getModifiedFallbackStyle(filter!, {strict: false});
+                fallbackStyle.textContent = getModifiedFallbackStyle(filter!, {
+                    strict: false,
+                });
             }
         }
     }
 
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
-        logInfo(`Removed loadingStyle ${loadingStyleId}, now awaiting: ${loadingStyles.size}`);
+        logInfo(
+            `Removed loadingStyle ${loadingStyleId}, now awaiting: ${loadingStyles.size}`,
+        );
         logInfo(`To-do to be loaded`, loadingStyles);
         if (loadingStyles.size === 0 && isDOMReady()) {
             cleanFallbackStyle();
@@ -310,7 +431,7 @@ function createManager(element: StyleElement) {
     }
 
     function update() {
-        const details = manager.details({secondRound: true});
+        const details = manager.details({ secondRound: true });
         if (!details) {
             return;
         }
@@ -318,11 +439,13 @@ function createManager(element: StyleElement) {
         variablesStore.matchVariablesAndDependants();
         manager.render(filter!, ignoredImageAnalysisSelectors);
         if (__TEST__) {
-            document.dispatchEvent(new CustomEvent('__darkreader__test__dynamicUpdateComplete'));
+            document.dispatchEvent(
+                new CustomEvent('__darkreader__test__dynamicUpdateComplete'),
+            );
         }
     }
 
-    const manager = manageStyle(element, {update, loadingStart, loadingEnd});
+    const manager = manageStyle(element, { update, loadingStart, loadingEnd });
     styleManagers.set(element, manager);
 
     return manager;
@@ -337,8 +460,12 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors));
+    styleManagers.forEach((manager) =>
+        manager.render(filter!, ignoredImageAnalysisSelectors),
+    );
+    adoptedStyleManagers.forEach((manager) =>
+        manager.render(filter!, ignoredImageAnalysisSelectors),
+    );
     callback && callback();
 });
 
@@ -392,48 +519,79 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
 
 function watchForUpdates() {
     const managedStyles = Array.from(styleManagers.keys());
-    watchForStyleChanges(managedStyles, ({created, updated, removed, moved}) => {
-        const stylesToRemove = removed;
-        const stylesToManage = created.concat(updated).concat(moved)
-            .filter((style) => !styleManagers.has(style));
-        const stylesToRestore = moved
-            .filter((style) => styleManagers.has(style));
-        logInfo(`Styles to be removed:`, stylesToRemove);
-        stylesToRemove.forEach((style) => removeManager(style));
-        const newManagers = stylesToManage
-            .map((style) => createManager(style));
-        newManagers
-            .map((manager) => manager.details({secondRound: false}))
-            .filter((detail) => detail && detail.rules.length > 0)
-            .forEach((detail) => {
-                variablesStore.addRulesForMatching(detail!.rules);
-            });
-        variablesStore.matchVariablesAndDependants();
-        newManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors));
-        newManagers.forEach((manager) => manager.watch());
-        stylesToRestore.forEach((style) => styleManagers.get(style)!.restore());
-    }, (shadowRoot) => {
-        createShadowStaticStyleOverrides(shadowRoot);
-        handleAdoptedStyleSheets(shadowRoot);
-    });
+    watchForStyleChanges(
+        managedStyles,
+        ({ created, updated, removed, moved }) => {
+            const stylesToRemove = removed;
+            const stylesToManage = created
+                .concat(updated)
+                .concat(moved)
+                .filter((style) => !styleManagers.has(style));
+            const stylesToRestore = moved.filter((style) =>
+                styleManagers.has(style),
+            );
+            logInfo(`Styles to be removed:`, stylesToRemove);
+            stylesToRemove.forEach((style) => removeManager(style));
+            const newManagers = stylesToManage.map((style) =>
+                createManager(style),
+            );
+            newManagers
+                .map((manager) => manager.details({ secondRound: false }))
+                .filter((detail) => detail && detail.rules.length > 0)
+                .forEach((detail) => {
+                    variablesStore.addRulesForMatching(detail!.rules);
+                });
+            variablesStore.matchVariablesAndDependants();
+            newManagers.forEach((manager) =>
+                manager.render(filter!, ignoredImageAnalysisSelectors),
+            );
+            newManagers.forEach((manager) => manager.watch());
+            stylesToRestore.forEach((style) =>
+                styleManagers.get(style)!.restore(),
+            );
+        },
+        (shadowRoot) => {
+            createShadowStaticStyleOverrides(shadowRoot);
+            handleAdoptedStyleSheets(shadowRoot);
+        },
+    );
 
-    watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
-        if (element === document.documentElement) {
-            const styleAttr = element.getAttribute('style') || '';
-            if (styleAttr.includes('--')) {
-                variablesStore.matchVariablesAndDependants();
-                const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-                variablesStore.putRootVars(rootVarsStyle, filter!);
+    watchForInlineStyles(
+        (element) => {
+            overrideInlineStyle(
+                element,
+                filter!,
+                ignoredInlineSelectors,
+                ignoredImageAnalysisSelectors,
+            );
+            if (element === document.documentElement) {
+                const styleAttr = element.getAttribute('style') || '';
+                if (styleAttr.includes('--')) {
+                    variablesStore.matchVariablesAndDependants();
+                    const rootVarsStyle = createOrUpdateStyle(
+                        'darkreader--root-vars',
+                    );
+                    variablesStore.putRootVars(rootVarsStyle, filter!);
+                }
             }
-        }
-    }, (root) => {
-        createShadowStaticStyleOverrides(root);
-        const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
-        if (inlineStyleElements.length > 0) {
-            forEach(inlineStyleElements, (el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
-        }
-    });
+        },
+        (root) => {
+            createShadowStaticStyleOverrides(root);
+            const inlineStyleElements = root.querySelectorAll(
+                INLINE_STYLE_SELECTOR,
+            );
+            if (inlineStyleElements.length > 0) {
+                forEach(inlineStyleElements, (el: HTMLElement) =>
+                    overrideInlineStyle(
+                        el,
+                        filter!,
+                        ignoredInlineSelectors,
+                        ignoredImageAnalysisSelectors,
+                    ),
+                );
+            }
+        },
+    );
 
     addDOMReadyListener(onDOMReady);
 }
@@ -456,7 +614,7 @@ function addMetaListener() {
             removeDynamicTheme();
         }
     });
-    metaObserver.observe(document.head, {childList: true, subtree: true});
+    metaObserver.observe(document.head, { childList: true, subtree: true });
 }
 
 function createDarkReaderInstanceMarker() {
@@ -471,7 +629,9 @@ function isAnotherDarkReaderInstanceActive() {
         return true;
     }
 
-    const meta: HTMLMetaElement | null = document.querySelector('meta[name="darkreader"]');
+    const meta: HTMLMetaElement | null = document.querySelector(
+        'meta[name="darkreader"]',
+    );
     if (meta) {
         if (meta.content !== INSTANCE_ID) {
             return true;
@@ -483,24 +643,40 @@ function isAnotherDarkReaderInstanceActive() {
     return false;
 }
 
-function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix | null {
+function selectRelevantFix(
+    documentURL: string,
+    fixes: DynamicThemeFix[],
+): DynamicThemeFix | null {
     if (!fixes) {
         return null;
     }
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
-        logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
+        logWarn(
+            'selectRelevantFix() failed to construct a single fix',
+            documentURL,
+            fixes,
+        );
         return null;
     }
 
     const relevantFixIndex = findRelevantFix(documentURL, fixes);
-    return relevantFixIndex ? combineFixes([fixes[0], fixes[relevantFixIndex]]) : fixes[0];
+    return relevantFixIndex
+        ? combineFixes([fixes[0], fixes[relevantFixIndex]])
+        : fixes[0];
 }
 
 /**
  * TODO: expose this function to API builds via src/api function enable()
  */
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean): void {
-    const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
+export function createOrUpdateDynamicTheme(
+    filterConfig: FilterConfig,
+    dynamicThemeFixes: DynamicThemeFix[],
+    iframe: boolean,
+): void {
+    const dynamicThemeFix = selectRelevantFix(
+        document.location.href,
+        dynamicThemeFixes,
+    );
 
     // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
     // and very few will have multple site-specific fixes
@@ -514,12 +690,20 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
  * only for use in src/api/enable() for backwards compatibility,
  * extension should use only createOrUpdateDynamicTheme()
  */
-export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
+export function createOrUpdateDynamicThemeInternal(
+    filterConfig: FilterConfig,
+    dynamicThemeFixes: DynamicThemeFix | null,
+    iframe: boolean,
+): void {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {
-        ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
-        ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+        ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis)
+            ? fixes.ignoreImageAnalysis
+            : [];
+        ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle)
+            ? fixes.ignoreInlineStyle
+            : [];
     } else {
         ignoredImageAnalysisSelectors = [];
         ignoredInlineSelectors = [];
@@ -537,14 +721,22 @@ export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, d
             removeDynamicTheme();
             return;
         }
-        document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
-        document.documentElement.setAttribute('data-darkreader-scheme', filter.mode ? 'dark' : 'dimmed');
+        document.documentElement.setAttribute(
+            'data-darkreader-mode',
+            'dynamic',
+        );
+        document.documentElement.setAttribute(
+            'data-darkreader-scheme',
+            filter.mode ? 'dark' : 'dimmed',
+        );
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
-            fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
+            fallbackStyle.textContent = getModifiedFallbackStyle(filter, {
+                strict: true,
+            });
         }
 
         const headObserver = new MutationObserver(() => {
@@ -557,7 +749,7 @@ export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, d
                 createThemeAndWatchForUpdates();
             }
         });
-        headObserver.observe(document, {childList: true, subtree: true});
+        headObserver.observe(document, { childList: true, subtree: true });
     }
 }
 

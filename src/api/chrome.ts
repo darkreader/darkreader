@@ -1,7 +1,7 @@
-import {MessageTypeCStoBG, MessageTypeBGtoCS} from '../utils/message';
-import type {MessageBGtoCS} from '../definitions';
-import {readResponseAsDataURL} from '../utils/network';
-import {callFetchMethod} from './fetch';
+import { MessageTypeCStoBG, MessageTypeBGtoCS } from '../utils/message';
+import type { MessageBGtoCS } from '../definitions';
+import { readResponseAsDataURL } from '../utils/network';
+import { callFetchMethod } from './fetch';
 
 if (!window.chrome) {
     window.chrome = {} as any;
@@ -14,9 +14,9 @@ const messageListeners = new Set<(message: MessageBGtoCS) => void>();
 
 async function sendMessage(...args: any[]) {
     if (args[0] && args[0].type === MessageTypeCStoBG.FETCH) {
-        const {id} = args[0];
+        const { id } = args[0];
         try {
-            const {url, responseType} = args[0].data;
+            const { url, responseType } = args[0].data;
             const response = await callFetchMethod(url);
             let text: string;
             if (responseType === 'data-url') {
@@ -24,10 +24,24 @@ async function sendMessage(...args: any[]) {
             } else {
                 text = await response.text();
             }
-            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: text, error: null, id}));
+            messageListeners.forEach((cb) =>
+                cb({
+                    type: MessageTypeBGtoCS.FETCH_RESPONSE,
+                    data: text,
+                    error: null,
+                    id,
+                }),
+            );
         } catch (error) {
             console.error(error);
-            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: null, error, id}));
+            messageListeners.forEach((cb) =>
+                cb({
+                    type: MessageTypeBGtoCS.FETCH_RESPONSE,
+                    data: null,
+                    error,
+                    id,
+                }),
+            );
         }
     }
 }
@@ -56,5 +70,6 @@ if (typeof chrome.runtime.onMessage.addListener === 'function') {
         nativeAddListener.apply(chrome.runtime.onMessage, args);
     };
 } else {
-    chrome.runtime.onMessage.addListener = (...args: any[]) => addMessageListener(args[0]);
+    chrome.runtime.onMessage.addListener = (...args: any[]) =>
+        addMessageListener(args[0]);
 }

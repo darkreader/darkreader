@@ -1,13 +1,34 @@
-import {createOrUpdateStyle, removeStyle} from './style';
-import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
-import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
-import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logWarn, logInfoCollapsed} from './utils/log';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
-import {collectCSS} from './dynamic-theme/css-collection';
-import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
-import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
-import {generateUID} from '../utils/uid';
+import { createOrUpdateStyle, removeStyle } from './style';
+import { createOrUpdateSVGFilter, removeSVGFilter } from './svg-filter';
+import { runDarkThemeDetector, stopDarkThemeDetector } from './detector';
+import {
+    createOrUpdateDynamicTheme,
+    removeDynamicTheme,
+    cleanDynamicThemeCache,
+} from './dynamic-theme';
+import { logWarn, logInfoCollapsed } from './utils/log';
+import {
+    isSystemDarkModeEnabled,
+    runColorSchemeChangeDetector,
+    stopColorSchemeChangeDetector,
+    emulateColorScheme,
+} from '../utils/media-query';
+import { collectCSS } from './dynamic-theme/css-collection';
+import type {
+    DebugMessageBGtoCS,
+    MessageBGtoCS,
+    MessageCStoBG,
+    MessageCStoUI,
+    MessageUItoCS,
+} from '../definitions';
+import {
+    DebugMessageTypeBGtoCS,
+    MessageTypeBGtoCS,
+    MessageTypeCStoBG,
+    MessageTypeCStoUI,
+    MessageTypeUItoCS,
+} from '../utils/message';
+import { generateUID } from '../utils/uid';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
@@ -35,14 +56,16 @@ function cleanup() {
 }
 
 function sendMessageForTesting(uuid: string) {
-    document.dispatchEvent(new CustomEvent('test-message', {detail: uuid}));
+    document.dispatchEvent(new CustomEvent('test-message', { detail: uuid }));
 }
 
 function sendMessage(message: MessageCStoBG | MessageCStoUI) {
     if (unloaded) {
         return;
     }
-    const responseHandler = (response: MessageBGtoCS | 'unsupportedSender' | undefined) => {
+    const responseHandler = (
+        response: MessageBGtoCS | 'unsupportedSender' | undefined,
+    ) => {
         // Vivaldi bug workaround. See TabManager for details.
         if (response === 'unsupportedSender') {
             removeStyle();
@@ -54,10 +77,16 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
 
     try {
         if (__CHROMIUM_MV3__) {
-            const promise = chrome.runtime.sendMessage<MessageCStoBG | MessageCStoUI, MessageBGtoCS | 'unsupportedSender'>(message);
+            const promise = chrome.runtime.sendMessage<
+                MessageCStoBG | MessageCStoUI,
+                MessageBGtoCS | 'unsupportedSender'
+            >(message);
             promise.then(responseHandler).catch(cleanup);
         } else {
-            chrome.runtime.sendMessage<MessageCStoBG | MessageCStoUI, 'unsupportedSender' | undefined>(message, responseHandler);
+            chrome.runtime.sendMessage<
+                MessageCStoBG | MessageCStoUI,
+                'unsupportedSender' | undefined
+            >(message, responseHandler);
         }
     } catch (error) {
         /*
@@ -71,22 +100,31 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
          * Regular message passing errors are returned via rejected promise or runtime.lastError.
          */
         if (error.message === 'Extension context invalidated.') {
-            console.log('Dark Reader: instance of old CS detected, clening up.');
+            console.log(
+                'Dark Reader: instance of old CS detected, clening up.',
+            );
             cleanup();
         } else {
-            console.log('Dark Reader: unexpected error during message passing.');
+            console.log(
+                'Dark Reader: unexpected error during message passing.',
+            );
         }
     }
 }
 
-function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) {
+function onMessage(
+    message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS,
+) {
     if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
         logWarn('Cleaning up before update');
         cleanup();
         return;
     }
 
-    if ((message as MessageBGtoCS).scriptId !== scriptId && message.type !== MessageTypeUItoCS.EXPORT_CSS) {
+    if (
+        (message as MessageBGtoCS).scriptId !== scriptId &&
+        message.type !== MessageTypeUItoCS.EXPORT_CSS
+    ) {
         return;
     }
 
@@ -94,9 +132,14 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
     switch (message.type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
         case MessageTypeBGtoCS.ADD_STATIC_THEME: {
-            const {css, detectDarkTheme} = message.data;
+            const { css, detectDarkTheme } = message.data;
             removeDynamicTheme();
-            createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
+            createOrUpdateStyle(
+                css,
+                message.type === MessageTypeBGtoCS.ADD_STATIC_THEME
+                    ? 'static'
+                    : 'filter',
+            );
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -108,7 +151,8 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             break;
         }
         case MessageTypeBGtoCS.ADD_SVG_FILTER: {
-            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = message.data;
+            const { css, svgMatrix, svgReverseMatrix, detectDarkTheme } =
+                message.data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
@@ -124,7 +168,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             break;
         }
         case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme} = message.data;
+            const { theme, fixes, isIFrame, detectDarkTheme } = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {
@@ -138,12 +182,19 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             if (__TEST__) {
                 darkReaderDynamicThemeStateForTesting = 'ready';
                 sendMessageForTesting('darkreader-dynamic-theme-ready');
-                sendMessageForTesting(`darkreader-dynamic-theme-ready-${document.location.pathname}`);
+                sendMessageForTesting(
+                    `darkreader-dynamic-theme-ready-${document.location.pathname}`,
+                );
             }
             break;
         }
         case MessageTypeUItoCS.EXPORT_CSS:
-            collectCSS().then((collectedCSS) => sendMessage({type: MessageTypeCStoUI.EXPORT_CSS_RESPONSE, data: collectedCSS}));
+            collectCSS().then((collectedCSS) =>
+                sendMessage({
+                    type: MessageTypeCStoUI.EXPORT_CSS_RESPONSE,
+                    data: collectedCSS,
+                }),
+            );
             break;
         case MessageTypeBGtoCS.UNSUPPORTED_SENDER:
         case MessageTypeBGtoCS.CLEAN_UP:
@@ -157,22 +208,31 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
     }
 }
 
-function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT | MessageTypeCStoBG.DOCUMENT_RESUME) {
-    sendMessage(
-        {
-            type,
-            scriptId,
-            data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? {
-                isDark: isSystemDarkModeEnabled(),
-                isTopFrame: window === window.top,
-            } : {
-                isDark: isSystemDarkModeEnabled(),
-            },
-        });
+function sendConnectionOrResumeMessage(
+    type:
+        | MessageTypeCStoBG.DOCUMENT_CONNECT
+        | MessageTypeCStoBG.DOCUMENT_RESUME,
+) {
+    sendMessage({
+        type,
+        scriptId,
+        data:
+            __CHROMIUM_MV2__ || __CHROMIUM_MV3__
+                ? {
+                      isDark: isSystemDarkModeEnabled(),
+                      isTopFrame: window === window.top,
+                  }
+                : {
+                      isDark: isSystemDarkModeEnabled(),
+                  },
+    });
 }
 
 runColorSchemeChangeDetector((isDark) =>
-    sendMessage({type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE, data: {isDark}})
+    sendMessage({
+        type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE,
+        data: { isDark },
+    }),
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
@@ -180,12 +240,12 @@ sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        sendMessage({type: MessageTypeCStoBG.DOCUMENT_FORGET, scriptId});
+        sendMessage({ type: MessageTypeCStoBG.DOCUMENT_FORGET, scriptId });
     }
 }
 
 function onFreeze() {
-    sendMessage({type: MessageTypeCStoBG.DOCUMENT_FREEZE});
+    sendMessage({ type: MessageTypeCStoBG.DOCUMENT_FREEZE });
 }
 
 function onResume() {
@@ -193,22 +253,24 @@ function onResume() {
 }
 
 function onDarkThemeDetected() {
-    sendMessage({type: MessageTypeCStoBG.DARK_THEME_DETECTED});
+    sendMessage({ type: MessageTypeCStoBG.DARK_THEME_DETECTED });
 }
 
 // Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.
 // And will currently error: `Promise rejected after context unloaded: Actor 'Conduits' destroyed before query 'RuntimeMessage' was resolved`
 if (!__THUNDERBIRD__) {
-    addEventListener('pagehide', onPageHide, {passive: true});
-    addEventListener('freeze', onFreeze, {passive: true});
-    addEventListener('resume', onResume, {passive: true});
+    addEventListener('pagehide', onPageHide, { passive: true });
+    addEventListener('freeze', onFreeze, { passive: true });
+    addEventListener('resume', onResume, { passive: true });
 }
 
 if (__TEST__) {
     async function awaitDOMContentLoaded() {
         if (document.readyState === 'loading') {
             return new Promise<void>((resolve) => {
-                addEventListener('DOMContentLoaded', () => resolve(), {passive: true});
+                addEventListener('DOMContentLoaded', () => resolve(), {
+                    passive: true,
+                });
             });
         }
     }
@@ -216,40 +278,55 @@ if (__TEST__) {
     async function awaitDarkReaderReady() {
         if (darkReaderDynamicThemeStateForTesting !== 'ready') {
             return new Promise<void>((resolve) => {
-                document.addEventListener('test-message', (event: CustomEvent) => {
-                    const message = event.detail;
-                    if (message === 'darkreader-dynamic-theme-ready' && darkReaderDynamicThemeStateForTesting === 'ready') {
-                        resolve();
-                    }
-                }, {passive: true});
+                document.addEventListener(
+                    'test-message',
+                    (event: CustomEvent) => {
+                        const message = event.detail;
+                        if (
+                            message === 'darkreader-dynamic-theme-ready' &&
+                            darkReaderDynamicThemeStateForTesting === 'ready'
+                        ) {
+                            resolve();
+                        }
+                    },
+                    { passive: true },
+                );
             });
         }
     }
 
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
-        document.addEventListener('test-message', (e: CustomEvent) => {
-            socket.send(JSON.stringify({
-                data: {
-                    type: 'page',
-                    uuid: e.detail,
-                },
-                id: null,
-            }));
-        }, {passive: true});
+        document.addEventListener(
+            'test-message',
+            (e: CustomEvent) => {
+                socket.send(
+                    JSON.stringify({
+                        data: {
+                            type: 'page',
+                            uuid: e.detail,
+                        },
+                        id: null,
+                    }),
+                );
+            },
+            { passive: true },
+        );
 
         // Wait for DOM to be complete
         // Note that here we wait only for DOM parsing and not for subresource load
         await awaitDOMContentLoaded();
         await awaitDarkReaderReady();
-        socket.send(JSON.stringify({
-            data: {
-                type: 'page',
-                message: 'page-ready',
-                uuid: `ready-${document.location.pathname}`,
-            },
-            id: null,
-        }));
+        socket.send(
+            JSON.stringify({
+                data: {
+                    type: 'page',
+                    message: 'page-ready',
+                    uuid: `ready-${document.location.pathname}`,
+                },
+                id: null,
+            }),
+        );
     };
 
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
@@ -257,7 +334,9 @@ if (__TEST__) {
         function expectPageStyles(data: any) {
             const checkOne = (expectation: any) => {
                 const [selector, cssAttributeName, expectedValue] = expectation;
-                const selector_ = Array.isArray(selector) ? selector : [selector];
+                const selector_ = Array.isArray(selector)
+                    ? selector
+                    : [selector];
                 let element = document as any;
                 for (const part of selector_) {
                     if (element instanceof HTMLIFrameElement) {
@@ -294,10 +373,10 @@ if (__TEST__) {
 
         socket.onmessage = (e) => {
             function respond(data: any) {
-                socket.send(JSON.stringify({id, data}));
+                socket.send(JSON.stringify({ id, data }));
             }
 
-            const {id, data, type} = JSON.parse(e.data);
+            const { id, data, type } = JSON.parse(e.data);
             switch (type) {
                 case 'firefox-eval': {
                     const result = eval(data);
@@ -319,7 +398,10 @@ if (__TEST__) {
                         }
                     }
 
-                    const interval: number = setInterval(checkPageStylesNow, 200);
+                    const interval: number = setInterval(
+                        checkPageStylesNow,
+                        200,
+                    );
                     checkPageStylesNow();
                     break;
                 }

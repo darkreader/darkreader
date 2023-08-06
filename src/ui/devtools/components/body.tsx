@@ -1,39 +1,49 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
-import {withState, useState} from 'malevic/state';
-import {Button, MessageBox, Overlay} from '../../controls';
-import {ThemeEngine} from '../../../generators/theme-engines';
-import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import type {DevToolsData, ExtWrapper} from '../../../definitions';
-import {getCurrentThemePreset} from '../../popup/theme/utils';
-import {isFirefox, isMobile} from '../../../utils/platform';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
+import { withState, useState } from 'malevic/state';
+import { Button, MessageBox, Overlay } from '../../controls';
+import { ThemeEngine } from '../../../generators/theme-engines';
+import { DEVTOOLS_DOCS_URL } from '../../../utils/links';
+import type { DevToolsData, ExtWrapper } from '../../../definitions';
+import { getCurrentThemePreset } from '../../popup/theme/utils';
+import { isFirefox, isMobile } from '../../../utils/platform';
 
-type BodyProps = ExtWrapper & {devtools: DevToolsData};
+type BodyProps = ExtWrapper & { devtools: DevToolsData };
 
-function Body({data, actions, devtools}: BodyProps) {
+function Body({ data, actions, devtools }: BodyProps) {
     const context = getContext();
-    const {state, setState} = useState<{errorText: string | null}>({errorText: null});
+    const { state, setState } = useState<{ errorText: string | null }>({
+        errorText: null,
+    });
     let textNode: HTMLTextAreaElement;
-    const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    const {theme} = getCurrentThemePreset({data, actions});
+    const previewButtonText = data.settings.previewNewDesign
+        ? 'Switch to old design'
+        : 'Preview new design';
+    const { theme } = getCurrentThemePreset({ data, actions });
 
-    const wrapper = (theme.engine === ThemeEngine.staticTheme
-        ? {
-            header: 'Static Theme Editor',
-            fixesText: devtools.staticThemesText,
-            apply: (text: string) => actions.applyDevStaticThemes(text),
-            reset: () => actions.resetDevStaticThemes(),
-        } : theme.engine === ThemeEngine.cssFilter || theme.engine === ThemeEngine.svgFilter ? {
-            header: 'Inversion Fix Editor',
-            fixesText: devtools.filterFixesText,
-            apply: (text: string) => actions.applyDevInversionFixes(text),
-            reset: () => actions.resetDevInversionFixes(),
-        } : {
-            header: 'Dynamic Theme Editor',
-            fixesText: devtools.dynamicFixesText,
-            apply: (text: string) => actions.applyDevDynamicThemeFixes(text),
-            reset: () => actions.resetDevDynamicThemeFixes(),
-        });
+    const wrapper =
+        theme.engine === ThemeEngine.staticTheme
+            ? {
+                  header: 'Static Theme Editor',
+                  fixesText: devtools.staticThemesText,
+                  apply: (text: string) => actions.applyDevStaticThemes(text),
+                  reset: () => actions.resetDevStaticThemes(),
+              }
+            : theme.engine === ThemeEngine.cssFilter ||
+              theme.engine === ThemeEngine.svgFilter
+            ? {
+                  header: 'Inversion Fix Editor',
+                  fixesText: devtools.filterFixesText,
+                  apply: (text: string) => actions.applyDevInversionFixes(text),
+                  reset: () => actions.resetDevInversionFixes(),
+              }
+            : {
+                  header: 'Dynamic Theme Editor',
+                  fixesText: devtools.dynamicFixesText,
+                  apply: (text: string) =>
+                      actions.applyDevDynamicThemeFixes(text),
+                  reset: () => actions.resetDevDynamicThemeFixes(),
+              };
 
     function onTextRender(node: HTMLTextAreaElement) {
         textNode = node;
@@ -41,7 +51,7 @@ function Body({data, actions, devtools}: BodyProps) {
             textNode.value = wrapper.fixesText;
         }
         // Must not be passive because it calls preventDefault(), must not be once
-        node.addEventListener('keydown', ({key, preventDefault}) => {
+        node.addEventListener('keydown', ({ key, preventDefault }) => {
             if (key === 'Tab') {
                 preventDefault();
                 const indent = ' '.repeat(4);
@@ -66,7 +76,7 @@ function Body({data, actions, devtools}: BodyProps) {
         const text = textNode.value;
         try {
             await wrapper.apply(text);
-            setState({errorText: null});
+            setState({ errorText: null });
         } catch (err) {
             setState({
                 errorText: String(err),
@@ -84,52 +94,75 @@ function Body({data, actions, devtools}: BodyProps) {
         context.refresh();
     }
 
-    const dialog = context && context.store.isDialogVisible ? (
-        <MessageBox
-            caption="Are you sure you want to remove current changes? You cannot restore them later."
-            onOK={reset}
-            onCancel={hideDialog}
-        />
-    ) : null;
+    const dialog =
+        context && context.store.isDialogVisible ? (
+            <MessageBox
+                caption='Are you sure you want to remove current changes? You cannot restore them later.'
+                onOK={reset}
+                onCancel={hideDialog}
+            />
+        ) : null;
 
     function reset(): void {
         context.store.isDialogVisible = false;
         wrapper.reset();
-        setState({errorText: null});
+        setState({ errorText: null });
     }
 
     function toggleDesign(): void {
-        actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
+        actions.changeSettings({
+            previewNewDesign: !data.settings.previewNewDesign,
+        });
     }
 
     return (
         <body>
             <header>
-                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
-                <h1 id="title">Developer Tools</h1>
+                <img
+                    id='logo'
+                    src='../assets/images/darkreader-type.svg'
+                    alt='Dark Reader'
+                />
+                <h1 id='title'>Developer Tools</h1>
             </header>
-            <h3 id="sub-title">{wrapper.header}</h3>
+            <h3 id='sub-title'>{wrapper.header}</h3>
             <textarea
-                id="editor"
+                id='editor'
                 onrender={onTextRender}
-                spellcheck="false"
-                autocorrect="off"
-                autocomplete="off"
-                autocapitalize="off"
+                spellcheck='false'
+                autocorrect='off'
+                autocomplete='off'
+                autocapitalize='off'
             />
-            <label id="error-text">{state.errorText}</label>
-            <div id="buttons">
+            <label id='error-text'>{state.errorText}</label>
+            <div id='buttons'>
                 <Button onclick={showDialog}>
                     Reset changes
                     {dialog}
                 </Button>
                 <Button onclick={apply}>Apply</Button>
-                {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
+                {isMobile ? null : (
+                    <Button
+                        class='preview-design-button'
+                        onclick={toggleDesign}
+                    >
+                        {previewButtonText}
+                    </Button>
+                )}
             </div>
-            <p id="description">
-                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.
-                If a <strong>popular</strong> website looks incorrect
-                e-mail to <strong>DarkReaderApp@gmail.com</strong>
+            <p id='description'>
+                Read about this tool{' '}
+                <strong>
+                    <a
+                        href={DEVTOOLS_DOCS_URL}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                    >
+                        here
+                    </a>
+                </strong>
+                . If a <strong>popular</strong> website looks incorrect e-mail
+                to <strong>DarkReaderApp@gmail.com</strong>
             </p>
             <Overlay />
         </body>

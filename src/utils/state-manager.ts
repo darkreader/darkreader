@@ -3,15 +3,20 @@
  * which is in StateManagerImpl class.
  */
 
-import {StateManagerImpl} from './state-manager-impl';
+import { StateManagerImpl } from './state-manager-impl';
 
-import {isNonPersistent} from './platform';
+import { isNonPersistent } from './platform';
 
 export class StateManager<T extends Record<string, unknown>> {
     private stateManager: StateManagerImpl<T> | null;
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    public constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
+    public constructor(
+        localStorageKey: string,
+        parent: any,
+        defaults: T,
+        logWarn: (log: string) => void,
+    ) {
         if (isNonPersistent) {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.local.onChanged.addListener((changes) => {

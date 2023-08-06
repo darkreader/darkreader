@@ -1,14 +1,27 @@
-import {m} from 'malevic';
-import {sync} from 'malevic/dom';
+import { m } from 'malevic';
+import { sync } from 'malevic/dom';
 import Connector from '../connect/connector';
 import Body from './components/body';
-import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
-import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
-import {isMobile, isFirefox} from '../../utils/platform';
-import {DebugMessageTypeBGtoUI} from '../../utils/message';
-import {getFontList, saveFile} from '../utils';
+import {
+    popupHasBuiltInHorizontalBorders,
+    popupHasBuiltInBorders,
+    fixNotClosingPopupOnNavigation,
+} from './utils/issues';
+import type {
+    ExtensionData,
+    ExtensionActions,
+    DebugMessageBGtoCS,
+    DebugMessageBGtoUI,
+} from '../../definitions';
+import { isMobile, isFirefox } from '../../utils/platform';
+import { DebugMessageTypeBGtoUI } from '../../utils/message';
+import { getFontList, saveFile } from '../utils';
 
-function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
+function renderBody(
+    data: ExtensionData,
+    fonts: string[],
+    actions: ExtensionActions,
+) {
     if (data.settings.previewNewDesign) {
         if (!document.documentElement.classList.contains('preview')) {
             document.documentElement.classList.add('preview');
@@ -24,14 +37,14 @@ function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActi
         }
     }
 
-    sync(document.body, (
-        <Body data={data} actions={actions} fonts={fonts} />
-    ));
+    sync(document.body, <Body data={data} actions={actions} fonts={fonts} />);
 }
 
 async function start() {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
+    window.addEventListener('unload', () => connector.disconnect(), {
+        passive: true,
+    });
 
     const [data, fonts] = await Promise.all([
         connector.getData(),
@@ -41,12 +54,18 @@ async function start() {
     connector.subscribeToChanges((data) => renderBody(data, fonts, connector));
 }
 
-addEventListener('load', start, {passive: true});
+addEventListener('load', start, { passive: true });
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);
-document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
-document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
+document.documentElement.classList.toggle(
+    'built-in-borders',
+    popupHasBuiltInBorders(),
+);
+document.documentElement.classList.toggle(
+    'built-in-horizontal-borders',
+    popupHasBuiltInHorizontalBorders(),
+);
 
 if (isFirefox) {
     fixNotClosingPopupOnNavigation();
@@ -54,52 +73,68 @@ if (isFirefox) {
 
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {
-    chrome.runtime.onMessage.addListener(({type}: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
-        if (type === DebugMessageTypeBGtoUI.CSS_UPDATE) {
-            document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
-                const url = link.href;
-                link.disabled = true;
-                const newLink = document.createElement('link');
-                newLink.rel = 'stylesheet';
-                newLink.href = url.replace(/\?.*$/, `?nocache=${Date.now()}`);
-                link.parentElement!.insertBefore(newLink, link);
-                link.remove();
-            });
-        }
+    chrome.runtime.onMessage.addListener(
+        ({ type }: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
+            if (type === DebugMessageTypeBGtoUI.CSS_UPDATE) {
+                document
+                    .querySelectorAll('link[rel="stylesheet"]')
+                    .forEach((link: HTMLLinkElement) => {
+                        const url = link.href;
+                        link.disabled = true;
+                        const newLink = document.createElement('link');
+                        newLink.rel = 'stylesheet';
+                        newLink.href = url.replace(
+                            /\?.*$/,
+                            `?nocache=${Date.now()}`,
+                        );
+                        link.parentElement!.insertBefore(newLink, link);
+                        link.remove();
+                    });
+            }
 
-        if (type === DebugMessageTypeBGtoUI.UPDATE) {
-            location.reload();
-        }
-    });
+            if (type === DebugMessageTypeBGtoUI.UPDATE) {
+                location.reload();
+            }
+        },
+    );
 }
 
 declare const __TEST__: boolean;
 if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
-        socket.send(JSON.stringify({
-            data: {
-                type: 'popup',
-                uuid: `ready-${document.location.pathname}`,
-            },
-            id: null,
-        }));
+        socket.send(
+            JSON.stringify({
+                data: {
+                    type: 'popup',
+                    uuid: `ready-${document.location.pathname}`,
+                },
+                id: null,
+            }),
+        );
     };
     socket.onmessage = (e) => {
-        const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
+        const respond = (message: {
+            id?: number;
+            data?: any;
+            error?: string;
+        }) => socket.send(JSON.stringify(message));
         try {
-            const message: {type: string; id: number; data: any} = JSON.parse(e.data);
-            const {type, id, data} = message;
+            const message: { type: string; id: number; data: any } = JSON.parse(
+                e.data,
+            );
+            const { type, id, data } = message;
             switch (type) {
                 case 'popup-click': {
                     // The required element may not exist yet
                     const check = () => {
-                        const element: HTMLElement | null = document.querySelector(data);
+                        const element: HTMLElement | null =
+                            document.querySelector(data);
                         if (element) {
                             element.click();
-                            respond({id});
+                            respond({ id });
                         } else {
-                            requestIdleCallback(check, {timeout: 500});
+                            requestIdleCallback(check, { timeout: 500 });
                         }
                     };
 
@@ -109,11 +144,12 @@ if (__TEST__) {
                 case 'popup-exists': {
                     // The required element may not exist yet
                     const check = () => {
-                        const element: HTMLElement | null = document.querySelector(data);
+                        const element: HTMLElement | null =
+                            document.querySelector(data);
                         if (element) {
-                            respond({id, data: true});
+                            respond({ id, data: true });
                         } else {
-                            requestIdleCallback(check, {timeout: 500});
+                            requestIdleCallback(check, { timeout: 500 });
                         }
                     };
 
@@ -121,15 +157,15 @@ if (__TEST__) {
                     break;
                 }
                 case 'popup-saveFile': {
-                    const {name, content} = data;
+                    const { name, content } = data;
                     saveFile(name, content);
-                    respond({id});
+                    respond({ id });
                     break;
                 }
                 default:
             }
         } catch (err) {
-            respond({error: String(err)});
+            respond({ error: String(err) });
         }
     };
 }

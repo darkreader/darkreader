@@ -1,5 +1,5 @@
-import type {Child} from 'malevic';
-import {m} from 'malevic';
+import type { Child } from 'malevic';
+import { m } from 'malevic';
 
 interface ToggleProps {
     checked: boolean;
@@ -10,23 +10,19 @@ interface ToggleProps {
 }
 
 export default function Toggle(props: ToggleProps) {
-    const {checked, onChange} = props;
+    const { checked, onChange } = props;
 
-    const cls = [
-        'toggle',
-        checked ? 'toggle--checked' : null,
-        props.class,
-    ];
+    const cls = ['toggle', checked ? 'toggle--checked' : null, props.class];
 
     const clsOn = {
-        'toggle__btn': true,
-        'toggle__on': true,
+        toggle__btn: true,
+        toggle__on: true,
         'toggle__btn--active': checked,
     };
 
     const clsOff = {
-        'toggle__btn': true,
-        'toggle__off': true,
+        toggle__btn: true,
+        toggle__off: true,
         'toggle__btn--active': !checked,
     };
 
@@ -34,13 +30,17 @@ export default function Toggle(props: ToggleProps) {
         <span class={cls}>
             <span
                 class={clsOn}
-                onclick={onChange ? () => !checked && onChange(true) : undefined}
+                onclick={
+                    onChange ? () => !checked && onChange(true) : undefined
+                }
             >
                 {props.labelOn}
             </span>
             <span
                 class={clsOff}
-                onclick={onChange ? () => checked && onChange(false) : undefined}
+                onclick={
+                    onChange ? () => checked && onChange(false) : undefined
+                }
             >
                 {props.labelOff}
             </span>

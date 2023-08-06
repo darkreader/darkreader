@@ -1,5 +1,5 @@
-import {readFile as fsReadFile, readdir as fsReadDir} from 'node:fs';
-import {rootPath} from '../../support/test-utils';
+import { readFile as fsReadFile, readdir as fsReadDir } from 'node:fs';
+import { rootPath } from '../../support/test-utils';
 
 function readDir(dir: string) {
     return new Promise<string[]>((resolve, reject) => {
@@ -15,13 +15,17 @@ function readDir(dir: string) {
 
 function readLocale(name: string) {
     return new Promise<string>((resolve, reject) => {
-        fsReadFile(rootPath('src/_locales', name), {encoding: 'utf-8'}, (err, data) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(data);
-        });
+        fsReadFile(
+            rootPath('src/_locales', name),
+            { encoding: 'utf-8' },
+            (err, data) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(data);
+            },
+        );
     });
 }
 
@@ -35,7 +39,9 @@ test('Locales', async () => {
         locales.push(locale);
     }
 
-    function compareLinesToEnLocale(predicate: (en: string, loc: string) => boolean) {
+    function compareLinesToEnLocale(
+        predicate: (en: string, loc: string) => boolean,
+    ) {
         return locales.every((loc, j) => {
             const lines = loc.split('\n');
             for (let i = 0; i < Math.min(lines.length, enLines.length); i++) {
@@ -49,7 +55,9 @@ test('Locales', async () => {
     }
 
     // Line count is the same
-    expect(locales.every((loc) => loc.split('\n').length === enLines.length)).toBe(true);
+    expect(
+        locales.every((loc) => loc.split('\n').length === enLines.length),
+    ).toBe(true);
 
     // Locale ends with new line
     expect(locales.every((loc) => loc.endsWith('\n')));
@@ -58,7 +66,12 @@ test('Locales', async () => {
     expect(compareLinesToEnLocale((en, loc) => !en === !loc)).toBe(true);
 
     // Message codes are on the same positions
-    expect(compareLinesToEnLocale((en, loc) => !en.startsWith('@') || (en.startsWith('@') && en === loc))).toBe(true);
+    expect(
+        compareLinesToEnLocale(
+            (en, loc) =>
+                !en.startsWith('@') || (en.startsWith('@') && en === loc),
+        ),
+    ).toBe(true);
 
     // No extra whitespace
     expect(compareLinesToEnLocale((en, loc) => loc.trim() === loc)).toBe(true);

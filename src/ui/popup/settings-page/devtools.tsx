@@ -1,7 +1,7 @@
-import {m} from 'malevic';
-import {openExtensionPage} from '../../utils';
-import {getLocalMessage} from '../../../utils/locales';
-import {NavButton} from '../../controls';
+import { m } from 'malevic';
+import { openExtensionPage } from '../../utils';
+import { getLocalMessage } from '../../../utils/locales';
+import { NavButton } from '../../controls';
 import ControlGroup from '../control-group';
 
 async function openDevTools() {
@@ -12,7 +12,7 @@ export default function DevToolsGroup() {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <NavButton onClick={openDevTools} class="dev-tools-button">
+                <NavButton onClick={openDevTools} class='dev-tools-button'>
                     🛠 {getLocalMessage('open_dev_tools')}
                 </NavButton>
             </ControlGroup.Control>

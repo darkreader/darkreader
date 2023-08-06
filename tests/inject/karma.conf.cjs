@@ -9,7 +9,7 @@
 const realConfigureKarma = import('./karma.conf.js');
 
 async function configureKarma(config, env) {
-    return ((await realConfigureKarma).configureKarma)(config, env);
+    return (await realConfigureKarma).configureKarma(config, env);
 }
 
 /**
@@ -20,5 +20,6 @@ module.exports = async (config) =>
     config.set(await configureKarma(config, process.env));
 
 if (process.env.NODE_ENV === 'test') {
-    module.exports.configureKarma = async (config, env) => configureKarma(config, env);
+    module.exports.configureKarma = async (config, env) =>
+        configureKarma(config, env);
 }

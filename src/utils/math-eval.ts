@@ -41,10 +41,10 @@ export function evalMath(expression: string): number {
             }
             // Add the operation to the workingStack.
             workingStack.unshift(token);
-        // Otherwise was the last token a operator?
+            // Otherwise was the last token a operator?
         } else if (!lastToken || operators.has(lastToken)) {
             rpnStack.push(token);
-        // Otherwise just append the result to the last token(e.g. multiple digits numbers).
+            // Otherwise just append the result to the last token(e.g. multiple digits numbers).
         } else {
             rpnStack[rpnStack.length - 1] += token;
         }
@@ -78,7 +78,10 @@ class Operator {
     private precendce: number;
     private execMethod: (left: number, right: number) => number;
 
-    public constructor(precedence: number, method: (left: number, right: number) => number) {
+    public constructor(
+        precedence: number,
+        method: (left: number, right: number) => number,
+    ) {
         this.precendce = precedence;
         this.execMethod = method;
     }
@@ -93,8 +96,20 @@ class Operator {
 }
 
 const operators: Readonly<Map<string, Operator>> = new Map([
-    ['+', new Operator(1, (left: number, right: number): number => left + right)],
-    ['-', new Operator(1, (left: number, right: number): number => left - right)],
-    ['*', new Operator(2, (left: number, right: number): number => left * right)],
-    ['/', new Operator(2, (left: number, right: number): number => left / right)],
+    [
+        '+',
+        new Operator(1, (left: number, right: number): number => left + right),
+    ],
+    [
+        '-',
+        new Operator(1, (left: number, right: number): number => left - right),
+    ],
+    [
+        '*',
+        new Operator(2, (left: number, right: number): number => left * right),
+    ],
+    [
+        '/',
+        new Operator(2, (left: number, right: number): number => left / right),
+    ],
 ]);

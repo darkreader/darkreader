@@ -1,27 +1,29 @@
-import {m} from 'malevic';
-import {getLocalMessage} from '../../../utils/locales';
-import {MultiSwitch} from '../../controls';
+import { m } from 'malevic';
+import { getLocalMessage } from '../../../utils/locales';
+import { MultiSwitch } from '../../controls';
 import ControlGroup from '../control-group';
-import type {ViewProps} from '../types';
+import type { ViewProps } from '../types';
 import WatchIcon from './watch-icon';
 import SunMoonIcon from './sun-moon-icon';
 import SystemIcon from './system-icon';
-import {AutomationMode} from '../../../utils/automation';
+import { AutomationMode } from '../../../utils/automation';
 
 export default function AppSwitch(props: ViewProps) {
-    const isOn = props.data.settings.enabled === true && !props.data.settings.automation.enabled;
-    const isOff = props.data.settings.enabled === false && !props.data.settings.automation.enabled;
+    const isOn =
+        props.data.settings.enabled === true &&
+        !props.data.settings.automation.enabled;
+    const isOff =
+        props.data.settings.enabled === false &&
+        !props.data.settings.automation.enabled;
     const isAutomation = props.data.settings.automation.enabled;
-    const isTimeAutomation = props.data.settings.automation.mode === AutomationMode.TIME;
-    const isLocationAutomation = props.data.settings.automation.mode === AutomationMode.LOCATION;
+    const isTimeAutomation =
+        props.data.settings.automation.mode === AutomationMode.TIME;
+    const isLocationAutomation =
+        props.data.settings.automation.mode === AutomationMode.LOCATION;
     const now = new Date();
 
     // TODO: Replace messages with some IDs.
-    const values = [
-        getLocalMessage('on'),
-        'Auto',
-        getLocalMessage('off'),
-    ];
+    const values = [getLocalMessage('on'), 'Auto', getLocalMessage('off')];
     const value = isOn ? values[0] : isOff ? values[2] : values[1];
 
     function onSwitchChange(v: string) {
@@ -29,29 +31,38 @@ export default function AppSwitch(props: ViewProps) {
         if (index === 0) {
             props.actions.changeSettings({
                 enabled: true,
-                automation: {... props.data.settings.automation, ...{enabled: false}},
+                automation: {
+                    ...props.data.settings.automation,
+                    ...{ enabled: false },
+                },
             });
         } else if (index === 2) {
             props.actions.changeSettings({
                 enabled: false,
-                automation:  {... props.data.settings.automation, ...{enabled: false}},
+                automation: {
+                    ...props.data.settings.automation,
+                    ...{ enabled: false },
+                },
             });
         } else if (index === 1) {
             props.actions.changeSettings({
-                automation: {... props.data.settings.automation, ...{mode: AutomationMode.SYSTEM, enabled: true}},
+                automation: {
+                    ...props.data.settings.automation,
+                    ...{ mode: AutomationMode.SYSTEM, enabled: true },
+                },
             });
         }
     }
 
-    const descriptionText = isOn ?
-        'Extension is enabled' :
-        isOff ?
-            'Extension is disabled' :
-            isTimeAutomation ?
-                'Switches according to specified time' :
-                isLocationAutomation ?
-                    'Switched according to location' :
-                    'Switches according to system dark mode';
+    const descriptionText = isOn
+        ? 'Extension is enabled'
+        : isOff
+        ? 'Extension is disabled'
+        : isTimeAutomation
+        ? 'Switches according to specified time'
+        : isLocationAutomation
+        ? 'Switched according to location'
+        : 'Switches according to system dark mode';
     const description = (
         <span
             class={{
@@ -65,10 +76,10 @@ export default function AppSwitch(props: ViewProps) {
     );
 
     return (
-        <ControlGroup class="app-switch">
+        <ControlGroup class='app-switch'>
             <ControlGroup.Control>
                 <MultiSwitch
-                    class="app-switch__control"
+                    class='app-switch__control'
                     options={values}
                     value={value}
                     onChange={onSwitchChange}
@@ -79,17 +90,28 @@ export default function AppSwitch(props: ViewProps) {
                             'app-switch__time--active': isAutomation,
                         }}
                     >
-                        {(isTimeAutomation
-                            ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
-                            : (isLocationAutomation
-                                ? (<SunMoonIcon date={now} latitude={props.data.settings.location.latitude!} longitude={props.data.settings.location.longitude!} />)
-                                : <SystemIcon />))}
+                        {isTimeAutomation ? (
+                            <WatchIcon
+                                hours={now.getHours()}
+                                minutes={now.getMinutes()}
+                            />
+                        ) : isLocationAutomation ? (
+                            <SunMoonIcon
+                                date={now}
+                                latitude={
+                                    props.data.settings.location.latitude!
+                                }
+                                longitude={
+                                    props.data.settings.location.longitude!
+                                }
+                            />
+                        ) : (
+                            <SystemIcon />
+                        )}
                     </span>
                 </MultiSwitch>
             </ControlGroup.Control>
-            <ControlGroup.Description>
-                {description}
-            </ControlGroup.Description>
+            <ControlGroup.Description>{description}</ControlGroup.Description>
         </ControlGroup>
     );
 }

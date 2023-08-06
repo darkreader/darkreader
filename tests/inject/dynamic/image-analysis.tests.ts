@@ -1,10 +1,13 @@
 import '../support/polyfills';
-import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
-import {multiline, timeout, waitForEvent} from '../support/test-utils';
-import type {DynamicThemeFix} from '../../../src/definitions';
-import {isFirefox} from '../../../src/utils/platform';
+import { DEFAULT_THEME } from '../../../src/defaults';
+import {
+    createOrUpdateDynamicTheme,
+    removeDynamicTheme,
+} from '../../../src/inject/dynamic-theme';
+import { getImageDetails } from '../../../src/inject/dynamic-theme/image';
+import { multiline, timeout, waitForEvent } from '../support/test-utils';
+import type { DynamicThemeFix } from '../../../src/definitions';
+import { isFirefox } from '../../../src/utils/platform';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -27,7 +30,12 @@ function svgToDataURL(svg: string) {
     return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
-function getSVGImageCSS(svg: string, width: number, height: number, selector: string) {
+function getSVGImageCSS(
+    svg: string,
+    width: number,
+    height: number,
+    selector: string,
+) {
     return multiline(
         `${selector} {`,
         `    background-image: url("${svgToDataURL(svg)}");`,
@@ -145,7 +153,9 @@ describe('IMAGE ANALYSIS', () => {
     });
 
     it('should analyze dark transparent icon', async () => {
-        const details = await getImageDetails(svgToDataURL(images.darkTransparentIcon));
+        const details = await getImageDetails(
+            svgToDataURL(images.darkTransparentIcon),
+        );
         expect(details.width).toBe(8);
         expect(details.height).toBe(8);
         expect(details.isDark).toBe(true);
@@ -155,7 +165,9 @@ describe('IMAGE ANALYSIS', () => {
     });
 
     it('should analyze large image', async () => {
-        const details = await getImageDetails(svgToDataURL(images.largeDarkImage));
+        const details = await getImageDetails(
+            svgToDataURL(images.largeDarkImage),
+        );
         expect(details.width).toBe(1024);
         expect(details.height).toBe(1024);
         expect(details.isDark).toBe(true);
@@ -174,7 +186,9 @@ describe('IMAGE ANALYSIS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         await timeout(500);
-        const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
+        const bgImageValue = getComputedStyle(
+            container.querySelector('i'),
+        ).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
         expect(info.lightness).toBe(1);
@@ -188,7 +202,9 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Light icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
+        const bgImageValue = getComputedStyle(
+            container.querySelector('i'),
+        ).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
         expect(info.lightness).toBe(1);
@@ -202,7 +218,9 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Dark background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
+        const bgImageValue = getComputedStyle(
+            container.querySelector('h1'),
+        ).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(1);
         expect(info.lightness).toBe(0);
@@ -217,7 +235,9 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
+        const bgImageValue = getComputedStyle(
+            container.querySelector('h1'),
+        ).backgroundImage;
         expect(bgImageValue).toBe('none');
     });
 
@@ -228,55 +248,87 @@ describe('IMAGE ANALYSIS', () => {
             '</style>',
             '<h1>Dark icon <i></i></h1>',
         );
-        const fixes: DynamicThemeFix[] = [{
-            url: ['*'],
-            invert: [''],
-            css: '',
-            ignoreInlineStyle: ['.'],
-            ignoreImageAnalysis: ['*'],
-            disableStyleSheetsProxy: false,
-            disableCustomElementRegistryProxy: false,
-        }];
+        const fixes: DynamicThemeFix[] = [
+            {
+                url: ['*'],
+                invert: [''],
+                css: '',
+                ignoreInlineStyle: ['.'],
+                ignoreImageAnalysis: ['*'],
+                disableStyleSheetsProxy: false,
+                disableCustomElementRegistryProxy: false,
+            },
+        ];
         createOrUpdateDynamicTheme(theme, fixes, false);
-        const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
+        const backgroundImage = getComputedStyle(
+            container.querySelector('i'),
+        ).backgroundImage;
         expect(backgroundImage).toContain('data:');
     });
 
     it('should handle background-image with URL and gradient', async () => {
         container.innerHTML = multiline(
             '<style>',
-            `    h1 { background-image: url("${svgToDataURL(images.lightIcon)}"), linear-gradient(red, white);`,
+            `    h1 { background-image: url("${svgToDataURL(
+                images.lightIcon,
+            )}"), linear-gradient(red, white);`,
             '</style>',
             '<h1>Weird color <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4="), linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))');
+        expect(
+            getComputedStyle(container.querySelector('h1')).backgroundImage,
+        ).toBe(
+            'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4="), linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))',
+        );
     });
 
     it('should handle background-image with URL and gradient (revered)', async () => {
         container.innerHTML = multiline(
             '<style>',
-            `    h1 { background-image: linear-gradient(red, white), url("${svgToDataURL(images.lightIcon)}");`,
+            `    h1 { background-image: linear-gradient(red, white), url("${svgToDataURL(
+                images.lightIcon,
+            )}");`,
             '</style>',
             '<h1>Weird color <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         await timeout(500);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0)), url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4=")');
+        expect(
+            getComputedStyle(container.querySelector('h1')).backgroundImage,
+        ).toBe(
+            'linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0)), url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4=")',
+        );
     });
 
     it('should handle background-image with empty URLs', async () => {
         container.innerHTML = multiline(
             '<style>',
-            `    h1 { background-image: url(''), url(''), url("${svgToDataURL(images.lightIcon)}");`,
+            `    h1 { background-image: url(''), url(''), url("${svgToDataURL(
+                images.lightIcon,
+            )}");`,
             '</style>',
             '<h1>Weird color <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage.startsWith(isFirefox ? 'url("about:invalid"), url("about:invalid")' : 'url("http://localhost')).toBeTrue();
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage.endsWith('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4=")')).toBeTrue();
+        expect(
+            getComputedStyle(
+                container.querySelector('h1'),
+            ).backgroundImage.startsWith(
+                isFirefox
+                    ? 'url("about:invalid"), url("about:invalid")'
+                    : 'url("http://localhost',
+            ),
+        ).toBeTrue();
+        expect(
+            getComputedStyle(
+                container.querySelector('h1'),
+            ).backgroundImage.endsWith(
+                'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4=")',
+            ),
+        ).toBeTrue();
     });
 });

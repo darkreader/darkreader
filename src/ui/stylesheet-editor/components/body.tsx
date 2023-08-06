@@ -1,13 +1,15 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
-import {Button, MessageBox, Overlay} from '../../controls';
-import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
-import type {ExtWrapper} from '../../../definitions';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
+import { Button, MessageBox, Overlay } from '../../controls';
+import { getURLHostOrProtocol, isURLInList } from '../../../utils/url';
+import type { ExtWrapper } from '../../../definitions';
 
-export default function Body({data, actions}: ExtWrapper) {
+export default function Body({ data, actions }: ExtWrapper) {
     const context = getContext();
     const host = getURLHostOrProtocol(data.activeTab.url);
-    const custom = data.settings.customThemes.find(({url}) => isURLInList(data.activeTab.url, url));
+    const custom = data.settings.customThemes.find(({ url }) =>
+        isURLInList(data.activeTab.url, url),
+    );
 
     let textNode: HTMLTextAreaElement;
 
@@ -20,7 +22,10 @@ export default function Body({data, actions}: ExtWrapper) {
 
     function onTextRender(node: HTMLTextAreaElement) {
         textNode = node;
-        textNode.value = (custom ? custom.theme.stylesheet : data.settings.theme.stylesheet) || '';
+        textNode.value =
+            (custom
+                ? custom.theme.stylesheet
+                : data.settings.theme.stylesheet) || '';
         if (document.activeElement !== textNode) {
             textNode.focus();
         }
@@ -28,10 +33,12 @@ export default function Body({data, actions}: ExtWrapper) {
 
     function applyStyleSheet(css: string) {
         if (custom) {
-            custom.theme = {...custom.theme, ...{stylesheet: css}};
-            actions.changeSettings({customThemes: data.settings.customThemes});
+            custom.theme = { ...custom.theme, ...{ stylesheet: css } };
+            actions.changeSettings({
+                customThemes: data.settings.customThemes,
+            });
         } else {
-            actions.setTheme({stylesheet: css});
+            actions.setTheme({ stylesheet: css });
         }
     }
 
@@ -45,13 +52,14 @@ export default function Body({data, actions}: ExtWrapper) {
         context.refresh();
     }
 
-    const dialog = context && context.store.isDialogVisible ? (
-        <MessageBox
-            caption="Are you sure you want to remove current changes? You cannot restore them later."
-            onOK={reset}
-            onCancel={hideDialog}
-        />
-    ) : null;
+    const dialog =
+        context && context.store.isDialogVisible ? (
+            <MessageBox
+                caption='Are you sure you want to remove current changes? You cannot restore them later.'
+                onOK={reset}
+                onCancel={hideDialog}
+            />
+        ) : null;
 
     function reset() {
         context.store.isDialogVisible = false;
@@ -66,21 +74,25 @@ export default function Body({data, actions}: ExtWrapper) {
     return (
         <body>
             <header>
-                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
-                <h1 id="title">CSS Editor</h1>
+                <img
+                    id='logo'
+                    src='../assets/images/darkreader-type.svg'
+                    alt='Dark Reader'
+                />
+                <h1 id='title'>CSS Editor</h1>
             </header>
-            <h3 id="sub-title">{custom ? host : 'All websites'}</h3>
+            <h3 id='sub-title'>{custom ? host : 'All websites'}</h3>
             <textarea
-                id="editor"
+                id='editor'
                 native
                 placeholder={placeholderText}
                 onrender={onTextRender}
-                spellcheck="false"
-                autocorrect="off"
-                autocomplete="off"
-                autocapitalize="off"
+                spellcheck='false'
+                autocorrect='off'
+                autocomplete='off'
+                autocapitalize='off'
             />
-            <div id="buttons">
+            <div id='buttons'>
                 <Button onclick={showDialog}>
                     Reset changes
                     {dialog}

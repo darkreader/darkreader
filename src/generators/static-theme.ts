@@ -1,11 +1,11 @@
-import {createTextStyle} from './text-style';
-import {formatSitesFixesConfig} from './utils/format';
-import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
-import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
-import type {SitePropsIndex} from './utils/parse';
-import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns, isURLInList} from '../utils/url';
-import type {FilterConfig, StaticTheme} from '../definitions';
+import { createTextStyle } from './text-style';
+import { formatSitesFixesConfig } from './utils/format';
+import { applyColorMatrix, createFilterMatrix } from './utils/matrix';
+import { parseSitesFixesConfig, getSitesFixesFor } from './utils/parse';
+import type { SitePropsIndex } from './utils/parse';
+import { parseArray, formatArray } from '../utils/text';
+import { compareURLPatterns, isURLInList } from '../utils/url';
+import type { FilterConfig, StaticTheme } from '../definitions';
 
 interface ThemeColors {
     [prop: string]: number[];
@@ -58,11 +58,20 @@ function mix(color1: number[], color2: number[], t: number): number[] {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: FilterConfig, url: string, isTopFrame: boolean, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): string {
+export default function createStaticStylesheet(
+    config: FilterConfig,
+    url: string,
+    isTopFrame: boolean,
+    staticThemes: string,
+    staticThemesIndex: SitePropsIndex<StaticTheme>,
+): string {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         const [r, g, b, a] = color;
-        t[prop] = applyColorMatrix([r, g, b], createFilterMatrix({...config, mode: 0}));
+        t[prop] = applyColorMatrix(
+            [r, g, b],
+            createFilterMatrix({ ...config, mode: 0 }),
+        );
         if (a !== undefined) {
             t[prop].push(a);
         }
@@ -89,12 +98,14 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         lines.push(createTextStyle(config));
     }
 
-    return lines
-        .filter((ln) => ln)
-        .join('\n');
+    return lines.filter((ln) => ln).join('\n');
 }
 
-function createRuleGen(getSelectors: (siteTheme: StaticTheme) => string[] | undefined, generateDeclarations: (theme: ThemeColors) => string[], modifySelector: ((s: string) => string) = (s) => s) {
+function createRuleGen(
+    getSelectors: (siteTheme: StaticTheme) => string[] | undefined,
+    generateDeclarations: (theme: ThemeColors) => string[],
+    modifySelector: (s: string) => string = (s) => s,
+) {
     return (siteTheme: StaticTheme, themeColors: ThemeColors) => {
         const selectors = getSelectors(siteTheme);
         if (selectors == null || selectors.length === 0) {
@@ -130,51 +141,232 @@ const mx = {
 };
 
 const ruleGenerators = [
-    createRuleGen((t) => t.neutralBg, (t) => [`background-color: ${rgb(t.neutralBg)}`]),
-    createRuleGen((t) => t.neutralBgActive, (t) => [`background-color: ${rgb(t.neutralBg)}`]),
-    createRuleGen((t) => t.neutralBgActive, (t) => [`background-color: ${rgb(mix(t.neutralBg, [255, 255, 255], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.neutralBgActive, (t) => [`background-color: ${rgb(mix(t.neutralBg, [255, 255, 255], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.neutralText, (t) => [`color: ${rgb(t.neutralText)}`]),
-    createRuleGen((t) => t.neutralTextActive, (t) => [`color: ${rgb(t.neutralText)}`]),
-    createRuleGen((t) => t.neutralTextActive, (t) => [`color: ${rgb(mix(t.neutralText, [255, 255, 255], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.neutralTextActive, (t) => [`color: ${rgb(mix(t.neutralText, [255, 255, 255], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.neutralBorder, (t) => [`border-color: ${rgb(mix(t.neutralBg, t.neutralText, mx.border))}`]),
+    createRuleGen(
+        (t) => t.neutralBg,
+        (t) => [`background-color: ${rgb(t.neutralBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.neutralBgActive,
+        (t) => [`background-color: ${rgb(t.neutralBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.neutralBgActive,
+        (t) => [
+            `background-color: ${rgb(
+                mix(t.neutralBg, [255, 255, 255], mx.bg.hover),
+            )}`,
+        ],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.neutralBgActive,
+        (t) => [
+            `background-color: ${rgb(
+                mix(t.neutralBg, [255, 255, 255], mx.bg.active),
+            )}`,
+        ],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.neutralText,
+        (t) => [`color: ${rgb(t.neutralText)}`],
+    ),
+    createRuleGen(
+        (t) => t.neutralTextActive,
+        (t) => [`color: ${rgb(t.neutralText)}`],
+    ),
+    createRuleGen(
+        (t) => t.neutralTextActive,
+        (t) => [
+            `color: ${rgb(mix(t.neutralText, [255, 255, 255], mx.fg.hover))}`,
+        ],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.neutralTextActive,
+        (t) => [
+            `color: ${rgb(mix(t.neutralText, [255, 255, 255], mx.fg.active))}`,
+        ],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.neutralBorder,
+        (t) => [
+            `border-color: ${rgb(mix(t.neutralBg, t.neutralText, mx.border))}`,
+        ],
+    ),
 
-    createRuleGen((t) => t.redBg, (t) => [`background-color: ${rgb(t.redBg)}`]),
-    createRuleGen((t) => t.redBgActive, (t) => [`background-color: ${rgb(t.redBg)}`]),
-    createRuleGen((t) => t.redBgActive, (t) => [`background-color: ${rgb(mix(t.redBg, [255, 0, 64], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.redBgActive, (t) => [`background-color: ${rgb(mix(t.redBg, [255, 0, 64], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.redText, (t) => [`color: ${rgb(t.redText)}`]),
-    createRuleGen((t) => t.redTextActive, (t) => [`color: ${rgb(t.redText)}`]),
-    createRuleGen((t) => t.redTextActive, (t) => [`color: ${rgb(mix(t.redText, [255, 255, 0], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.redTextActive, (t) => [`color: ${rgb(mix(t.redText, [255, 255, 0], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.redBorder, (t) => [`border-color: ${rgb(mix(t.redBg, t.redText, mx.border))}`]),
+    createRuleGen(
+        (t) => t.redBg,
+        (t) => [`background-color: ${rgb(t.redBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.redBgActive,
+        (t) => [`background-color: ${rgb(t.redBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.redBgActive,
+        (t) => [
+            `background-color: ${rgb(mix(t.redBg, [255, 0, 64], mx.bg.hover))}`,
+        ],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.redBgActive,
+        (t) => [
+            `background-color: ${rgb(
+                mix(t.redBg, [255, 0, 64], mx.bg.active),
+            )}`,
+        ],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.redText,
+        (t) => [`color: ${rgb(t.redText)}`],
+    ),
+    createRuleGen(
+        (t) => t.redTextActive,
+        (t) => [`color: ${rgb(t.redText)}`],
+    ),
+    createRuleGen(
+        (t) => t.redTextActive,
+        (t) => [`color: ${rgb(mix(t.redText, [255, 255, 0], mx.fg.hover))}`],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.redTextActive,
+        (t) => [`color: ${rgb(mix(t.redText, [255, 255, 0], mx.fg.active))}`],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.redBorder,
+        (t) => [`border-color: ${rgb(mix(t.redBg, t.redText, mx.border))}`],
+    ),
 
-    createRuleGen((t) => t.greenBg, (t) => [`background-color: ${rgb(t.greenBg)}`]),
-    createRuleGen((t) => t.greenBgActive, (t) => [`background-color: ${rgb(t.greenBg)}`]),
-    createRuleGen((t) => t.greenBgActive, (t) => [`background-color: ${rgb(mix(t.greenBg, [128, 255, 182], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.greenBgActive, (t) => [`background-color: ${rgb(mix(t.greenBg, [128, 255, 182], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.greenText, (t) => [`color: ${rgb(t.greenText)}`]),
-    createRuleGen((t) => t.greenTextActive, (t) => [`color: ${rgb(t.greenText)}`]),
-    createRuleGen((t) => t.greenTextActive, (t) => [`color: ${rgb(mix(t.greenText, [182, 255, 224], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.greenTextActive, (t) => [`color: ${rgb(mix(t.greenText, [182, 255, 224], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.greenBorder, (t) => [`border-color: ${rgb(mix(t.greenBg, t.greenText, mx.border))}`]),
+    createRuleGen(
+        (t) => t.greenBg,
+        (t) => [`background-color: ${rgb(t.greenBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.greenBgActive,
+        (t) => [`background-color: ${rgb(t.greenBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.greenBgActive,
+        (t) => [
+            `background-color: ${rgb(
+                mix(t.greenBg, [128, 255, 182], mx.bg.hover),
+            )}`,
+        ],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.greenBgActive,
+        (t) => [
+            `background-color: ${rgb(
+                mix(t.greenBg, [128, 255, 182], mx.bg.active),
+            )}`,
+        ],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.greenText,
+        (t) => [`color: ${rgb(t.greenText)}`],
+    ),
+    createRuleGen(
+        (t) => t.greenTextActive,
+        (t) => [`color: ${rgb(t.greenText)}`],
+    ),
+    createRuleGen(
+        (t) => t.greenTextActive,
+        (t) => [
+            `color: ${rgb(mix(t.greenText, [182, 255, 224], mx.fg.hover))}`,
+        ],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.greenTextActive,
+        (t) => [
+            `color: ${rgb(mix(t.greenText, [182, 255, 224], mx.fg.active))}`,
+        ],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.greenBorder,
+        (t) => [`border-color: ${rgb(mix(t.greenBg, t.greenText, mx.border))}`],
+    ),
 
-    createRuleGen((t) => t.blueBg, (t) => [`background-color: ${rgb(t.blueBg)}`]),
-    createRuleGen((t) => t.blueBgActive, (t) => [`background-color: ${rgb(t.blueBg)}`]),
-    createRuleGen((t) => t.blueBgActive, (t) => [`background-color: ${rgb(mix(t.blueBg, [0, 128, 255], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.blueBgActive, (t) => [`background-color: ${rgb(mix(t.blueBg, [0, 128, 255], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.blueText, (t) => [`color: ${rgb(t.blueText)}`]),
-    createRuleGen((t) => t.blueTextActive, (t) => [`color: ${rgb(t.blueText)}`]),
-    createRuleGen((t) => t.blueTextActive, (t) => [`color: ${rgb(mix(t.blueText, [182, 224, 255], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.blueTextActive, (t) => [`color: ${rgb(mix(t.blueText, [182, 224, 255], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.blueBorder, (t) => [`border-color: ${rgb(mix(t.blueBg, t.blueText, mx.border))}`]),
+    createRuleGen(
+        (t) => t.blueBg,
+        (t) => [`background-color: ${rgb(t.blueBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.blueBgActive,
+        (t) => [`background-color: ${rgb(t.blueBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.blueBgActive,
+        (t) => [
+            `background-color: ${rgb(
+                mix(t.blueBg, [0, 128, 255], mx.bg.hover),
+            )}`,
+        ],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.blueBgActive,
+        (t) => [
+            `background-color: ${rgb(
+                mix(t.blueBg, [0, 128, 255], mx.bg.active),
+            )}`,
+        ],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.blueText,
+        (t) => [`color: ${rgb(t.blueText)}`],
+    ),
+    createRuleGen(
+        (t) => t.blueTextActive,
+        (t) => [`color: ${rgb(t.blueText)}`],
+    ),
+    createRuleGen(
+        (t) => t.blueTextActive,
+        (t) => [`color: ${rgb(mix(t.blueText, [182, 224, 255], mx.fg.hover))}`],
+        (s) => `${s}:hover`,
+    ),
+    createRuleGen(
+        (t) => t.blueTextActive,
+        (t) => [
+            `color: ${rgb(mix(t.blueText, [182, 224, 255], mx.fg.active))}`,
+        ],
+        (s) => `${s}:active, ${s}:focus`,
+    ),
+    createRuleGen(
+        (t) => t.blueBorder,
+        (t) => [`border-color: ${rgb(mix(t.blueBg, t.blueText, mx.border))}`],
+    ),
 
-    createRuleGen((t) => t.fadeBg, (t) => [`background-color: ${rgb(t.fadeBg)}`]),
-    createRuleGen((t) => t.fadeText, (t) => [`color: ${rgb(t.fadeText)}`]),
-    createRuleGen((t) => t.transparentBg, () => ['background-color: transparent']),
-    createRuleGen((t) => t.noImage, () => ['background-image: none']),
-    createRuleGen((t) => t.invert, () => ['filter: invert(100%) hue-rotate(180deg)']),
+    createRuleGen(
+        (t) => t.fadeBg,
+        (t) => [`background-color: ${rgb(t.fadeBg)}`],
+    ),
+    createRuleGen(
+        (t) => t.fadeText,
+        (t) => [`color: ${rgb(t.fadeText)}`],
+    ),
+    createRuleGen(
+        (t) => t.transparentBg,
+        () => ['background-color: transparent'],
+    ),
+    createRuleGen(
+        (t) => t.noImage,
+        () => ['background-image: none'],
+    ),
+    createRuleGen(
+        (t) => t.invert,
+        () => ['filter: invert(100%) hue-rotate(180deg)'],
+    ),
 ];
 
 const staticThemeCommands: { [key: string]: keyof StaticTheme } = {
@@ -209,7 +401,7 @@ const staticThemeCommands: { [key: string]: keyof StaticTheme } = {
     'TRANSPARENT BG': 'transparentBg',
 
     'NO IMAGE': 'noImage',
-    'INVERT': 'invert',
+    INVERT: 'invert',
 };
 
 export function parseStaticThemes($themes: string): StaticTheme[] {
@@ -230,7 +422,9 @@ function camelCaseToUpperCase(text: string): string {
 }
 
 export function formatStaticThemes(staticThemes: StaticTheme[]): string {
-    const themes = staticThemes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
+    const themes = staticThemes
+        .slice()
+        .sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(themes, {
         props: Object.values(staticThemeCommands),
@@ -250,32 +444,46 @@ export function formatStaticThemes(staticThemes: StaticTheme[]): string {
     });
 }
 
-function getCommonTheme(staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): StaticTheme {
+function getCommonTheme(
+    staticThemes: string,
+    staticThemesIndex: SitePropsIndex<StaticTheme>,
+): StaticTheme {
     const length = parseInt(staticThemesIndex.offsets.substring(4, 4 + 3), 36);
     const staticThemeText = staticThemes.substring(0, length);
     return parseStaticThemes(staticThemeText)[0];
 }
 
-function getThemeFor(url: string, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): Readonly<StaticTheme> | null {
-    const themes = getSitesFixesFor<StaticTheme>(url, staticThemes, staticThemesIndex, {
-        commands: Object.keys(staticThemeCommands),
-        getCommandPropName: (command) => staticThemeCommands[command],
-        parseCommandValue: (command, value) => {
-            if (command === 'NO COMMON') {
-                return true;
-            }
-            return parseArray(value);
+function getThemeFor(
+    url: string,
+    staticThemes: string,
+    staticThemesIndex: SitePropsIndex<StaticTheme>,
+): Readonly<StaticTheme> | null {
+    const themes = getSitesFixesFor<StaticTheme>(
+        url,
+        staticThemes,
+        staticThemesIndex,
+        {
+            commands: Object.keys(staticThemeCommands),
+            getCommandPropName: (command) => staticThemeCommands[command],
+            parseCommandValue: (command, value) => {
+                if (command === 'NO COMMON') {
+                    return true;
+                }
+                return parseArray(value);
+            },
         },
-    });
+    );
     const sortedBySpecificity = themes
         .slice(1)
         .map((theme) => {
             return {
-                specificity: isURLInList(url, theme.url) ? theme.url[0].length : 0,
+                specificity: isURLInList(url, theme.url)
+                    ? theme.url[0].length
+                    : 0,
                 theme,
             };
         })
-        .filter(({specificity}) => specificity > 0)
+        .filter(({ specificity }) => specificity > 0)
         .sort((a, b) => b.specificity - a.specificity);
 
     if (sortedBySpecificity.length === 0) {

@@ -1,40 +1,45 @@
-import {isPDF} from '../../utils/url';
-import {isFirefox, isEdge} from '../../utils/platform';
+import { isPDF } from '../../utils/url';
+import { isFirefox, isEdge } from '../../utils/platform';
 
 export function canInjectScript(url: string | null | undefined): boolean {
     if (isFirefox) {
-        return Boolean(url
-            && !url.startsWith('about:')
-            && !url.startsWith('moz')
-            && !url.startsWith('view-source:')
-            && !url.startsWith('resource:')
-            && !url.startsWith('chrome:')
-            && !url.startsWith('jar:')
-            && !url.startsWith('https://addons.mozilla.org/')
-            && !isPDF(url)
+        return Boolean(
+            url &&
+                !url.startsWith('about:') &&
+                !url.startsWith('moz') &&
+                !url.startsWith('view-source:') &&
+                !url.startsWith('resource:') &&
+                !url.startsWith('chrome:') &&
+                !url.startsWith('jar:') &&
+                !url.startsWith('https://addons.mozilla.org/') &&
+                !isPDF(url),
         );
     }
     if (isEdge) {
-        return Boolean(url
-            && !url.startsWith('chrome')
-            && !url.startsWith('data')
-            && !url.startsWith('devtools')
-            && !url.startsWith('edge')
-            && !url.startsWith('https://chrome.google.com/webstore')
-            && !url.startsWith('https://microsoftedge.microsoft.com/addons')
-            && !url.startsWith('view-source')
+        return Boolean(
+            url &&
+                !url.startsWith('chrome') &&
+                !url.startsWith('data') &&
+                !url.startsWith('devtools') &&
+                !url.startsWith('edge') &&
+                !url.startsWith('https://chrome.google.com/webstore') &&
+                !url.startsWith('https://microsoftedge.microsoft.com/addons') &&
+                !url.startsWith('view-source'),
         );
     }
-    return Boolean(url
-        && !url.startsWith('chrome')
-        && !url.startsWith('https://chrome.google.com/webstore')
-        && !url.startsWith('data')
-        && !url.startsWith('devtools')
-        && !url.startsWith('view-source')
+    return Boolean(
+        url &&
+            !url.startsWith('chrome') &&
+            !url.startsWith('https://chrome.google.com/webstore') &&
+            !url.startsWith('data') &&
+            !url.startsWith('devtools') &&
+            !url.startsWith('view-source'),
     );
 }
 
-export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T | null> {
+export async function readSyncStorage<T extends { [key: string]: any }>(
+    defaults: T,
+): Promise<T | null> {
     return new Promise<T | null>((resolve) => {
         chrome.storage.sync.get(null, (sync: any) => {
             if (chrome.runtime.lastError) {
@@ -62,7 +67,9 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
                 try {
                     sync[key] = JSON.parse(string);
                 } catch (error) {
-                    console.error(`sync[${key}]: Could not parse record from sync storage: ${string}`);
+                    console.error(
+                        `sync[${key}]: Could not parse record from sync storage: ${string}`,
+                    );
                     resolve(null);
                     return;
                 }
@@ -78,7 +85,9 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
     });
 }
 
-export async function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+export async function readLocalStorage<T extends { [key: string]: any }>(
+    defaults: T,
+): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.local.get(defaults, (local: T) => {
             if (chrome.runtime.lastError) {
@@ -91,7 +100,9 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
     });
 }
 
-function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: string]: any} {
+function prepareSyncStorage<T extends { [key: string]: any }>(
+    values: T,
+): { [key: string]: any } {
     for (const key in values) {
         const value = values[key];
         const string = JSON.stringify(value);
@@ -101,10 +112,14 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
         const totalLength = string.length + key.length;
         if (totalLength > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
             // This length limit permits us to store up to 1000 = (parseInt('rr', 36) + 1) records.
-            const maxLength = chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 1 - 2;
+            const maxLength =
+                chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 1 - 2;
             const minimalKeysNeeded = Math.ceil(string.length / maxLength);
             for (let i = 0; i < minimalKeysNeeded; i++) {
-                (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
+                (values as any)[`${key}_${i.toString(36)}`] = string.substring(
+                    i * maxLength,
+                    (i + 1) * maxLength,
+                );
             }
             (values as any)[key] = {
                 __meta_split_count: minimalKeysNeeded,
@@ -114,7 +129,9 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
     return values;
 }
 
-export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+export async function writeSyncStorage<T extends { [key: string]: any }>(
+    values: T,
+): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         const packaged = prepareSyncStorage(values);
         chrome.storage.sync.set(packaged, () => {
@@ -127,7 +144,9 @@ export async function writeSyncStorage<T extends {[key: string]: any}>(values: T
     });
 }
 
-export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+export async function writeLocalStorage<T extends { [key: string]: any }>(
+    values: T,
+): Promise<void> {
     return new Promise<void>(async (resolve) => {
         chrome.storage.local.set(values, () => {
             resolve();

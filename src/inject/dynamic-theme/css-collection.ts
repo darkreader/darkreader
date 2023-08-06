@@ -1,6 +1,6 @@
-import {forEach} from '../../utils/array';
-import {loadAsDataURL} from '../../utils/network';
-import {getMatches, formatCSS} from '../../utils/text';
+import { forEach } from '../../utils/array';
+import { loadAsDataURL } from '../../utils/network';
+import { getMatches, formatCSS } from '../../utils/text';
 
 const blobRegex = /url\(\"(blob\:.*?)\"\)/g;
 
@@ -57,11 +57,13 @@ export async function collectCSS(): Promise<string> {
     addStaticCSS('.darkreader--variables', 'Variables Style');
 
     const modifiedCSS: string[] = [];
-    document.querySelectorAll('.darkreader--sync').forEach((element: HTMLStyleElement) => {
-        forEach(element.sheet!.cssRules, (rule) => {
-            rule && rule.cssText && modifiedCSS.push(rule.cssText);
+    document
+        .querySelectorAll('.darkreader--sync')
+        .forEach((element: HTMLStyleElement) => {
+            forEach(element.sheet!.cssRules, (rule) => {
+                rule && rule.cssText && modifiedCSS.push(rule.cssText);
+            });
         });
-    });
 
     if (modifiedCSS.length) {
         const formattedCSS = formatCSS(modifiedCSS.join('\n'));

@@ -1,8 +1,10 @@
-import {isMobile} from '../utils/platform';
+import { isMobile } from '../utils/platform';
 
 declare const __CHROMIUM_MV3__: boolean;
 
-export function classes(...args: Array<string | {[cls: string]: boolean}>): string {
+export function classes(
+    ...args: Array<string | { [cls: string]: boolean }>
+): string {
     const classes: string[] = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
         if (typeof c === 'string') {
@@ -14,11 +16,17 @@ export function classes(...args: Array<string | {[cls: string]: boolean}>): stri
     return classes.join(' ');
 }
 
-export function compose<T extends Malevic.Component>(type: T, ...wrappers: Array<(t: T) => T>): T {
+export function compose<T extends Malevic.Component>(
+    type: T,
+    ...wrappers: Array<(t: T) => T>
+): T {
     return wrappers.reduce((t, w) => w(t), type);
 }
 
-export function openFile(options: {extensions: string[]}, callback: (content: string) => void): void {
+export function openFile(
+    options: { extensions: string[] },
+    callback: (content: string) => void,
+): void {
     const input = document.createElement('input');
     input.type = 'file';
     input.style.display = 'none';
@@ -61,8 +69,14 @@ interface SwipeEventObject {
     clientY: number;
 }
 
-type SwipeEventHandler<T = void> = (e: SwipeEventObject, nativeEvent: MouseEvent | TouchEvent) => T;
-type StartSwipeHandler = SwipeEventHandler<{move: SwipeEventHandler; up: SwipeEventHandler}>;
+type SwipeEventHandler<T = void> = (
+    e: SwipeEventObject,
+    nativeEvent: MouseEvent | TouchEvent,
+) => T;
+type StartSwipeHandler = SwipeEventHandler<{
+    move: SwipeEventHandler;
+    up: SwipeEventHandler;
+}>;
 
 function onSwipeStart(
     startEventObj: MouseEvent | TouchEvent,
@@ -72,7 +86,7 @@ function onSwipeStart(
         typeof TouchEvent !== 'undefined' &&
         startEventObj instanceof TouchEvent;
     const touchId = isTouchEvent
-        ? (startEventObj).changedTouches[0].identifier
+        ? startEventObj.changedTouches[0].identifier
         : null;
     const pointerMoveEvent = isTouchEvent ? 'touchmove' : 'mousemove';
     const pointerUpEvent = isTouchEvent ? 'touchend' : 'mouseup';
@@ -82,18 +96,21 @@ function onSwipeStart(
     }
 
     function getSwipeEventObject(e: MouseEvent | TouchEvent) {
-        const {clientX, clientY} = isTouchEvent
+        const { clientX, clientY } = isTouchEvent
             ? getTouch(e as TouchEvent)
-            : e as MouseEvent;
-        return {clientX, clientY};
+            : (e as MouseEvent);
+        return { clientX, clientY };
     }
 
     const startSE = getSwipeEventObject(startEventObj);
-    const {move: moveHandler, up: upHandler} = startHandler(startSE, startEventObj);
+    const { move: moveHandler, up: upHandler } = startHandler(
+        startSE,
+        startEventObj,
+    );
 
     function getTouch(e: TouchEvent) {
         return Array.from(e.changedTouches).find(
-            ({identifier: id}) => id === touchId,
+            ({ identifier: id }) => id === touchId,
         )!;
     }
 
@@ -113,11 +130,13 @@ function onSwipeStart(
         window.removeEventListener(pointerUpEvent, onPointerUp);
     }
 
-    window.addEventListener(pointerMoveEvent, onPointerMove, {passive: true});
-    window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
+    window.addEventListener(pointerMoveEvent, onPointerMove, { passive: true });
+    window.addEventListener(pointerUpEvent, onPointerUp, { passive: true });
 }
 
-export function createSwipeHandler(startHandler: StartSwipeHandler): (e: MouseEvent | TouchEvent) => void {
+export function createSwipeHandler(
+    startHandler: StartSwipeHandler,
+): (e: MouseEvent | TouchEvent) => void {
     return (e: MouseEvent | TouchEvent) => onSwipeStart(e, startHandler);
 }
 
@@ -150,35 +169,48 @@ type page = 'devtools' | 'stylesheet-editor';
 // messages only to popups and not regular windows.
 async function getExtensionPageTabMV3(): Promise<chrome.tabs.Tab | null> {
     return new Promise((resolve) => {
-        chrome.windows.getAll({
-            populate: true,
-            windowTypes: ['popup'],
-        }, (w) => {
-            const responses: Array<Promise<string>> = [];
-            let found = false;
-            for (const window of w) {
-                const response = chrome.tabs.sendMessage<string, 'getExtensionPageTabMV3_pong'>(window.tabs![0]!.id!, 'getExtensionPageTabMV3_ping', {frameId: 0});
-                response.then((response) => {
-                    if (response === 'getExtensionPageTabMV3_pong') {
-                        found = true;
-                        resolve(window.tabs![0]);
-                    }
-                });
-                responses.push(response);
-            }
-            Promise.all(responses).then(() => !found && resolve(null));
-        });
+        chrome.windows.getAll(
+            {
+                populate: true,
+                windowTypes: ['popup'],
+            },
+            (w) => {
+                const responses: Array<Promise<string>> = [];
+                let found = false;
+                for (const window of w) {
+                    const response = chrome.tabs.sendMessage<
+                        string,
+                        'getExtensionPageTabMV3_pong'
+                    >(window.tabs![0]!.id!, 'getExtensionPageTabMV3_ping', {
+                        frameId: 0,
+                    });
+                    response.then((response) => {
+                        if (response === 'getExtensionPageTabMV3_pong') {
+                            found = true;
+                            resolve(window.tabs![0]);
+                        }
+                    });
+                    responses.push(response);
+                }
+                Promise.all(responses).then(() => !found && resolve(null));
+            },
+        );
     });
 }
 
-async function getExtensionPageTab(url: string): Promise<chrome.tabs.Tab | null> {
+async function getExtensionPageTab(
+    url: string,
+): Promise<chrome.tabs.Tab | null> {
     if (__CHROMIUM_MV3__) {
         return getExtensionPageTabMV3();
     }
     return new Promise<chrome.tabs.Tab>((resolve) => {
-        chrome.tabs.query({
-            url,
-        }, ([tab]) => resolve(tab || null));
+        chrome.tabs.query(
+            {
+                url,
+            },
+            ([tab]) => resolve(tab || null),
+        );
     });
 }
 
@@ -187,16 +219,16 @@ export async function openExtensionPage(page: page): Promise<void> {
     if (isMobile) {
         const extensionPageTab = await getExtensionPageTab(url);
         if (extensionPageTab !== null) {
-            chrome.tabs.update(extensionPageTab.id!, {active: true});
+            chrome.tabs.update(extensionPageTab.id!, { active: true });
             window.close();
         } else {
-            chrome.tabs.create({url});
+            chrome.tabs.create({ url });
             window.close();
         }
     } else {
         const extensionPageTab = await getExtensionPageTab(url);
         if (extensionPageTab !== null) {
-            chrome.windows.update(extensionPageTab.windowId, {focused: true});
+            chrome.windows.update(extensionPageTab.windowId, { focused: true });
             window.close();
         } else {
             chrome.windows.create({

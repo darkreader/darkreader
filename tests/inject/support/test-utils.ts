@@ -16,6 +16,6 @@ export function timeout(delay: number): Promise<void> {
 
 export function waitForEvent(eventName: string): Promise<void> {
     return new Promise<void>((resolve) => {
-        document.addEventListener(eventName, () => resolve(), {once: true});
+        document.addEventListener(eventName, () => resolve(), { once: true });
     });
 }

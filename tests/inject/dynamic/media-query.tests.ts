@@ -1,7 +1,10 @@
 import '../support/polyfills';
-import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../support/test-utils';
+import { DEFAULT_THEME } from '../../../src/defaults';
+import {
+    createOrUpdateDynamicTheme,
+    removeDynamicTheme,
+} from '../../../src/inject/dynamic-theme';
+import { multiline, timeout } from '../support/test-utils';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -35,9 +38,17 @@ describe('MEDIA QUERIES', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
-        expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
+        expect(
+            getComputedStyle(document.querySelector('h1 strong')).color,
+        ).toBe('rgb(255, 174, 26)');
+        expect(
+            document
+                .querySelector('.testcase-style-2')
+                .nextElementSibling.classList.contains('darkreader--sync'),
+        ).toBe(false);
     });
 
     it('should style lazyloaded media', async () => {
@@ -51,12 +62,24 @@ describe('MEDIA QUERIES', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
 
-        (document.querySelector('.testcase-style') as HTMLStyleElement).media = 'screen';
+        (document.querySelector('.testcase-style') as HTMLStyleElement).media =
+            'screen';
         await timeout(0);
-        expect((document.querySelector('.testcase-style') as HTMLStyleElement).media).toBe('screen');
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
-        expect(document.querySelector('.testcase-style').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
+        expect(
+            (document.querySelector('.testcase-style') as HTMLStyleElement)
+                .media,
+        ).toBe('screen');
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
+        expect(
+            getComputedStyle(document.querySelector('h1 strong')).color,
+        ).toBe('rgb(255, 174, 26)');
+        expect(
+            document
+                .querySelector('.testcase-style')
+                .nextElementSibling.classList.contains('darkreader--sync'),
+        ).toBe(true);
     });
 
     it('should check for CSS support', async () => {
@@ -76,9 +99,15 @@ describe('MEDIA QUERIES', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
-        expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
+        expect(
+            getComputedStyle(document.querySelector('h1 strong')).color,
+        ).toBe('rgb(255, 174, 26)');
+        expect(getComputedStyle(document.body).backgroundColor).toBe(
+            'rgb(0, 0, 0)',
+        );
     });
 
     it('should check for CSS @media', async () => {
@@ -95,8 +124,15 @@ describe('MEDIA QUERIES', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
+        expect(
+            (
+                document.querySelector('.testcase-style')
+                    .nextElementSibling as HTMLStyleElement
+            ).sheet.cssRules.length,
+        ).toBe(2);
     });
 
     it('should check for nested CSS @media', async () => {
@@ -115,8 +151,15 @@ describe('MEDIA QUERIES', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
+        expect(
+            (
+                document.querySelector('.testcase-style')
+                    .nextElementSibling as HTMLStyleElement
+            ).sheet.cssRules.length,
+        ).toBe(2);
     });
 
     it('should style print/media query', () => {
@@ -132,9 +175,17 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test foor...... <strong>Oh uh media query :D</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
-        expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(102, 102, 102)');
+        expect(
+            getComputedStyle(document.querySelector('h1 strong')).color,
+        ).toBe('rgb(255, 26, 26)');
+        expect(
+            document
+                .querySelector('.testcase-style-2')
+                .nextElementSibling.classList.contains('darkreader--sync'),
+        ).toBe(true);
     });
 
     it('should handle same cssText but different media rule', () => {
@@ -151,7 +202,9 @@ describe('MEDIA QUERIES', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
     });
 
     it('should not style blacklisted media and handle uppercase media', () => {
@@ -168,9 +221,17 @@ describe('MEDIA QUERIES', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
-        expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
+        expect(
+            getComputedStyle(document.querySelector('h1 strong')).color,
+        ).toBe('rgb(255, 174, 26)');
+        expect(
+            document
+                .querySelector('.testcase-style-2')
+                .nextElementSibling.classList.contains('darkreader--sync'),
+        ).toBe(false);
     });
 
     it('should handle media query and print', () => {
@@ -183,6 +244,8 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(
+            getComputedStyle(document.querySelector('h1')).backgroundColor,
+        ).toBe('rgb(0, 102, 0)');
     });
 });

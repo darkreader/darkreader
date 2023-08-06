@@ -1,8 +1,11 @@
 import '../support/polyfills';
-import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../support/test-utils';
-import {isFirefox, isSafari} from '../../../src/utils/platform';
+import { DEFAULT_THEME } from '../../../src/defaults';
+import {
+    createOrUpdateDynamicTheme,
+    removeDynamicTheme,
+} from '../../../src/inject/dynamic-theme';
+import { multiline, timeout } from '../support/test-utils';
+import { isFirefox, isSafari } from '../../../src/utils/platform';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -26,19 +29,37 @@ describe('SHADOW DOM', () => {
         container.innerHTML = multiline(
             '<div class="shadow-dom-wrapper"></div>',
         );
-        document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
+        document
+            .querySelector('.shadow-dom-wrapper')
+            .attachShadow({ mode: 'open' });
         createOrUpdateDynamicTheme(theme, null, false);
-        const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
-        expect(shadowRoot.firstElementChild.classList.contains('darkreader--inline')).toBe(true);
-        expect(shadowRoot.firstElementChild.nextElementSibling.classList.contains('darkreader--override')).toBe(true);
-        expect(shadowRoot.firstElementChild.nextElementSibling.nextElementSibling.classList.contains('darkreader--invert')).toBe(true);
+        const shadowRoot = document.querySelector(
+            '.shadow-dom-wrapper',
+        ).shadowRoot;
+        expect(
+            shadowRoot.firstElementChild.classList.contains(
+                'darkreader--inline',
+            ),
+        ).toBe(true);
+        expect(
+            shadowRoot.firstElementChild.nextElementSibling.classList.contains(
+                'darkreader--override',
+            ),
+        ).toBe(true);
+        expect(
+            shadowRoot.firstElementChild.nextElementSibling.nextElementSibling.classList.contains(
+                'darkreader--invert',
+            ),
+        ).toBe(true);
     });
 
     it('should override styles', async () => {
         container.innerHTML = multiline(
             '<div class="shadow-dom-wrapper"></div>',
         );
-        const shadow = document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
+        const shadow = document
+            .querySelector('.shadow-dom-wrapper')
+            .attachShadow({ mode: 'open' });
         const style = document.createElement('style');
         style.classList.add('test-case-style');
         shadow.appendChild(style);
@@ -46,17 +67,26 @@ describe('SHADOW DOM', () => {
         style.sheet.insertRule('strong { color: red }');
         createOrUpdateDynamicTheme(theme, null, false);
 
-        const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
+        const shadowRoot = document.querySelector(
+            '.shadow-dom-wrapper',
+        ).shadowRoot;
         const testCase = shadowRoot.querySelector('.test-case-style');
-        expect(testCase.nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
-        expect((testCase.nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
+        expect(
+            testCase.nextElementSibling.classList.contains('darkreader--sync'),
+        ).toBe(true);
+        expect(
+            (testCase.nextElementSibling as HTMLStyleElement).sheet.cssRules
+                .length,
+        ).toBe(2);
     });
 
     it('should react to DOM changes', async () => {
         container.innerHTML = multiline(
             '<div class="shadow-dom-wrapper"></div>',
         );
-        const shadow = document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
+        const shadow = document
+            .querySelector('.shadow-dom-wrapper')
+            .attachShadow({ mode: 'open' });
 
         createOrUpdateDynamicTheme(theme, null, false);
         const style = document.createElement('style');
@@ -66,19 +96,36 @@ describe('SHADOW DOM', () => {
         style.sheet.insertRule('strong { color: red }');
 
         await timeout(0);
-        const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
+        const shadowRoot = document.querySelector(
+            '.shadow-dom-wrapper',
+        ).shadowRoot;
         const testCase = shadowRoot.querySelector('.test-case-style');
-        expect(shadowRoot.firstElementChild.classList.contains('darkreader--inline')).toBe(true);
-        expect(shadowRoot.firstElementChild.nextElementSibling.classList.contains('darkreader--override')).toBe(true);
-        expect(testCase.nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
-        expect((testCase.nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
+        expect(
+            shadowRoot.firstElementChild.classList.contains(
+                'darkreader--inline',
+            ),
+        ).toBe(true);
+        expect(
+            shadowRoot.firstElementChild.nextElementSibling.classList.contains(
+                'darkreader--override',
+            ),
+        ).toBe(true);
+        expect(
+            testCase.nextElementSibling.classList.contains('darkreader--sync'),
+        ).toBe(true);
+        expect(
+            (testCase.nextElementSibling as HTMLStyleElement).sheet.cssRules
+                .length,
+        ).toBe(2);
     });
 
     it('should override inline styles', async () => {
         container.innerHTML = multiline(
             '<div class="shadow-dom-wrapper"></div>',
         );
-        const shadow = document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
+        const shadow = document
+            .querySelector('.shadow-dom-wrapper')
+            .attachShadow({ mode: 'open' });
 
         createOrUpdateDynamicTheme(theme, null, false);
         const standardElement = document.createElement('p');
@@ -86,8 +133,12 @@ describe('SHADOW DOM', () => {
         shadow.appendChild(standardElement);
 
         await timeout(0);
-        const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
-        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 26, 26)');
+        const shadowRoot = document.querySelector(
+            '.shadow-dom-wrapper',
+        ).shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe(
+            'rgb(255, 26, 26)',
+        );
     });
 
     it('should handle defined custom elements', async () => {
@@ -98,11 +149,12 @@ describe('SHADOW DOM', () => {
         class CustomElement extends HTMLElement {
             public constructor() {
                 super();
-                const shadowRoot = this.attachShadow({mode: 'open'});
+                const shadowRoot = this.attachShadow({ mode: 'open' });
                 const style = document.createElement('style');
                 style.textContent = 'p { color: pink }';
                 const paragraph = document.createElement('p');
-                paragraph.textContent = 'Some text content that should be pink.';
+                paragraph.textContent =
+                    'Some text content that should be pink.';
 
                 shadowRoot.append(style);
                 shadowRoot.append(paragraph);
@@ -112,7 +164,9 @@ describe('SHADOW DOM', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         const shadowRoot = document.querySelector('custom-element').shadowRoot;
-        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe(
+            'rgb(255, 198, 208)',
+        );
     });
 
     it('should react to defined custom elements', async () => {
@@ -123,11 +177,12 @@ describe('SHADOW DOM', () => {
         class DelayedCustomElement extends HTMLElement {
             public constructor() {
                 super();
-                const shadowRoot = this.attachShadow({mode: 'open'});
+                const shadowRoot = this.attachShadow({ mode: 'open' });
                 const style = document.createElement('style');
                 style.textContent = 'p { color: pink }';
                 const paragraph = document.createElement('p');
-                paragraph.textContent = 'Some text content that should be pink.';
+                paragraph.textContent =
+                    'Some text content that should be pink.';
 
                 shadowRoot.append(style);
                 shadowRoot.append(paragraph);
@@ -137,8 +192,12 @@ describe('SHADOW DOM', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         customElements.define('delayed-custom-element', DelayedCustomElement);
         await timeout(0);
-        const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
-        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
+        const shadowRoot = document.querySelector(
+            'delayed-custom-element',
+        ).shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe(
+            'rgb(255, 198, 208)',
+        );
     });
 
     it('should override styles', async () => {
@@ -154,7 +213,9 @@ describe('SHADOW DOM', () => {
         const newRule = new CSSStyleSheet();
         newRule.insertRule(':host { --red: red }');
 
-        const shadow = document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
+        const shadow = document
+            .querySelector('.shadow-dom-wrapper')
+            .attachShadow({ mode: 'open' });
         shadow.adoptedStyleSheets = [newRule];
 
         const style = document.createElement('style');
@@ -167,11 +228,18 @@ describe('SHADOW DOM', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
 
-        const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
+        const shadowRoot = document.querySelector(
+            '.shadow-dom-wrapper',
+        ).shadowRoot;
         const testCase = shadowRoot.querySelector('.test-case-style');
         const darkendH1 = shadowRoot.querySelector('h1');
-        expect(testCase.nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
-        expect((testCase.nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(1);
+        expect(
+            testCase.nextElementSibling.classList.contains('darkreader--sync'),
+        ).toBe(true);
+        expect(
+            (testCase.nextElementSibling as HTMLStyleElement).sheet.cssRules
+                .length,
+        ).toBe(1);
         expect(shadowRoot.adoptedStyleSheets.length).toBe(2);
         expect(getComputedStyle(darkendH1).color).toBe('rgb(255, 26, 26)');
     });

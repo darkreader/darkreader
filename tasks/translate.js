@@ -1,6 +1,6 @@
 // @ts-check
 import fs from 'node:fs/promises';
-import {readFile, writeFile, httpsRequest, timeout, log} from './utils.js';
+import { readFile, writeFile, httpsRequest, timeout, log } from './utils.js';
 
 // To use this tool:
 // 1. Edit a line in en.config.
@@ -63,7 +63,7 @@ async function getAllLocales() {
         }
         const locale = file.substring(0, file.lastIndexOf('.config'));
         const content = await readFile(`${dir}/${file}`);
-        locales.push({locale, file, content});
+        locales.push({ locale, file, content });
     }
 
     return locales;
@@ -76,14 +76,14 @@ async function getAllLocales() {
  */
 async function translate(text, lang) {
     const url = new URL('https://translate.googleapis.com/translate_a/single');
-    url.search = (new URLSearchParams({
+    url.search = new URLSearchParams({
         client: 'gtx',
         sl: 'en-US',
         tl: lang,
         dt: 't',
         dj: '1',
         q: text,
-    })).toString();
+    }).toString();
     const response = await httpsRequest(url.toString());
     const translation = JSON.parse(response.text());
     return translation.sentences.map((s) => s.trans).join('');

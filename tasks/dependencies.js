@@ -1,29 +1,31 @@
 // @ts-check
-import {exec} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
-import {readFile, writeFile} from 'node:fs/promises';
-import {log} from './utils.js';
+import { exec } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { readFile, writeFile } from 'node:fs/promises';
+import { log } from './utils.js';
 
 const cwd = fileURLToPath(new URL('../', import.meta.url));
 const packagePath = `${cwd}/package.json`;
 
 async function getOutdated() {
-    return /** @type {Promise<object | null>} */(new Promise((resolve, reject) => {
-        exec('npm outdated --json', {cwd}, (error, stdout) => {
-            const packages = JSON.parse(stdout.toString());
-            if (typeof packages !== 'object') {
-                log.error('Failed to check for dependencies');
-                reject();
-                return;
-            }
-            if (Object.keys(packages).length === 0) {
-                log.error('All dependencies are already up to date');
-                reject();
-                return;
-            }
-            resolve(packages);
-        });
-    }));
+    return /** @type {Promise<object | null>} */ (
+        new Promise((resolve, reject) => {
+            exec('npm outdated --json', { cwd }, (error, stdout) => {
+                const packages = JSON.parse(stdout.toString());
+                if (typeof packages !== 'object') {
+                    log.error('Failed to check for dependencies');
+                    reject();
+                    return;
+                }
+                if (Object.keys(packages).length === 0) {
+                    log.error('All dependencies are already up to date');
+                    reject();
+                    return;
+                }
+                resolve(packages);
+            });
+        })
+    );
 }
 
 /**
@@ -32,19 +34,21 @@ async function getOutdated() {
  * @returns {Promise<void>}
  */
 async function command(script) {
-    return (new Promise((resolve, reject) => {
-        exec(script, {cwd}, (error) => {
+    return new Promise((resolve, reject) => {
+        exec(script, { cwd }, (error) => {
             if (error) {
                 reject(error);
                 return;
             }
             resolve();
         });
-    }));
+    });
 }
 
 async function buildAll() {
-    await command('npm run build -- --release --api --chrome-mv2 --chrome-mv3 --firefox-mv2 --thunderbird');
+    await command(
+        'npm run build -- --release --api --chrome-mv2 --chrome-mv3 --firefox-mv2 --thunderbird',
+    );
 }
 
 async function patchPackage(outdated) {
@@ -57,7 +61,7 @@ async function patchPackage(outdated) {
 
 async function main() {
     const outdated = await getOutdated();
-    if (!outdated){
+    if (!outdated) {
         return;
     }
 
@@ -85,9 +89,13 @@ async function main() {
     log.ok('Built with new dependencies');
 
     await command('diff -r build-old/release/chrome build/release/chrome');
-    await command('diff -r build-old/release/chrome-mv3 build/release/chrome-mv3');
+    await command(
+        'diff -r build-old/release/chrome-mv3 build/release/chrome-mv3',
+    );
     await command('diff -r build-old/release/firefox build/release/firefox');
-    await command('diff -r build-old/release/thunderbird build/release/thunderbird');
+    await command(
+        'diff -r build-old/release/thunderbird build/release/thunderbird',
+    );
     await command('diff darkreader-old.js darkreader.js');
     log.ok('Dependency upgrade does not result in change to built output');
 

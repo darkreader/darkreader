@@ -1,4 +1,4 @@
-import {dirname, join} from 'node:path';
+import { dirname, join } from 'node:path';
 
 export const rootDir: string = dirname(require.resolve('../../package.json'));
 
@@ -20,11 +20,17 @@ export function timeout(delay: number): Promise<void> {
     return new Promise<void>((resolve) => setTimeout(resolve, delay));
 }
 
-export function promiseWithTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
+export function promiseWithTimeout<T>(
+    ms: number,
+    promise: Promise<T>,
+): Promise<T> {
     let id: ReturnType<typeof setTimeout>;
-    return Promise.race<T>([promise, new Promise<never>((_, reject) => {
-        id = setTimeout(() => reject(new TimeoutError(ms)), ms);
-    })]).finally(() => clearTimeout(id));
+    return Promise.race<T>([
+        promise,
+        new Promise<never>((_, reject) => {
+            id = setTimeout(() => reject(new TimeoutError(ms)), ms);
+        }),
+    ]).finally(() => clearTimeout(id));
 }
 
 class TimeoutError extends Error {

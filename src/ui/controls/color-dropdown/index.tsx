@@ -1,8 +1,8 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
 import ColorPicker from '../color-picker';
 import DropDown from '../dropdown';
-import {parseColorWithCache} from '../../../utils/color';
+import { parseColorWithCache } from '../../../utils/color';
 
 interface ColorDropDownProps {
     class?: string;
@@ -31,16 +31,19 @@ export default function ColorDropDown(props: ColorDropDownProps) {
     };
 
     const dropDownOptions = [
-        props.hasDefaultOption ? {id: 'default', content: labels.DEFAULT} : null,
-        props.hasAutoOption ? {id: 'auto', content: labels.AUTO} : null,
-        {id: 'custom', content: labels.CUSTOM},
-    ].filter((v) => v) as Array<{id: string; content: string}>;
+        props.hasDefaultOption
+            ? { id: 'default', content: labels.DEFAULT }
+            : null,
+        props.hasAutoOption ? { id: 'auto', content: labels.AUTO } : null,
+        { id: 'custom', content: labels.CUSTOM },
+    ].filter((v) => v) as Array<{ id: string; content: string }>;
 
-    const selectedDropDownValue = (
-        props.value === '' ? 'default' :
-            props.value === 'auto' ? 'auto' :
-                'custom'
-    );
+    const selectedDropDownValue =
+        props.value === ''
+            ? 'default'
+            : props.value === 'auto'
+            ? 'auto'
+            : 'custom';
 
     function onDropDownChange(value: 'default' | 'auto' | 'custom') {
         const result = {
@@ -54,11 +57,11 @@ export default function ColorDropDown(props: ColorDropDownProps) {
     const isPickerVisible = Boolean(parseColorWithCache(props.value));
 
     const prevValue = context.prev ? context.prev.props.value : null;
-    const shouldFocusOnPicker = (
-        (props.value !== '' && props.value !== 'auto') &&
+    const shouldFocusOnPicker =
+        props.value !== '' &&
+        props.value !== 'auto' &&
         prevValue != null &&
-        (prevValue === '' || prevValue === 'auto')
-    );
+        (prevValue === '' || prevValue === 'auto');
 
     function onRootRender(root: Element) {
         if (shouldFocusOnPicker) {
@@ -76,7 +79,8 @@ export default function ColorDropDown(props: ColorDropDownProps) {
             }}
             onrender={onRootRender}
         >
-            <DropDown class="color-dropdown__options"
+            <DropDown
+                class='color-dropdown__options'
                 options={dropDownOptions}
                 selected={selectedDropDownValue}
                 onChange={onDropDownChange}

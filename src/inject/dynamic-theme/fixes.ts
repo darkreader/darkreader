@@ -1,6 +1,6 @@
-import {logWarn} from '../utils/log';
-import type {DynamicThemeFix} from '../../definitions';
-import {isURLInList} from '../../utils/url';
+import { logWarn } from '../utils/log';
+import type { DynamicThemeFix } from '../../definitions';
+import { isURLInList } from '../../utils/url';
 
 /**
  * Note: This function's behavior is identical to what we had for a long time, but it's slightly odd:
@@ -11,9 +11,20 @@ import {isURLInList} from '../../utils/url';
  *        and fixes matching the document origin
  * @returns A single fix constructed from the generic fix and a single most relevant other fix
  */
-export function findRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): number | null {
-    if (!Array.isArray(fixes) || fixes.length === 0 || fixes[0].url[0] !== '*') {
-        logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
+export function findRelevantFix(
+    documentURL: string,
+    fixes: DynamicThemeFix[],
+): number | null {
+    if (
+        !Array.isArray(fixes) ||
+        fixes.length === 0 ||
+        fixes[0].url[0] !== '*'
+    ) {
+        logWarn(
+            'selectRelevantFix() failed to construct a single fix',
+            documentURL,
+            fixes,
+        );
         return null;
     }
 
@@ -51,10 +62,21 @@ export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix | null {
     return {
         url: [],
         invert: combineArrays(fixes.map((fix) => fix.invert)),
-        css: fixes.map((fix) => fix.css).filter(Boolean).join('\n'),
-        ignoreInlineStyle: combineArrays(fixes.map((fix) => fix.ignoreInlineStyle)),
-        ignoreImageAnalysis: combineArrays(fixes.map((fix) => fix.ignoreImageAnalysis)),
-        disableStyleSheetsProxy: fixes.some((fix) => fix.disableStyleSheetsProxy),
-        disableCustomElementRegistryProxy: fixes.some((fix) => fix.disableCustomElementRegistryProxy),
+        css: fixes
+            .map((fix) => fix.css)
+            .filter(Boolean)
+            .join('\n'),
+        ignoreInlineStyle: combineArrays(
+            fixes.map((fix) => fix.ignoreInlineStyle),
+        ),
+        ignoreImageAnalysis: combineArrays(
+            fixes.map((fix) => fix.ignoreImageAnalysis),
+        ),
+        disableStyleSheetsProxy: fixes.some(
+            (fix) => fix.disableStyleSheetsProxy,
+        ),
+        disableCustomElementRegistryProxy: fixes.some(
+            (fix) => fix.disableCustomElementRegistryProxy,
+        ),
     };
 }

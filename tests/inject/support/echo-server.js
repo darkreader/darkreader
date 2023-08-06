@@ -1,7 +1,7 @@
 // @ts-check
 import http from 'http';
 
-export async function createEchoServer(/** @type {number} */port) {
+export async function createEchoServer(/** @type {number} */ port) {
     /** @type {import('http').Server} */
     let server;
 
@@ -16,7 +16,7 @@ export async function createEchoServer(/** @type {number} */port) {
             return;
         }
 
-        const {searchParams} = parsedURL;
+        const { searchParams } = parsedURL;
 
         const content = searchParams.get('content');
         if (!content) {

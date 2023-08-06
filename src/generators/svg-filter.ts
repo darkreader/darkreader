@@ -1,21 +1,39 @@
-import {createFilterMatrix, Matrix} from './utils/matrix';
-import {cssFilterStyleSheetTemplate} from './css-filter';
-import type {FilterConfig, InversionFix} from '../definitions';
-import {isFirefox} from '../utils/platform';
-import type {SitePropsIndex} from './utils/parse';
+import { createFilterMatrix, Matrix } from './utils/matrix';
+import { cssFilterStyleSheetTemplate } from './css-filter';
+import type { FilterConfig, InversionFix } from '../definitions';
+import { isFirefox } from '../utils/platform';
+import type { SitePropsIndex } from './utils/parse';
 
-export function createSVGFilterStylesheet(config: FilterConfig, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
+export function createSVGFilterStylesheet(
+    config: FilterConfig,
+    url: string,
+    isTopFrame: boolean,
+    fixes: string,
+    index: SitePropsIndex<InversionFix>,
+): string {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox) {
-        filterValue = getEmbeddedSVGFilterValue(getSVGFilterMatrixValue(config));
-        reverseFilterValue = getEmbeddedSVGFilterValue(getSVGReverseFilterMatrixValue());
+        filterValue = getEmbeddedSVGFilterValue(
+            getSVGFilterMatrixValue(config),
+        );
+        reverseFilterValue = getEmbeddedSVGFilterValue(
+            getSVGReverseFilterMatrixValue(),
+        );
     } else {
         // Chrome fails with "Unsafe attempt to load URL ... Domains, protocols and ports must match.
         filterValue = 'url(#dark-reader-filter)';
         reverseFilterValue = 'url(#dark-reader-reverse-filter)';
     }
-    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
+    return cssFilterStyleSheetTemplate(
+        filterValue,
+        reverseFilterValue,
+        config,
+        url,
+        isTopFrame,
+        fixes,
+        index,
+    );
 }
 
 function getEmbeddedSVGFilterValue(matrixValue: string): string {
@@ -31,7 +49,10 @@ function getEmbeddedSVGFilterValue(matrixValue: string): string {
 }
 
 function toSVGMatrix(matrix: number[][]): string {
-    return matrix.slice(0, 4).map((m) => m.map((m) => m.toFixed(3)).join(' ')).join(' ');
+    return matrix
+        .slice(0, 4)
+        .map((m) => m.map((m) => m.toFixed(3)).join(' '))
+        .join(' ');
 }
 
 export function getSVGFilterMatrixValue(config: FilterConfig): string {

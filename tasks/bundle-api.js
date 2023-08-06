@@ -7,19 +7,22 @@ import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 import fs from 'node:fs';
 import os from 'node:os';
-import {createTask} from './task.js';
+import { createTask } from './task.js';
 import paths from './paths.js';
-const {rootDir, rootPath} = paths;
+const { rootDir, rootPath } = paths;
 
 async function getVersion() {
-    const file = await fs.promises.readFile(new URL('../package.json', import.meta.url), 'utf8');
+    const file = await fs.promises.readFile(
+        new URL('../package.json', import.meta.url),
+        'utf8',
+    );
     const p = JSON.parse(file);
     return p.version;
 }
 
 let watchFiles = [];
 
-async function bundleAPI({debug, watch}) {
+async function bundleAPI({ debug, watch }) {
     const src = rootPath('src/api/index.ts');
     const dest = 'darkreader.js';
     const bundle = await rollup.rollup({
@@ -39,7 +42,11 @@ async function bundleAPI({debug, watch}) {
                 sourceMap: debug ? true : false,
                 inlineSources: debug ? true : false,
                 noEmitOnError: watch ? false : true,
-                cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : undefined,
+                cacheDir: debug
+                    ? `${fs.realpathSync(
+                          os.tmpdir(),
+                      )}/darkreader_api_typescript_cache`
+                    : undefined,
             }),
             rollupPluginReplace({
                 preventAssignment: true,
@@ -65,22 +72,19 @@ async function bundleAPI({debug, watch}) {
     });
 }
 
-const bundleAPITask = createTask(
-    'bundle-api',
-    bundleAPI,
-).addWatcher(
+const bundleAPITask = createTask('bundle-api', bundleAPI).addWatcher(
     () => {
         return watchFiles;
     },
     async (changedFiles, watcher) => {
         const oldWatchFiles = watchFiles;
-        await bundleAPI({debug: true, watch: true});
+        await bundleAPI({ debug: true, watch: true });
 
         watcher.unwatch(
-            oldWatchFiles.filter((oldFile) => !watchFiles.includes(oldFile))
+            oldWatchFiles.filter((oldFile) => !watchFiles.includes(oldFile)),
         );
         watcher.add(
-            watchFiles.filter((newFile) => oldWatchFiles.includes(newFile))
+            watchFiles.filter((newFile) => oldWatchFiles.includes(newFile)),
         );
     },
 );

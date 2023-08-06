@@ -3,17 +3,17 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import paths from './paths.js';
 import * as reload from './reload.js';
-import {createTask} from './task.js';
-import {readFile, writeFile} from './utils.js';
-const {getDestDir, PLATFORM, rootPath} = paths;
+import { createTask } from './task.js';
+import { readFile, writeFile } from './utils.js';
+const { getDestDir, PLATFORM, rootPath } = paths;
 
-async function bundleLocale(/** @type {string} */filePath) {
+async function bundleLocale(/** @type {string} */ filePath) {
     let file = await readFile(filePath);
     file = file.replace(/^#.*?$/gm, '');
 
     const messages = {};
 
-    const regex = /@([a-z0-9_]+)/ig;
+    const regex = /@([a-z0-9_]+)/gi;
     let match;
     while ((match = regex.exec(file))) {
         const messageName = match[1];
@@ -30,7 +30,7 @@ async function bundleLocale(/** @type {string} */filePath) {
     return `${JSON.stringify(messages, null, 4)}\n`;
 }
 
-async function bundleLocales({platforms, debug}) {
+async function bundleLocales({ platforms, debug }) {
     const localesSrcDir = rootPath('src/_locales');
     const list = await fs.readdir(localesSrcDir);
     for (const name of list) {
@@ -39,16 +39,20 @@ async function bundleLocales({platforms, debug}) {
         }
         const locale = await bundleLocale(`${localesSrcDir}/${name}`);
         const fileName = name.substring(name.lastIndexOf('/') + 1);
-        await writeFiles(locale, fileName, {platforms, debug});
+        await writeFiles(locale, fileName, { platforms, debug });
     }
 }
 
-async function writeFiles(data, fileName, {platforms, debug}){
-    const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
+async function writeFiles(data, fileName, { platforms, debug }) {
+    const locale = fileName
+        .substring(0, fileName.lastIndexOf('.'))
+        .replace('-', '_');
     const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
-    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
+    const enabledPlatforms = Object.values(PLATFORM).filter(
+        (platform) => platform !== PLATFORM.API && platforms[platform],
+    );
     for (const platform of enabledPlatforms) {
-        const dir = getDestDir({debug, platform});
+        const dir = getDestDir({ debug, platform });
         await writeFile(getOutputPath(dir), data);
     }
 }
@@ -63,9 +67,9 @@ const bundleLocalesTask = createTask(
         for (const file of changedFiles) {
             const fileName = file.substring(file.lastIndexOf(path.sep) + 1);
             const locale = await bundleLocale(`${localesSrcDir}/${fileName}`);
-            await writeFiles(locale, fileName, {platforms, debug: true});
+            await writeFiles(locale, fileName, { platforms, debug: true });
         }
-        reload.reload({type: reload.FULL});
+        reload.reload({ type: reload.FULL });
     },
 );
 

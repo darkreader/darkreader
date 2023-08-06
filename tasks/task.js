@@ -1,4 +1,4 @@
-import {log} from './utils.js';
+import { log } from './utils.js';
 import watch from './watch.js';
 
 /**
@@ -45,9 +45,7 @@ class Task {
      * @param {TaskOptions} options
      */
     async run(options) {
-        await this._measureTime(
-            this._run(options)
-        );
+        await this._measureTime(this._run(options));
     }
 
     watch(platforms) {
@@ -56,12 +54,13 @@ class Task {
         }
 
         const watcher = watch({
-            files: typeof this._watchFiles === 'function' ?
-                this._watchFiles() :
-                this._watchFiles,
+            files:
+                typeof this._watchFiles === 'function'
+                    ? this._watchFiles()
+                    : this._watchFiles,
             onChange: async (files) => {
                 await this._measureTime(
-                    this._onChange(files, watcher, platforms)
+                    this._onChange(files, watcher, platforms),
                 );
             },
         });

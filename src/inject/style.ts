@@ -1,4 +1,4 @@
-import {createNodeAsap, removeNode} from './utils/dom';
+import { createNodeAsap, removeNode } from './utils/dom';
 
 export function createOrUpdateStyle(css: string, type: string): void {
     createNodeAsap({
@@ -13,17 +13,24 @@ export function createOrUpdateStyle(css: string, type: string): void {
             target.appendChild(style);
         },
         updateNode: (existing) => {
-            if (css.replace(/^\s+/gm, '') !== existing.textContent!.replace(/^\s+/gm, '')) {
+            if (
+                css.replace(/^\s+/gm, '') !==
+                existing.textContent!.replace(/^\s+/gm, '')
+            ) {
                 existing.textContent = css;
             }
         },
         selectTarget: () => document.head,
         createTarget: () => {
             const head = document.createElement('head');
-            document.documentElement.insertBefore(head, document.documentElement.firstElementChild);
+            document.documentElement.insertBefore(
+                head,
+                document.documentElement.firstElementChild,
+            );
             return head;
         },
-        isTargetMutation: (mutation) => mutation.target.nodeName.toLowerCase() === 'head',
+        isTargetMutation: (mutation) =>
+            mutation.target.nodeName.toLowerCase() === 'head',
     });
 }
 

@@ -1,8 +1,18 @@
-import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, UNINSTALL_URL, HELP_URL} from './links';
+import {
+    HOMEPAGE_URL,
+    BLOG_URL,
+    DEVTOOLS_DOCS_URL,
+    DONATE_URL,
+    GITHUB_URL,
+    PRIVACY_URL,
+    TWITTER_URL,
+    UNINSTALL_URL,
+    HELP_URL,
+} from './links';
 
 enum CSP {
     NONE = "'none'",
-    SELF = "'self'"
+    SELF = "'self'",
 }
 
 function check() {
@@ -21,10 +31,7 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
             'default-src': [CSP.NONE],
             'script-src': [CSP.SELF],
             'style-src': [CSP.SELF],
-            'img-src': [
-                '*',
-                'data:',
-            ],
+            'img-src': ['*', 'data:'],
             'connect-src': ['*'],
             'navigate-to': [
                 CSP.SELF,

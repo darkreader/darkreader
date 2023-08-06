@@ -5,20 +5,20 @@
  */
 
 // @ts-check
-import {execute, log} from './utils.js';
-import {fork} from 'node:child_process';
+import { execute, log } from './utils.js';
+import { fork } from 'node:child_process';
 import process from 'node:process';
 
-import {fileURLToPath} from 'node:url';
-import {join} from 'node:path';
-import {rm} from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
+import { rm } from 'node:fs/promises';
 
-import {runTasks} from './task.js';
+import { runTasks } from './task.js';
 import zip from './zip.js';
 import signature from './bundle-signature.js';
 
 import paths from './paths.js';
-const {PLATFORM} = paths;
+const { PLATFORM } = paths;
 
 const __filename = join(fileURLToPath(import.meta.url), '../build.js');
 
@@ -29,35 +29,39 @@ async function executeChildProcess(args) {
         child.kill('SIGKILL');
         process.exit(130);
     });
-    return new Promise((resolve, reject) => child.on('error', reject).on('close', resolve));
+    return new Promise((resolve, reject) =>
+        child.on('error', reject).on('close', resolve),
+    );
 }
 
 function printHelp() {
-    console.log([
-        'Dark Reader build utility',
-        '',
-        'Usage: build [build parameters]',
-        '',
-        'To narrow down the list of build targets (for efficiency):',
-        '  --api          Library build (published to NPM)',
-        '  --chrome       MV2 for Chromium-based browsers (published to Chrome Web Store)',
-        '  --chrome-mv3   MV3 for Chromium-based browsers (will replace MV2 version eventually)',
-        '  --firefox      MV2 for Firefox (published to Mozilla Add-on store)',
-        '  --thunderbird  Thunderbird',
-        '',
-        'To specify type of build:',
-        '  --release      Release bundle for signing prior to publication',
-        '  --version=*    Released bundle complete with digial signature (Firefox only)',
-        '  --debug        Build for development',
-        '  --watch        Incremental build for development',
-        '',
-        'To log errors to disk (for debugging and bug reports):',
-        '  --log-info     Log lots of data',
-        '  --log-warn     Log only warnings',
-        '',
-        'Build for testing (not to be used by humans):',
-        '  --test',
-    ].join('\n'));
+    console.log(
+        [
+            'Dark Reader build utility',
+            '',
+            'Usage: build [build parameters]',
+            '',
+            'To narrow down the list of build targets (for efficiency):',
+            '  --api          Library build (published to NPM)',
+            '  --chrome       MV2 for Chromium-based browsers (published to Chrome Web Store)',
+            '  --chrome-mv3   MV3 for Chromium-based browsers (will replace MV2 version eventually)',
+            '  --firefox      MV2 for Firefox (published to Mozilla Add-on store)',
+            '  --thunderbird  Thunderbird',
+            '',
+            'To specify type of build:',
+            '  --release      Release bundle for signing prior to publication',
+            '  --version=*    Released bundle complete with digial signature (Firefox only)',
+            '  --debug        Build for development',
+            '  --watch        Incremental build for development',
+            '',
+            'To log errors to disk (for debugging and bug reports):',
+            '  --log-info     Log lots of data',
+            '  --log-warn     Log only warnings',
+            '',
+            'Build for testing (not to be used by humans):',
+            '  --test',
+        ].join('\n'),
+    );
 }
 
 function getVersion(args) {
@@ -76,7 +80,9 @@ function getVersion(args) {
 async function ensureGitClean() {
     const diff = await execute('git diff');
     if (diff) {
-        throw new Error('git source tree is not clean. Pease commit your work and try again');
+        throw new Error(
+            'git source tree is not clean. Pease commit your work and try again',
+        );
     }
 }
 
@@ -95,8 +101,10 @@ async function ensureGitClean() {
 async function checkoutVersion(version, fixVulnerabilities) {
     log.ok(`Checking out version ${version}`);
     // Use -- to disambiguate the tag (release version) and file paths
-    await rm('src', {force: true, recursive: true});
-    await execute(`git checkout v${version} -- package.json package-lock.json src/ tasks/`);
+    await rm('src', { force: true, recursive: true });
+    await execute(
+        `git checkout v${version} -- package.json package-lock.json src/ tasks/`,
+    );
     log.ok(`Installing dependencies`);
     await execute('npm install --ignore-scripts');
     if (!fixVulnerabilities) {
@@ -104,30 +112,60 @@ async function checkoutVersion(version, fixVulnerabilities) {
         return;
     }
     log.ok(`Dependency audit`);
-    const deps = JSON.parse(await execute('npm audit fix --force --ignore-scripts --json'));
+    const deps = JSON.parse(
+        await execute('npm audit fix --force --ignore-scripts --json'),
+    );
     if (deps.audit.auditReportVersion !== 2) {
         throw new Error('Could not audit dependencies');
     }
     if (deps.audit.metadata.vulnerabilities.total !== 0) {
-        throw new Error('Dependency vulnerability without a fix found, please audit manually');
+        throw new Error(
+            'Dependency vulnerability without a fix found, please audit manually',
+        );
     }
 }
 
 async function checkoutHead() {
-    await execute('git checkout HEAD -- package.json package-lock.json src/ tasks/');
+    await execute(
+        'git checkout HEAD -- package.json package-lock.json src/ tasks/',
+    );
     await execute('npm install --ignore-scripts');
 }
 
 function validateArguments(args) {
     const validaionErrors = [];
 
-    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
-    const invalidFlags = args.filter((flag) => !validFlags.includes(flag) && !flag.startsWith('--version='));
-    invalidFlags.forEach((flag) => validaionErrors.push(`Invalid flag ${flag}`));
+    const validFlags = [
+        '--api',
+        '--chrome',
+        '--chrome-mv2',
+        '--chrome-mv3',
+        '--firefox',
+        '--firefox-mv2',
+        '--thunderbird',
+        '--release',
+        '--debug',
+        '--watch',
+        '--log-info',
+        '--log-warn',
+        '--test',
+    ];
+    const invalidFlags = args.filter(
+        (flag) => !validFlags.includes(flag) && !flag.startsWith('--version='),
+    );
+    invalidFlags.forEach((flag) =>
+        validaionErrors.push(`Invalid flag ${flag}`),
+    );
 
     if (args.some((arg) => arg.startsWith('--version='))) {
-        if (!args.includes('--firefox') || !args.includes('--release') || args.length !== 3) {
-            validaionErrors.push('Only Firefox build currenly supports signed builds');
+        if (
+            !args.includes('--firefox') ||
+            !args.includes('--release') ||
+            args.length !== 3
+        ) {
+            validaionErrors.push(
+                'Only Firefox build currenly supports signed builds',
+            );
         }
     }
     return validaionErrors;
@@ -140,7 +178,11 @@ function parseArguments(args) {
 async function run() {
     const args = process.argv.slice(3);
 
-    const shouldPrintHelp = args.length === 0 || process.argv[2] !== 'build' || args.includes('-h') || args.includes('--help');
+    const shouldPrintHelp =
+        args.length === 0 ||
+        process.argv[2] !== 'build' ||
+        args.includes('-h') ||
+        args.includes('--help');
     if (shouldPrintHelp) {
         printHelp();
         process.exit(0);

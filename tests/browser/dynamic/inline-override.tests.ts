@@ -1,5 +1,5 @@
-import {multiline} from '../../support/test-utils';
-import type {StyleExpectations} from '../globals';
+import { multiline } from '../../support/test-utils';
+import type { StyleExpectations } from '../globals';
 
 async function loadBasicPage() {
     await loadTestPage({
@@ -22,7 +22,7 @@ async function expectStyles(styles: StyleExpectations) {
 
 describe('Inline style override', () => {
     // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+    jest.retryTimes(10, { logErrorsBeforeRetry: true });
 
     it('should override inline style', async () => {
         await loadBasicPage();
@@ -35,11 +35,13 @@ describe('Inline style override', () => {
 
         await expectStyles(['span', 'color', 'rgb(255, 26, 26)']);
 
-        await expect(pageUtils.evaluateScript(async () => {
-            const span = document.querySelector('span');
-            span.style.color = 'green';
-            await new Promise((resolve) => setTimeout(resolve));
-            return getComputedStyle(span).color;
-        })).resolves.toBe('rgb(114, 255, 114)');
+        await expect(
+            pageUtils.evaluateScript(async () => {
+                const span = document.querySelector('span');
+                span.style.color = 'green';
+                await new Promise((resolve) => setTimeout(resolve));
+                return getComputedStyle(span).color;
+            }),
+        ).resolves.toBe('rgb(114, 255, 114)');
     });
 });

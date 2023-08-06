@@ -1,5 +1,5 @@
-import {multiline} from '../../support/test-utils';
-import type {StyleExpectations} from '../globals';
+import { multiline } from '../../support/test-utils';
+import type { StyleExpectations } from '../globals';
 
 async function loadBasicPage() {
     await loadTestPage({
@@ -27,7 +27,7 @@ async function expectStyles(styles: StyleExpectations) {
 
 describe('Modifying config via Developer tools', () => {
     // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+    jest.retryTimes(10, { logErrorsBeforeRetry: true });
 
     it('Modifying config', async () => {
         await loadBasicPage();
@@ -41,21 +41,23 @@ describe('Modifying config via Developer tools', () => {
             ['a', 'color', 'rgb(51, 145, 255)'],
         ]);
 
-        await devtoolsUtils.paste([
-            '*',
-            '',
-            'CSS',
-            'bachground: black',
-            'color: white',
-            '',
-            '============================',
-            '',
-            'nonexistent.com',
-            '',
-            'CSS',
-            'color: red',
-            '',
-        ].join('\n'));
+        await devtoolsUtils.paste(
+            [
+                '*',
+                '',
+                'CSS',
+                'bachground: black',
+                'color: white',
+                '',
+                '============================',
+                '',
+                'nonexistent.com',
+                '',
+                'CSS',
+                'color: red',
+                '',
+            ].join('\n'),
+        );
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

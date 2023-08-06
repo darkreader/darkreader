@@ -1,18 +1,29 @@
 // @ts-check
 import paths from './paths.js';
-import {createTask} from './task.js';
-import {copyFile, getPaths, readJSON, readFile, writeFile, fileExists} from './utils.js';
-import {createHash} from 'node:crypto';
-const {getDestDir, PLATFORM} = paths;
+import { createTask } from './task.js';
+import {
+    copyFile,
+    getPaths,
+    readJSON,
+    readFile,
+    writeFile,
+    fileExists,
+} from './utils.js';
+import { createHash } from 'node:crypto';
+const { getDestDir, PLATFORM } = paths;
 
 function serializeHashManifest(entries) {
     const lines = [];
     lines.push('Manifest-Version: 1.0');
-    for (const {archivePath, integrity} of entries) {
+    for (const { archivePath, integrity } of entries) {
         lines.push('');
         lines.push(`Name: ${archivePath}`);
 
-        lines.push(`Digest-Algorithms:${integrity.md5 ? ' MD5' : ''}${integrity.sha1 ? ' SHA1' : ''}${integrity.sha256 ? ' SHA256' : ''}`);
+        lines.push(
+            `Digest-Algorithms:${integrity.md5 ? ' MD5' : ''}${
+                integrity.sha1 ? ' SHA1' : ''
+            }${integrity.sha256 ? ' SHA256' : ''}`,
+        );
         if (integrity.md5) {
             lines.push(`MD5-Digest: ${integrity.md5}`);
         }
@@ -38,7 +49,11 @@ async function enumerateStandardPaths(dir, order) {
         realPath,
         archivePath: realPath.substring(dir.length + 1),
     }));
-    completeRealPaths = completeRealPaths.filter(({archivePath}) => archivePath !== 'manifest.json' && !archivePath.startsWith('META-INF/'));
+    completeRealPaths = completeRealPaths.filter(
+        ({ archivePath }) =>
+            archivePath !== 'manifest.json' &&
+            !archivePath.startsWith('META-INF/'),
+    );
 
     // Re-order paths if needed
     if (order) {
@@ -88,7 +103,11 @@ function hashTypes(signatureVersion) {
 
 async function calculateHashes(types, paths) {
     for (let i = 0; i < paths.length; i++) {
-        const digests = await calculateHashesForFile(types, paths[i].realPath, paths[i].isOptional);
+        const digests = await calculateHashesForFile(
+            types,
+            paths[i].realPath,
+            paths[i].isOptional,
+        );
         paths[i].integrity = digests;
     }
 }
@@ -112,7 +131,7 @@ function serializeSfManifest(types, manifestMf) {
 }
 
 async function fixManifest(indent, settings) {
-    const destDir = getDestDir({debug: false, platform: 'firefox'});
+    const destDir = getDestDir({ debug: false, platform: 'firefox' });
     const realPath = `${destDir}/manifest.json`;
     const manifest = await readJSON(realPath);
     let string = JSON.stringify(manifest, null, indent);
@@ -128,7 +147,7 @@ async function fixManifest(indent, settings) {
 
 async function createHashes(signatureVersion, version, order, manifest) {
     const types = hashTypes(signatureVersion);
-    const destDir = getDestDir({debug: false, platform: 'firefox'});
+    const destDir = getDestDir({ debug: false, platform: 'firefox' });
     /** @type {Array<{archivePath: string; realPath?: string; isOptional?: boolean; integrity?: any}>} */
     const regular = [
         await fixManifest(manifest?.indent || 2, manifest?.settings),
@@ -150,7 +169,10 @@ async function createHashes(signatureVersion, version, order, manifest) {
         });
         regular.push({
             archivePath: 'META-INF/cose.sig',
-            integrity: await calculateHashesForFile(types, `./integrity/firefox/${version}/cose.sig`),
+            integrity: await calculateHashesForFile(
+                types,
+                `./integrity/firefox/${version}/cose.sig`,
+            ),
         });
     }
 
@@ -166,16 +188,16 @@ async function createHashes(signatureVersion, version, order, manifest) {
  * It is a naiive implementation which does not take advantage of data streaming
  * and trivial parrallelism of the task.
  */
-async function signature({platforms, debug, version}) {
+async function signature({ platforms, debug, version }) {
     if (!platforms[PLATFORM.FIREFOX_MV2] || debug) {
         throw new Error('Only Firefox builds support signed packages for now.');
     }
 
     const infoPath = `./integrity/firefox/${version}/info.json`;
-    const {type, order, manifest} = await readJSON(infoPath);
+    const { type, order, manifest } = await readJSON(infoPath);
     await createHashes(type, version, order, manifest);
 
-    const destDir = getDestDir({debug, platform: 'firefox'});
+    const destDir = getDestDir({ debug, platform: 'firefox' });
     const rsa = `./integrity/firefox/${version}/mozilla.rsa`;
     const rsaDest = `${destDir}/META-INF/mozilla.rsa`;
     const sig = `./integrity/firefox/${version}/cose.sig`;
@@ -195,9 +217,6 @@ async function signature({platforms, debug, version}) {
     }
 }
 
-const signatureTask = createTask(
-    'signature',
-    signature,
-);
+const signatureTask = createTask('signature', signature);
 
 export default signatureTask;

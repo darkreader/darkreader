@@ -1,6 +1,6 @@
 import process from 'node:process';
-import {WebSocketServer} from 'ws';
-import {log} from './utils.js';
+import { WebSocketServer } from 'ws';
+import { log } from './utils.js';
 
 export const PORT = 8890;
 const WAIT_FOR_CONNECTION = 2000;
@@ -18,7 +18,7 @@ const times = new WeakMap();
  */
 function createServer() {
     return new Promise((resolve) => {
-        const server = new WebSocketServer({port: PORT});
+        const server = new WebSocketServer({ port: PORT });
         server.on('listening', () => {
             log.ok('Auto-reloader started');
             resolve(server);
@@ -81,7 +81,7 @@ function send(ws, message) {
  * @param {Object} options
  * @param {string} options.type
  */
-export async function reload({type}) {
+export async function reload({ type }) {
     if (!server) {
         server = await createServer();
     }
@@ -94,7 +94,7 @@ export async function reload({type}) {
             const created = times.get(ws);
             return created < now;
         })
-        .forEach((ws) => send(ws, {type}));
+        .forEach((ws) => send(ws, { type }));
 }
 
 export const CSS = 'reload:css';

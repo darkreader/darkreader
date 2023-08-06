@@ -1,13 +1,17 @@
-import type {RGBA} from '../utils/color';
-import {parseColorWithCache} from '../utils/color';
-import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
-import type {FilterConfig} from '../definitions';
+import type { RGBA } from '../utils/color';
+import { parseColorWithCache } from '../utils/color';
+import {
+    modifyBackgroundColor,
+    modifyForegroundColor,
+    modifyBorderColor,
+} from '../generators/modify-colors';
+import type { FilterConfig } from '../definitions';
 
 // TODO: remove type after dependency update
 declare const browser: {
     theme: {
-        update: ((theme: any) => Promise<void>);
-        reset: (() => Promise<void>);
+        update: (theme: any) => Promise<void>;
+        reset: () => Promise<void>;
     };
 };
 
@@ -70,25 +74,36 @@ const $colors: { [key: string]: string } = {
 };
 
 export function setWindowTheme(filter: FilterConfig): void {
-    const colors = Object.entries($colors).reduce((obj: { [key: string]: string }, [key, value]) => {
-        const type: 'bg' | 'text' | 'border' = themeColorTypes[key];
-        const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
-            'bg': modifyBackgroundColor,
-            'text': modifyForegroundColor,
-            'border': modifyBorderColor,
-        }[type];
-        const rgb = parseColorWithCache(value)!;
-        const modified = modify(rgb, filter);
-        obj[key] = modified;
-        return obj;
-    }, {});
-    if (typeof browser !== 'undefined' && browser.theme && browser.theme.update) {
-        browser.theme.update({colors});
+    const colors = Object.entries($colors).reduce(
+        (obj: { [key: string]: string }, [key, value]) => {
+            const type: 'bg' | 'text' | 'border' = themeColorTypes[key];
+            const modify: (rgb: RGBA, filter: FilterConfig) => string = {
+                bg: modifyBackgroundColor,
+                text: modifyForegroundColor,
+                border: modifyBorderColor,
+            }[type];
+            const rgb = parseColorWithCache(value)!;
+            const modified = modify(rgb, filter);
+            obj[key] = modified;
+            return obj;
+        },
+        {},
+    );
+    if (
+        typeof browser !== 'undefined' &&
+        browser.theme &&
+        browser.theme.update
+    ) {
+        browser.theme.update({ colors });
     }
 }
 
 export function resetWindowTheme(): void {
-    if (typeof browser !== 'undefined' && browser.theme && browser.theme.reset) {
+    if (
+        typeof browser !== 'undefined' &&
+        browser.theme &&
+        browser.theme.reset
+    ) {
         // BUG: resets browser theme to entire
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1415267
         browser.theme.reset();

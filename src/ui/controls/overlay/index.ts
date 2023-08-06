@@ -1,5 +1,5 @@
-import {getContext, render} from 'malevic/dom';
-import {isStringifying} from 'malevic/string';
+import { getContext, render } from 'malevic/dom';
+import { isStringifying } from 'malevic/string';
 
 const DEFAULT_OVERLAY_KEY = Symbol();
 const overlayNodes = new Map<any, HTMLElement>();
@@ -13,12 +13,16 @@ function getOverlayDOMNode(key: any) {
     if (!overlayNodes.has(key)) {
         const node = document.createElement('div');
         node.classList.add('overlay');
-        node.addEventListener('click', (e) => {
-            if (clickListeners.has(node) && e.currentTarget === node) {
-                const listener = clickListeners.get(node)!;
-                listener();
-            }
-        }, {passive: true});
+        node.addEventListener(
+            'click',
+            (e) => {
+                if (clickListeners.has(node) && e.currentTarget === node) {
+                    const listener = clickListeners.get(node)!;
+                    listener();
+                }
+            },
+            { passive: true },
+        );
         overlayNodes.set(key, node);
     }
     return overlayNodes.get(key);
@@ -61,4 +65,4 @@ function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]): void {
     return context.leave();
 }
 
-export default Object.assign(Overlay, {Portal});
+export default Object.assign(Overlay, { Portal });

@@ -1,5 +1,5 @@
 // @ts-check
-import {exec} from 'node:child_process';
+import { exec } from 'node:child_process';
 import fs from 'node:fs/promises';
 import https from 'node:https';
 import path from 'node:path';
@@ -10,20 +10,28 @@ const colors = Object.entries({
     green: '\x1b[32m',
     red: '\x1b[31m',
     yellow: '\x1b[33m',
-}).reduce((map, [key, value]) => Object.assign(map, {[key]: (/** @type {string} */text) => `${value}${text}\x1b[0m`}), {});
+}).reduce(
+    (map, [key, value]) =>
+        Object.assign(map, {
+            [key]: (/** @type {string} */ text) => `${value}${text}\x1b[0m`,
+        }),
+    {},
+);
 
 /**
  * @param {string} command
  * @returns {Promise<string>}
  */
 export async function execute(command) {
-    return new Promise((resolve, reject) => exec(command, (error, stdout) => {
-        if (error) {
-            reject(`Failed to execute command ${command}`);
-        } else {
-            resolve(stdout);
-        }
-    }));
+    return new Promise((resolve, reject) =>
+        exec(command, (error, stdout) => {
+            if (error) {
+                reject(`Failed to execute command ${command}`);
+            } else {
+                resolve(stdout);
+            }
+        }),
+    );
 }
 
 /**
@@ -35,15 +43,22 @@ export function logWithTime(text) {
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
-    const leftpad = (/** @type {number} */n) => String(n).padStart(2, '0');
-    return console.log(`${colors.gray([hours, minutes, seconds].map(leftpad).join(':'))} ${text}`);
+    const leftpad = (/** @type {number} */ n) => String(n).padStart(2, '0');
+    return console.log(
+        `${colors.gray(
+            [hours, minutes, seconds].map(leftpad).join(':'),
+        )} ${text}`,
+    );
 }
 
-export const log = Object.assign((/** @type {string} */text) => logWithTime(text), {
-    ok: (/** @type {string} */text) => logWithTime(colors.green(text)),
-    warn: (/** @type {string} */text) => logWithTime(colors.yellow(text)),
-    error: (/** @type {string} */text) => logWithTime(colors.red(text)),
-});
+export const log = Object.assign(
+    (/** @type {string} */ text) => logWithTime(text),
+    {
+        ok: (/** @type {string} */ text) => logWithTime(colors.green(text)),
+        warn: (/** @type {string} */ text) => logWithTime(colors.yellow(text)),
+        error: (/** @type {string} */ text) => logWithTime(colors.red(text)),
+    },
+);
 
 /**
  * @param {string} dest
@@ -64,7 +79,7 @@ export async function pathExists(dest) {
  */
 export async function removeFolder(dir) {
     if (await pathExists(dir)) {
-        await fs.rm(dir, {recursive: true});
+        await fs.rm(dir, { recursive: true });
     }
 }
 
@@ -75,7 +90,7 @@ export async function removeFolder(dir) {
 export async function mkDirIfMissing(dest) {
     const dir = path.dirname(dest);
     if (!(await pathExists(dir))) {
-        await fs.mkdir(dir, {recursive: true});
+        await fs.mkdir(dir, { recursive: true });
     }
 }
 
@@ -147,7 +162,7 @@ export async function writeJSON(dest, content, space = 4) {
  * @returns {Promise<string[]>}
  */
 export async function getPaths(patterns) {
-    const {globby} = await import('globby');
+    const { globby } = await import('globby');
     return await globby(patterns);
 }
 

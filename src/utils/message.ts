@@ -16,16 +16,16 @@ export enum MessageTypeUItoBG {
     APPLY_DEV_STATIC_THEMES = 'ui-bg-apply-dev-static-themes',
     RESET_DEV_STATIC_THEMES = 'ui-bg-reset-dev-static-themes',
     COLOR_SCHEME_CHANGE = 'ui-bg-color-scheme-change',
-    HIDE_HIGHLIGHTS = 'ui-bg-hide-highlights'
+    HIDE_HIGHLIGHTS = 'ui-bg-hide-highlights',
 }
 
 export enum MessageTypeBGtoUI {
-    CHANGES = 'bg-ui-changes'
+    CHANGES = 'bg-ui-changes',
 }
 
 export enum DebugMessageTypeBGtoUI {
     CSS_UPDATE = 'debug-bg-ui-css-update',
-    UPDATE = 'debug-bg-ui-update'
+    UPDATE = 'debug-bg-ui-update',
 }
 
 export enum MessageTypeBGtoCS {
@@ -35,11 +35,11 @@ export enum MessageTypeBGtoCS {
     ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
     CLEAN_UP = 'bg-cs-clean-up',
     FETCH_RESPONSE = 'bg-cs-fetch-response',
-    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender'
+    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
 }
 
 export enum DebugMessageTypeBGtoCS {
-    RELOAD = 'debug-bg-cs-reload'
+    RELOAD = 'debug-bg-cs-reload',
 }
 
 export enum MessageTypeCStoBG {
@@ -50,17 +50,17 @@ export enum MessageTypeCStoBG {
     DOCUMENT_CONNECT = 'cs-bg-document-connect',
     DOCUMENT_FORGET = 'cs-bg-document-forget',
     DOCUMENT_FREEZE = 'cs-bg-document-freeze',
-    DOCUMENT_RESUME = 'cs-bg-document-resume'
+    DOCUMENT_RESUME = 'cs-bg-document-resume',
 }
 
 export enum DebugMessageTypeCStoBG {
-    LOG = 'debug-cs-bg-log'
+    LOG = 'debug-cs-bg-log',
 }
 
 export enum MessageTypeCStoUI {
-    EXPORT_CSS_RESPONSE = 'cs-ui-export-css-response'
+    EXPORT_CSS_RESPONSE = 'cs-ui-export-css-response',
 }
 
 export enum MessageTypeUItoCS {
-    EXPORT_CSS = 'ui-cs-export-css'
+    EXPORT_CSS = 'ui-cs-export-css',
 }

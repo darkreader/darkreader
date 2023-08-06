@@ -1,7 +1,7 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
 
-export type DropDownOption<T> = {id: T; content: Malevic.Child};
+export type DropDownOption<T> = { id: T; content: Malevic.Child };
 
 interface DropDownProps<T> {
     class?: string;
@@ -22,8 +22,13 @@ export default function DropDown<T>(props: DropDownProps<T>) {
 
     if (context.prev) {
         const currOptions = props.options.map((o) => o.id);
-        const prevOptions = (context.prev.props.options as Array<DropDownOption<T>>).map((o) => o.id);
-        if (currOptions.length !== prevOptions.length || currOptions.some((o, i) => o !== prevOptions[i])) {
+        const prevOptions = (
+            context.prev.props.options as Array<DropDownOption<T>>
+        ).map((o) => o.id);
+        if (
+            currOptions.length !== prevOptions.length ||
+            currOptions.some((o, i) => o !== prevOptions[i])
+        ) {
             store.isOpen = false;
         }
     }
@@ -58,7 +63,9 @@ export default function DropDown<T>(props: DropDownProps<T>) {
                 }
             };
 
-            window.addEventListener('mousedown', onOuterClick, {passive: true});
+            window.addEventListener('mousedown', onOuterClick, {
+                passive: true,
+            });
         }
     }
 
@@ -66,8 +73,9 @@ export default function DropDown<T>(props: DropDownProps<T>) {
         return (
             <span
                 class={{
-                    'dropdown__list__item': true,
-                    'dropdown__list__item--selected': value.id === props.selected,
+                    dropdown__list__item: true,
+                    'dropdown__list__item--selected':
+                        value.id === props.selected,
                     [props.class!]: Boolean(props.class),
                 }}
                 onclick={() => {
@@ -81,34 +89,37 @@ export default function DropDown<T>(props: DropDownProps<T>) {
         );
     }
 
-    const selectedContent = props.options.find((value) => value.id === props.selected)!.content;
+    const selectedContent = props.options.find(
+        (value) => value.id === props.selected,
+    )!.content;
 
     return (
         <span
             class={{
-                'dropdown': true,
+                dropdown: true,
                 'dropdown--open': store.isOpen,
                 [props.class!]: Boolean(props.class),
             }}
         >
-            <span
-                class="dropdown__list"
-                oncreate={saveListNode}
-            >
+            <span class='dropdown__list' oncreate={saveListNode}>
                 {props.options
                     .slice()
-                    .sort((a, b) => a.id === props.selected ? -1 : b.id === props.selected ? 1 : 0)
+                    .sort((a, b) =>
+                        a.id === props.selected
+                            ? -1
+                            : b.id === props.selected
+                            ? 1
+                            : 0,
+                    )
                     .map(createListItem)}
             </span>
             <span
-                class="dropdown__selected"
+                class='dropdown__selected'
                 oncreate={saveSelectedNode}
                 onclick={onSelectedClick}
             >
-                <span class="dropdown__selected__text">
-                    {selectedContent}
-                </span>
+                <span class='dropdown__selected__text'>{selectedContent}</span>
             </span>
-        </span >
+        </span>
     );
 }

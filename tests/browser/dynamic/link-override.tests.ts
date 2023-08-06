@@ -1,5 +1,5 @@
-import {multiline} from '../../support/test-utils';
-import type {StyleExpectations} from '../globals';
+import { multiline } from '../../support/test-utils';
+import type { StyleExpectations } from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
     await expectPageStyles(expect, styles);
@@ -7,7 +7,7 @@ async function expectStyles(styles: StyleExpectations) {
 
 describe('Link override', () => {
     // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+    jest.retryTimes(10, { logErrorsBeforeRetry: true });
 
     it('should override link style', async () => {
         await loadTestPage({
@@ -70,32 +70,40 @@ describe('Link override', () => {
     it('should wait till style is loading', async () => {
         let proceedCSSResponse: () => void;
 
-        await loadTestPage({
-            '/': multiline(
-                '<!DOCTYPE html>',
-                '<html>',
-                '<head>',
-                '    <link rel="stylesheet" href="style.css"/>',
-                '</head>',
-                '<body>',
-                '    <h1>Link loading <strong>delay</strong></h1>',
-                '</body>',
-                '</html>',
-            ),
-            '/style.css': async (_, res) => {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'text/css');
+        await loadTestPage(
+            {
+                '/': multiline(
+                    '<!DOCTYPE html>',
+                    '<html>',
+                    '<head>',
+                    '    <link rel="stylesheet" href="style.css"/>',
+                    '</head>',
+                    '<body>',
+                    '    <h1>Link loading <strong>delay</strong></h1>',
+                    '</body>',
+                    '</html>',
+                ),
+                '/style.css': async (_, res) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'text/css');
 
-                await new Promise<void>((resolve) => proceedCSSResponse = resolve);
+                    await new Promise<void>(
+                        (resolve) => (proceedCSSResponse = resolve),
+                    );
 
-                res.end(multiline(
-                    'body { background: gray; }',
-                    'h1 strong { color: red; }',
-                ), 'utf8');
+                    res.end(
+                        multiline(
+                            'body { background: gray; }',
+                            'h1 strong { color: red; }',
+                        ),
+                        'utf8',
+                    );
+                },
             },
-        }, {
-            waitUntil: 'domcontentloaded',
-        });
+            {
+                waitUntil: 'domcontentloaded',
+            },
+        );
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

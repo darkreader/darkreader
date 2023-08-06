@@ -1,4 +1,6 @@
-export function throttle<T extends(...args: any[]) => any>(callback: T): T & {cancel: () => void} {
+export function throttle<T extends (...args: any[]) => any>(
+    callback: T,
+): T & { cancel: () => void } {
     let pending = false;
     let frameId: number | null = null;
     let lastArgs: any[];
@@ -26,7 +28,7 @@ export function throttle<T extends(...args: any[]) => any>(callback: T): T & {ca
         frameId = null;
     };
 
-    return Object.assign(throttled, {cancel});
+    return Object.assign(throttled, { cancel });
 }
 
 type Task = () => void;
@@ -49,7 +51,9 @@ export function createAsyncTasksQueue(): AsyncTaskQueue {
         }
         frameId = null;
         if (__TEST__) {
-            document.dispatchEvent(new CustomEvent('__darkreader__test__asyncQueueComplete'));
+            document.dispatchEvent(
+                new CustomEvent('__darkreader__test__asyncQueueComplete'),
+            );
         }
     }
 
@@ -67,5 +71,5 @@ export function createAsyncTasksQueue(): AsyncTaskQueue {
         frameId = null;
     }
 
-    return {add, cancel};
+    return { add, cancel };
 }

@@ -1,11 +1,16 @@
-import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
-import {debounce} from '../utils/debounce';
-import {isURLMatched} from '../utils/url';
-import type {UserSettings} from '../definitions';
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
-import {logWarn} from './utils/log';
-import {PromiseBarrier} from '../utils/promise-barrier';
-import {validateSettings} from '../utils/validation';
+import { DEFAULT_SETTINGS, DEFAULT_THEME } from '../defaults';
+import { debounce } from '../utils/debounce';
+import { isURLMatched } from '../utils/url';
+import type { UserSettings } from '../definitions';
+import {
+    readSyncStorage,
+    readLocalStorage,
+    writeSyncStorage,
+    writeLocalStorage,
+} from './utils/extension-api';
+import { logWarn } from './utils/log';
+import { PromiseBarrier } from '../utils/promise-barrier';
+import { validateSettings } from '../utils/validation';
 
 const SAVE_TIMEOUT = 1000;
 
@@ -21,13 +26,13 @@ export default class UserStorage {
     }
 
     private static fillDefaults(settings: UserSettings) {
-        settings.theme = {...DEFAULT_THEME, ...settings.theme};
-        settings.time = {...DEFAULT_SETTINGS.time, ...settings.time};
+        settings.theme = { ...DEFAULT_THEME, ...settings.theme };
+        settings.time = { ...DEFAULT_SETTINGS.time, ...settings.time };
         settings.presets.forEach((preset) => {
-            preset.theme = {...DEFAULT_THEME, ...preset.theme};
+            preset.theme = { ...DEFAULT_THEME, ...preset.theme };
         });
         settings.customThemes.forEach((site) => {
-            site.theme = {...DEFAULT_THEME, ...site.theme};
+            site.theme = { ...DEFAULT_THEME, ...site.theme };
         });
     }
 
@@ -42,7 +47,9 @@ export default class UserStorage {
     private static migrateAutomationSettings(settings: UserSettings): void {
         if (typeof settings.automation === 'string') {
             const automationMode = settings.automation;
-            const automationBehavior: UserSettings['automation']['behavior'] = (settings as any).automationBehaviour;
+            const automationBehavior: UserSettings['automation']['behavior'] = (
+                settings as any
+            ).automationBehaviour;
             if (settings.automation === '') {
                 settings.automation = {
                     enabled: false,
@@ -67,7 +74,7 @@ export default class UserStorage {
         UserStorage.loadBarrier = new PromiseBarrier();
 
         const local = await readLocalStorage(DEFAULT_SETTINGS);
-        const {errors: localCfgErrors} = validateSettings(local);
+        const { errors: localCfgErrors } = validateSettings(local);
         localCfgErrors.forEach((err) => logWarn(err));
         if (local.syncSettings == null) {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
@@ -83,13 +90,13 @@ export default class UserStorage {
         if (!$sync) {
             logWarn('Sync settings are missing');
             local.syncSettings = false;
-            UserStorage.set({syncSettings: false});
+            UserStorage.set({ syncSettings: false });
             UserStorage.saveSyncSetting(false);
             UserStorage.loadBarrier.resolve(local);
             return local;
         }
 
-        const {errors: syncCfgErrors} = validateSettings($sync);
+        const { errors: syncCfgErrors } = validateSettings($sync);
         syncCfgErrors.forEach((err) => logWarn(err));
 
         UserStorage.migrateAutomationSettings($sync);
@@ -103,47 +110,58 @@ export default class UserStorage {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.saveSettings().
-            logWarn('Could not save setthings into storage because settings are missing.');
+            logWarn(
+                'Could not save setthings into storage because settings are missing.',
+            );
             return;
         }
         await UserStorage.saveSettingsIntoStorage();
     }
 
     public static async saveSyncSetting(sync: boolean): Promise<void> {
-        const obj = {syncSettings: sync};
+        const obj = { syncSettings: sync };
         await writeLocalStorage(obj);
         try {
             await writeSyncStorage(obj);
         } catch (err) {
-            logWarn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
-            UserStorage.set({syncSettings: false});
+            logWarn(
+                'Settings synchronization was disabled due to error:',
+                chrome.runtime.lastError,
+            );
+            UserStorage.set({ syncSettings: false });
         }
     }
 
-    private static saveSettingsIntoStorage = debounce(SAVE_TIMEOUT, async () => {
-        if (UserStorage.saveStorageBarrier) {
-            await UserStorage.saveStorageBarrier.entry();
-            return;
-        }
-        UserStorage.saveStorageBarrier = new PromiseBarrier();
+    private static saveSettingsIntoStorage = debounce(
+        SAVE_TIMEOUT,
+        async () => {
+            if (UserStorage.saveStorageBarrier) {
+                await UserStorage.saveStorageBarrier.entry();
+                return;
+            }
+            UserStorage.saveStorageBarrier = new PromiseBarrier();
 
-        const settings = UserStorage.settings;
-        if (settings.syncSettings) {
-            try {
-                await writeSyncStorage(settings);
-            } catch (err) {
-                logWarn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
-                UserStorage.set({syncSettings: false});
-                await UserStorage.saveSyncSetting(false);
+            const settings = UserStorage.settings;
+            if (settings.syncSettings) {
+                try {
+                    await writeSyncStorage(settings);
+                } catch (err) {
+                    logWarn(
+                        'Settings synchronization was disabled due to error:',
+                        chrome.runtime.lastError,
+                    );
+                    UserStorage.set({ syncSettings: false });
+                    await UserStorage.saveSyncSetting(false);
+                    await writeLocalStorage(settings);
+                }
+            } else {
                 await writeLocalStorage(settings);
             }
-        } else {
-            await writeLocalStorage(settings);
-        }
 
-        UserStorage.saveStorageBarrier.resolve();
-        UserStorage.saveStorageBarrier = null;
-    });
+            UserStorage.saveStorageBarrier.resolve();
+            UserStorage.saveStorageBarrier = null;
+        },
+    );
 
     public static set($settings: Partial<UserSettings>): void {
         if (!UserStorage.settings) {
@@ -155,7 +173,7 @@ export default class UserStorage {
         if ($settings.siteList) {
             if (!Array.isArray($settings.siteList)) {
                 const list: string[] = [];
-                for (const key in ($settings.siteList as string[])) {
+                for (const key in $settings.siteList as string[]) {
                     const index = Number(key);
                     if (!isNaN(index)) {
                         list[index] = $settings.siteList[key];
@@ -174,8 +192,8 @@ export default class UserStorage {
                 }
                 return isOK && pattern !== '/';
             });
-            $settings = {...$settings, siteList};
+            $settings = { ...$settings, siteList };
         }
-        UserStorage.settings = {...UserStorage.settings, ...$settings};
+        UserStorage.settings = { ...UserStorage.settings, ...$settings };
     }
 }

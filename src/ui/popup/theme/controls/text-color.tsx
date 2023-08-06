@@ -1,5 +1,5 @@
-import {m} from 'malevic';
-import {ColorPicker} from '../../../controls';
+import { m } from 'malevic';
+import { ColorPicker } from '../../../controls';
 import ThemeControl from './theme-control';
 
 type TextColorValue = 'auto' | string;
@@ -13,7 +13,7 @@ interface TextColorEditorProps {
 
 export default function TextColorEditor(props: TextColorEditorProps) {
     return (
-        <ThemeControl label="Text">
+        <ThemeControl label='Text'>
             <ColorPicker
                 color={props.value}
                 onChange={props.onChange}

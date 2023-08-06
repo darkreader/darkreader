@@ -1,12 +1,13 @@
-@import "../../../theme";
+@import '../../../theme';
 
-@more-settings-line-height: 2 * @size-border + @size-control-inner + @size-text-small-height;  
+@more-settings-line-height: 2 * @size-border + @size-control-inner +
+    @size-text-small-height;
 
 .header {
     display: grid;
     grid:
-        "logo logo"
-        "site-toggle app-toggle"
+        'logo logo'
+        'site-toggle app-toggle'
         / 5.5fr 4.5fr;
     grid-gap: @indent-small;
     width: 100%;
@@ -108,7 +109,8 @@
         flex-direction: column;
         left: 0;
         position: absolute;
-        top: @popup-content-padding + 2 * @size-control-inner + @size-border + 2 * @size-text-small-height + 2 * @indent-small;
+        top: @popup-content-padding + 2 * @size-control-inner + @size-border + 2 *
+            @size-text-small-height + 2 * @indent-small;
         transition: all @time-slow;
         width: 100%;
         z-index: 999;
@@ -198,8 +200,12 @@
         }
 
         &::after {
-            background-image: linear-gradient(to bottom, fadeout(@color-back, 10%), fadeout(@color-back, 100%));
-            content: "";
+            background-image: linear-gradient(
+                to bottom,
+                fadeout(@color-back, 10%),
+                fadeout(@color-back, 100%)
+            );
+            content: '';
             display: block;
             height: @size-control-inner;
             left: 0;

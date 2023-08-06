@@ -1,4 +1,4 @@
-import {isNonPersistent} from '../utils/platform';
+import { isNonPersistent } from '../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
 
@@ -41,7 +41,10 @@ export default class IconManager {
         if (!isNonPersistent) {
             return;
         }
-        if (IconManager.iconState.badgeText !== '' || !IconManager.iconState.active) {
+        if (
+            IconManager.iconState.badgeText !== '' ||
+            !IconManager.iconState.active
+        ) {
             chrome.runtime.onStartup.addListener(IconManager.onStartup);
         } else {
             chrome.runtime.onStartup.removeListener(IconManager.onStartup);
@@ -74,14 +77,14 @@ export default class IconManager {
 
     public static showBadge(text: string): void {
         IconManager.iconState.badgeText = text;
-        chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
-        chrome.browserAction.setBadgeText({text});
+        chrome.browserAction.setBadgeBackgroundColor({ color: '#e96c4c' });
+        chrome.browserAction.setBadgeText({ text });
         IconManager.handleUpdate();
     }
 
     public static hideBadge(): void {
         IconManager.iconState.badgeText = '';
-        chrome.browserAction.setBadgeText({text: ''});
+        chrome.browserAction.setBadgeText({ text: '' });
         IconManager.handleUpdate();
     }
 }

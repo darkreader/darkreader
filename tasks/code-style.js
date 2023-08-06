@@ -1,9 +1,9 @@
 // @ts-check
 import prettier from 'prettier';
 import paths from './paths.js';
-import {createTask} from './task.js';
-import {readFile, writeFile, getPaths} from './utils.js';
-const {getDestDir, PLATFORM} = paths;
+import { createTask } from './task.js';
+import { readFile, writeFile, getPaths } from './utils.js';
+const { getDestDir, PLATFORM } = paths;
 
 /** @type {import('prettier').Options} */
 const options = {
@@ -32,7 +32,7 @@ async function processAPIBuild() {
 }
 
 async function processExtensionPlatform(platform) {
-    const dir = getDestDir({debug: false, platform});
+    const dir = getDestDir({ debug: false, platform });
     const files = await getPaths(extensions.map((ext) => `${dir}/**/*.${ext}`));
     for (const file of files) {
         const code = await readFile(file);
@@ -46,7 +46,7 @@ async function processExtensionPlatform(platform) {
     }
 }
 
-async function codeStyle({platforms, debug}) {
+async function codeStyle({ platforms, debug }) {
     if (debug) {
         throw new Error('code-style task does not support debug builds');
     }
@@ -56,13 +56,12 @@ async function codeStyle({platforms, debug}) {
     }
     Object.values(PLATFORM)
         .filter((platform) => platform !== PLATFORM.API && platforms[platform])
-        .forEach((platform) => promisses.push(processExtensionPlatform(platform)));
+        .forEach((platform) =>
+            promisses.push(processExtensionPlatform(platform)),
+        );
     await Promise.all(promisses);
 }
 
-const codeStyleTask = createTask(
-    'code-style',
-    codeStyle,
-);
+const codeStyleTask = createTask('code-style', codeStyle);
 
 export default codeStyleTask;

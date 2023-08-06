@@ -1,9 +1,9 @@
-import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
-import {bgFetch} from './network';
-import {getSRGBLightness} from '../../utils/color';
-import {loadAsDataURL} from '../../utils/network';
-import type {FilterConfig} from '../../definitions';
-import {logInfo, logWarn} from '../utils/log';
+import { getSVGFilterMatrixValue } from '../../generators/svg-filter';
+import { bgFetch } from './network';
+import { getSRGBLightness } from '../../utils/color';
+import { loadAsDataURL } from '../../utils/network';
+import type { FilterConfig } from '../../definitions';
+import { logInfo, logWarn } from '../utils/log';
 import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {
@@ -56,7 +56,7 @@ async function getImageDataURL(url: string): Promise<string> {
     if (parsedURL.origin === location.origin) {
         return await loadAsDataURL(url);
     }
-    return await bgFetch({url, responseType: 'data-url'});
+    return await bgFetch({ url, responseType: 'data-url' });
 }
 
 async function urlToImage(url: string): Promise<HTMLImageElement> {
@@ -70,7 +70,10 @@ async function urlToImage(url: string): Promise<HTMLImageElement> {
 
 const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 let canvas: HTMLCanvasElement | OffscreenCanvas | null;
-let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+let context:
+    | CanvasRenderingContext2D
+    | OffscreenCanvasRenderingContext2D
+    | null;
 
 function createCanvas() {
     const maxWidth = MAX_ANALIZE_PIXELS_COUNT;
@@ -78,7 +81,7 @@ function createCanvas() {
     canvas = document.createElement('canvas');
     canvas.width = maxWidth;
     canvas.height = maxHeight;
-    context = canvas.getContext('2d', {willReadFrequently: true})!;
+    context = canvas.getContext('2d', { willReadFrequently: true })!;
     context.imageSmoothingEnabled = false;
 }
 
@@ -94,7 +97,7 @@ function analyzeImage(image: HTMLImageElement) {
     if (!canvas) {
         createCanvas();
     }
-    const {naturalWidth, naturalHeight} = image;
+    const { naturalWidth, naturalHeight } = image;
     if (naturalHeight === 0 || naturalWidth === 0) {
         logWarn(`logWarn(Image is empty ${image.currentSrc})`);
         return {
@@ -124,12 +127,25 @@ function analyzeImage(image: HTMLImageElement) {
     }
 
     const naturalPixelsCount = naturalWidth * naturalHeight;
-    const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
+    const k = Math.min(
+        1,
+        Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount),
+    );
     const width = Math.ceil(naturalWidth * k);
     const height = Math.ceil(naturalHeight * k);
     context!.clearRect(0, 0, width, height);
 
-    context!.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
+    context!.drawImage(
+        image,
+        0,
+        0,
+        naturalWidth,
+        naturalHeight,
+        0,
+        0,
+        width,
+        height,
+    );
     const imageData = context!.getImageData(0, 0, width, height);
     const d = imageData.data;
 
@@ -175,15 +191,20 @@ function analyzeImage(image: HTMLImageElement) {
     const LARGE_IMAGE_PIXELS_COUNT = 800 * 600;
 
     return {
-        isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
-        isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
-        isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
-        isLarge: (naturalPixelsCount >= LARGE_IMAGE_PIXELS_COUNT),
+        isDark: darkPixelsCount / opaquePixelsCount >= DARK_IMAGE_THRESHOLD,
+        isLight: lightPixelsCount / opaquePixelsCount >= LIGHT_IMAGE_THRESHOLD,
+        isTransparent:
+            transparentPixelsCount / totalPixelsCount >=
+            TRANSPARENT_IMAGE_THRESHOLD,
+        isLarge: naturalPixelsCount >= LARGE_IMAGE_PIXELS_COUNT,
         isTooLarge: false,
     };
 }
 
-export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
+export function getFilteredImageDataURL(
+    { dataURL, width, height }: ImageDetails,
+    theme: FilterConfig,
+): string {
     const matrix = getSVGFilterMatrixValue(theme);
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,

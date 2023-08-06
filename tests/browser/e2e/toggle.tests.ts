@@ -1,5 +1,5 @@
-import {multiline, timeout} from '../../support/test-utils';
-import type {StyleExpectations} from '../globals';
+import { multiline, timeout } from '../../support/test-utils';
+import type { StyleExpectations } from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
     await expectPageStyles(expect, styles);
@@ -27,10 +27,11 @@ async function loadBasicPage(header: string) {
 
 describe('Toggling the extension', () => {
     // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+    jest.retryTimes(10, { logErrorsBeforeRetry: true });
 
     const automationMenuSelector = '.header__more-settings-button';
-    const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
+    const automationSystemSelector =
+        '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
 
     it('should turn On/Off', async () => {
         await loadBasicPage('Toggle on/off');
@@ -71,7 +72,6 @@ describe('Toggling the extension', () => {
 
     it('should follow system color scheme', async () => {
         await loadBasicPage('Automation (color scheme)');
-
 
         await emulateColorScheme('light');
 
@@ -163,51 +163,56 @@ describe('Toggling the extension', () => {
         ];
 
         let loadSubframe: () => void = null;
-        await loadTestPage({
-            '/': multiline(
-                '<!DOCTYPE html>',
-                '<html>',
-                '<head>',
-                '    <style>',
-                '        h1 { color: red; }',
-                '    </style>',
-                '</head>',
-                '<body>',
-                `    <h1>Color scheme detector</h1>`,
-                '    <p>Text</p>',
-                '    <a href="#">Link</a>',
-                '    <iframe src="/subframe.html" style="color-scheme: light"></iframe>',
-                '</body>',
-                '</html>',
-            ),
-            '/subframe.html': async (_, res) => {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'text/html');
+        await loadTestPage(
+            {
+                '/': multiline(
+                    '<!DOCTYPE html>',
+                    '<html>',
+                    '<head>',
+                    '    <style>',
+                    '        h1 { color: red; }',
+                    '    </style>',
+                    '</head>',
+                    '<body>',
+                    `    <h1>Color scheme detector</h1>`,
+                    '    <p>Text</p>',
+                    '    <a href="#">Link</a>',
+                    '    <iframe src="/subframe.html" style="color-scheme: light"></iframe>',
+                    '</body>',
+                    '</html>',
+                ),
+                '/subframe.html': async (_, res) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'text/html');
 
-                await new Promise<void>((resolve) => loadSubframe = resolve);
+                    await new Promise<void>(
+                        (resolve) => (loadSubframe = resolve),
+                    );
 
-                res.end(
-                    multiline(
-                        '<!DOCTYPE html>',
-                        '<html>',
-                        '<head>',
-                        '    <style>',
-                        '        h1 { color: red; }',
-                        '    </style>',
-                        '</head>',
-                        '<body>',
-                        '    <h1>Header</h1>',
-                        '    <p>Text</p>',
-                        '    <a href="#">Link</a>',
-                        '</body>',
-                        '</html>',
-                    ),
-                    'utf8'
-                );
+                    res.end(
+                        multiline(
+                            '<!DOCTYPE html>',
+                            '<html>',
+                            '<head>',
+                            '    <style>',
+                            '        h1 { color: red; }',
+                            '    </style>',
+                            '</head>',
+                            '<body>',
+                            '    <h1>Header</h1>',
+                            '    <p>Text</p>',
+                            '    <a href="#">Link</a>',
+                            '</body>',
+                            '</html>',
+                        ),
+                        'utf8',
+                    );
+                },
             },
-        }, {
-            waitUntil: 'domcontentloaded',
-        });
+            {
+                waitUntil: 'domcontentloaded',
+            },
+        );
 
         await emulateColorScheme('dark');
         await expectStyles(darkPageExpectations);
@@ -243,7 +248,9 @@ describe('Toggling the extension', () => {
     it('dynamic themes', async () => {
         await loadBasicPage('Dynamic styles');
 
-        const numStyles = await pageUtils.evaluateScript(() => document.styleSheets.length);
+        const numStyles = await pageUtils.evaluateScript(
+            () => document.styleSheets.length,
+        );
         expect(numStyles).toBe(product === 'firefox' ? 10 : 1);
     });
 });

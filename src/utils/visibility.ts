@@ -35,15 +35,39 @@ const listenerOptions: any = {
 };
 
 function watchForDocumentVisibility(): void {
-    document.addEventListener('visibilitychange', documentVisibilityListener!, listenerOptions);
-    window.addEventListener('pageshow', documentVisibilityListener!, listenerOptions);
-    window.addEventListener('focus', documentVisibilityListener!, listenerOptions);
+    document.addEventListener(
+        'visibilitychange',
+        documentVisibilityListener!,
+        listenerOptions,
+    );
+    window.addEventListener(
+        'pageshow',
+        documentVisibilityListener!,
+        listenerOptions,
+    );
+    window.addEventListener(
+        'focus',
+        documentVisibilityListener!,
+        listenerOptions,
+    );
 }
 
 function stopWatchingForDocumentVisibility(): void {
-    document.removeEventListener('visibilitychange', documentVisibilityListener!, listenerOptions);
-    window.removeEventListener('pageshow', documentVisibilityListener!, listenerOptions);
-    window.removeEventListener('focus', documentVisibilityListener!, listenerOptions);
+    document.removeEventListener(
+        'visibilitychange',
+        documentVisibilityListener!,
+        listenerOptions,
+    );
+    window.removeEventListener(
+        'pageshow',
+        documentVisibilityListener!,
+        listenerOptions,
+    );
+    window.removeEventListener(
+        'focus',
+        documentVisibilityListener!,
+        listenerOptions,
+    );
 }
 
 export function setDocumentVisibilityListener(callback: () => void): void {

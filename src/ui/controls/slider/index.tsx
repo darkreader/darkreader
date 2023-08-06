@@ -1,7 +1,7 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
-import {throttle} from '../../../utils/throttle';
-import {scale, clamp} from '../../../utils/math';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
+import { throttle } from '../../../utils/throttle';
+import { scale, clamp } from '../../../utils/math';
 
 interface SliderProps {
     value: number;
@@ -40,7 +40,9 @@ export default function Slider(props: SliderProps) {
     store.activeProps = props;
 
     function onRootCreate(rootNode: HTMLElement) {
-        rootNode.addEventListener('touchstart', onPointerDown, {passive: true});
+        rootNode.addEventListener('touchstart', onPointerDown, {
+            passive: true,
+        });
     }
 
     function saveTrackNode(el: HTMLElement) {
@@ -64,11 +66,7 @@ export default function Slider(props: SliderProps) {
             return;
         }
 
-        const {
-            getClientX,
-            pointerMoveEvent,
-            pointerUpEvent,
-        } = (() => {
+        const { getClientX, pointerMoveEvent, pointerUpEvent } = (() => {
             const isTouchEvent =
                 typeof TouchEvent !== 'undefined' &&
                 startEvt instanceof TouchEvent;
@@ -77,32 +75,37 @@ export default function Slider(props: SliderProps) {
                 : null;
 
             function getTouch(e: TouchEvent) {
-                const find = (touches: TouchList) => Array.from(touches).find((t) => t.identifier === touchId)!;
+                const find = (touches: TouchList) =>
+                    Array.from(touches).find((t) => t.identifier === touchId)!;
                 return find(e.changedTouches) || find(e.touches);
             }
 
             function getClientX(e: MouseEvent | TouchEvent) {
-                const {clientX} = isTouchEvent
+                const { clientX } = isTouchEvent
                     ? getTouch(e as TouchEvent)
-                    : e as MouseEvent;
+                    : (e as MouseEvent);
                 return clientX;
             }
 
             const pointerMoveEvent = isTouchEvent ? 'touchmove' : 'mousemove';
             const pointerUpEvent = isTouchEvent ? 'touchend' : 'mouseup';
 
-            return {getClientX, pointerMoveEvent, pointerUpEvent};
+            return { getClientX, pointerMoveEvent, pointerUpEvent };
         })();
 
         const dx = (() => {
             const thumbRect = getThumbNode().getBoundingClientRect();
             const startClientX = getClientX(startEvt);
-            const isThumbPressed = startClientX >= thumbRect.left && startClientX <= thumbRect.right;
-            return isThumbPressed ? (thumbRect.left + thumbRect.width / 2 - startClientX) : 0;
+            const isThumbPressed =
+                startClientX >= thumbRect.left &&
+                startClientX <= thumbRect.right;
+            return isThumbPressed
+                ? thumbRect.left + thumbRect.width / 2 - startClientX
+                : 0;
         })();
 
         function getEventValue(e: MouseEvent | TouchEvent) {
-            const {min, max} = store.activeProps;
+            const { min, max } = store.activeProps;
             const clientX = getClientX(e);
             const rect = getTrackNode().getBoundingClientRect();
             const scaled = scale(clientX + dx, rect.left, rect.right, min, max);
@@ -123,7 +126,7 @@ export default function Slider(props: SliderProps) {
             context.refresh();
             store.activeValue = null;
 
-            const {onChange, step} = store.activeProps;
+            const { onChange, step } = store.activeProps;
             onChange(stickToStep(value, step));
         }
 
@@ -137,9 +140,18 @@ export default function Slider(props: SliderProps) {
         }
 
         function subscribe() {
-            window.addEventListener(pointerMoveEvent, onPointerMove, {once: true, passive: true});
-            window.addEventListener(pointerUpEvent, onPointerUp, {once: true, passive: true});
-            window.addEventListener('keypress', onKeyPress, {once: true, passive: true});
+            window.addEventListener(pointerMoveEvent, onPointerMove, {
+                once: true,
+                passive: true,
+            });
+            window.addEventListener(pointerUpEvent, onPointerUp, {
+                once: true,
+                passive: true,
+            });
+            window.addEventListener('keypress', onKeyPress, {
+                once: true,
+                passive: true,
+            });
         }
 
         function unsubscribe() {
@@ -162,7 +174,7 @@ export default function Slider(props: SliderProps) {
     const thumbPositionStyleValue = `${percent}%`;
     const shouldFlipText = percent > 75;
     const formattedValue = props.formatValue(
-        stickToStep(getValue(), props.step)
+        stickToStep(getValue(), props.step),
     );
 
     function scaleWheelDelta(delta: number) {
@@ -172,7 +184,7 @@ export default function Slider(props: SliderProps) {
     const refreshOnWheel = throttle(() => {
         store.activeValue = stickToStep(store.wheelValue!, props.step);
         store.wheelTimeoutId = setTimeout(() => {
-            const {onChange} = store.activeProps;
+            const { onChange } = store.activeProps;
             onChange(store.activeValue);
             store.isActive = false;
             store.activeValue = null;
@@ -188,36 +200,34 @@ export default function Slider(props: SliderProps) {
         store.isActive = true;
         clearTimeout(store.wheelTimeoutId);
         event.preventDefault();
-        const accumulatedValue = store.wheelValue + scaleWheelDelta(event.deltaY);
+        const accumulatedValue =
+            store.wheelValue + scaleWheelDelta(event.deltaY);
         store.wheelValue = clamp(accumulatedValue, props.min, props.max);
         refreshOnWheel();
     }
 
     return (
         <span
-            class={{'slider': true, 'slider--active': store.isActive}}
+            class={{ slider: true, 'slider--active': store.isActive }}
             oncreate={onRootCreate}
             onmousedown={onPointerDown}
             onwheel={onWheel}
         >
-            <span
-                class="slider__track"
-                oncreate={saveTrackNode}
-            >
+            <span class='slider__track' oncreate={saveTrackNode}>
                 <span
-                    class="slider__track__fill"
-                    style={{width: thumbPositionStyleValue}}
+                    class='slider__track__fill'
+                    style={{ width: thumbPositionStyleValue }}
                 ></span>
             </span>
-            <span class="slider__thumb-wrapper">
+            <span class='slider__thumb-wrapper'>
                 <span
-                    class="slider__thumb"
+                    class='slider__thumb'
                     oncreate={saveThumbNode}
-                    style={{left: thumbPositionStyleValue}}
+                    style={{ left: thumbPositionStyleValue }}
                 >
                     <span
                         class={{
-                            'slider__thumb__value': true,
+                            slider__thumb__value: true,
                             'slider__thumb__value--flip': shouldFlipText,
                         }}
                     >

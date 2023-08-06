@@ -20,24 +20,15 @@
     },
     "content_scripts": [
         {
-            "matches": [
-                "https://example.com/doesNotExist"
-            ],
-            "js": [
-                "inject/fallback.js",
-                "inject/index.js"
-            ],
+            "matches": ["https://example.com/doesNotExist"],
+            "js": ["inject/fallback.js", "inject/index.js"],
             "run_at": "document_start",
             "all_frames": true,
             "match_about_blank": true
         },
         {
-            "matches": [
-                "*://*/*"
-            ],
-            "js": [
-                "inject/color-scheme-watcher.js"
-            ],
+            "matches": ["*://*/*"],
+            "js": ["inject/color-scheme-watcher.js"],
             "run_at": "document_idle",
             "all_frames": false,
             "match_about_blank": false
@@ -50,9 +41,7 @@
         "storage",
         "unlimitedStorage"
     ],
-    "host_permissions": [
-        "*://*/*"
-    ],
+    "host_permissions": ["*://*/*"],
     "web_accessible_resources": [
         {
             "matches": ["*://*/*"],

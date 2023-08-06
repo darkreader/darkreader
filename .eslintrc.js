@@ -1,30 +1,42 @@
 'use strict';
 
 /** @type {import('eslint').Linter.Config} */
-const config = {overrides: []};
+const config = { overrides: [] };
 
 // Source code (TS, JSX, JS)
 config.overrides.push({
-    files: ['{src,tasks,tests}/**/*.{ts,tsx,js,cjs,mjs,jsx}', '.*.js', 'index.d.ts'],
+    files: [
+        '{src,tasks,tests}/**/*.{ts,tsx,js,cjs,mjs,jsx}',
+        '.*.js',
+        'index.d.ts',
+    ],
     excludedFiles: ['darkreader.js'],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
     parserOptions: {
         sourceType: 'module',
     },
-    extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
+    extends: [
+        'plugin:@typescript-eslint/recommended',
+        'plugin:import/recommended',
+        'plugin:import/typescript',
+    ],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
         'block-spacing': ['error', 'always'],
         'brace-style': 'error',
         'comma-spacing': 'error',
-        'curly': 'error',
+        curly: 'error',
         'eol-last': ['error', 'always'],
-        'eqeqeq': ['error', 'smart'],
-        'indent': ['error', 4, {
-            'SwitchCase': 1,
-        }],
+        eqeqeq: ['error', 'smart'],
+        indent: [
+            'error',
+            4,
+            {
+                SwitchCase: 1,
+            },
+        ],
         'jsx-quotes': ['error', 'prefer-double'],
         'keyword-spacing': 'error',
         'object-curly-spacing': ['error', 'never'],
@@ -44,109 +56,136 @@ config.overrides.push({
         'padded-blocks': ['error', 'never'],
         'prefer-exponentiation-operator': 'error',
         'prefer-regex-literals': 'error',
-        'semi': 'error',
-        'space-before-function-paren': ['error', {
-            anonymous: 'always',
-            asyncArrow: 'always',
-            named: 'never',
-        }],
+        semi: 'error',
+        'space-before-function-paren': [
+            'error',
+            {
+                anonymous: 'always',
+                asyncArrow: 'always',
+                named: 'never',
+            },
+        ],
         'space-in-parens': ['error', 'never'],
         'space-infix-ops': 'error',
-        'spaced-comment': ['error', 'always', {exceptions: ['-']}],
-        '@typescript-eslint/array-type': ['error', {
-            default: 'array-simple',
-        }],
-        'yoda': ['error', 'never'],
+        'spaced-comment': ['error', 'always', { exceptions: ['-'] }],
+        '@typescript-eslint/array-type': [
+            'error',
+            {
+                default: 'array-simple',
+            },
+        ],
+        yoda: ['error', 'never'],
         'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
-        '@typescript-eslint/comma-dangle': ['error', {
-            arrays: 'always-multiline',
-            objects: 'always-multiline',
-            imports: 'always-multiline',
-            exports: 'always-multiline',
-            functions: 'only-multiline',
-        }],
-        '@typescript-eslint/comma-spacing': ['error', {
-            before: false,
-            after: true,
-        }],
+        '@typescript-eslint/comma-dangle': [
+            'error',
+            {
+                arrays: 'always-multiline',
+                objects: 'always-multiline',
+                imports: 'always-multiline',
+                exports: 'always-multiline',
+                functions: 'only-multiline',
+            },
+        ],
+        '@typescript-eslint/comma-spacing': [
+            'error',
+            {
+                before: false,
+                after: true,
+            },
+        ],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/func-call-spacing': ['error', 'never'],
-        '@typescript-eslint/keyword-spacing': ['error', {
-            after: true,
-            before: true,
-        }],
+        '@typescript-eslint/keyword-spacing': [
+            'error',
+            {
+                after: true,
+                before: true,
+            },
+        ],
         '@typescript-eslint/member-delimiter-style': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-redeclare': 'error',
         '@typescript-eslint/no-unused-vars': 'error',
         '@typescript-eslint/semi': ['error', 'always'],
-        '@typescript-eslint/quotes': ['error', 'single', {
-            allowTemplateLiterals: true,
-            avoidEscape: true,
-        }],
+        '@typescript-eslint/quotes': [
+            'error',
+            'single',
+            {
+                allowTemplateLiterals: true,
+                avoidEscape: true,
+            },
+        ],
         'import/no-duplicates': 'error',
-        'import/no-unresolved': ['error', {
-            ignore: ['^malevic\/'],
-        }],
-        'import/no-restricted-paths': ['error', {
-            zones: [{
-                target: './src/inject/',
-                from: './src/background/',
-            },
+        'import/no-unresolved': [
+            'error',
             {
-                target: './src/inject/',
-                from: './src/ui/',
+                ignore: ['^malevic/'],
             },
+        ],
+        'import/no-restricted-paths': [
+            'error',
             {
-                target: './src/inject/',
-                from: './src/api/',
+                zones: [
+                    {
+                        target: './src/inject/',
+                        from: './src/background/',
+                    },
+                    {
+                        target: './src/inject/',
+                        from: './src/ui/',
+                    },
+                    {
+                        target: './src/inject/',
+                        from: './src/api/',
+                    },
+                    {
+                        target: './src/inject/',
+                        from: './tests/',
+                    },
+                    {
+                        target: './src/background/',
+                        from: './src/inject/',
+                    },
+                    {
+                        target: './src/background/',
+                        from: './src/ui/',
+                    },
+                    {
+                        target: './src/background/',
+                        from: './tests/',
+                    },
+                    {
+                        target: './src/ui/',
+                        from: './src/inject/',
+                    },
+                    {
+                        target: './src/ui/',
+                        from: './src/background/',
+                    },
+                    {
+                        target: './src/ui/',
+                        from: './tests/',
+                    },
+                    {
+                        target: './src/generators/',
+                        from: './src/inject/',
+                    },
+                    {
+                        target: './src/generators/',
+                        from: './src/background/',
+                    },
+                    {
+                        target: './src/generators/',
+                        from: './src/ui/',
+                    },
+                ],
             },
-            {
-                target: './src/inject/',
-                from: './tests/',
-            },
-            {
-                target: './src/background/',
-                from: './src/inject/',
-            },
-            {
-                target: './src/background/',
-                from: './src/ui/',
-            },
-            {
-                target: './src/background/',
-                from: './tests/',
-            },
-            {
-                target: './src/ui/',
-                from: './src/inject/',
-            },
-            {
-                target: './src/ui/',
-                from: './src/background/',
-            },
-            {
-                target: './src/ui/',
-                from: './tests/',
-            },
-            {
-                target: './src/generators/',
-                from: './src/inject/',
-            },
-            {
-                target: './src/generators/',
-                from: './src/background/',
-            },
-            {
-                target: './src/generators/',
-                from: './src/ui/',
-            }],
-        }],
+        ],
     },
 
     overrides: [
@@ -158,10 +197,7 @@ config.overrides.push({
             },
         },
         {
-            files: [
-                'tasks/task.js',
-                'tests/browser/environment.js',
-            ],
+            files: ['tasks/task.js', 'tests/browser/environment.js'],
             rules: {
                 '@typescript-eslint/explicit-member-accessibility': 'off',
             },
@@ -170,7 +206,7 @@ config.overrides.push({
             files: [
                 'src/ui/controls/**/*.tsx',
                 'src/ui/popup/**/*.tsx',
-                'src/ui/stylesheet-editor/components/body.tsx'
+                'src/ui/stylesheet-editor/components/body.tsx',
             ],
             rules: {
                 '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -198,7 +234,7 @@ config.overrides.push({
             rules: {
                 '@typescript-eslint/no-implied-eval': 'error',
                 '@typescript-eslint/switch-exhaustiveness-check': 'error',
-            }
+            },
         },
     ],
 });
@@ -207,30 +243,28 @@ config.overrides.push({
 
 config.overrides.push({
     files: ['darkreader.js', 'build/debug/chrome/**/*.js'],
-    env: {browser: true},
+    env: { browser: true },
     extends: ['plugin:compat/recommended'],
     parserOptions: {
         ecmaVersion: 2019,
         sourceType: 'module',
     },
     settings: {
-        polyfills: [
-            'navigator.deviceMemory',
-            'navigator.userAgentData',
-        ],
+        polyfills: ['navigator.deviceMemory', 'navigator.userAgentData'],
     },
     overrides: [
-
         // API (modern clients)
         {
             files: ['darkreader.js'],
             rules: {
-
                 // Compatibility check
-                'compat/compat': ['error', [
-                    '>0.5% and supports es5 and supports promises and supports url',
-                    'not Explorer > 0',
-                ].join(', ')]
+                'compat/compat': [
+                    'error',
+                    [
+                        '>0.5% and supports es5 and supports promises and supports url',
+                        'not Explorer > 0',
+                    ].join(', '),
+                ],
             },
         },
 
@@ -238,18 +272,20 @@ config.overrides.push({
         {
             files: ['build/debug/chrome/**/*.js'],
             rules: {
-
                 // Compatibility check
-                'compat/compat': ['error', [
-                    '> 0.5% and supports es5',
-                    'Firefox ESR',
-                    'last 2 FirefoxAndroid versions',
-                    'not Explorer > 0',
-                    'not Safari > 0',
-                    'not iOS > 0',
-                    'not ChromeAndroid > 0',
-                    'not OperaMini all',
-                ].join(', ')]
+                'compat/compat': [
+                    'error',
+                    [
+                        '> 0.5% and supports es5',
+                        'Firefox ESR',
+                        'last 2 FirefoxAndroid versions',
+                        'not Explorer > 0',
+                        'not Safari > 0',
+                        'not iOS > 0',
+                        'not ChromeAndroid > 0',
+                        'not OperaMini all',
+                    ].join(', '),
+                ],
             },
         },
     ],

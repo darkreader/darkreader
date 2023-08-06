@@ -1,5 +1,8 @@
-import {indexSitesFixesConfig, getSitesFixesFor} from '../../../../src/generators/utils/parse';
-import type {SitesFixesParserOptions} from '../../../../src/generators/utils/parse';
+import {
+    indexSitesFixesConfig,
+    getSitesFixesFor,
+} from '../../../../src/generators/utils/parse';
+import type { SitesFixesParserOptions } from '../../../../src/generators/utils/parse';
 
 test('Index config', () => {
     interface TestFix {
@@ -42,18 +45,24 @@ test('Index config', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixes = getSitesFixesFor<TestFix>('example.com', config, index, options);
+    const fixes = getSitesFixesFor<TestFix>(
+        'example.com',
+        config,
+        index,
+        options,
+    );
     fixes.sort();
     expect(fixes).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hi',
-            'multilineDirective':
-                'hello\nworld',
-        }, {
-            'url': ['example.com'],
-            'css': 'div {\n  color: green;\n}',
-        }]);
+            url: ['*'],
+            directive: 'hi',
+            multilineDirective: 'hello\nworld',
+        },
+        {
+            url: ['example.com'],
+            css: 'div {\n  color: green;\n}',
+        },
+    ]);
 });
 
 test('Empty config', () => {
@@ -85,12 +94,24 @@ test('Empty config', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixesGeneric = getSitesFixesFor<TestFix>('example.com', config, index, options);
-    const fixesInvalid = getSitesFixesFor<TestFix>('invalid.example', config, index, options);
-    expect(fixesGeneric).toEqual([{
-        'url': ['*'],
-        'directive': 'hello world',
-    }]);
+    const fixesGeneric = getSitesFixesFor<TestFix>(
+        'example.com',
+        config,
+        index,
+        options,
+    );
+    const fixesInvalid = getSitesFixesFor<TestFix>(
+        'invalid.example',
+        config,
+        index,
+        options,
+    );
+    expect(fixesGeneric).toEqual([
+        {
+            url: ['*'],
+            directive: 'hello world',
+        },
+    ]);
     expect(fixesInvalid).toEqual(fixesGeneric);
 });
 
@@ -143,39 +164,56 @@ test('Domain appearing in multiple records', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixesFQD = getSitesFixesFor<TestFix>('example.com', config, index, options);
-    const fixesWildcard = getSitesFixesFor<TestFix>('sub.example.net', config, index, options);
+    const fixesFQD = getSitesFixesFor<TestFix>(
+        'example.com',
+        config,
+        index,
+        options,
+    );
+    const fixesWildcard = getSitesFixesFor<TestFix>(
+        'sub.example.net',
+        config,
+        index,
+        options,
+    );
     fixesFQD.sort();
     expect(fixesFQD).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': ['example.com', '*.example.net'],
-            'directive': 'one',
-        }, {
-            'url': ['example.com', '*.example.net'],
-            'directive': 'two',
-        }, {
-            'url': ['example.com', '*.example.net'],
-            'directive': 'three',
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: ['example.com', '*.example.net'],
+            directive: 'one',
+        },
+        {
+            url: ['example.com', '*.example.net'],
+            directive: 'two',
+        },
+        {
+            url: ['example.com', '*.example.net'],
+            directive: 'three',
         },
     ]);
     fixesWildcard.sort();
     expect(fixesWildcard).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': ['example.com', '*.example.net'],
-            'directive': 'one',
-        }, {
-            'url': ['example.com', '*.example.net'],
-            'directive': 'two',
-        }, {
-            'url': ['example.com', '*.example.net'],
-            'directive': 'three',
-        }]);
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: ['example.com', '*.example.net'],
+            directive: 'one',
+        },
+        {
+            url: ['example.com', '*.example.net'],
+            directive: 'two',
+        },
+        {
+            url: ['example.com', '*.example.net'],
+            directive: 'three',
+        },
+    ]);
 });
 
 test('Domain appearing multiple times within the same record', () => {
@@ -213,36 +251,48 @@ test('Domain appearing multiple times within the same record', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixesFQD = getSitesFixesFor<TestFix>('example.com', config, index, options);
-    const fixesWildcard = getSitesFixesFor<TestFix>('sub.example.net', config, index, options);
+    const fixesFQD = getSitesFixesFor<TestFix>(
+        'example.com',
+        config,
+        index,
+        options,
+    );
+    const fixesWildcard = getSitesFixesFor<TestFix>(
+        'sub.example.net',
+        config,
+        index,
+        options,
+    );
     fixesFQD.sort();
     expect(fixesFQD).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': [
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: [
                 'example.com',
                 '*.example.net',
                 'example.com',
                 '*.example.net',
             ],
-            'directive': 'one',
+            directive: 'one',
         },
     ]);
     fixesWildcard.sort();
     expect(fixesWildcard).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': [
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: [
                 'example.com',
                 '*.example.net',
                 'example.com',
                 '*.example.net',
             ],
-            'directive': 'one',
+            directive: 'one',
         },
     ]);
 });
@@ -293,25 +343,33 @@ test('BACKWARDS COMPATIBILITY: The generic fix appears first', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixesFQD = getSitesFixesFor<TestFix>('long.sub.example.com', config, index, options);
+    const fixesFQD = getSitesFixesFor<TestFix>(
+        'long.sub.example.com',
+        config,
+        index,
+        options,
+    );
     expect(fixesFQD[0]).toEqual({
-        'url': ['*'],
-        'directive': 'hello world',
+        url: ['*'],
+        directive: 'hello world',
     });
     fixesFQD.sort();
     expect(fixesFQD).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': ['long.sub.example.com'],
-            'directive': 'long',
-        }, {
-            'url': ['sub.example.com'],
-            'directive': 'sub',
-        }, {
-            'url': ['*.example.com'],
-            'directive': 'wildcard',
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: ['long.sub.example.com'],
+            directive: 'long',
+        },
+        {
+            url: ['sub.example.com'],
+            directive: 'sub',
+        },
+        {
+            url: ['*.example.com'],
+            directive: 'wildcard',
         },
     ]);
 });
@@ -349,17 +407,20 @@ test('Fixes appear only once', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixes = getSitesFixesFor<TestFix>('www.example.com', config, index, options);
+    const fixes = getSitesFixesFor<TestFix>(
+        'www.example.com',
+        config,
+        index,
+        options,
+    );
     expect(fixes).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': [
-                '*.example.com',
-                'www.example.com',
-            ],
-            'directive': 'duplicate',
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: ['*.example.com', 'www.example.com'],
+            directive: 'duplicate',
         },
     ]);
 });
@@ -395,16 +456,20 @@ describe('Explicit wildcard domain patterns', () => {
 
         const index = indexSitesFixesConfig<TestFix>(config);
 
-        const fixes = getSitesFixesFor<TestFix>('www.example.com', config, index, options);
+        const fixes = getSitesFixesFor<TestFix>(
+            'www.example.com',
+            config,
+            index,
+            options,
+        );
         expect(fixes).toEqual([
             {
-                'url': ['*'],
-                'directive': 'hello world',
-            }, {
-                'url': [
-                    '*.example.com',
-                ],
-                'directive': 'match',
+                url: ['*'],
+                directive: 'hello world',
+            },
+            {
+                url: ['*.example.com'],
+                directive: 'match',
             },
         ]);
     });
@@ -434,17 +499,24 @@ describe('Explicit wildcard domain patterns', () => {
 
         const index = indexSitesFixesConfig<TestFix>(config);
 
-        const fixes = getSitesFixesFor<TestFix>('example.other.com', config, index, options);
+        const fixes = getSitesFixesFor<TestFix>(
+            'example.other.com',
+            config,
+            index,
+            options,
+        );
         // Ensure that label 'example.com' does appear in the index
         expect(index.domainLabels).toEqual({
             '*': [0],
             'example.com': [1],
             'lowspecificity.com': [2],
         });
-        expect(fixes).toEqual([{
-            'url': ['*'],
-            'directive': 'hello world',
-        }]);
+        expect(fixes).toEqual([
+            {
+                url: ['*'],
+                directive: 'hello world',
+            },
+        ]);
     });
 });
 
@@ -482,11 +554,16 @@ describe('Backwards compatibility', () => {
             };
             const index = indexSitesFixesConfig<TestFix>(config);
 
-            const fixes = getSitesFixesFor<TestFix>('other.net', config, index, options);
+            const fixes = getSitesFixesFor<TestFix>(
+                'other.net',
+                config,
+                index,
+                options,
+            );
             expect(fixes).toEqual([
                 {
-                    'url': ['*'],
-                    'directive': 'hello world',
+                    url: ['*'],
+                    directive: 'hello world',
                 },
             ]);
         });
@@ -523,47 +600,67 @@ describe('Backwards compatibility', () => {
             };
             const index = indexSitesFixesConfig<TestFix>(config);
 
-            const fixes = getSitesFixesFor<TestFix>('example.com', config, index, options);
+            const fixes = getSitesFixesFor<TestFix>(
+                'example.com',
+                config,
+                index,
+                options,
+            );
             expect(fixes).toEqual([
                 {
-                    'url': ['*'],
-                    'directive': 'hello world',
+                    url: ['*'],
+                    directive: 'hello world',
                 },
                 {
-                    'url': ['example*'],
-                    'directive': 'one',
+                    url: ['example*'],
+                    directive: 'one',
                 },
             ]);
 
-            const fixes2 = getSitesFixesFor<TestFix>('example.deep.com', config, index, options);
+            const fixes2 = getSitesFixesFor<TestFix>(
+                'example.deep.com',
+                config,
+                index,
+                options,
+            );
             expect(fixes2).toEqual([
                 {
-                    'url': ['*'],
-                    'directive': 'hello world',
+                    url: ['*'],
+                    directive: 'hello world',
                 },
                 {
-                    'url': ['example*'],
-                    'directive': 'one',
+                    url: ['example*'],
+                    directive: 'one',
                 },
             ]);
 
-            const fixes3 = getSitesFixesFor<TestFix>('nonexample.com', config, index, options);
+            const fixes3 = getSitesFixesFor<TestFix>(
+                'nonexample.com',
+                config,
+                index,
+                options,
+            );
             expect(fixes3).toEqual([
                 {
-                    'url': ['*'],
-                    'directive': 'hello world',
+                    url: ['*'],
+                    directive: 'hello world',
                 },
             ]);
 
-            const fixes4 = getSitesFixesFor<TestFix>('deep.example.com', config, index, options);
+            const fixes4 = getSitesFixesFor<TestFix>(
+                'deep.example.com',
+                config,
+                index,
+                options,
+            );
             expect(fixes4).toEqual([
                 {
-                    'url': ['*'],
-                    'directive': 'hello world',
+                    url: ['*'],
+                    directive: 'hello world',
                 },
                 {
-                    'url': ['example*'],
-                    'directive': 'one',
+                    url: ['example*'],
+                    directive: 'one',
                 },
             ]);
         });
@@ -602,16 +699,20 @@ test('Implied wildcards', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixes = getSitesFixesFor<TestFix>('www.example.com', config, index, options);
+    const fixes = getSitesFixesFor<TestFix>(
+        'www.example.com',
+        config,
+        index,
+        options,
+    );
     expect(fixes).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': [
-                'example.com',
-            ],
-            'directive': 'one',
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: ['example.com'],
+            directive: 'one',
         },
     ]);
 });
@@ -653,19 +754,24 @@ test('Base64 in CSS', () => {
     };
     const index = indexSitesFixesConfig<TestFix>(config);
 
-    const fixes = getSitesFixesFor<TestFix>('www.example.com', config, index, options);
+    const fixes = getSitesFixesFor<TestFix>(
+        'www.example.com',
+        config,
+        index,
+        options,
+    );
     expect(fixes).toEqual([
         {
-            'url': ['*'],
-            'directive': 'hello world',
-        }, {
-            'url': [
-                'example.com',
-            ],
-            'css': [
+            url: ['*'],
+            directive: 'hello world',
+        },
+        {
+            url: ['example.com'],
+            css: [
                 '.CodeMirror-merge-r-deleted, .CodeMirror-merge-l-deleted {',
                 "    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAIAAAASFvFNAAAAFklEQVQImWO84ePDwMCQ8uEDEwMMAAA1TAO4kytpLAAAAABJRU5ErkJggg==') !important;",
                 '}',
             ].join('\n'),
-        }]);
+        },
+    ]);
 });

@@ -1,22 +1,29 @@
-import {m} from 'malevic';
-import {isChromium} from '../../../utils/platform';
-import {getLocalMessage} from '../../../utils/locales';
-import {isURLEnabled, isPDF, isLocalFile} from '../../../utils/url';
+import { m } from 'malevic';
+import { isChromium } from '../../../utils/platform';
+import { getLocalMessage } from '../../../utils/locales';
+import { isURLEnabled, isPDF, isLocalFile } from '../../../utils/url';
 import SiteToggle from '../components/site-toggle';
 import ControlGroup from '../control-group';
-import type {ViewProps} from '../types';
+import type { ViewProps } from '../types';
 
 export default function SiteToggleGroup(props: ViewProps) {
     const tab = props.data.activeTab;
-    const isPageEnabled = isURLEnabled(tab.url, props.data.settings, tab, props.data.isAllowedFileSchemeAccess);
+    const isPageEnabled = isURLEnabled(
+        tab.url,
+        props.data.settings,
+        tab,
+        props.data.isAllowedFileSchemeAccess,
+    );
     const isFile = isChromium && isLocalFile(tab.url);
-    const {isDarkThemeDetected, isProtected, isInDarkList} = tab;
+    const { isDarkThemeDetected, isProtected, isInDarkList } = tab;
     let descriptionText = '';
 
     if (isFile && !props.data.isAllowedFileSchemeAccess) {
         descriptionText = getLocalMessage('local_files_forbidden');
     } else if (isPDF(tab.url)) {
-        descriptionText = isPageEnabled ? 'Enabled for PDF files' : 'Disabled for PDF files';
+        descriptionText = isPageEnabled
+            ? 'Enabled for PDF files'
+            : 'Disabled for PDF files';
     } else if (isDarkThemeDetected) {
         descriptionText = 'Dark theme detected on page';
     } else if (isPageEnabled) {
@@ -36,17 +43,17 @@ export default function SiteToggleGroup(props: ViewProps) {
                 'site-toggle-group__description--on': isPageEnabled,
                 'site-toggle-group__description--off': !isPageEnabled,
             }}
-        >{descriptionText}</span>
+        >
+            {descriptionText}
+        </span>
     );
 
     return (
-        <ControlGroup class="site-toggle-group">
-            <ControlGroup.Control class="site-toggle-group__control">
+        <ControlGroup class='site-toggle-group'>
+            <ControlGroup.Control class='site-toggle-group__control'>
                 <SiteToggle {...props} />
             </ControlGroup.Control>
-            <ControlGroup.Description>
-                {description}
-            </ControlGroup.Description>
+            <ControlGroup.Description>{description}</ControlGroup.Description>
         </ControlGroup>
     );
 }

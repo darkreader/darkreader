@@ -1,7 +1,10 @@
 import '../support/polyfills';
-import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../support/test-utils';
+import { DEFAULT_THEME } from '../../../src/defaults';
+import {
+    createOrUpdateDynamicTheme,
+    removeDynamicTheme,
+} from '../../../src/inject/dynamic-theme';
+import { multiline, timeout } from '../support/test-utils';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -22,13 +25,17 @@ afterEach(() => {
 
 describe('INLINE STYLES', () => {
     it('should override inline style', () => {
-        container.innerHTML = '<span style="color: red;">Inline style override</span>';
+        container.innerHTML =
+            '<span style="color: red;">Inline style override</span>';
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('span')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(document.querySelector('span')).color).toBe(
+            'rgb(255, 26, 26)',
+        );
     });
 
     it('should watch for inline style change', async () => {
-        container.innerHTML = '<span style="color: red;">Watch inline style</span>';
+        container.innerHTML =
+            '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);
         const span = document.querySelector('span');
         expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
@@ -45,20 +52,29 @@ describe('INLINE STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         const span = container.querySelector('span');
-        expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(span).backgroundColor).toBe(
+            'rgb(102, 102, 102)',
+        );
         expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
 
         span.style.color = 'green';
         await timeout(0);
         expect(getComputedStyle(span).color).toBe('rgb(140, 255, 140)');
-        expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(span).backgroundColor).toBe(
+            'rgb(102, 102, 102)',
+        );
     });
 
     it('should clean up the customProp after originial is gone', async () => {
-        container.innerHTML = '<span style="color: red;">Watch inline style</span>';
+        container.innerHTML =
+            '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);
         const span = document.querySelector('span');
-        expect(span.getAttribute('style').startsWith('color: red; --darkreader-inline-color:')).toBeTrue();
+        expect(
+            span
+                .getAttribute('style')
+                .startsWith('color: red; --darkreader-inline-color:'),
+        ).toBeTrue();
         expect(span.getAttribute('style').endsWith('#ff1a1a;')).toBeTrue();
 
         span.style.color = '';

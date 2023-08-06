@@ -1,4 +1,4 @@
-import {push} from '../../utils/array';
+import { push } from '../../utils/array';
 
 interface SiteFix {
     url: string[];
@@ -12,7 +12,10 @@ interface SitesFixesFormatOptions {
     shouldIgnoreProp: (props: string, value: string | string[]) => boolean;
 }
 
-export function formatSitesFixesConfig(fixes: SiteFix[], options: SitesFixesFormatOptions): string {
+export function formatSitesFixesConfig(
+    fixes: SiteFix[],
+    options: SitesFixesFormatOptions,
+): string {
     const lines: string[] = [];
 
     fixes.forEach((fix, i) => {

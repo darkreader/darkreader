@@ -1,5 +1,5 @@
-import {expect, jest, test} from '@jest/globals';
-import {StateManagerImpl} from '../../../src/utils/state-manager-impl';
+import { expect, jest, test } from '@jest/globals';
+import { StateManagerImpl } from '../../../src/utils/state-manager-impl';
 
 class PromiseWrapper {
     public promises: Map<Promise<void>, 'pending' | 'resolved' | 'rejected'>;
@@ -16,7 +16,8 @@ class PromiseWrapper {
                 throw new Error('Already added');
             }
             this.promises.set(promise, 'pending');
-            promise.then(() => this.promises.set(promise, 'resolved'))
+            promise
+                .then(() => this.promises.set(promise, 'resolved'))
                 .catch(() => this.promises.set(promise, 'rejected'));
         });
     }
@@ -36,7 +37,9 @@ class PromiseWrapper {
 
 describe('State manager utility', () => {
     const nextTick = () => new Promise((r) => setTimeout(r));
-    const noop = () => { /* noop */ };
+    const noop = () => {
+        /* noop */
+    };
 
     test('State manager basic functionality', async () => {
         const key = 'key';
@@ -64,10 +67,17 @@ describe('State manager utility', () => {
             fromStorage: undefined,
         };
 
-        const stateManager = new StateManagerImpl(key, parent, {
-            fromParent: 'fromDefault',
-            fromStorage: 'fromDefault',
-        }, {get, set}, noop, noop);
+        const stateManager = new StateManagerImpl(
+            key,
+            parent,
+            {
+                fromParent: 'fromDefault',
+                fromStorage: 'fromDefault',
+            },
+            { get, set },
+            noop,
+            noop,
+        );
 
         expect(getMock).not.toBeCalled();
         expect(setMock).not.toBeCalled();
@@ -119,9 +129,16 @@ describe('State manager utility', () => {
             data: 'fromParent',
         };
 
-        const stateManager = new StateManagerImpl(key, parent, {
-            data: 'fromStorage',
-        }, {get, set: setMock}, noop, noop);
+        const stateManager = new StateManagerImpl(
+            key,
+            parent,
+            {
+                data: 'fromStorage',
+            },
+            { get, set: setMock },
+            noop,
+            noop,
+        );
 
         expect(setMock).not.toBeCalled();
         expect(parent).toEqual({
@@ -159,7 +176,7 @@ describe('State manager utility', () => {
 
         const get = (storageKey: string, callback: (data: any) => void) => {
             expect(storageKey).toEqual(key);
-            callback({[storageKey]: storage[storageKey]});
+            callback({ [storageKey]: storage[storageKey] });
         };
 
         const resolveSet = () => setCallback();
@@ -178,9 +195,16 @@ describe('State manager utility', () => {
             count: 100,
         };
 
-        const stateManager = new StateManagerImpl(key, parent, {
-            count: 0,
-        }, {get, set}, noop, noop);
+        const stateManager = new StateManagerImpl(
+            key,
+            parent,
+            {
+                count: 0,
+            },
+            { get, set },
+            noop,
+            noop,
+        );
 
         expect(parent).toEqual({
             noSync: true,
@@ -206,7 +230,6 @@ describe('State manager utility', () => {
             count: 5,
         });
         promises.all('pending');
-
 
         // Resolve the first write
         expect(setCount).toEqual(1);
@@ -243,7 +266,7 @@ describe('State manager utility', () => {
 
         const get = (storageKey: string, callback: (data: any) => void) => {
             expect(storageKey).toEqual(key);
-            callback({[storageKey]: storage[storageKey]});
+            callback({ [storageKey]: storage[storageKey] });
         };
 
         const resolveSet = () => setCallback();
@@ -262,9 +285,16 @@ describe('State manager utility', () => {
             count: 100,
         };
 
-        const stateManager = new StateManagerImpl(key, parent, {
-            count: 0,
-        }, {get, set}, noop, noop);
+        const stateManager = new StateManagerImpl(
+            key,
+            parent,
+            {
+                count: 0,
+            },
+            { get, set },
+            noop,
+            noop,
+        );
 
         expect(parent).toEqual({
             noSync: true,
@@ -290,7 +320,6 @@ describe('State manager utility', () => {
             count: 5,
         });
         promises.all('pending');
-
 
         // Resolve the first write
         expect(setCount).toEqual(1);
@@ -332,7 +361,7 @@ describe('State manager utility', () => {
             expect(storageKey).toEqual(key);
             getCount++;
             getCallback = () => {
-                callback({[storageKey]: storage[storageKey]});
+                callback({ [storageKey]: storage[storageKey] });
             };
         };
 
@@ -343,9 +372,16 @@ describe('State manager utility', () => {
             data: 'fromParent',
         };
 
-        const stateManager = new StateManagerImpl(key, parent, {
-            data: 'fromDefault',
-        }, {get, set}, noop, noop);
+        const stateManager = new StateManagerImpl(
+            key,
+            parent,
+            {
+                data: 'fromDefault',
+            },
+            { get, set },
+            noop,
+            noop,
+        );
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -392,7 +428,7 @@ describe('State manager utility', () => {
             expect(storageKey).toEqual(key);
             getCount++;
             getCallback = () => {
-                callback({[storageKey]: storage[storageKey]});
+                callback({ [storageKey]: storage[storageKey] });
             };
         };
 
@@ -411,9 +447,16 @@ describe('State manager utility', () => {
             data: 'fromParent',
         };
 
-        const stateManager = new StateManagerImpl(key, parent, {
-            data: 'fromDefault',
-        }, {get, set}, noop, noop);
+        const stateManager = new StateManagerImpl(
+            key,
+            parent,
+            {
+                data: 'fromDefault',
+            },
+            { get, set },
+            noop,
+            noop,
+        );
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -509,7 +552,7 @@ describe('State manager utility', () => {
             expect(storageKey).toEqual(key);
             getCount++;
             getCallback = () => {
-                callback({[storageKey]: storage[storageKey]});
+                callback({ [storageKey]: storage[storageKey] });
             };
         };
 
@@ -545,9 +588,16 @@ describe('State manager utility', () => {
             data: 'fromParent',
         };
 
-        const stateManager = new StateManagerImpl(key, parent, {
-            data: 'fromDefault',
-        }, {get, set}, (listener) => onChangedListener = listener, noop);
+        const stateManager = new StateManagerImpl(
+            key,
+            parent,
+            {
+                data: 'fromDefault',
+            },
+            { get, set },
+            (listener) => (onChangedListener = listener),
+            noop,
+        );
 
         const c1 = jest.fn();
         stateManager.addChangeListener(c1);
@@ -601,7 +651,7 @@ describe('State manager utility', () => {
         expect(setCount).toEqual(0);
         expect(stateManager.getStateForTesting()).toEqual('Ready');
 
-        const promises2 = new PromiseWrapper;
+        const promises2 = new PromiseWrapper();
         promises2.add(stateManager.saveState());
 
         modifyInternalState({

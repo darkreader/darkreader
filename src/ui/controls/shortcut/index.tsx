@@ -1,10 +1,10 @@
-import {m} from 'malevic';
-import {mergeClass} from '../utils';
-import type {Shortcuts} from '../../../definitions';
-import {isFirefox, isEdge} from '../../../utils/platform';
+import { m } from 'malevic';
+import { mergeClass } from '../utils';
+import type { Shortcuts } from '../../../definitions';
+import { isFirefox, isEdge } from '../../../utils/platform';
 
 interface ShortcutLinkProps {
-    class?: string | {[cls: string]: any};
+    class?: string | { [cls: string]: any };
     commandName: string;
     shortcuts: Shortcuts;
     textTemplate: (shortcut: string | null) => string;
@@ -33,13 +33,19 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
 
         // Note: these variables are function-global to be able to update shortcut display,
         // but they are overwritten right before shortcut is set.
-        let ctrl = false, alt = false, command = false, shift = false, key: string | null = null;
+        let ctrl = false,
+            alt = false,
+            command = false,
+            shift = false,
+            key: string | null = null;
 
         function updateShortcut() {
             if (!enteringShortcutInProgress) {
                 return;
             }
-            const shortcut = `${ctrl ? 'Ctrl+' : ''}${alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
+            const shortcut = `${ctrl ? 'Ctrl+' : ''}${
+                alt ? 'Alt+' : command ? 'Command+' : ''
+            }${shift ? 'Shift+' : ''}${key ? key : ''}`;
             node.textContent = shortcut;
         }
 
@@ -86,7 +92,9 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
             if ((ctrl || alt || command || shift) && key) {
                 removeListeners();
                 node.blur();
-                const shortcut = `${ctrl ? 'Ctrl+' : ''}${alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
+                const shortcut = `${ctrl ? 'Ctrl+' : ''}${
+                    alt ? 'Alt+' : command ? 'Command+' : ''
+                }${shift ? 'Shift+' : ''}${key ? key : ''}`;
                 props.onSetShortcut(shortcut).then((shortcut) => {
                     enteringShortcutInProgress = false;
                     node.classList.remove('shortcut--edit');
@@ -122,14 +130,33 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         }
 
         function removeListeners() {
-            window.removeEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false} as EventListenerOptions);
-            window.removeEventListener('keyup', onKeyUp, {capture: true, passive: false, once: false} as EventListenerOptions);
-            window.removeEventListener('blur', onBlur, {capture: true, once: true} as EventListenerOptions);
+            window.removeEventListener('keydown', onKeyDown, {
+                capture: true,
+                passive: false,
+                once: false,
+            } as EventListenerOptions);
+            window.removeEventListener('keyup', onKeyUp, {
+                capture: true,
+                passive: false,
+                once: false,
+            } as EventListenerOptions);
+            window.removeEventListener('blur', onBlur, {
+                capture: true,
+                once: true,
+            } as EventListenerOptions);
         }
 
-        window.addEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false});
-        window.addEventListener('keyup', onKeyUp, {capture: true, passive: false, once: false});
-        window.addEventListener('blur', onBlur, {capture: true, once: true});
+        window.addEventListener('keydown', onKeyDown, {
+            capture: true,
+            passive: false,
+            once: false,
+        });
+        window.addEventListener('keyup', onKeyUp, {
+            capture: true,
+            passive: false,
+            once: false,
+        });
+        window.addEventListener('blur', onBlur, { capture: true, once: true });
         node.classList.add('shortcut--edit');
     }
 
@@ -156,12 +183,5 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         node.textContent = shortcutMessage;
     }
 
-    return (
-        <a
-            class={cls}
-            href="#"
-            onclick={onClick}
-            oncreate={onRender}
-        ></a>
-    );
+    return <a class={cls} href='#' onclick={onClick} oncreate={onRender}></a>;
 }

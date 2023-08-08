@@ -11,6 +11,10 @@ type MoreSiteSettingsProps = ExtWrapper & {
 };
 
 export default function MoreSiteSettings({data, actions, isExpanded, onClose}: MoreSiteSettingsProps) {
+    function toggleEnabledByDefault() {
+        actions.changeSettings({applyToListedOnly: !data.settings.applyToListedOnly});
+    }
+
     function toggleDetectDarkTheme() {
         actions.changeSettings({detectDarkTheme: !data.settings.detectDarkTheme});
     }
@@ -28,6 +32,28 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                 <span class="header__more-settings__top__close" role="button" onclick={onClose}>✕</span>
             </div>
             <div class="header__more-settings__content">
+                <div
+                    class={[
+                        'header__more-settings__line',
+                        'header__more-settings__enabled-by-default',
+                    ]}
+                >
+                    <CheckBox
+                        class="header__more-settings__enabled-by-default__checkbox"
+                        checked={!data.settings.applyToListedOnly}
+                        onchange={toggleEnabledByDefault}
+                    />
+                    <Button
+                        class={{
+                            'header__more-settings__enabled-by-default__button': true,
+                            'header__more-settings__enabled-by-default__button--active': !data.settings.applyToListedOnly,
+                        }}
+                        onclick={toggleEnabledByDefault}
+                    >{getLocalMessage('enabled_by_default')}</Button>
+                </div>
+                <p class="header__more-settings__description">
+                    {getLocalMessage('enable_for_all_sites_by_default')}
+                </p>
                 <div class={[
                     'header__more-settings__line',
                     'header__more-settings__detect-dark-theme',

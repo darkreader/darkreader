@@ -175,9 +175,15 @@ function deepWatchForInlineStyles(
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const handleAttributeMutations = throttle((mutations: MutationRecord[]) => {
+        const handledTargets = new Set<Node>();
         mutations.forEach((m) => {
+            const target = m.target as HTMLElement;
+            if (handledTargets.has(target)) {
+                return;
+            }
             if (INLINE_STYLE_ATTRS.includes(m.attributeName!)) {
-                elementStyleDidChange(m.target as HTMLElement);
+                handledTargets.add(target);
+                elementStyleDidChange(target);
             }
         });
     });

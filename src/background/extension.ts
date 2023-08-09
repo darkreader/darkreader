@@ -627,18 +627,18 @@ export class Extension {
         };
     }
 
-    private static getTabMessage = (tabURL: string, url: string, isTopFrame: boolean): TabData => {
+    private static getTabMessage = (tabURl: string, url: string, isTopFrame: boolean): TabData => {
         const settings = UserStorage.settings;
-        const tabInfo = Extension.getTabInfo(tabURL);
-        if (Extension.isExtensionSwitchedOn() && isURLEnabled(tabURL, settings, tabInfo)) {
-            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURL, urlList));
-            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURL, urls));
+        const tabInfo = Extension.getTabInfo(tabURl);
+        if (Extension.isExtensionSwitchedOn() && isURLEnabled(tabURl, settings, tabInfo)) {
+            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURl, urlList));
+            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURl, urls));
             let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;
             if (Extension.autoState === 'scheme-dark' || Extension.autoState === 'scheme-light') {
                 const mode = Extension.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
-            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURL, settings.siteListEnabled) && !isPDF(tabURL);
+            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURl, settings.siteListEnabled) && !isPDF(tabURl);
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -701,7 +701,7 @@ export class Extension {
             }
         }
 
-        logInfo(`Site is not inverted: ${tabURL}`);
+        logInfo(`Site is not inverted: ${tabURl}`);
         return {
             type: MessageTypeBGtoCS.CLEAN_UP,
         };

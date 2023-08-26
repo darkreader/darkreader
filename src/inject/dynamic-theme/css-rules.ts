@@ -12,7 +12,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             iterate((rule as CSSStyleRule));
         } else if ((rule as CSSImportRule).href) {
             try {
-                iterateCSSRules((rule as CSSImportRule).styleSheet.cssRules, iterate, onMediaRuleError);
+                iterateCSSRules((rule as CSSImportRule).styleSheet!.cssRules, iterate, onMediaRuleError);
             } catch (err) {
                 logInfo(`Found a non-loaded link.`);
                 onMediaRuleError && onMediaRuleError();

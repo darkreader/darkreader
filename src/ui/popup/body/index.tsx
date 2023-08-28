@@ -14,6 +14,10 @@ import type {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
 import {isMobile} from '../../../utils/platform';
 
+interface IndexStore {
+    activePage: PageId;
+}
+
 function Logo() {
     return (
         <a
@@ -41,9 +45,7 @@ isMobile && window.addEventListener('popstate', () => popstate && popstate(), {p
 
 function Pages(props: ViewProps) {
     const context = getContext();
-    const store = context.store as {
-        activePage: PageId;
-    };
+    const store: IndexStore = context.store;
     if (store.activePage == null) {
         store.activePage = 'main';
     }
@@ -80,7 +82,7 @@ function Pages(props: ViewProps) {
 
     function goBack() {
         const activePage = store.activePage;
-        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        const settingsPageSubpages: PageId[] = ['automation', 'manage-settings', 'site-list'];
         if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {

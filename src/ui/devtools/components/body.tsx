@@ -6,13 +6,13 @@ import {ThemeEngine} from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import type {DevToolsData, ExtWrapper} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
-import {isFirefox} from '../../../utils/platform';
+import {isFirefox, isMobile} from '../../../utils/platform';
 
 type BodyProps = ExtWrapper & {devtools: DevToolsData};
 
 function Body({data, actions, devtools}: BodyProps) {
     const context = getContext();
-    const {state, setState} = useState({errorText: null as string | null});
+    const {state, setState} = useState<{errorText: string | null}>({errorText: null});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, actions});
@@ -124,7 +124,7 @@ function Body({data, actions, devtools}: BodyProps) {
                     {dialog}
                 </Button>
                 <Button onclick={apply}>Apply</Button>
-                <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>
+                {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
             </div>
             <p id="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.

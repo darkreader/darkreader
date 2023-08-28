@@ -68,6 +68,9 @@ test('Dark Sites list', async () => {
     // there is no \r character
     expect(file.indexOf('\r')).toEqual(-1);
 
+    // there are no trailing spaces
+    expect(file.indexOf(' \n')).toEqual(-1);
+
     const sites = parseArray(file);
 
     // is not empty
@@ -88,6 +91,9 @@ test('Dynamic Theme Fixes config', async () => {
 
     // there is no \r character
     expect(file.indexOf('\r')).toEqual(-1);
+
+    // there are no trailing spaces
+    expect(file.indexOf(' \n')).toEqual(-1);
 
     const fixes = parseDynamicThemeFixes(file);
 
@@ -141,6 +147,9 @@ test('Inversion Fixes config', async () => {
     // there is no \r character
     expect(file.indexOf('\r')).toEqual(-1);
 
+    // there are no trailing spaces
+    expect(file.indexOf(' \n')).toEqual(-1);
+
     const fixes = parseInversionFixes(file);
 
     // there is a common fix
@@ -164,6 +173,9 @@ test('Static Themes config', async () => {
 
     // there is no \r character
     expect(file.indexOf('\r')).toEqual(-1);
+
+    // there are no trailing spaces
+    expect(file.indexOf(' \n')).toEqual(-1);
 
     const themes = parseStaticThemes(file);
 
@@ -191,6 +203,9 @@ test('Colorscheme config', async () => {
 
     // there is no \r character
     expect(file.indexOf('\r')).toEqual(-1);
+
+    // there are no trailing spaces
+    expect(file.indexOf(' \n')).toEqual(-1);
 
     const {result: schemes, error} = parseColorSchemeConfig(file);
 

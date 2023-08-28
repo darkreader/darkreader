@@ -10,6 +10,10 @@ interface RequestParams {
     timeout?: number;
 }
 
+interface FileLoader {
+    get: (fetchRequestParameters: FetchRequestParameters) => Promise<string | null>;
+}
+
 export async function readText(params: RequestParams): Promise<string> {
     return new Promise((resolve, reject) => {
         if (isXMLHttpRequestSupported) {
@@ -82,7 +86,7 @@ class LimitedCacheStorage {
     private records = new Map<string, CacheRecord>();
     private static alarmIsActive = false;
 
-    constructor() {
+    public constructor() {
         chrome.alarms.onAlarm.addListener(async (alarm) => {
             if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
                 // We schedule only one-time alarms, so once it goes off,
@@ -161,7 +165,7 @@ export interface FetchRequestParameters {
     origin?: string;
 }
 
-export function createFileLoader() {
+export function createFileLoader(): FileLoader {
     const caches = {
         'data-url': new LimitedCacheStorage(),
         'text': new LimitedCacheStorage(),

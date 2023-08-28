@@ -3,8 +3,7 @@
 
 import fs from 'node:fs';
 import os from 'node:os';
-import rollupPluginIstanbul from 'rollup-plugin-istanbul2';
-import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
+import rollupPluginIstanbul from 'rollup-plugin-istanbul';
 import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
@@ -44,7 +43,6 @@ export function configureKarma(config, env) {
         },
         rollupPreprocessor: {
             plugins: [
-                rollupPluginNodeResolve(),
                 rollupPluginTypescript({
                     typescript,
                     tsconfig: rootPath('tests/inject/tsconfig.json'),
@@ -53,7 +51,7 @@ export function configureKarma(config, env) {
                 rollupPluginReplace({
                     preventAssignment: true,
                     __DEBUG__: false,
-                    __FIREFOX__: false,
+                    __FIREFOX_MV2__: false,
                     __CHROMIUM_MV2__: true,
                     __CHROMIUM_MV3__: false,
                     __THUNDERBIRD__: false,
@@ -100,7 +98,7 @@ export function configureKarma(config, env) {
         if (chrome || all) {
             options.customLaunchers['CIChromeHeadless'] = {
                 base: 'ChromeHeadless',
-                flags: ['--no-sandbox', '--disable-setuid-sandbox']
+                flags: ['--no-sandbox', '--disable-setuid-sandbox'],
             };
             options.browsers.push('CIChromeHeadless');
         }
@@ -128,7 +126,7 @@ export function configureKarma(config, env) {
         options.reporters.push('coverage');
         options.coverageReporter = {
             type: 'html',
-            dir: 'tests/inject/coverage/'
+            dir: 'tests/inject/coverage/',
         };
     }
 

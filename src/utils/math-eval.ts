@@ -78,7 +78,7 @@ class Operator {
     private precendce: number;
     private execMethod: (left: number, right: number) => number;
 
-    constructor(precedence: number, method: (left: number, right: number) => number) {
+    public constructor(precedence: number, method: (left: number, right: number) => number) {
         this.precendce = precedence;
         this.execMethod = method;
     }

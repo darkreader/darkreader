@@ -18,7 +18,7 @@ import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterM
 import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
-import {MessageType} from '../utils/message';
+import {MessageTypeBGtoCS} from '../utils/message';
 import {logInfo, logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
@@ -26,6 +26,7 @@ import {debounce} from '../utils/debounce';
 import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
 import UIHighlights from './ui-highlights';
+import {getActiveTab} from '../utils/tabs';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -204,12 +205,12 @@ export class Extension {
         }
     }
 
-    public static async start() {
+    public static async start(): Promise<void> {
         Extension.init();
         await Promise.all([
             ConfigManager.load({local: true}),
             Extension.MV3syncSystemColorStateManager(null),
-            UserStorage.loadSettings()
+            UserStorage.loadSettings(),
         ]);
 
         if (UserStorage.settings.enableContextMenus && !Extension.registeredContextMenus) {
@@ -298,7 +299,7 @@ export class Extension {
                     } else if (__CHROMIUM_MV2__) {
                         return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
                             frameId,
-                            code: `(${detectPDF.toString()})()`
+                            code: `(${detectPDF.toString()})()`,
                         }, ([r]) => resolve(r)));
                     }
                     return false;
@@ -334,7 +335,7 @@ export class Extension {
             Extension.registeredContextMenus = false;
             chrome.contextMenus.create({
                 id: 'DarkReader-top',
-                title: 'Dark Reader'
+                title: 'Dark Reader',
             }, () => {
                 if (chrome.runtime.lastError) {
                     // Failed to create the context menu
@@ -401,7 +402,7 @@ export class Extension {
         const [
             dynamicFixesText,
             filterFixesText,
-            staticThemesText
+            staticThemesText,
         ] = await Promise.all([
             DevTools.getDynamicThemeFixesText(),
             DevTools.getInversionFixesText(),
@@ -410,19 +411,31 @@ export class Extension {
         return {
             dynamicFixesText,
             filterFixesText,
-            staticThemesText
+            staticThemesText,
         };
     }
 
-    private static async getActiveTabInfo() {
+    private static async getActiveTabInfo(): Promise<TabInfo> {
         await Extension.loadData();
-        const tabURL = await TabManager.getActiveTabURL();
-        const info = Extension.getTabInfo(tabURL);
-        info.isInjected = await TabManager.canAccessActiveTab();
+        const tab = await getActiveTab();
+        const url = await TabManager.getTabURL(tab);
+        const {isInDarkList, isProtected} = Extension.getTabInfo(url);
+        const isInjected = TabManager.canAccessTab(tab);
+        const documentId = TabManager.getTabDocumentId(tab);
+        let isDarkThemeDetected = null;
         if (UserStorage.settings.detectDarkTheme) {
-            info.isDarkThemeDetected = await TabManager.isActiveTabDarkThemeDetected();
+            isDarkThemeDetected = TabManager.isTabDarkThemeDetected(tab);
         }
-        return info;
+        const id = tab && tab.id || null;
+        return {
+            id,
+            documentId,
+            url,
+            isInDarkList,
+            isProtected,
+            isInjected,
+            isDarkThemeDetected,
+        };
     }
 
     private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean) {
@@ -470,7 +483,7 @@ export class Extension {
         }
     };
 
-    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
+    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
         const promises = [];
         const prev = {...UserStorage.settings};
 
@@ -534,6 +547,9 @@ export class Extension {
     private static async toggleActiveTab() {
         const settings = UserStorage.settings;
         const tab = await Extension.getActiveTabInfo();
+        if (!tab) {
+            return;
+        }
         const {url} = tab;
         const isInDarkList = ConfigManager.isURLInDarkList(url);
         const host = getURLHostOrProtocol(url);
@@ -602,15 +618,12 @@ export class Extension {
     //
     //----------------------
 
-    private static getTabInfo(tabURL: string): TabInfo {
+    private static getTabInfo(tabURL: string): Pick<TabInfo, 'isInDarkList' | 'isProtected'> {
         const isInDarkList = ConfigManager.isURLInDarkList(tabURL);
         const isProtected = !canInjectScript(tabURL);
         return {
-            url: tabURL,
             isInDarkList,
             isProtected,
-            isInjected: null,
-            isDarkThemeDetected: null,
         };
     }
 
@@ -633,7 +646,7 @@ export class Extension {
             switch (theme.engine) {
                 case ThemeEngine.cssFilter: {
                     return {
-                        type: MessageType.BG_ADD_CSS_FILTER,
+                        type: MessageTypeBGtoCS.ADD_CSS_FILTER,
                         data: {
                             css: createCSSFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                             detectDarkTheme,
@@ -643,7 +656,7 @@ export class Extension {
                 case ThemeEngine.svgFilter: {
                     if (isFirefox) {
                         return {
-                            type: MessageType.BG_ADD_CSS_FILTER,
+                            type: MessageTypeBGtoCS.ADD_CSS_FILTER,
                             data: {
                                 css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                                 detectDarkTheme,
@@ -651,7 +664,7 @@ export class Extension {
                         };
                     }
                     return {
-                        type: MessageType.BG_ADD_SVG_FILTER,
+                        type: MessageTypeBGtoCS.ADD_SVG_FILTER,
                         data: {
                             css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                             svgMatrix: getSVGFilterMatrixValue(theme),
@@ -662,7 +675,7 @@ export class Extension {
                 }
                 case ThemeEngine.staticTheme: {
                     return {
-                        type: MessageType.BG_ADD_STATIC_THEME,
+                        type: MessageTypeBGtoCS.ADD_STATIC_THEME,
                         data: {
                             css: theme.stylesheet && theme.stylesheet.trim() ?
                                 theme.stylesheet :
@@ -674,7 +687,7 @@ export class Extension {
                 case ThemeEngine.dynamicTheme: {
                     const fixes = getDynamicThemeFixesFor(url, isTopFrame, ConfigManager.DYNAMIC_THEME_FIXES_RAW!, ConfigManager.DYNAMIC_THEME_FIXES_INDEX!, UserStorage.settings.enableForPDF);
                     return {
-                        type: MessageType.BG_ADD_DYNAMIC_THEME,
+                        type: MessageTypeBGtoCS.ADD_DYNAMIC_THEME,
                         data: {
                             theme,
                             fixes,
@@ -690,7 +703,7 @@ export class Extension {
 
         logInfo(`Site is not inverted: ${tabURl}`);
         return {
-            type: MessageType.BG_CLEAN_UP,
+            type: MessageTypeBGtoCS.CLEAN_UP,
         };
     };
 

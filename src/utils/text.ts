@@ -107,7 +107,12 @@ export function formatCSS(text: string): string {
     return formatted.join('').trim();
 }
 
-export function getParenthesesRange(input: string, searchStartIndex = 0) {
+interface ParenthesesRange {
+    start: number;
+    end: number;
+}
+
+export function getParenthesesRange(input: string, searchStartIndex = 0): ParenthesesRange | null {
     const length = input.length;
     let depth = 0;
     let firstOpenIndex = -1;

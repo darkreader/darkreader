@@ -15,7 +15,7 @@ const dynamicThemeFixesCommands: { [key: string]: keyof DynamicThemeFix } = {
     'IGNORE IMAGE ANALYSIS': 'ignoreImageAnalysis',
 };
 
-export function parseDynamicThemeFixes(text: string) {
+export function parseDynamicThemeFixes(text: string): DynamicThemeFix[] {
     return parseSitesFixesConfig<DynamicThemeFix>(text, {
         commands: Object.keys(dynamicThemeFixesCommands),
         getCommandPropName: (command) => dynamicThemeFixesCommands[command],
@@ -28,7 +28,7 @@ export function parseDynamicThemeFixes(text: string) {
     });
 }
 
-export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
+export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]): string {
     const fixes = dynamicThemeFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(fixes, {

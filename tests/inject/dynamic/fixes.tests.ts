@@ -40,7 +40,7 @@ describe('FIXES', () => {
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
             disableStyleSheetsProxy: false,
-
+            disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
         expect(getComputedStyle(container.querySelector('.logo')).filter).toBe('invert(1) hue-rotate(180deg) contrast(0.9)');
@@ -57,7 +57,7 @@ describe('FIXES', () => {
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
             disableStyleSheetsProxy: false,
-
+            disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
         expect(getComputedStyle(container.querySelector('.text')).color).toBe('rgb(255, 0, 0)');
@@ -74,14 +74,14 @@ describe('FIXES', () => {
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
             disableStyleSheetsProxy: false,
-
+            disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
         expect(getComputedStyle(container.querySelector('.text')).backgroundColor).toBe('rgb(128, 0, 128)');
     });
 
     it('should ignore styling when darkreader-lock detected', async () => {
-        document.head.innerHTML = '<meta name="darkreader-lock"></meta>',
+        document.head.innerHTML = '<meta name="darkreader-lock">',
         container.innerHTML = multiline(
             '<style>',
             '    body {',

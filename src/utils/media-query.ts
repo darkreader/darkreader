@@ -1,5 +1,8 @@
 import {isMatchMediaChangeEventListenerSupported} from './platform';
 
+declare const __TEST__: boolean;
+let override: boolean | null = null;
+
 let query: MediaQueryList | null = null;
 const onChange: ({matches}: {matches: boolean}) => void = ({matches}) => listeners.forEach((listener) => listener(matches));
 const listeners = new Set<(isDark: boolean) => void>();
@@ -31,4 +34,12 @@ export function stopColorSchemeChangeDetector(): void {
     query = null;
 }
 
-export const isSystemDarkModeEnabled = () => (query || matchMedia('(prefers-color-scheme: dark)')).matches;
+export function emulateColorScheme(colorScheme: 'light' | 'dark'): void {
+    if (__TEST__) {
+        const isDark = colorScheme === 'dark';
+        override = isDark;
+        listeners.forEach((l) => l(isDark));
+    }
+}
+
+export const isSystemDarkModeEnabled = (): boolean => (__TEST__ && typeof override === 'boolean') ? override : (query || matchMedia('(prefers-color-scheme: dark)')).matches;

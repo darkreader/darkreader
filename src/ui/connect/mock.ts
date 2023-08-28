@@ -56,12 +56,12 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             'monospace',
             'cursive',
             'fantasy',
-            'system-ui'
+            'system-ui',
         ],
         news: [],
         shortcuts: {
             'addSite': 'Alt+Shift+A',
-            'toggle': 'Alt+Shift+D'
+            'toggle': 'Alt+Shift+D',
         },
         devtools: {
             dynamicFixesText: '',
@@ -84,6 +84,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
         },
         forcedScheme: null,
         activeTab: {
+            id: 1,
+            documentId: 'id',
             url: 'https://darkreader.org/',
             isProtected: false,
             isInDarkList: false,

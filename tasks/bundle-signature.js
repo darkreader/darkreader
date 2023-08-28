@@ -167,7 +167,7 @@ async function createHashes(signatureVersion, version, order, manifest) {
  * and trivial parrallelism of the task.
  */
 async function signature({platforms, debug, version}) {
-    if (!platforms[PLATFORM.FIREFOX] || debug) {
+    if (!platforms[PLATFORM.FIREFOX_MV2] || debug) {
         throw new Error('Only Firefox builds support signed packages for now.');
     }
 

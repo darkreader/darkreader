@@ -16,7 +16,7 @@ interface SiteListStore {
 
 export default function SiteList(props: SiteListProps) {
     const context = getContext();
-    const store = context.store as SiteListStore;
+    const store: SiteListStore = context.store;
     if (!context.prev) {
         store.indices = new WeakMap();
         store.shouldFocusAtIndex = -1;

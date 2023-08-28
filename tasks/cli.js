@@ -56,7 +56,7 @@ function printHelp() {
         '  --log-warn     Log only warnings',
         '',
         'Build for testing (not to be used by humans):',
-        '  --test'
+        '  --test',
     ].join('\n'));
 }
 
@@ -121,7 +121,7 @@ async function checkoutHead() {
 function validateArguments(args) {
     const validaionErrors = [];
 
-    const validFlags = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
     const invalidFlags = args.filter((flag) => !validFlags.includes(flag) && !flag.startsWith('--version='));
     invalidFlags.forEach((flag) => validaionErrors.push(`Invalid flag ${flag}`));
 
@@ -176,12 +176,12 @@ async function run() {
         await runTasks([signature, zip], {
             version,
             platforms: {
-                [PLATFORM.FIREFOX]: true,
+                [PLATFORM.FIREFOX_MV2]: true,
             },
             debug: false,
             watch: false,
             log: false,
-            test: false
+            test: false,
         });
     }
 }

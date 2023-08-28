@@ -24,7 +24,7 @@ function hasSomeStyle() {
         return true;
     }
     for (const style of document.styleSheets) {
-        if (style && style.ownerNode && !(style.ownerNode as HTMLElement).classList.contains('darkreader')) {
+        if (style && style.ownerNode && !((style.ownerNode as HTMLElement).classList && (style.ownerNode as HTMLElement).classList.contains('darkreader'))) {
             return true;
         }
     }
@@ -34,7 +34,7 @@ function hasSomeStyle() {
 let observer: MutationObserver | null;
 let readyStateListener: (() => void) | null;
 
-export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) {
+export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void): void {
     stopDarkThemeDetector();
     if (document.body && hasSomeStyle()) {
         runCheck(callback);
@@ -61,7 +61,7 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) 
     }
 }
 
-export function stopDarkThemeDetector() {
+export function stopDarkThemeDetector(): void {
     if (observer) {
         observer.disconnect();
         observer = null;

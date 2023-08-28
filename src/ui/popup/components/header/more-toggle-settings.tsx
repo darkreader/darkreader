@@ -18,7 +18,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
     const values = {
         'latitude': {
             min: -90,
-            max: 90
+            max: 90,
         },
         'longitude': {
             min: -180,

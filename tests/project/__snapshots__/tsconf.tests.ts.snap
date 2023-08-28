@@ -10,7 +10,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "jsx": "react",
     "jsxFactory": "m",
     "lib": [
-      "es2017",
+      "es2022",
       "dom",
       "dom.iterable",
     ],
@@ -222,6 +222,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./utils/promise-barrier.ts",
     "./utils/state-manager-impl.ts",
     "./utils/state-manager.ts",
+    "./utils/tabs.ts",
     "./utils/text.ts",
     "./utils/throttle.ts",
     "./utils/time.ts",
@@ -243,7 +244,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src/
     "jsx": "react",
     "jsxFactory": "m",
     "lib": [
-      "es2017",
+      "es2022",
       "dom",
       "dom.iterable",
     ],
@@ -279,7 +280,7 @@ exports[`TypeScript project config file should parse and resolve correctly: test
     "jsx": "react",
     "jsxFactory": "m",
     "lib": [
-      "es2017",
+      "es2022",
       "dom",
       "dom.iterable",
     ],

@@ -6,7 +6,7 @@ const throwCORSError = async (url: string) => {
             'Overview your URLs and CORS policies or use',
             '`DarkReader.setFetchMethod(fetch: (url) => Promise<Response>))`.',
             'See if using `DarkReader.setFetchMethod(window.fetch)`',
-            'before `DarkReader.enable()` works.'
+            'before `DarkReader.enable()` works.',
         ].join(' '),
     ));
 };
@@ -15,7 +15,7 @@ type Fetcher = (url: string) => Promise<Response>;
 
 let fetcher: Fetcher = throwCORSError;
 
-export function setFetchMethod(fetch: Fetcher) {
+export function setFetchMethod(fetch: Fetcher): void {
     if (fetch) {
         fetcher = fetch;
     } else {
@@ -23,6 +23,6 @@ export function setFetchMethod(fetch: Fetcher) {
     }
 }
 
-export async function callFetchMethod(url: string) {
+export async function callFetchMethod(url: string): Promise<Response> {
     return await fetcher(url);
 }

@@ -91,7 +91,7 @@ export async function copyFile(src, dest) {
 
 /**
  * @param {string} src
- * @param {BufferEncoding | null | undefined} encoding
+ * @param {BufferEncoding} [encoding]
  * @returns {Promise<string>}
  */
 export async function readFile(src, encoding = 'utf8') {

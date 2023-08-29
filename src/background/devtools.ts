@@ -18,7 +18,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.
     private cache: {[key: string]: string | null} = {};
 
-    async get(key: string) {
+    public async get(key: string) {
         if (key in this.cache) {
             return this.cache[key];
         }
@@ -45,7 +45,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         });
     }
 
-    async set(key: string, value: string) {
+    public async set(key: string, value: string) {
         this.cache[key] = value;
         return new Promise<void>((resolve) => chrome.storage.local.set({[key]: value}, () => {
             if (chrome.runtime.lastError) {
@@ -56,7 +56,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         }));
     }
 
-    async remove(key: string) {
+    public async remove(key: string) {
         this.cache[key] = null;
         return new Promise<void>((resolve) => chrome.storage.local.remove(key, () => {
             if (chrome.runtime.lastError) {
@@ -67,27 +67,27 @@ class PersistentStorageWrapper implements DevToolsStorage {
         }));
     }
 
-    async has(key: string) {
+    public async has(key: string) {
         return Boolean(await this.get(key));
     }
 }
 
 class TempStorage implements DevToolsStorage {
-    map = new Map<string, string>();
+    private map = new Map<string, string>();
 
-    async get(key: string) {
+    public async get(key: string) {
         return this.map.get(key) || null;
     }
 
-    set(key: string, value: string) {
+    public set(key: string, value: string) {
         this.map.set(key, value);
     }
 
-    remove(key: string) {
+    public remove(key: string) {
         this.map.delete(key);
     }
 
-    async has(key: string) {
+    public async has(key: string) {
         return this.map.has(key);
     }
 }

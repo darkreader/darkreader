@@ -3,10 +3,10 @@ import {sync} from 'malevic/dom';
 import Connector from '../connect/connector';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
-import type {ExtensionData, ExtensionActions} from '../../definitions';
+import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
-import {MessageTypeBGtoCS, MessageTypeBGtoUI} from '../../utils/message';
-import {getFontList} from '../utils';
+import {DebugMessageTypeBGtoUI} from '../../utils/message';
+import {getFontList, saveFile} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
@@ -54,8 +54,8 @@ if (isFirefox) {
 
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {
-    chrome.runtime.onMessage.addListener(({type}) => {
-        if (type === MessageTypeBGtoCS.CSS_UPDATE) {
+    chrome.runtime.onMessage.addListener(({type}: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
+        if (type === DebugMessageTypeBGtoUI.CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;
@@ -67,7 +67,7 @@ if (__DEBUG__) {
             });
         }
 
-        if (type === MessageTypeBGtoUI.UPDATE) {
+        if (type === DebugMessageTypeBGtoUI.UPDATE) {
             location.reload();
         }
     });
@@ -88,21 +88,45 @@ if (__TEST__) {
     socket.onmessage = (e) => {
         const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
-            const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-            const {type, id, data: selector} = message;
-            if (type === 'popup-click') {
-                // The required element may not exist yet
-                const check = () => {
-                    const element: HTMLElement | null = document.querySelector(selector);
-                    if (element) {
-                        element.click();
-                        respond({id});
-                    } else {
-                        requestIdleCallback(check, {timeout: 500});
-                    }
-                };
+            const message: {type: string; id: number; data: any} = JSON.parse(e.data);
+            const {type, id, data} = message;
+            switch (type) {
+                case 'popup-click': {
+                    // The required element may not exist yet
+                    const check = () => {
+                        const element: HTMLElement | null = document.querySelector(data);
+                        if (element) {
+                            element.click();
+                            respond({id});
+                        } else {
+                            requestIdleCallback(check, {timeout: 500});
+                        }
+                    };
 
-                check();
+                    check();
+                    break;
+                }
+                case 'popup-exists': {
+                    // The required element may not exist yet
+                    const check = () => {
+                        const element: HTMLElement | null = document.querySelector(data);
+                        if (element) {
+                            respond({id, data: true});
+                        } else {
+                            requestIdleCallback(check, {timeout: 500});
+                        }
+                    };
+
+                    check();
+                    break;
+                }
+                case 'popup-saveFile': {
+                    const {name, content} = data;
+                    saveFile(name, content);
+                    respond({id});
+                    break;
+                }
+                default:
             }
         } catch (err) {
             respond({error: String(err)});

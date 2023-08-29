@@ -26,6 +26,7 @@ import {debounce} from '../utils/debounce';
 import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
 import UIHighlights from './ui-highlights';
+import {getActiveTab} from '../utils/tabs';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -414,15 +415,27 @@ export class Extension {
         };
     }
 
-    private static async getActiveTabInfo() {
+    private static async getActiveTabInfo(): Promise<TabInfo> {
         await Extension.loadData();
-        const tabURL = await TabManager.getActiveTabURL();
-        const info = Extension.getTabInfo(tabURL);
-        info.isInjected = await TabManager.canAccessActiveTab();
+        const tab = await getActiveTab();
+        const url = await TabManager.getTabURL(tab);
+        const {isInDarkList, isProtected} = Extension.getTabInfo(url);
+        const isInjected = TabManager.canAccessTab(tab);
+        const documentId = TabManager.getTabDocumentId(tab);
+        let isDarkThemeDetected = null;
         if (UserStorage.settings.detectDarkTheme) {
-            info.isDarkThemeDetected = await TabManager.isActiveTabDarkThemeDetected();
+            isDarkThemeDetected = TabManager.isTabDarkThemeDetected(tab);
         }
-        return info;
+        const id = tab && tab.id || null;
+        return {
+            id,
+            documentId,
+            url,
+            isInDarkList,
+            isProtected,
+            isInjected,
+            isDarkThemeDetected,
+        };
     }
 
     private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean) {
@@ -534,6 +547,9 @@ export class Extension {
     private static async toggleActiveTab() {
         const settings = UserStorage.settings;
         const tab = await Extension.getActiveTabInfo();
+        if (!tab) {
+            return;
+        }
         const {url} = tab;
         const isInDarkList = ConfigManager.isURLInDarkList(url);
         const host = getURLHostOrProtocol(url);
@@ -602,15 +618,12 @@ export class Extension {
     //
     //----------------------
 
-    private static getTabInfo(tabURL: string): TabInfo {
+    private static getTabInfo(tabURL: string): Pick<TabInfo, 'isInDarkList' | 'isProtected'> {
         const isInDarkList = ConfigManager.isURLInDarkList(tabURL);
         const isProtected = !canInjectScript(tabURL);
         return {
-            url: tabURL,
             isInDarkList,
             isProtected,
-            isInjected: null,
-            isDarkThemeDetected: null,
         };
     }
 

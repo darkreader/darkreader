@@ -1,6 +1,4 @@
-import {MessageTypeUItoBG} from '../utils/message';
-import {isFirefox, isMobile} from '../utils/platform';
-import type {MessageUItoBG} from '../definitions';
+import {isMobile} from '../utils/platform';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -40,14 +38,10 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string): void {
-    if (__CHROMIUM_MV3__ || isFirefox || isMobile) {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([content]));
-        a.download = name;
-        a.click();
-    } else {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.SAVE_FILE, data: {name, content}});
-    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content]));
+    a.download = name;
+    a.click();
 }
 
 type AnyVoidFunction = (...args: any[]) => void;

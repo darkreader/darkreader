@@ -96,7 +96,7 @@ describe('SHADOW DOM', () => {
             '</custom-element>',
         );
         class CustomElement extends HTMLElement {
-            constructor() {
+            public constructor() {
                 super();
                 const shadowRoot = this.attachShadow({mode: 'open'});
                 const style = document.createElement('style');
@@ -121,7 +121,7 @@ describe('SHADOW DOM', () => {
             '</delayed-custom-element>',
         );
         class DelayedCustomElement extends HTMLElement {
-            constructor() {
+            public constructor() {
                 super();
                 const shadowRoot = this.attachShadow({mode: 'open'});
                 const style = document.createElement('style');

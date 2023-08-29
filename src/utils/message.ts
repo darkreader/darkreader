@@ -15,38 +15,46 @@ export enum MessageTypeUItoBG {
     RESET_DEV_INVERSION_FIXES = 'ui-bg-reset-dev-inversion-fixes',
     APPLY_DEV_STATIC_THEMES = 'ui-bg-apply-dev-static-themes',
     RESET_DEV_STATIC_THEMES = 'ui-bg-reset-dev-static-themes',
-    SAVE_FILE = 'ui-bg-save-file',
     COLOR_SCHEME_CHANGE = 'ui-bg-color-scheme-change',
     HIDE_HIGHLIGHTS = 'ui-bg-hide-highlights'
 }
 
 export enum MessageTypeBGtoUI {
-    CHANGES = 'bg-ui-changes',
-    UPDATE = 'bg-ui-update'
+    CHANGES = 'bg-ui-changes'
+}
+
+export enum DebugMessageTypeBGtoUI {
+    CSS_UPDATE = 'debug-bg-ui-css-update',
+    UPDATE = 'debug-bg-ui-update'
 }
 
 export enum MessageTypeBGtoCS {
     ADD_CSS_FILTER = 'bg-cs-add-css-filter',
+    ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
     ADD_STATIC_THEME = 'bg-cs-add-static-theme',
     ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
-    ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
-    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
     CLEAN_UP = 'bg-cs-clean-up',
-    RELOAD = 'bg-cs-reload',
     FETCH_RESPONSE = 'bg-cs-fetch-response',
-    CSS_UPDATE = 'bg-cs-css-update'
+    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender'
+}
+
+export enum DebugMessageTypeBGtoCS {
+    RELOAD = 'debug-bg-cs-reload'
 }
 
 export enum MessageTypeCStoBG {
     COLOR_SCHEME_CHANGE = 'cs-bg-color-scheme-change',
-    FRAME_CONNECT = 'cs-bg-frame-connect',
-    FRAME_FORGET = 'cs-bg-frame-forget',
-    FRAME_FREEZE = 'cs-bg-frame-freeze',
-    FRAME_RESUME = 'cs-bg-frame-resume',
-    FETCH = 'cs-bg-fetch',
     DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
     DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
-    LOG = 'cs-bg-log'
+    FETCH = 'cs-bg-fetch',
+    DOCUMENT_CONNECT = 'cs-bg-document-connect',
+    DOCUMENT_FORGET = 'cs-bg-document-forget',
+    DOCUMENT_FREEZE = 'cs-bg-document-freeze',
+    DOCUMENT_RESUME = 'cs-bg-document-resume'
+}
+
+export enum DebugMessageTypeCStoBG {
+    LOG = 'debug-cs-bg-log'
 }
 
 export enum MessageTypeCStoUI {

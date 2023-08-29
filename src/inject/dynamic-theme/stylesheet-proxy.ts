@@ -73,7 +73,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyAddRule(selector?: string, style?: string, index?: number): number {
         addRuleDescriptor!.value.call(this, selector, style, index);
-        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
         // Should always returns -1 https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/addRule#Return_value.
@@ -82,7 +82,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyInsertRule(rule: string, index?: number): number {
         const returnValue = insertRuleDescriptor!.value.call(this, rule, index);
-        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
         return returnValue;
@@ -90,14 +90,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyDeleteRule(index: number): void {
         deleteRuleDescriptor!.value.call(this, index);
-        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
     }
 
     function proxyRemoveRule(index?: number): void {
         removeRuleDescriptor!.value.call(this, index);
-        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
     }
@@ -106,13 +106,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         const getCurrentValue = () => {
             const docSheets: StyleSheetList = documentStyleSheetsDescriptor!.get!.call(this);
 
-            const filteredSheets = [...docSheets].filter((styleSheet) => {
-                return styleSheet.ownerNode && !(styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList.contains('darkreader');
-            });
+            const filteredSheets = [...docSheets].filter((styleSheet) =>
+                styleSheet.ownerNode && !(
+                    (styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList &&
+                    (styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList.contains('darkreader')
+                )
+            );
 
-            (filteredSheets as unknown as StyleSheetList).item = (item: number) => {
-                return filteredSheets[item];
-            };
+            (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
 
             return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
         };
@@ -144,9 +145,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         const getCurrentElementValue = () => {
             const elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor!.value.call(this, tagName);
 
-            return Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
-                return !element.classList.contains('darkreader');
-            }), NodeList.prototype);
+            return Object.setPrototypeOf([...elements].filter((element: HTMLElement) =>
+                element && !(element.classList && element.classList.contains('darkreader'))
+            ), NodeList.prototype);
         };
 
         let elements = getCurrentElementValue();

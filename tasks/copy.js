@@ -17,11 +17,6 @@ const srcDir = 'src';
 /** @type {copyEntry[]} */
 const copyEntries = [
     {
-        src: 'background/index.html',
-        reloadType: reload.FULL,
-        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
-    },
-    {
         src: 'config/**/*.{config,drconf}',
         reloadType: reload.FULL,
     },
@@ -36,18 +31,7 @@ const copyEntries = [
     {
         src: 'ui/popup/compatibility.js',
         reloadType: reload.UI,
-    },
-    {
-        src: 'ui/popup/index.html',
-        reloadType: reload.UI,
-    },
-    {
-        src: 'ui/devtools/index.html',
-        reloadType: reload.UI,
-    },
-    {
-        src: 'ui/stylesheet-editor/index.html',
-        reloadType: reload.UI,
+        platforms: [PLATFORM.CHROMIUM_MV2],
     },
 ];
 

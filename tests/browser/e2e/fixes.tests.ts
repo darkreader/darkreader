@@ -68,7 +68,6 @@ describe('Correct fixes are chosen', () => {
             'body {',
             '    bachground: blue;',
             '}',
-            '',
         ));
 
         await expectStyles([
@@ -122,7 +121,6 @@ describe('Correct fixes are chosen', () => {
             'body {',
             '    bachground: green;',
             '}',
-            '',
         ));
 
         await expectStyles([
@@ -178,7 +176,6 @@ describe('Correct fixes are chosen', () => {
             'body {',
             '    bachground: green;',
             '}',
-            '',
         ));
 
         await expectStyles([
@@ -232,7 +229,6 @@ describe('Correct fixes are chosen', () => {
             'body {',
             '    bachground: green;',
             '}',
-            '',
         ));
 
         await expectStyles([

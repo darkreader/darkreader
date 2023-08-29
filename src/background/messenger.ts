@@ -2,6 +2,7 @@ import {isFirefox} from '../utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
 import {makeFirefoxHappy} from './make-firefox-happy';
+import {ASSERT} from './utils/log';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -56,6 +57,12 @@ export default class Messenger {
     }
 
     private static firefoxPortListener(port: chrome.runtime.Port) {
+        ASSERT('Messenger.firefoxPortListener() is used only on Firefox', isFirefox);
+
+        if (!isFirefox) {
+            return;
+        }
+
         let promise: Promise<ExtensionData | DevToolsData | TabInfo | null>;
         switch (port.name) {
             case MessageTypeUItoBG.GET_DATA:

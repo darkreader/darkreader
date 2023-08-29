@@ -339,6 +339,8 @@ export default class CustomJestEnvironment extends TestEnvironment {
             const resolvers = new Map();
             const rejectors = new Map();
 
+            let onDownloadCallback = null;
+
             wsServer.on('connection', async (ws) => {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
@@ -368,6 +370,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
                             }
                         }
                         this.onPageEventResponse(message.data.uuid);
+                    } else if (message.id === null && message.data && message.data.type === 'download') {
+                        if (onDownloadCallback) {
+                            onDownloadCallback(message.data);
+                        }
                     } else if (message.error) {
                         const reject = rejectors.get(message.id);
                         reject(message.error);
@@ -416,7 +422,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
             }
 
             this.global.popupUtils = {
+                saveFile: async (name, content) => sendToPopup('popup-saveFile', {name, content}),
                 click: async (selector) => await sendToPopup('popup-click', selector),
+                exists: async (selector) => await sendToPopup('popup-exists', selector),
             };
 
             this.global.devtoolsUtils = {
@@ -449,6 +457,8 @@ export default class CustomJestEnvironment extends TestEnvironment {
                     }
                     await sendToBackground('firefox-emulateColorScheme', colorScheme);
                 },
+                setNews: async (news) => await sendToBackground('setNews', news),
+                onDownload: (callback) => onDownloadCallback = callback,
             };
 
             this.global.pageUtils = {

@@ -5,18 +5,24 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DynamicThemeFix, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, Theme} from '../definitions';
-import {MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
+import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
+import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
+import {generateUID} from '../utils/uid';
 
+declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
 
 let unloaded = false;
 
 let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
+declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 declare const __FIREFOX_MV2__: boolean;
+
+// Identifier for this particular script instance. It is used as an alternative to chrome.runtime.MessageSender.documentId
+const scriptId = generateUID();
 
 function cleanup() {
     unloaded = true;
@@ -73,14 +79,24 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
     }
 }
 
-function onMessage({type, data}: MessageBGtoCS | MessageUItoCS & {data: any}) {
-    logInfoCollapsed(`onMessage[${type}]`, data);
-    switch (type) {
+function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) {
+    if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
+        logWarn('Cleaning up before update');
+        cleanup();
+        return;
+    }
+
+    if ((message as MessageBGtoCS).scriptId !== scriptId && message.type !== MessageTypeUItoCS.EXPORT_CSS) {
+        return;
+    }
+
+    logInfoCollapsed(`onMessage[${message.type}]`, message);
+    switch (message.type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
         case MessageTypeBGtoCS.ADD_STATIC_THEME: {
-            const {css, detectDarkTheme} = data;
+            const {css, detectDarkTheme} = message.data;
             removeDynamicTheme();
-            createOrUpdateStyle(css, type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
+            createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -92,7 +108,7 @@ function onMessage({type, data}: MessageBGtoCS | MessageUItoCS & {data: any}) {
             break;
         }
         case MessageTypeBGtoCS.ADD_SVG_FILTER: {
-            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = data;
+            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = message.data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
@@ -108,7 +124,7 @@ function onMessage({type, data}: MessageBGtoCS | MessageUItoCS & {data: any}) {
             break;
         }
         case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
+            const {theme, fixes, isIFrame, detectDarkTheme} = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {
@@ -136,13 +152,23 @@ function onMessage({type, data}: MessageBGtoCS | MessageUItoCS & {data: any}) {
             removeDynamicTheme();
             stopDarkThemeDetector();
             break;
-        case MessageTypeBGtoCS.RELOAD:
-            logWarn('Cleaning up before update');
-            cleanup();
-            break;
         default:
             break;
     }
+}
+
+function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT | MessageTypeCStoBG.DOCUMENT_RESUME) {
+    sendMessage(
+        {
+            type,
+            scriptId,
+            data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? {
+                isDark: isSystemDarkModeEnabled(),
+                isTopFrame: window === window.top,
+            } : {
+                isDark: isSystemDarkModeEnabled(),
+            },
+        });
 }
 
 runColorSchemeChangeDetector((isDark) =>
@@ -150,20 +176,20 @@ runColorSchemeChangeDetector((isDark) =>
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageTypeCStoBG.FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
+sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        sendMessage({type: MessageTypeCStoBG.FRAME_FORGET});
+        sendMessage({type: MessageTypeCStoBG.DOCUMENT_FORGET, scriptId});
     }
 }
 
 function onFreeze() {
-    sendMessage({type: MessageTypeCStoBG.FRAME_FREEZE});
+    sendMessage({type: MessageTypeCStoBG.DOCUMENT_FREEZE});
 }
 
 function onResume() {
-    sendMessage({type: MessageTypeCStoBG.FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
+    sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_RESUME);
 }
 
 function onDarkThemeDetected() {

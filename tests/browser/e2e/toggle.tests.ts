@@ -219,7 +219,7 @@ describe('Toggling the extension', () => {
 
         // Finalize page load
         loadSubframe();
-        // Page may be not finalized loading until the subframe has loaded
+        // Top-level page may finish loading only after the subframe has loaded
         await loadCompleted;
 
         // Ensure that the subframe received its styles

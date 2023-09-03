@@ -326,7 +326,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     }
     if (element instanceof SVGElement) {
         if (element.hasAttribute('fill')) {
-            const SMALL_SVG_LIMIT = 32;
+            const SMALL_SVG_LIMIT = 38;
             const value = element.getAttribute('fill')!;
             if (value !== 'none') {
                 if (!(element instanceof SVGTextElement)) {

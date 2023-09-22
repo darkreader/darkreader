@@ -236,6 +236,27 @@ if (__TEST__) {
             socket.send(JSON.stringify({error: String(err), original: e.data}));
         }
     };
+
+    chrome.downloads.onCreated.addListener(({id, mime, url, danger, paused}) => {
+        // Cancel download
+        chrome.downloads.cancel(id);
+
+        try {
+            const {protocol, origin} = new URL(url);
+            const realOrigin = (new URL(chrome.runtime.getURL(''))).origin;
+            const ok = paused === false && danger === 'safe' && protocol === 'blob:' && origin === realOrigin;
+            socket.send(JSON.stringify({
+                data: {
+                    type: 'download',
+                    ok,
+                    mime,
+                },
+                id: null,
+            }));
+        } catch (e) {
+            // Do nothing
+        }
+    });
 }
 
 if (__DEBUG__ && __LOG__) {

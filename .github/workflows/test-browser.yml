@@ -32,7 +32,9 @@ on:
 jobs:
   test-browser:
     name: Run browser tests
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
         include:
 

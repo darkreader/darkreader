@@ -93,7 +93,7 @@
     }
 
     &__more-site-settings {
-        height: 12rem;
+        height: 14.5rem;
     }
 
     &__more-toggle-settings {
@@ -301,9 +301,33 @@
             }
         }
 
+        &__enabled-by-default {
+            display: flex;
+            flex-direction: row;
+
+            &__checkbox {
+                flex: none;
+            }
+
+            &__button {
+                border-left-width: @size-border-inner;
+                flex: auto;
+
+                &:not(&--active) {
+                    color: @color-input-fore;
+                }
+            }
+
+            &:hover &__button,
+            &:hover &__checkbox {
+                background-color: @color-control-hover;
+            }
+        }
+
         &__detect-dark-theme {
             display: flex;
             flex-direction: row;
+            margin-top: @indent-small;
 
             &__checkbox {
                 flex: none;

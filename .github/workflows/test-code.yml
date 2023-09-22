@@ -28,6 +28,7 @@ on:
 jobs:
   test:
     name: Run tests
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
 

@@ -11,7 +11,7 @@ import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {getDuration} from '../../../utils/time';
-import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
+import {DONATE_URL, GITHUB_URL, MOBILE_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose, openExtensionPage} from '../../utils';
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
@@ -147,6 +147,14 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 }}
             />
 
+            <div class="mobile-link-container">
+                <a class="mobile-link" href={MOBILE_URL} target="_blank" rel="noopener noreferrer">
+                    <span class="mobile-link__icon"></span>
+                    <span class="mobile-link__text">
+                        {getLocalMessage('mobile_link')}
+                    </span>
+                </a>
+            </div>
             <footer>
                 <div class="footer-links">
                     <a class="footer-links__link" href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>

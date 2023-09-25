@@ -63,9 +63,16 @@ function Body(props: BodyProps & {fonts: string[]}) {
     const unreadNews = props.data.news.filter(({read}) => !read);
     const latestNews = props.data.news.length > 0 ? props.data.news[0] : null;
     const isFirstNewsUnread = latestNews && !latestNews.read;
+    let newsWereLongTimeAgo = true;
+    if (unreadNews.length > 0) {
+        const latest = new Date(unreadNews[0].date);
+        const today = new Date();
+        newsWereLongTimeAgo = latest.getTime() < today.getTime() - getDuration({days: 30});
+    }
+    const displayedNewsCount = newsWereLongTimeAgo ? 0 : unreadNews.length;
 
     context.onRender(() => {
-        if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
+        if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn && !newsWereLongTimeAgo) {
             setTimeout(toggleNews, 750);
         }
     });
@@ -81,16 +88,6 @@ function Body(props: BodyProps & {fonts: string[]}) {
         const unread = news.filter(({read}) => !read);
         if (unread.length > 0) {
             props.actions.markNewsAsRead(unread.map(({id}) => id));
-        }
-    }
-
-    let displayedNewsCount = unreadNews.length;
-    if (unreadNews.length > 0) {
-        const latest = new Date(unreadNews[0].date);
-        const today = new Date();
-        const newsWereLongTimeAgo = latest.getTime() < today.getTime() - getDuration({days: 14});
-        if (newsWereLongTimeAgo) {
-            displayedNewsCount = 0;
         }
     }
 

@@ -157,7 +157,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
                     <a class="footer-links__link" href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>
                     <a class="footer-links__link" href={TWITTER_URL} target="_blank" rel="noopener noreferrer">Twitter</a>
                     <a class="footer-links__link" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
-                    <a class="footer-links__link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
+                    <a class="footer-links__link footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
                 </div>
                 <div class="footer-buttons">
                     <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">

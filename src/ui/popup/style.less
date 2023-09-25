@@ -194,6 +194,21 @@ footer {
     }
 }
 
+.footer-help-link {
+    color: @color-control-fore;
+    font-weight: bold;
+
+    &::after {
+        background-color: @color-control-active;
+        border-radius: 50%;
+        content: "?";
+        display: inline-block;
+        height: @size-text-normal-height;
+        margin-left: 0.125rem;
+        width: @size-text-normal-height;
+    }
+}
+
 //
 // Make popup borders the same
 // across platforms and browser versions

@@ -9,7 +9,7 @@ interface SiteListSettingsProps extends ExtWrapper {
 
 export default function SiteListSettings({data, actions, isFocused}: SiteListSettingsProps) {
     function isSiteUrlValid(value: string) {
-        return /^[0-9a-z-]+(\.[0-9a-z-]+)*$/.test(value) || /^(\[([0-9\:]+)\])$/.test(value);
+        return /^([^\.\s]+?\.?)+$/.test(value);
     }
 
     return (
@@ -27,9 +27,8 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
                 values={data.settings.siteList}
                 isFocused={isFocused}
                 onChange={(values) => {
-                    if (values.every(isSiteUrlValid)) {
-                        actions.changeSettings({siteList: values});
-                    }
+                    const siteList = values.filter(isSiteUrlValid);
+                    actions.changeSettings({siteList});
                 }}
             />
             <Shortcut

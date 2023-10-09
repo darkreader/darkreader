@@ -90,6 +90,18 @@ text: #586e75
 
 ================================
 
+Selenized
+
+DARK
+background: #103c48
+text: #adbcbc
+
+LIGHT
+background: #fbf3db
+text: #53676d
+
+================================
+
 Tokyo Night
 
 DARK

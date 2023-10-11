@@ -233,3 +233,7 @@
         border-color: mix(@color-back, @color-control-fore);
     }
 }
+
+html:not(.mobile) {
+    width: calc(@popup-content-width + 2 * @popup-content-padding + 4px);
+}

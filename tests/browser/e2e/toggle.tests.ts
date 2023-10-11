@@ -163,7 +163,7 @@ describe('Toggling the extension', () => {
         ];
 
         let loadSubframe: () => void = null;
-        await loadTestPage({
+        const loadCompleted = loadTestPage({
             '/': multiline(
                 '<!DOCTYPE html>',
                 '<html>',
@@ -217,7 +217,10 @@ describe('Toggling the extension', () => {
 
         await expectStyles(darkPageExpectations);
 
+        // Finalize page load
         loadSubframe();
+        // Top-level page may finish loading only after the subframe has loaded
+        await loadCompleted;
 
         // Ensure that the subframe received its styles
         await expectStyles(darkSubframePageExpectations);

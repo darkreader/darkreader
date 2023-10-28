@@ -224,6 +224,13 @@ function getModifiedScrollbarStyle(theme: Theme) {
 }
 
 export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}): string {
+    const factory = fallbackFactory || defaultFallbackFactory;
+    return factory(filter, {strict});
+}
+
+type FallbackFactory = (theme: Theme, options: {strict: boolean}) => string;
+
+function defaultFallbackFactory(filter: Theme, {strict}: {strict: boolean}): string {
     const lines: string[] = [];
     // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
     const isMicrosoft = ['microsoft.com', 'docs.microsoft.com'].includes(location.hostname);
@@ -233,6 +240,18 @@ export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
     return lines.join('\n');
+}
+
+let fallbackFactory: FallbackFactory | null = null;
+
+const colorModifiers = {
+    background: modifyBackgroundColor,
+    border: modifyBorderColor,
+    foreground: modifyForegroundColor,
+};
+
+export function createFallbackFactory(fn: (colors: typeof colorModifiers) => FallbackFactory): void {
+    fallbackFactory = fn(colorModifiers);
 }
 
 const unparsableColors = new Set([

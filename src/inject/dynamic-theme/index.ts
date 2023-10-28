@@ -24,6 +24,8 @@ import {variablesStore} from './variables';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {combineFixes, findRelevantFix} from './fixes';
 
+export {createFallbackFactory} from './modify-css';
+
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();

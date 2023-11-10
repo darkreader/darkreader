@@ -132,12 +132,12 @@ To force a synchronization of the sites fixes (when the corresponding setting is
 - Click on the `Dev tools` button (in the bottom-right corner).
 - Click on the `Reset` button. This will remove any custom site fixes you may have.
 
-## Enable Dark Reader for all websites on Firefox
+## Enable Dark Reader for restricted websites on Firefox
 
 By default, Dark Reader does not work on some websites due to **security restrictions** enforced by Mozilla.
 The following instructions will guide you on how to bypass those restrictions.
-**Proceed with caution. This exposes you to a security risk if you don't know what you're doing.**
-**These settings will apply to all extensions; not just Dark Reader.**
+**Proceed with caution. This exposes you to a security risk if you do not know what you are doing.**
+**These settings will apply to all extensions, and not just Dark Reader.**
 
 Step 1: change Dark Reader's settings.
 

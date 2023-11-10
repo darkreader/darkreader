@@ -258,7 +258,7 @@ function createDynamicStyleOverrides() {
             variablesStore.addRulesForMatching(detail!.rules);
         });
 
-    variablesStore.matchVariablesAndDependants();
+    variablesStore.matchVariablesAndDependents();
     variablesStore.setOnRootVariableChange(() => {
         const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
         variablesStore.putRootVars(rootVarsStyle, filter!);
@@ -317,7 +317,7 @@ function createManager(element: StyleElement) {
             return;
         }
         variablesStore.addRulesForMatching(details.rules);
-        variablesStore.matchVariablesAndDependants();
+        variablesStore.matchVariablesAndDependents();
         manager.render(filter!, ignoredImageAnalysisSelectors);
         if (__TEST__) {
             document.dispatchEvent(new CustomEvent('__darkreader__test__dynamicUpdateComplete'));
@@ -410,7 +410,7 @@ function watchForUpdates() {
             .forEach((detail) => {
                 variablesStore.addRulesForMatching(detail!.rules);
             });
-        variablesStore.matchVariablesAndDependants();
+        variablesStore.matchVariablesAndDependents();
         newManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors));
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style)!.restore());
@@ -424,7 +424,7 @@ function watchForUpdates() {
         if (element === document.documentElement) {
             const styleAttr = element.getAttribute('style') || '';
             if (styleAttr.includes('--')) {
-                variablesStore.matchVariablesAndDependants();
+                variablesStore.matchVariablesAndDependents();
                 const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
                 variablesStore.putRootVars(rootVarsStyle, filter!);
             }

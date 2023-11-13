@@ -1,3 +1,8 @@
+## 4.9.68 (November 13, 2023)
+
+- Fixed incorrect CSS comment handling (Reddit issue #11583).
+- Fixed working on domains containing `constructor` part (#11877).
+
 ## 4.9.67 (October 1, 2023)
 
 - Fixed Site List when there is any URL with port.

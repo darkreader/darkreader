@@ -91,7 +91,10 @@ config.overrides.push({
         }],
         'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
-            ignore: ['^malevic\/'],
+            ignore: [
+                'get-stream',
+                '^malevic\/',
+            ],
         }],
         'import/no-restricted-paths': ['error', {
             zones: [{
@@ -170,7 +173,7 @@ config.overrides.push({
             files: [
                 'src/ui/controls/**/*.tsx',
                 'src/ui/popup/**/*.tsx',
-                'src/ui/stylesheet-editor/components/body.tsx'
+                'src/ui/stylesheet-editor/components/body.tsx',
             ],
             rules: {
                 '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -198,7 +201,7 @@ config.overrides.push({
             rules: {
                 '@typescript-eslint/no-implied-eval': 'error',
                 '@typescript-eslint/switch-exhaustiveness-check': 'error',
-            }
+            },
         },
     ],
 });
@@ -230,7 +233,7 @@ config.overrides.push({
                 'compat/compat': ['error', [
                     '>0.5% and supports es5 and supports promises and supports url',
                     'not Explorer > 0',
-                ].join(', ')]
+                ].join(', ')],
             },
         },
 
@@ -249,7 +252,7 @@ config.overrides.push({
                     'not iOS > 0',
                     'not ChromeAndroid > 0',
                     'not OperaMini all',
-                ].join(', ')]
+                ].join(', ')],
             },
         },
     ],

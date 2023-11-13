@@ -135,8 +135,11 @@ To force a synchronization of the sites fixes (when the corresponding setting is
 ## Enable Dark Reader for restricted websites on Firefox
 
 By default, Dark Reader does not work on some websites due to **security restrictions** enforced by Mozilla.
+
 The following instructions will guide you on how to bypass those restrictions.
+
 **Proceed with caution. This exposes you to a security risk if you do not know what you are doing.**
+
 **These settings will apply to all extensions, and not just Dark Reader.**
 
 Step 1: change Dark Reader's settings.

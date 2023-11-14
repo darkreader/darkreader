@@ -110,7 +110,7 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     } else if (!isFirstIPV6 && !isSecondIPV6) {
         let regex: RegExp;
         try {
-            regex = createUrlRegex(urlTemplate);
+            regex = createCachedURLRegex(urlTemplate);
         } catch (e) {
             return false;
         }
@@ -119,7 +119,24 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     return false;
 }
 
-function createUrlRegex(urlTemplate: string): RegExp {
+const URL_MATCH_CACHE_SIZE = 32 * 1024;
+const urlMatchCache = new Map<string, RegExp>();
+
+function createCachedURLRegex(urlTemplate: string): RegExp {
+    if (urlMatchCache.has(urlTemplate)) {
+        return urlMatchCache.get(urlTemplate)!;
+    }
+
+    const regex = createURLRegex(urlTemplate);
+    urlMatchCache.set(urlTemplate, regex);
+    if (urlMatchCache.size > URL_MATCH_CACHE_SIZE) {
+        const first = urlMatchCache.keys().next().value;
+        urlMatchCache.delete(first);
+    }
+    return regex;
+}
+
+function createURLRegex(urlTemplate: string): RegExp {
     urlTemplate = urlTemplate.trim();
     const exactBeginning = (urlTemplate[0] === '^');
     const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');

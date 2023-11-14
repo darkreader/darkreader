@@ -108,79 +108,80 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     if (isFirstIPV6 && isSecondIPV6) {
         return compareIPV6(url, urlTemplate);
     } else if (!isFirstIPV6 && !isSecondIPV6) {
-        const regex = createUrlRegex(urlTemplate);
-        return regex !== null && Boolean(url.match(regex));
+        let regex: RegExp;
+        try {
+            regex = createUrlRegex(urlTemplate);
+        } catch (e) {
+            return false;
+        }
+        return Boolean(url.match(regex));
     }
     return false;
 }
 
-function createUrlRegex(urlTemplate: string): RegExp | null {
-    try {
-        urlTemplate = urlTemplate.trim();
-        const exactBeginning = (urlTemplate[0] === '^');
-        const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
-        const hasLastSlash = /\/\$?$/.test(urlTemplate);
+function createUrlRegex(urlTemplate: string): RegExp {
+    urlTemplate = urlTemplate.trim();
+    const exactBeginning = (urlTemplate[0] === '^');
+    const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
+    const hasLastSlash = /\/\$?$/.test(urlTemplate);
 
-        urlTemplate = (urlTemplate
-            .replace(/^\^/, '') // Remove ^ at start
-            .replace(/\$$/, '') // Remove $ at end
-            .replace(/^.*?\/{2,3}/, '') // Remove scheme
-            .replace(/\?.*$/, '') // Remove query
-            .replace(/\/$/, '') // Remove last slash
-        );
+    urlTemplate = (urlTemplate
+        .replace(/^\^/, '') // Remove ^ at start
+        .replace(/\$$/, '') // Remove $ at end
+        .replace(/^.*?\/{2,3}/, '') // Remove scheme
+        .replace(/\?.*$/, '') // Remove query
+        .replace(/\/$/, '') // Remove last slash
+    );
 
-        let slashIndex: number;
-        let beforeSlash: string;
-        let afterSlash: string | undefined;
-        if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
-            beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-            afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
-        } else {
-            beforeSlash = urlTemplate.replace(/\$/g, '');
-        }
-
-        //
-        // SCHEME and SUBDOMAINS
-
-        let result = (exactBeginning ?
-            '^(.*?\\:\\/{2,3})?' // Scheme
-            : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
-        );
-
-        //
-        // HOST and PORT
-
-        const hostParts = beforeSlash.split('.');
-        result += '(';
-        for (let i = 0; i < hostParts.length; i++) {
-            if (hostParts[i] === '*') {
-                hostParts[i] = '[^\\.\\/]+?';
-            }
-        }
-        result += hostParts.join('\\.');
-        result += ')';
-
-        //
-        // PATH and QUERY
-
-        if (afterSlash) {
-            result += '(';
-            result += afterSlash.replace('/', '\\/');
-            result += ')';
-        }
-
-        result += (exactEnding ?
-            '(\\/?(\\?[^\/]*?)?)$' // All following queries
-            : `(\\/${hasLastSlash ? '' : '?'}.*?)$` // All following paths and queries
-        );
-
-        //
-        // Result
-
-        return new RegExp(result, 'i');
-    } catch (e) {
-        return null;
+    let slashIndex: number;
+    let beforeSlash: string;
+    let afterSlash: string | undefined;
+    if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
+        beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
+        afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
+    } else {
+        beforeSlash = urlTemplate.replace(/\$/g, '');
     }
+
+    //
+    // SCHEME and SUBDOMAINS
+
+    let result = (exactBeginning ?
+        '^(.*?\\:\\/{2,3})?' // Scheme
+        : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
+    );
+
+    //
+    // HOST and PORT
+
+    const hostParts = beforeSlash.split('.');
+    result += '(';
+    for (let i = 0; i < hostParts.length; i++) {
+        if (hostParts[i] === '*') {
+            hostParts[i] = '[^\\.\\/]+?';
+        }
+    }
+    result += hostParts.join('\\.');
+    result += ')';
+
+    //
+    // PATH and QUERY
+
+    if (afterSlash) {
+        result += '(';
+        result += afterSlash.replace('/', '\\/');
+        result += ')';
+    }
+
+    result += (exactEnding ?
+        '(\\/?(\\?[^\/]*?)?)$' // All following queries
+        : `(\\/${hasLastSlash ? '' : '?'}.*?)$` // All following paths and queries
+    );
+
+    //
+    // Result
+
+    return new RegExp(result, 'i');
 }
 
 export function isPDF(url: string): boolean {

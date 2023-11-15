@@ -205,6 +205,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./utils/array.ts",
     "./utils/async-queue.ts",
     "./utils/automation.ts",
+    "./utils/cache.ts",
     "./utils/color.ts",
     "./utils/colorscheme-parser.ts",
     "./utils/csp.ts",

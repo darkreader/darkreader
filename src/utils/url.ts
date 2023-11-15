@@ -106,7 +106,10 @@ export function isURLInList(url: string, list: string[]): boolean {
 export function isURLMatched(url: string, urlTemplate: string): boolean {
     const isFirstIPV6 = isIPV6(url);
     const isSecondIPV6 = isIPV6(urlTemplate);
-    if (isFirstIPV6 && isSecondIPV6) {
+    if (isRegExp(urlTemplate)) {
+        const regexp = createRegExp(urlTemplate);
+        return regexp ? regexp.test(url) : false;
+    } else if (isFirstIPV6 && isSecondIPV6) {
         return compareIPV6(url, urlTemplate);
     } else if (!isFirstIPV6 && !isSecondIPV6) {
         return matchURLPattern(url, urlTemplate);
@@ -215,6 +218,25 @@ function matchURLPattern(url: string, pattern: string) {
 
     return true;
 }
+
+function isRegExp(pattern: string) {
+    return pattern.startsWith('/') && pattern.endsWith('/') && pattern.length > 2;
+}
+
+const REGEXP_CACHE_SIZE = 1024;
+const createRegExp = cachedFactory((pattern: string) => {
+    if (pattern.startsWith('/')) {
+        pattern = pattern.substring(1);
+    }
+    if (pattern.endsWith('/')) {
+        pattern = pattern.substring(0, pattern.length - 1);
+    }
+    try {
+        return new RegExp(pattern);
+    } catch (err) {
+        return null;
+    }
+}, REGEXP_CACHE_SIZE);
 
 export function isPDF(url: string): boolean {
     try {

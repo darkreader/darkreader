@@ -70,5 +70,8 @@ describe('Domain utilities', () => {
 
         expect(isURLMatched('file:///C:/My%20Documents/balance.xlsx', 'file:///C:')).toEqual(true);
         expect(isURLMatched('file:///D:/Bin/cat.gif', 'file:///C:')).toEqual(false);
+
+        expect(isURLMatched('https://www.example.com/page/1', '/www\.ex.*\.com/')).toEqual(true);
+        expect(isURLMatched('https://www.failure.com/page/1', '/www\.ex.*\.com/')).toEqual(false);
     });
 });

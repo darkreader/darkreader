@@ -1,4 +1,5 @@
 import type {UserSettings, TabInfo} from '../definitions';
+import {cachedFactory} from './cache';
 import {isIPV6, compareIPV6} from './ipv6';
 
 declare const __THUNDERBIRD__: boolean;
@@ -108,97 +109,102 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     if (isFirstIPV6 && isSecondIPV6) {
         return compareIPV6(url, urlTemplate);
     } else if (!isFirstIPV6 && !isSecondIPV6) {
-        let regex: RegExp;
-        try {
-            regex = createCachedURLRegex(urlTemplate);
-        } catch (e) {
-            return false;
-        }
-        return Boolean(url.match(regex));
+        return matchURLPattern(url, urlTemplate);
     }
     return false;
 }
 
+const URL_CACHE_SIZE = 32;
+const prepareURL = cachedFactory((url: string) => {
+    let parsed: URL;
+    try {
+        parsed = new URL(url);
+    } catch (err) {
+        return null;
+    }
+    const host = parsed.host;
+    const path = parsed.pathname;
+    const hostParts = host.split('.').reverse();
+    const pathParts = path.split('/').slice(1);
+    if (!pathParts[pathParts.length - 1]) {
+        pathParts.splice(pathParts.length - 1, 1);
+    }
+    return {
+        hostParts,
+        pathParts,
+    };
+}, URL_CACHE_SIZE);
+
 const URL_MATCH_CACHE_SIZE = 32 * 1024;
-const urlMatchCache = new Map<string, RegExp>();
-
-function createCachedURLRegex(urlTemplate: string): RegExp {
-    if (urlMatchCache.has(urlTemplate)) {
-        return urlMatchCache.get(urlTemplate)!;
+const preparePattern = cachedFactory((pattern: string) => {
+    if (!pattern) {
+        return null;
     }
 
-    const regex = createURLRegex(urlTemplate);
-    urlMatchCache.set(urlTemplate, regex);
-    if (urlMatchCache.size > URL_MATCH_CACHE_SIZE) {
-        const first = urlMatchCache.keys().next().value;
-        urlMatchCache.delete(first);
+    const exactStart = pattern.startsWith('^');
+    const exactEnd = pattern.endsWith('$');
+    if (exactStart) {
+        pattern = pattern.substring(1);
     }
-    return regex;
-}
-
-function createURLRegex(urlTemplate: string): RegExp {
-    urlTemplate = urlTemplate.trim();
-    const exactBeginning = (urlTemplate[0] === '^');
-    const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
-    const hasLastSlash = /\/\$?$/.test(urlTemplate);
-
-    urlTemplate = (urlTemplate
-        .replace(/^\^/, '') // Remove ^ at start
-        .replace(/\$$/, '') // Remove $ at end
-        .replace(/^.*?\/{2,3}/, '') // Remove scheme
-        .replace(/\?.*$/, '') // Remove query
-        .replace(/\/$/, '') // Remove last slash
-    );
-
-    let slashIndex: number;
-    let beforeSlash: string;
-    let afterSlash: string | undefined;
-    if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
-        beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-        afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
-    } else {
-        beforeSlash = urlTemplate.replace(/\$/g, '');
+    if (exactEnd) {
+        pattern = pattern.substring(0, pattern.length - 1);
     }
 
-    //
-    // SCHEME and SUBDOMAINS
+    const slashIndex = pattern.indexOf('/');
+    const host = slashIndex < 0 ? pattern : pattern.substring(0, slashIndex);
+    const path = slashIndex < 0 ? '' : pattern.substring(slashIndex + 1);
+    const hostParts = host.split('.').reverse();
+    const pathParts = path.split('/');
+    if (!pathParts[pathParts.length - 1]) {
+        pathParts.splice(pathParts.length - 1, 1);
+    }
 
-    let result = (exactBeginning ?
-        '^(.*?\\:\\/{2,3})?' // Scheme
-        : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
-    );
+    return {
+        hostParts,
+        pathParts,
+        exactStart,
+        exactEnd,
+    };
+}, URL_MATCH_CACHE_SIZE);
 
-    //
-    // HOST and PORT
+function matchURLPattern(url: string, pattern: string) {
+    const u = prepareURL(url);
+    const p = preparePattern(pattern);
 
-    const hostParts = beforeSlash.split('.');
-    result += '(';
-    for (let i = 0; i < hostParts.length; i++) {
-        if (hostParts[i] === '*') {
-            hostParts[i] = '[^\\.\\/]+?';
+    if (
+        !(u && p)
+        || (p.hostParts.length > u.hostParts.length)
+        || (p.exactStart && p.hostParts.length !== u.hostParts.length)
+        || (p.exactEnd && p.pathParts.length !== u.pathParts.length)
+    ) {
+        return false;
+    }
+
+    for (let i = 0; i < p.hostParts.length; i++) {
+        const pHostPart = p.hostParts[i];
+        const uHostPart = u.hostParts[i];
+        if (pHostPart !== '*' && pHostPart !== uHostPart) {
+            return false;
         }
     }
-    result += hostParts.join('\\.');
-    result += ')';
 
-    //
-    // PATH and QUERY
-
-    if (afterSlash) {
-        result += '(';
-        result += afterSlash.replace('/', '\\/');
-        result += ')';
+    if (p.pathParts.length === 0) {
+        return true;
     }
 
-    result += (exactEnding ?
-        '(\\/?(\\?[^\/]*?)?)$' // All following queries
-        : `(\\/${hasLastSlash ? '' : '?'}.*?)$` // All following paths and queries
-    );
+    if (p.pathParts.length > u.pathParts.length) {
+        return false;
+    }
 
-    //
-    // Result
+    for (let i = 0; i < p.pathParts.length; i++) {
+        const pPathPart = p.pathParts[i];
+        const uPathPart = u.pathParts[i];
+        if (pPathPart !== '*' && pPathPart !== uPathPart) {
+            return false;
+        }
+    }
 
-    return new RegExp(result, 'i');
+    return true;
 }
 
 export function isPDF(url: string): boolean {

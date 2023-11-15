@@ -122,8 +122,7 @@ const prepareURL = cachedFactory((url: string) => {
     } catch (err) {
         return null;
     }
-    const host = parsed.host;
-    const path = parsed.pathname;
+    const {host, pathname: path, protocol} = parsed;
     const hostParts = host.split('.').reverse();
     const pathParts = path.split('/').slice(1);
     if (!pathParts[pathParts.length - 1]) {
@@ -132,6 +131,7 @@ const prepareURL = cachedFactory((url: string) => {
     return {
         hostParts,
         pathParts,
+        protocol,
     };
 }, URL_CACHE_SIZE);
 
@@ -150,6 +150,13 @@ const preparePattern = cachedFactory((pattern: string) => {
         pattern = pattern.substring(0, pattern.length - 1);
     }
 
+    let protocol = '';
+    const protocolIndex = pattern.indexOf('://');
+    if (protocolIndex > 0) {
+        protocol = pattern.substring(0, protocolIndex + 1);
+        pattern = pattern.substring(protocolIndex + 3);
+    }
+
     const slashIndex = pattern.indexOf('/');
     const host = slashIndex < 0 ? pattern : pattern.substring(0, slashIndex);
     const path = slashIndex < 0 ? '' : pattern.substring(slashIndex + 1);
@@ -164,6 +171,7 @@ const preparePattern = cachedFactory((pattern: string) => {
         pathParts,
         exactStart,
         exactEnd,
+        protocol,
     };
 }, URL_MATCH_CACHE_SIZE);
 
@@ -176,6 +184,7 @@ function matchURLPattern(url: string, pattern: string) {
         || (p.hostParts.length > u.hostParts.length)
         || (p.exactStart && p.hostParts.length !== u.hostParts.length)
         || (p.exactEnd && p.pathParts.length !== u.pathParts.length)
+        || (p.protocol && p.protocol !== u.protocol)
     ) {
         return false;
     }

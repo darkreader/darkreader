@@ -125,7 +125,7 @@ test('Settings Validation', () => {
     expect(validation.errors.length).toBeGreaterThan(0);
     expect(wonkySet as any).toEqual({
         ...DEFAULT_SETTINGS,
-        siteList: ['a.com', 'b.com'],
+        disabledFor: ['a.com', 'b.com'],
         presets: [{id: 'p5', name: 'P5', urls: ['a.com'], theme: {brightness: 100}}],
         customThemes: [{url: ['a.com'], theme: {brightness: 100}}],
     });

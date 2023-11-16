@@ -282,19 +282,16 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     if (isPDF(url)) {
         return userSettings.enableForPDF;
     }
-    const isURLInUserList = isURLInList(url, userSettings.siteList);
-    const isURLInEnabledList = isURLInList(url, userSettings.siteListEnabled);
+    const isURLInDisabledList = isURLInList(url, userSettings.disabledFor);
+    const isURLInEnabledList = isURLInList(url, userSettings.enabledFor);
 
-    if (userSettings.applyToListedOnly) {
-        return isURLInEnabledList || isURLInUserList;
-    }
-    if (isURLInEnabledList) {
-        return true;
+    if (!userSettings.enabledByDefault) {
+        return isURLInEnabledList;
     }
     if (isInDarkList || (userSettings.detectDarkTheme && isDarkThemeDetected)) {
         return false;
     }
-    return !isURLInUserList;
+    return !isURLInDisabledList;
 }
 
 export function isFullyQualifiedDomain(candidate: string): boolean {

@@ -108,9 +108,9 @@ export interface UserSettings {
     theme: FilterConfig;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
-    siteList: string[];
-    siteListEnabled: string[];
-    applyToListedOnly: boolean;
+    enabledByDefault: boolean;
+    enabledFor: string[];
+    disabledFor: string[];
     changeBrowserTheme: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;

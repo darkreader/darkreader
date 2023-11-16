@@ -149,21 +149,22 @@ export default class UserStorage {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.set().
-            logWarn('Could not modify setthings because settings are missing.');
+            logWarn('Could not modify settings because the settings are missing.');
             return;
         }
-        if ($settings.siteList) {
-            if (!Array.isArray($settings.siteList)) {
+
+        const filterSiteList = (siteList: string[]) => {
+            if (!Array.isArray(siteList)) {
                 const list: string[] = [];
-                for (const key in ($settings.siteList as string[])) {
+                for (const key in (siteList as string[])) {
                     const index = Number(key);
                     if (!isNaN(index)) {
-                        list[index] = $settings.siteList[key];
+                        list[index] = siteList[key];
                     }
                 }
-                $settings.siteList = list;
+                siteList = list;
             }
-            const siteList = $settings.siteList.filter((pattern) => {
+            return siteList.filter((pattern) => {
                 let isOK = false;
                 try {
                     isURLMatched('https://google.com/', pattern);
@@ -174,8 +175,17 @@ export default class UserStorage {
                 }
                 return isOK && pattern !== '/';
             });
-            $settings = {...$settings, siteList};
+        };
+
+        const {enabledFor, disabledFor} = $settings;
+        const updatedSettings = {...UserStorage.settings};
+        if (enabledFor) {
+            updatedSettings.enabledFor = filterSiteList(enabledFor);
         }
-        UserStorage.settings = {...UserStorage.settings, ...$settings};
+        if (disabledFor) {
+            updatedSettings.disabledFor = filterSiteList(disabledFor);
+        }
+
+        UserStorage.settings = updatedSettings;
     }
 }

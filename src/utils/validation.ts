@@ -133,12 +133,12 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
         return presetValidator.errors.length === 0;
     });
 
-    validateProperty(settings, 'siteList', isArray, DEFAULT_SETTINGS);
-    validateArray(settings, 'siteList', isNonEmptyString);
-    validateProperty(settings, 'siteListEnabled', isArray, DEFAULT_SETTINGS);
-    validateArray(settings, 'siteListEnabled', isNonEmptyString);
+    validateProperty(settings, 'enabledFor', isArray, DEFAULT_SETTINGS);
+    validateArray(settings, 'enabledFor', isNonEmptyString);
+    validateProperty(settings, 'disabledFor', isArray, DEFAULT_SETTINGS);
+    validateArray(settings, 'disabledFor', isNonEmptyString);
 
-    validateProperty(settings, 'applyToListedOnly', isBoolean, DEFAULT_SETTINGS);
+    validateProperty(settings, 'enabledByDefault', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'changeBrowserTheme', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSettings', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSitesFixes', isBoolean, DEFAULT_SETTINGS);

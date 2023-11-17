@@ -209,7 +209,7 @@ export default class UserStorage {
         };
 
         const {enabledFor, disabledFor} = $settings;
-        const updatedSettings = {...UserStorage.settings};
+        const updatedSettings = {...UserStorage.settings, ...$settings};
         if (enabledFor) {
             updatedSettings.enabledFor = filterSiteList(enabledFor);
         }

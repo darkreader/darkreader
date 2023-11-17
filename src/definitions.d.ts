@@ -103,6 +103,7 @@ export interface Automation {
 }
 
 export interface UserSettings {
+    schemeVersion: number;
     enabled: boolean;
     fetchNews: boolean;
     theme: FilterConfig;

@@ -2,7 +2,7 @@ import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
+import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {validateSettings} from '../utils/validation';
@@ -37,7 +37,7 @@ export default class UserStorage {
     // Remove this over two years(mid-2024).
     // This won't always work, because browsers can decide to instead use the default settings
     // when they notice a different type being requested for automation, in that case it's a data-loss
-    // and not something we can encouter for, except for doing always two extra requests to explicitly
+    // and not something we can encounter for, except for doing always two extra requests to explicitly
     // check for this case which is inefficient usage of requesting storage.
     private static migrateAutomationSettings(settings: UserSettings): void {
         if (typeof settings.automation === 'string') {
@@ -60,6 +60,19 @@ export default class UserStorage {
         }
     }
 
+    private static migrateSiteListsV2(deprecated: any): Partial<UserSettings> {
+        const settings: Partial<UserSettings> = {};
+        settings.enabledByDefault = !deprecated.applyToListedOnly;
+        if (settings.enabledByDefault) {
+            settings.disabledFor = deprecated.siteList ?? [];
+            settings.enabledFor = deprecated.siteListEnabled ?? [];
+        } else {
+            settings.disabledFor = [];
+            settings.enabledFor = deprecated.siteList ?? [];
+        }
+        return settings;
+    }
+
     private static async loadSettingsFromStorage(): Promise<UserSettings> {
         if (UserStorage.loadBarrier) {
             return await UserStorage.loadBarrier.entry();
@@ -67,6 +80,24 @@ export default class UserStorage {
         UserStorage.loadBarrier = new PromiseBarrier();
 
         const local = await readLocalStorage(DEFAULT_SETTINGS);
+
+        if (local.schemeVersion < 2) {
+            const deprecatedDefaults = {
+                siteList: [],
+                siteListEnabled: [],
+                applyToListedOnly: false,
+            };
+            const localDeprecated = await readLocalStorage(deprecatedDefaults);
+            const localTransformed = UserStorage.migrateSiteListsV2(localDeprecated);
+            await writeLocalStorage({schemeVersion: 2, ...localTransformed});
+            await removeLocalStorage(Object.keys(deprecatedDefaults));
+
+            const syncDeprecated = await readSyncStorage(deprecatedDefaults);
+            const syncTransformed = UserStorage.migrateSiteListsV2(syncDeprecated);
+            await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
+            await removeSyncStorage(Object.keys(deprecatedDefaults));
+        }
+
         const {errors: localCfgErrors} = validateSettings(local);
         localCfgErrors.forEach((err) => logWarn(err));
         if (local.syncSettings == null) {
@@ -103,7 +134,7 @@ export default class UserStorage {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.saveSettings().
-            logWarn('Could not save setthings into storage because settings are missing.');
+            logWarn('Could not save settings into storage because the settings are missing.');
             return;
         }
         await UserStorage.saveSettingsIntoStorage();

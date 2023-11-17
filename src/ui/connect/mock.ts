@@ -7,6 +7,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
         isReady: true,
         isAllowedFileSchemeAccess: false,
         settings: {
+            schemeVersion: 2,
             enabled: true,
             fetchNews: true,
             presets: [],

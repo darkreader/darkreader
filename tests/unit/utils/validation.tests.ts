@@ -148,6 +148,7 @@ test('Settings Validation', () => {
     });
 
     const validSet: UserSettings = {
+        schemeVersion: 2,
         enabled: true,
         fetchNews: true,
         theme: {

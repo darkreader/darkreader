@@ -53,6 +53,7 @@ test('Settings Validation', () => {
     expect(defaultSet).toEqual(DEFAULT_SETTINGS);
 
     const wonkySet = {
+        schemeVersion: 'x',
         enabled: '',
         fetchNews: null as boolean | null,
         theme: {

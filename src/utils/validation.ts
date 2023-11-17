@@ -102,7 +102,6 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
         return themeErrors.length === 0;
     };
 
-
     validateProperty(settings, 'schemeVersion', isNumber, DEFAULT_SETTINGS);
 
     validateProperty(settings, 'enabled', isBoolean, DEFAULT_SETTINGS);

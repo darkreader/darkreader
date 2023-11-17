@@ -5,6 +5,7 @@ import {isIPV6} from '../../../src/utils/ipv6';
 it('URL is enabled', () => {
     function fillUserSettings(settings: Partial<UserSettings>): UserSettings {
         return {
+            schemeVersion: 2,
             enabled: false,
             fetchNews: false,
             theme: null,

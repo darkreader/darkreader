@@ -18,6 +18,7 @@ import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterM
 import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
+import {getDuration} from '../utils/time';
 import {MessageTypeBGtoCS} from '../utils/message';
 import {logInfo, logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
@@ -205,6 +206,25 @@ export class Extension {
         }
     }
 
+    private static wakeInterval: number = -1;
+
+    private static runWakeDetector() {
+        const WAKE_CHECK_INTERVAL = getDuration({minutes: 1});
+        const WAKE_CHECK_INTERVAL_ERROR = getDuration({seconds: 10});
+        if (this.wakeInterval >= 0) {
+            clearInterval(this.wakeInterval);
+        }
+
+        let lastRun = Date.now();
+        this.wakeInterval = setInterval(() => {
+            const now = Date.now();
+            if (now - lastRun > WAKE_CHECK_INTERVAL + WAKE_CHECK_INTERVAL_ERROR) {
+                Extension.handleAutomationCheck();
+            }
+            lastRun = now;
+        }, WAKE_CHECK_INTERVAL);
+    }
+
     public static async start(): Promise<void> {
         Extension.init();
         await Promise.all([
@@ -226,6 +246,7 @@ export class Extension {
             await ConfigManager.load({local: false});
         }
         Extension.updateAutoState();
+        Extension.runWakeDetector();
         Extension.onAppToggle();
         logInfo('loaded', UserStorage.settings);
 

@@ -586,9 +586,15 @@ export class Extension {
         }
 
         const darkThemeDetected = settings.enabledByDefault && settings.detectDarkTheme && tab.isDarkThemeDetected;
-        if (isInDarkList || darkThemeDetected || settings.enabledFor.includes(host)) {
+        if (!settings.enabledByDefault || isInDarkList || darkThemeDetected) {
             const toggledList = getToggledList(settings.enabledFor);
             Extension.changeSettings({enabledFor: toggledList}, true);
+            return;
+        }
+        if (settings.enabledByDefault && settings.enabledFor.includes(host)) {
+            const enabledFor = getToggledList(settings.enabledFor);
+            const disabledFor = getToggledList(settings.disabledFor);
+            Extension.changeSettings({enabledFor, disabledFor}, true);
             return;
         }
 

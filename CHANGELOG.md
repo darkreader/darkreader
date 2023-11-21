@@ -1,3 +1,9 @@
+## 4.9.69 (November 21, 2023)
+
+- Separated Enabled and Disabled site lists.
+- Regular expressions support in Site List.
+- Fixed automation after computer waking up.
+
 ## 4.9.68 (November 13, 2023)
 
 - Fixed incorrect CSS comment handling (Reddit issue #11583).

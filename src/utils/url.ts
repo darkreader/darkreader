@@ -288,6 +288,9 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     if (!userSettings.enabledByDefault) {
         return isURLInEnabledList;
     }
+    if (isURLInEnabledList) {
+        return true;
+    }
     if (isInDarkList || (userSettings.detectDarkTheme && isDarkThemeDetected)) {
         return false;
     }

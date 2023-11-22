@@ -79,7 +79,7 @@ export default class UserStorage {
         }
         UserStorage.loadBarrier = new PromiseBarrier();
 
-        const local = await readLocalStorage(DEFAULT_SETTINGS);
+        let local = await readLocalStorage(DEFAULT_SETTINGS);
 
         if (local.schemeVersion < 2) {
             const deprecatedDefaults = {
@@ -96,6 +96,8 @@ export default class UserStorage {
             const syncTransformed = UserStorage.migrateSiteListsV2(syncDeprecated);
             await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
             await removeSyncStorage(Object.keys(deprecatedDefaults));
+
+            local = await readLocalStorage(DEFAULT_SETTINGS);
         }
 
         const {errors: localCfgErrors} = validateSettings(local);

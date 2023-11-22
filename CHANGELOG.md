@@ -1,3 +1,7 @@
+## 4.9.70 (November 22, 2023)
+
+- Fixed clearing site lists when synchronization is disabled.
+
 ## 4.9.69 (November 21, 2023)
 
 - Separated Enabled and Disabled site lists.

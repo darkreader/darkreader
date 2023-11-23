@@ -12,6 +12,7 @@ import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChan
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import {ThemeEngine} from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
+import {getDetectorHintsFor} from '../generators/detector-hints';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
@@ -665,6 +666,7 @@ export class Extension {
                 theme = {...theme, mode};
             }
             const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURL, settings.enabledFor) && !isPDF(tabURL);
+            const detectorHints = detectDarkTheme ? getDetectorHintsFor(url, ConfigManager.DETECTOR_HINTS_RAW!, ConfigManager.DETECTOR_HINTS_INDEX!) : null;
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -676,6 +678,7 @@ export class Extension {
                         data: {
                             css: createCSSFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                             detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }
@@ -686,6 +689,7 @@ export class Extension {
                             data: {
                                 css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                                 detectDarkTheme,
+                                detectorHints,
                             },
                         };
                     }
@@ -696,6 +700,7 @@ export class Extension {
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                             detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }
@@ -707,6 +712,7 @@ export class Extension {
                                 theme.stylesheet :
                                 createStaticStylesheet(theme, url, isTopFrame, ConfigManager.STATIC_THEMES_RAW!, ConfigManager.STATIC_THEMES_INDEX!),
                             detectDarkTheme: settings.detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }
@@ -719,6 +725,7 @@ export class Extension {
                             fixes,
                             isIFrame: !isTopFrame,
                             detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }

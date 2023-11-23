@@ -53,6 +53,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./background/utils/sendLog.ts",
     "./background/utils/tab.ts",
     "./generators/css-filter.ts",
+    "./generators/detector-hints.ts",
     "./generators/dynamic-theme.ts",
     "./generators/modify-colors.ts",
     "./generators/static-theme.ts",

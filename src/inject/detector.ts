@@ -39,6 +39,9 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void, 
     stopDarkThemeDetector();
     if (hints && hints.length > 0) {
         const hint = hints[0];
+        if (hint.noDarkTheme) {
+            return;
+        }
         detectUsingHint(hint, () => callback(true));
         return;
     }

@@ -219,6 +219,7 @@ export interface DetectorHint {
     url: string[];
     target: string;
     match: string[];
+    noDarkTheme: boolean;
 }
 
 export interface StaticTheme {

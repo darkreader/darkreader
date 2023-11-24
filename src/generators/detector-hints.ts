@@ -8,6 +8,7 @@ import type {SitePropsIndex, SitesFixesParserOptions} from './utils/parse';
 const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
     'TARGET': 'target',
     'MATCH': 'match',
+    'NO DARK THEME': 'noDarkTheme',
 };
 
 const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {
@@ -16,6 +17,9 @@ const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {
     parseCommandValue: (command, value) => {
         if (command === 'TARGET') {
             return value.trim();
+        }
+        if (command === 'NO DARK THEME') {
+            return true;
         }
         return parseArray(value);
     },
@@ -31,13 +35,18 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
     return formatSitesFixesConfig(fixes, {
         props: Object.values(detectorHintsCommands),
         getPropCommandName: (prop) => Object.entries(detectorHintsCommands).find(([, p]) => p === prop)![0],
-        formatPropValue: (_prop, value) => {
+        formatPropValue: (prop: keyof DetectorHint, value) => {
             if (Array.isArray(value)) {
                 return formatArray(value).trim();
             }
+            if (prop === 'noDarkTheme') {
+                return '';
+            }
             return String(value).trim();
         },
-        shouldIgnoreProp: () => false,
+        shouldIgnoreProp: (_prop, value) => {
+            return !value;
+        },
     });
 }
 

@@ -2,6 +2,7 @@ import {readFile} from 'node:fs';
 import {compareURLPatterns} from '../../../src/utils/url';
 import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../../src/utils/text';
 import {parseInversionFixes, formatInversionFixes} from '../../../src/generators/css-filter';
+import {parseDetectorHints, formatDetectorHints} from '../../../src/generators/detector-hints';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../../src/generators/static-theme';
 import type {StaticTheme} from '../../../src/definitions';
@@ -84,6 +85,54 @@ test('Dark Sites list', async () => {
 
     // sites are properly formatted
     expect(throwIfDifferent(file, formatArray(sites), 'Dark Sites list format error')).not.toThrow();
+});
+
+test('Detector Hints config', async () => {
+    const file = await readConfig('detector-hints.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
+    // there are no trailing spaces
+    expect(file.indexOf(' \n')).toEqual(-1);
+
+    const hints = parseDetectorHints(file);
+
+    // each hint has valid URL
+    expect(hints.every(({url}) => url.every(isURLPatternValid))).toBe(true);
+
+    // hints are sorted alphabetically
+    expect(hints.map(({url}) => url[0])).toEqual(hints.map(({url}) => url[0]).sort(compareURLPatterns));
+
+    // selectors should have no comma
+    const commaSelector = /\,(?![^\(|\"]*(\)|\"))/;
+    expect(hints.every(({target, match}) => ![target, match].some((s) => commaSelector.test(s)))).toBe(true);
+
+    // only a single selector is allowed
+    expect(hints.every(({target, match}) => ![target, match].some((s) => s.includes('\n')))).toBe(true);
+
+    // hints are properly formatted
+    expect(throwIfDifferent(file, formatDetectorHints(hints), 'Detector Hints format error')).not.toThrow();
+
+    // should parse empty config
+    expect(parseDetectorHints('')).toEqual([]);
+
+    // should skip unsupported commands
+    expect(parseDetectorHints([
+        'inbox.google.com',
+        'mail.google.com',
+        'TARGET', 'a',
+        'MATCH', '.b',
+        'UNSUPPORTED', 'c',
+        '========',
+        'twitter.com',
+        'UNSUPPORTED', 'a', 'b',
+        'TARGET', 'c',
+        'MATCH', '[d="e"]',
+    ].join('\n'))).toEqual([
+        {url: ['inbox.google.com', 'mail.google.com'], target: 'a', match: '.b'},
+        {url: ['twitter.com'], target: 'c', match: '[d="e"]'},
+    ] as any);
 });
 
 test('Dynamic Theme Fixes config', async () => {

@@ -86,8 +86,10 @@ let hintMatchObserver: MutationObserver;
 function detectUsingHint(hint: DetectorHint, success: () => void) {
     stopDetectingUsingHint();
 
+    const matchSelector = (hint.match || []).join(', ');
+
     function checkMatch(target: Element) {
-        if (target.matches?.(hint.match)) {
+        if (target.matches?.(matchSelector)) {
             stopDetectingUsingHint();
             success();
             return true;

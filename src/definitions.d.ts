@@ -218,7 +218,7 @@ export interface InversionFix {
 export interface DetectorHint {
     url: string[];
     target: string;
-    match: string;
+    match: string[];
 }
 
 export interface StaticTheme {

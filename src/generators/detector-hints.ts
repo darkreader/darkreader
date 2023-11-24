@@ -1,4 +1,5 @@
 import type {DetectorHint} from '../definitions';
+import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
@@ -12,8 +13,11 @@ const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
 const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {
     commands: Object.keys(detectorHintsCommands),
     getCommandPropName: (command) => detectorHintsCommands[command],
-    parseCommandValue: (_command, value) => {
-        return value.trim();
+    parseCommandValue: (command, value) => {
+        if (command === 'TARGET') {
+            return value.trim();
+        }
+        return parseArray(value);
     },
 };
 
@@ -28,11 +32,12 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
         props: Object.values(detectorHintsCommands),
         getPropCommandName: (prop) => Object.entries(detectorHintsCommands).find(([, p]) => p === prop)![0],
         formatPropValue: (_prop, value) => {
+            if (Array.isArray(value)) {
+                return formatArray(value).trim();
+            }
             return String(value).trim();
         },
-        shouldIgnoreProp: (_prop, value) => {
-            return !value;
-        },
+        shouldIgnoreProp: () => false,
     });
 }
 

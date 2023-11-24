@@ -106,10 +106,10 @@ test('Detector Hints config', async () => {
 
     // selectors should have no comma
     const commaSelector = /\,(?![^\(|\"]*(\)|\"))/;
-    expect(hints.every(({target, match}) => ![target, match].some((s) => commaSelector.test(s)))).toBe(true);
+    expect(hints.every(({target, match}) => ![target].concat(match).some((s) => commaSelector.test(s)))).toBe(true);
 
-    // only a single selector is allowed
-    expect(hints.every(({target, match}) => ![target, match].some((s) => s.includes('\n')))).toBe(true);
+    // only a single selector is allowed for target
+    expect(hints.every(({target}) => typeof target === 'string' && !target.includes('\n'))).toBe(true);
 
     // hints are properly formatted
     expect(throwIfDifferent(file, formatDetectorHints(hints), 'Detector Hints format error')).not.toThrow();
@@ -122,7 +122,7 @@ test('Detector Hints config', async () => {
         'inbox.google.com',
         'mail.google.com',
         'TARGET', 'a',
-        'MATCH', '.b',
+        'MATCH', '.b', '#c',
         'UNSUPPORTED', 'c',
         '========',
         'twitter.com',
@@ -130,8 +130,8 @@ test('Detector Hints config', async () => {
         'TARGET', 'c',
         'MATCH', '[d="e"]',
     ].join('\n'))).toEqual([
-        {url: ['inbox.google.com', 'mail.google.com'], target: 'a', match: '.b'},
-        {url: ['twitter.com'], target: 'c', match: '[d="e"]'},
+        {url: ['inbox.google.com', 'mail.google.com'], target: 'a', match: ['.b', '#c']},
+        {url: ['twitter.com'], target: 'c', match: ['[d="e"]']},
     ] as any);
 });
 

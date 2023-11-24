@@ -112,7 +112,6 @@ test('Detector Hints config', async () => {
     expect(hints.every(({target, noDarkTheme}) => noDarkTheme || typeof target === 'string' && !target.includes('\n'))).toBe(true);
 
     // hints are properly formatted
-    console.log(formatDetectorHints(hints))
     expect(throwIfDifferent(file, formatDetectorHints(hints), 'Detector Hints format error')).not.toThrow();
 
     // should parse empty config

@@ -577,7 +577,13 @@ export class Extension {
 
         function getToggledList(sourceList: string[]) {
             const list = sourceList.slice();
-            const index = list.indexOf(host);
+
+            let index = list.indexOf(host);
+            if (index < 0 && host.startsWith('www.')) {
+                const noWwwHost = host.substring(4);
+                index = list.indexOf(noWwwHost);
+            }
+
             if (index < 0) {
                 list.push(host);
             } else {

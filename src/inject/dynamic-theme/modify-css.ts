@@ -437,25 +437,20 @@ export function getBgImageModifier(
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge, isTooLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string | null;
-            if (isTooLarge) {
+            if (isLarge) {
                 logInfo(`Not modifying too large image ${imageDetails.src}`);
                 result = `url("${imageDetails.src}")`;
-            } else if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
+            } else if (isDark && isTransparent && filter.mode === 1 && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
             } else if (isLight && !isTransparent && filter.mode === 1) {
-                if (isLarge) {
-                    logInfo(`Not modifying light non-transparent large image ${imageDetails.src}`);
-                    result = 'none';
-                } else {
-                    logInfo(`Dimming light image ${imageDetails.src}`);
-                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
-                    result = `url("${dimmed}")`;
-                }
-            } else if (filter.mode === 0 && isLight && !isLarge) {
+                logInfo(`Dimming light image ${imageDetails.src}`);
+                const dimmed = getFilteredImageDataURL(imageDetails, filter);
+                result = `url("${dimmed}")`;
+            } else if (filter.mode === 0 && isLight) {
                 logInfo(`Applying filter to image ${imageDetails.src}`);
                 const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;

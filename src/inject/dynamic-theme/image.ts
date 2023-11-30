@@ -15,7 +15,6 @@ export interface ImageDetails {
     isLight: boolean;
     isTransparent: boolean;
     isLarge: boolean;
-    isTooLarge: boolean;
 }
 
 const imageManager = new AsyncQueue();
@@ -37,12 +36,13 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
         try {
             const image = await urlToImage(dataURL);
             imageManager.addToQueue(() => {
+                const analysis = analyzeImage(image);
                 resolve({
                     src: url,
-                    dataURL,
+                    dataURL: analysis.isLarge ? '' : dataURL,
                     width: image.naturalWidth,
                     height: image.naturalHeight,
-                    ...analyzeImage(image),
+                    ...analysis,
                 });
             });
         } catch (error) {
@@ -87,8 +87,7 @@ function removeCanvas() {
     context = null;
 }
 
-// 5MB
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const LARGE_IMAGE_PIXELS_COUNT = 512 * 512;
 
 function analyzeImage(image: HTMLImageElement) {
     if (!canvas) {
@@ -106,20 +105,13 @@ function analyzeImage(image: HTMLImageElement) {
         };
     }
 
-    // Get good appromized image size in memory terms.
-    // Width * Height * 4(R, G, B, A) and 500B(metadata) because rgba can contain up to 3 digits.
-    const size = naturalWidth * naturalHeight * 4;
-    // Is it over ~5MB? Let's not decode the image, it's something that's useless to analyze.
-    // And very performance senstive for the browser to decode this image(~50ms) and take into account
-    // It's being async `drawImage` calls.
-    if (size > MAX_IMAGE_SIZE) {
-        logInfo('Skipped large image analyzing(Larger than 5mb in memory)');
+    if (naturalWidth * naturalHeight > LARGE_IMAGE_PIXELS_COUNT) {
+        logInfo('Skipped large image analyzing');
         return {
             isDark: false,
             isLight: false,
             isTransparent: false,
-            isLarge: false,
-            isTooLarge: true,
+            isLarge: true,
         };
     }
 
@@ -172,14 +164,12 @@ function analyzeImage(image: HTMLImageElement) {
     const DARK_IMAGE_THRESHOLD = 0.7;
     const LIGHT_IMAGE_THRESHOLD = 0.7;
     const TRANSPARENT_IMAGE_THRESHOLD = 0.1;
-    const LARGE_IMAGE_PIXELS_COUNT = 800 * 600;
 
     return {
         isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
         isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
         isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
-        isLarge: (naturalPixelsCount >= LARGE_IMAGE_PIXELS_COUNT),
-        isTooLarge: false,
+        isLarge: false,
     };
 }
 

@@ -12,7 +12,7 @@ type MoreSiteSettingsProps = ExtWrapper & {
 
 export default function MoreSiteSettings({data, actions, isExpanded, onClose}: MoreSiteSettingsProps) {
     function toggleEnabledByDefault() {
-        actions.changeSettings({applyToListedOnly: !data.settings.applyToListedOnly});
+        actions.changeSettings({enabledByDefault: !data.settings.enabledByDefault});
     }
 
     function toggleDetectDarkTheme() {
@@ -40,13 +40,13 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                 >
                     <CheckBox
                         class="header__more-settings__enabled-by-default__checkbox"
-                        checked={!data.settings.applyToListedOnly}
+                        checked={data.settings.enabledByDefault}
                         onchange={toggleEnabledByDefault}
                     />
                     <Button
                         class={{
                             'header__more-settings__enabled-by-default__button': true,
-                            'header__more-settings__enabled-by-default__button--active': !data.settings.applyToListedOnly,
+                            'header__more-settings__enabled-by-default__button--active': data.settings.enabledByDefault,
                         }}
                         onclick={toggleEnabledByDefault}
                     >{getLocalMessage('enabled_by_default')}</Button>

@@ -1,3 +1,4 @@
+import type {DetectorHint} from '../definitions';
 import {getSRGBLightness, parseColorWithCache} from '../utils/color';
 
 function hasBuiltInDarkTheme() {
@@ -34,8 +35,17 @@ function hasSomeStyle() {
 let observer: MutationObserver | null;
 let readyStateListener: (() => void) | null;
 
-export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void): void {
+export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void, hints: DetectorHint[]): void {
     stopDarkThemeDetector();
+    if (hints && hints.length > 0) {
+        const hint = hints[0];
+        if (hint.noDarkTheme) {
+            return;
+        }
+        detectUsingHint(hint, () => callback(true));
+        return;
+    }
+
     if (document.body && hasSomeStyle()) {
         runCheck(callback);
         return;
@@ -70,4 +80,61 @@ export function stopDarkThemeDetector(): void {
         document.removeEventListener('readystatechange', readyStateListener);
         readyStateListener = null;
     }
+    stopDetectingUsingHint();
+}
+
+let hintTargetObserver: MutationObserver;
+let hintMatchObserver: MutationObserver;
+
+function detectUsingHint(hint: DetectorHint, success: () => void) {
+    stopDetectingUsingHint();
+
+    const matchSelector = (hint.match || []).join(', ');
+
+    function checkMatch(target: Element) {
+        if (target.matches?.(matchSelector)) {
+            stopDetectingUsingHint();
+            success();
+            return true;
+        }
+        return false;
+    }
+
+    function setupMatchObserver(target: Element) {
+        hintMatchObserver?.disconnect();
+        if (checkMatch(target)) {
+            return;
+        }
+        hintMatchObserver = new MutationObserver(() => checkMatch(target));
+        hintMatchObserver.observe(target, {attributes: true});
+    }
+
+    const target = document.querySelector(hint.target);
+    if (target) {
+        setupMatchObserver(target);
+    } else {
+        hintTargetObserver = new MutationObserver((mutations) => {
+            const handledTargets = new Set<Node>();
+            for (const mutation of mutations) {
+                if (handledTargets.has(mutation.target)) {
+                    continue;
+                }
+                handledTargets.add(mutation.target);
+                if (mutation.target instanceof Element) {
+                    const target = mutation.target.querySelector(hint.target);
+                    if (target) {
+                        hintTargetObserver.disconnect();
+                        setupMatchObserver(target);
+                        break;
+                    }
+                }
+            }
+        });
+        hintTargetObserver.observe(document.documentElement, {childList: true, subtree: true});
+    }
+}
+
+function stopDetectingUsingHint() {
+    hintTargetObserver?.disconnect();
+    hintMatchObserver?.disconnect();
 }

@@ -4,16 +4,16 @@ import type {ViewProps} from '../types';
 
 export default function EnabledByDefaultGroup(props: ViewProps) {
     function onEnabledByDefaultChange(checked: boolean) {
-        props.actions.changeSettings({applyToListedOnly: !checked});
+        props.actions.changeSettings({enabledByDefault: checked});
     }
 
     return (
         <CheckButton
-            checked={!props.data.settings.applyToListedOnly}
+            checked={props.data.settings.enabledByDefault}
             label="Enable by default"
-            description={props.data.settings.applyToListedOnly ?
-                'Disabled on all websites by default' :
-                'Enabled on all websites by default'}
+            description={props.data.settings.enabledByDefault ?
+                'Enabled on all websites by default' :
+                'Disabled on all websites by default'}
             onChange={onEnabledByDefaultChange}
         />
     );

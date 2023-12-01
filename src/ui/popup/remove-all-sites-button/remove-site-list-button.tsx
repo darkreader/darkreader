@@ -20,7 +20,7 @@ export default function RemoveAllButton(props: ViewProps) {
 
     function reset() {
         context.store.isDialogVisible = false;
-        props.actions.changeSettings({siteList: []});
+        props.actions.changeSettings({enabledFor: [], disabledFor: []});
     }
 
     const dialog = context.store.isDialogVisible ? (

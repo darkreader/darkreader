@@ -94,7 +94,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
     switch (message.type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
         case MessageTypeBGtoCS.ADD_STATIC_THEME: {
-            const {css, detectDarkTheme} = message.data;
+            const {css, detectDarkTheme, detectorHints} = message.data;
             removeDynamicTheme();
             createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
             if (detectDarkTheme) {
@@ -103,12 +103,12 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
                         removeStyle();
                         onDarkThemeDetected();
                     }
-                });
+                }, detectorHints);
             }
             break;
         }
         case MessageTypeBGtoCS.ADD_SVG_FILTER: {
-            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = message.data;
+            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme, detectorHints} = message.data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
@@ -119,12 +119,12 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
                         removeSVGFilter();
                         onDarkThemeDetected();
                     }
-                });
+                }, detectorHints);
             }
             break;
         }
         case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme} = message.data;
+            const {theme, fixes, isIFrame, detectDarkTheme, detectorHints} = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {
@@ -133,7 +133,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
                         removeDynamicTheme();
                         onDarkThemeDetected();
                     }
-                });
+                }, detectorHints);
             }
             if (__TEST__) {
                 darkReaderDynamicThemeStateForTesting = 'ready';

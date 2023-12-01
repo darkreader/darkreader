@@ -158,7 +158,12 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             declarations.forEach((declarations) => {
                 cssRulesText += `${getDeclarationText(declarations)} `;
             });
-            const ruleText = `${selector} { ${cssRulesText} }`;
+            let selectorText = selector;
+            if (selector.startsWith(':is(),')) {
+                // Empty :is() selector breaks Chrome when calling deleteRule()
+                selectorText = selector.substring(6).trim();
+            }
+            const ruleText = `${selectorText} { ${cssRulesText} }`;
             target.insertRule(ruleText, index);
         }
 

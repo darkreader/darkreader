@@ -82,22 +82,25 @@ export default class UserStorage {
         let local = await readLocalStorage(DEFAULT_SETTINGS);
 
         if (local.schemeVersion < 2) {
-            const deprecatedDefaults = {
-                siteList: [],
-                siteListEnabled: [],
-                applyToListedOnly: false,
-            };
-            const localDeprecated = await readLocalStorage(deprecatedDefaults);
-            const localTransformed = UserStorage.migrateSiteListsV2(localDeprecated);
-            await writeLocalStorage({schemeVersion: 2, ...localTransformed});
-            await removeLocalStorage(Object.keys(deprecatedDefaults));
+            const sync = await readSyncStorage({schemeVersion: 0});
+            if (!sync || sync.schemeVersion < 2) {
+                const deprecatedDefaults = {
+                    siteList: [],
+                    siteListEnabled: [],
+                    applyToListedOnly: false,
+                };
+                const localDeprecated = await readLocalStorage(deprecatedDefaults);
+                const localTransformed = UserStorage.migrateSiteListsV2(localDeprecated);
+                await writeLocalStorage({schemeVersion: 2, ...localTransformed});
+                await removeLocalStorage(Object.keys(deprecatedDefaults));
 
-            const syncDeprecated = await readSyncStorage(deprecatedDefaults);
-            const syncTransformed = UserStorage.migrateSiteListsV2(syncDeprecated);
-            await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
-            await removeSyncStorage(Object.keys(deprecatedDefaults));
+                const syncDeprecated = await readSyncStorage(deprecatedDefaults);
+                const syncTransformed = UserStorage.migrateSiteListsV2(syncDeprecated);
+                await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
+                await removeSyncStorage(Object.keys(deprecatedDefaults));
 
-            local = await readLocalStorage(DEFAULT_SETTINGS);
+                local = await readLocalStorage(DEFAULT_SETTINGS);
+            }
         }
 
         const {errors: localCfgErrors} = validateSettings(local);

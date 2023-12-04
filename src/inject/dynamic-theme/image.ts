@@ -68,13 +68,13 @@ async function urlToImage(url: string): Promise<HTMLImageElement> {
     });
 }
 
-const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
+const MAX_ANALYSIS_PIXELS_COUNT = 32 * 32;
 let canvas: HTMLCanvasElement | OffscreenCanvas | null;
 let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
 
 function createCanvas() {
-    const maxWidth = MAX_ANALIZE_PIXELS_COUNT;
-    const maxHeight = MAX_ANALIZE_PIXELS_COUNT;
+    const maxWidth = MAX_ANALYSIS_PIXELS_COUNT;
+    const maxHeight = MAX_ANALYSIS_PIXELS_COUNT;
     canvas = document.createElement('canvas');
     canvas.width = maxWidth;
     canvas.height = maxHeight;
@@ -106,7 +106,7 @@ function analyzeImage(image: HTMLImageElement) {
     }
 
     if (naturalWidth * naturalHeight > LARGE_IMAGE_PIXELS_COUNT) {
-        logInfo('Skipped large image analyzing');
+        logInfo('Skipped large image analysis');
         return {
             isDark: false,
             isLight: false,
@@ -116,7 +116,7 @@ function analyzeImage(image: HTMLImageElement) {
     }
 
     const naturalPixelsCount = naturalWidth * naturalHeight;
-    const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
+    const k = Math.min(1, Math.sqrt(MAX_ANALYSIS_PIXELS_COUNT / naturalPixelsCount));
     const width = Math.ceil(naturalWidth * k);
     const height = Math.ceil(naturalHeight * k);
     context!.clearRect(0, 0, width, height);

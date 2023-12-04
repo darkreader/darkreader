@@ -1,4 +1,5 @@
 import type {Theme} from '../../definitions';
+import {isChromium} from '../../utils/platform';
 import {createAsyncTasksQueue} from '../../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
@@ -159,9 +160,20 @@ export function createStyleSheetModifier(): StyleSheetModifier {
                 cssRulesText += `${getDeclarationText(declarations)} `;
             });
             let selectorText = selector;
-            if (selector.startsWith(':is(),')) {
-                // Empty :is() selector breaks Chrome when calling deleteRule()
-                selectorText = selector.substring(6).trim();
+            if (
+                isChromium &&
+                selector.startsWith(':is(') && (
+                    selector.includes(':is()') ||
+                    selector.includes(':where()') || (
+                        selector.includes(':where(') &&
+                        selector.includes(':-moz')
+                    )
+                )
+            ) {
+                // Empty :is() and :where() selectors or
+                // selectors like :is(:where(:-unknown))
+                // break Chrome 119 when calling deleteRule()
+                selectorText = '.darkreader-unsupported-selector';
             }
             const ruleText = `${selectorText} { ${cssRulesText} }`;
             target.insertRule(ruleText, index);

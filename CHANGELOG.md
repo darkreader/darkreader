@@ -1,9 +1,14 @@
+## 4.9.72 (December 5, 2023)
+
+- Fixed Salesforce and Excel Online issues.
+
 ## 4.9.71 (December 5, 2023)
 
 - Improved subdomain handling in Site List.
 - Improved dark theme detection.
 - Fixed page crashes (Slack issue).
 - Fixed Site List migration.
+- Reduced image analysis memory usage.
 
 ## 4.9.70 (November 22, 2023)
 

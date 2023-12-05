@@ -1,3 +1,10 @@
+## 4.9.71 (December 5, 2023)
+
+- Improved subdomain handling in Site List.
+- Improved dark theme detection.
+- Fixed page crashes (Slack issue).
+- Fixed Site List migration.
+
 ## 4.9.70 (November 22, 2023)
 
 - Fixed clearing site lists when synchronization is disabled.

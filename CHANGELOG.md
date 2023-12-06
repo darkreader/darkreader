@@ -1,3 +1,7 @@
+## 4.9.73 (December 6, 2023)
+
+- Fixed URL subdomain handling.
+
 ## 4.9.72 (December 5, 2023)
 
 - Fixed Salesforce and Excel Online issues.

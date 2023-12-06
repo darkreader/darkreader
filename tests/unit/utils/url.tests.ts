@@ -46,6 +46,10 @@ describe('Domain utilities', () => {
         expect(isURLMatched('https://xyz.example.com/page/1', 'example.com')).toEqual(false);
         expect(isURLMatched('https://xyz.www.example.com/page/1', 'example.com')).toEqual(false);
 
+        expect(isURLMatched('https://xyz.example.com/page/1', '*.example.com')).toEqual(true);
+        expect(isURLMatched('https://abc.xyz.example.com/page/1', '*.example.com')).toEqual(true);
+        expect(isURLMatched('https://xyz.failure.com/page/1', '*.example.com')).toEqual(false);
+
         expect(isURLMatched('https://www.example.com/page/1', 'example.com/page')).toEqual(true);
         expect(isURLMatched('https://www.example.com/fail/1', 'example.com/page')).toEqual(false);
 

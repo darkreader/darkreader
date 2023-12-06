@@ -215,6 +215,7 @@ function matchURLPattern(url: string, pattern: string) {
 
     if (
         p.hostParts.length >= 2
+        && p.hostParts.at(-1) !== '*'
         && (
             p.hostParts.length < u.hostParts.length - 1
             || (

@@ -119,6 +119,8 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./ui/controls/virtual-scroll/index.tsx",
     "./ui/devtools/index.tsx",
     "./ui/devtools/components/body.tsx",
+    "./ui/options/index.tsx",
+    "./ui/options/components/body.tsx",
     "./ui/popup/compatibility.js",
     "./ui/popup/index.tsx",
     "./ui/popup/types.d.ts",

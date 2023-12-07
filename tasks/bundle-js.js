@@ -58,6 +58,11 @@ const jsEntries = [
         reloadType: reload.UI,
     },
     {
+        src: 'src/ui/options/index.tsx',
+        dest: 'ui/options/index.js',
+        reloadType: reload.UI,
+    },
+    {
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,

@@ -21,6 +21,10 @@ const cssEntries = [
         dest: 'ui/devtools/style.css',
     },
     {
+        src: 'src/ui/options/style.less',
+        dest: 'ui/options/style.css',
+    },
+    {
         src: 'src/ui/popup/style.less',
         dest: 'ui/popup/style.css',
     },

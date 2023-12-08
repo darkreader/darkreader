@@ -3,7 +3,7 @@ import {Button, CheckBox, Shortcut} from '../../../controls';
 import type {ExtWrapper} from '../../../../definitions';
 import {DONATE_URL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
-import KeyboardIcon from '../../main-page/keyboard-icon';
+import {KeyboardIcon} from '../../../icons';
 
 type MoreSiteSettingsProps = ExtWrapper & {
     isExpanded: boolean;

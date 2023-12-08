@@ -1,7 +1,13 @@
 import {m} from 'malevic';
-import {isNightAtLocation} from '../../../utils/time';
+import {isNightAtLocation} from '../../utils/time';
 
-export default function SunMoonIcon({date, latitude, longitude}: {date: Date; latitude: number; longitude: number}) {
+interface SunMoonIconProps {
+    date: Date;
+    latitude: number;
+    longitude: number;
+}
+
+export function SunMoonIcon({date, latitude, longitude}: SunMoonIconProps): Malevic.Child {
     if (latitude == null || longitude == null) {
         // question mark icon
         return (

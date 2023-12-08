@@ -1,9 +1,8 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import DeleteAllButton from '../../controls/delete-all-button';
-import {MessageBox} from '../../controls';
-import ControlGroup from '../control-group';
-import type {ViewProps} from '../types';
+import {ControlGroup, MessageBox} from '../../controls';
+import type {ViewProps} from '../../../definitions';
 
 export default function RemoveAllButton(props: ViewProps) {
     const context = getContext();

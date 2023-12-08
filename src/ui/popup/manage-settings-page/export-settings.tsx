@@ -1,8 +1,7 @@
 import {m} from 'malevic';
-import type {ViewProps} from '../types';
-import {Button} from '../../controls';
+import type {ViewProps} from '../../../definitions';
+import {Button, ControlGroup} from '../../controls';
 import {saveFile} from '../../utils';
-import ControlGroup from '../control-group';
 
 export default function ExportButton(props: ViewProps) {
     function exportSettings() {

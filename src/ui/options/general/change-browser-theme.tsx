@@ -1,8 +1,8 @@
 import {m} from 'malevic';
-import CheckButton from '../check-button';
-import type {ViewProps} from '../types';
+import type {ViewProps} from '../../../definitions';
+import {CheckButton} from '../../controls';
 
-export default function ChangeBrowserTheme(props: ViewProps) {
+export function ChangeBrowserTheme(props: ViewProps): Malevic.Child {
     function onBrowserThemeChange(checked: boolean) {
         props.actions.changeSettings({changeBrowserTheme: checked});
     }

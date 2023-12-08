@@ -1,6 +1,5 @@
 import {m} from 'malevic';
-import {NavButton} from '../../controls';
-import ControlGroup from '../control-group';
+import {ControlGroup, NavButton} from '../../controls';
 
 export default function SiteListButton(props: {onClick: () => void}) {
     return (

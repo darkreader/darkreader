@@ -2,7 +2,7 @@ import {m} from 'malevic';
 
 let appVersion: string;
 
-export default function AppVersion() {
+export function AppVersion(): Malevic.Child {
     if (!appVersion) {
         appVersion = chrome.runtime.getManifest().version;
     }

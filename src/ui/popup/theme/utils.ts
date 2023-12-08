@@ -1,6 +1,5 @@
-import type {Theme} from '../../../definitions';
+import type {Theme, ViewProps} from '../../../definitions';
 import {isURLInList} from '../../../utils/url';
-import type {ViewProps} from '../types';
 
 interface ThemePresets {
     theme: Theme;

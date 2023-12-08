@@ -1,10 +1,8 @@
 import {m} from 'malevic';
-import type {ViewProps} from '../types';
-import {Button} from '../../controls';
+import type {ViewProps, MessageCStoUI, MessageUItoCS} from '../../../definitions';
+import {Button, ControlGroup} from '../../controls';
 import {saveFile} from '../../utils';
-import ControlGroup from '../control-group';
 import {getURLHostOrProtocol} from '../../../utils/url';
-import type {MessageCStoUI, MessageUItoCS} from '../../../definitions';
 import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../utils/message';
 
 declare const __CHROMIUM_MV2__: boolean;

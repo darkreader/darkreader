@@ -1,8 +1,8 @@
 import {m} from 'malevic';
-import CheckButton from '../check-button';
-import type {ViewProps} from '../types';
+import type {ViewProps} from '../../../definitions';
+import {CheckButton} from '../../controls';
 
-export default function DetectDarkTheme(props: ViewProps) {
+export function DetectDarkTheme(props: ViewProps): Malevic.Child {
     function onDetectDarkThemeChange(checked: boolean) {
         props.actions.changeSettings({detectDarkTheme: checked});
     }

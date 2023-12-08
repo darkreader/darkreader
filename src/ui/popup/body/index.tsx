@@ -10,7 +10,7 @@ import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
-import type {ViewProps} from '../types';
+import type {ViewProps} from '../../../definitions';
 import ManageSettingsPage from '../manage-settings-page';
 import {isMobile} from '../../../utils/platform';
 

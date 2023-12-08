@@ -1,9 +1,9 @@
 import {m} from 'malevic';
+import type {ViewProps} from '../../../definitions';
 import {isFirefox, isMobile} from '../../../utils/platform';
-import CheckButton from '../check-button';
-import type {ViewProps} from '../types';
+import {CheckButton} from '../../controls';
 
-export default function ContextMenusGroup(props: ViewProps) {
+export function ContextMenus(props: ViewProps): Malevic.Child {
     function onContextMenusChange(checked: boolean) {
         if (checked) {
             if (isFirefox) {

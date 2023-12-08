@@ -1,8 +1,7 @@
 import {m} from 'malevic';
 import {openExtensionPage} from '../../utils';
 import {getLocalMessage} from '../../../utils/locales';
-import {NavButton} from '../../controls';
-import ControlGroup from '../control-group';
+import {ControlGroup, NavButton} from '../../controls';
 
 async function openDevTools() {
     await openExtensionPage('devtools');

@@ -1,7 +1,7 @@
 import {m} from 'malevic';
-import type {ViewProps} from '../types';
+import type {ViewProps} from '../../../definitions';
 import SiteList from './site-list';
-import CheckButton from '../check-button';
+import {CheckButton} from '../../controls';
 import RemoveAllButton from '../remove-all-sites-button/remove-site-list-button';
 import {isFirefox} from '../../../utils/platform';
 

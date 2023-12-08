@@ -1,8 +1,8 @@
 import {m} from 'malevic';
-import CheckButton from '../check-button';
-import type {ViewProps} from '../types';
+import type {ViewProps} from '../../../definitions';
+import {CheckButton} from '../../controls';
 
-export default function EnabledByDefaultGroup(props: ViewProps) {
+export function EnabledByDefault(props: ViewProps): Malevic.Child {
     function onEnabledByDefaultChange(checked: boolean) {
         props.actions.changeSettings({enabledByDefault: checked});
     }

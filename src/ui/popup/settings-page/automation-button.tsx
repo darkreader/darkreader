@@ -1,7 +1,6 @@
 import {m} from 'malevic';
-import {NavButton} from '../../controls';
-import ControlGroup from '../control-group';
-import WatchIcon from '../main-page/watch-icon';
+import {ControlGroup, NavButton} from '../../controls';
+import {WatchIcon} from '../../icons';
 
 export default function AutomationButton(props: {onClick: () => void}) {
     const now = new Date();

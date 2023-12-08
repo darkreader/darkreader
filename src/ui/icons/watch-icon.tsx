@@ -1,6 +1,11 @@
 import {m} from 'malevic';
 
-export default function WatchIcon({hours, minutes}: {hours: number; minutes: number}) {
+interface WatchIconProps {
+    hours: number;
+    minutes: number;
+}
+
+export function WatchIcon({hours, minutes}: WatchIconProps): Malevic.Child {
     const cx = 8;
     const cy = 8.5;
     const lenHour = 3;

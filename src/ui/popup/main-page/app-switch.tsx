@@ -1,11 +1,8 @@
 import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
-import {MultiSwitch} from '../../controls';
-import ControlGroup from '../control-group';
-import type {ViewProps} from '../types';
-import WatchIcon from './watch-icon';
-import SunMoonIcon from './sun-moon-icon';
-import SystemIcon from './system-icon';
+import type {ViewProps} from '../../../definitions';
+import {ControlGroup, MultiSwitch} from '../../controls';
+import {SunMoonIcon, SystemIcon, WatchIcon} from '../../icons';
 import {AutomationMode} from '../../../utils/automation';
 
 export default function AppSwitch(props: ViewProps) {

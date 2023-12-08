@@ -1,8 +1,15 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+import type {DevToolsData, ViewProps} from '../../../definitions';
+import {ListIcon, WatchIcon} from '../../icons';
+import GeneralTab from '../general/general-tab';
 import TabPanel from '../tab-panel/tab-panel';
 
-export default function Body(): Malevic.Child {
+type BodyProps = ViewProps & {
+    devtools: DevToolsData;
+};
+
+export default function Body(props: BodyProps): Malevic.Child {
     const context = getContext();
     const store = context.getStore({activeTabId: 'general'});
 
@@ -10,6 +17,10 @@ export default function Body(): Malevic.Child {
         store.activeTabId = tabId;
         context.refresh();
     }
+
+    const now = new Date();
+    const listIcon = <ListIcon />;
+    const watchIcon = <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />;
 
     return (
         <body>
@@ -19,12 +30,12 @@ export default function Body(): Malevic.Child {
             </header>
             <TabPanel activeTabId={store.activeTabId} onTabChange={onSettingsTabChange}>
                 <TabPanel.Tab id="general" label="General">
-                    <p>General</p>
+                    <GeneralTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="site-list" label="Site List">
+                <TabPanel.Tab id="site-list" label="Site List" icon={listIcon}>
                     <p>Site List</p>
                 </TabPanel.Tab>
-                <TabPanel.Tab id="automation" label="Automation">
+                <TabPanel.Tab id="automation" label="Automation" icon={watchIcon}>
                     <p>Automation</p>
                 </TabPanel.Tab>
             </TabPanel>

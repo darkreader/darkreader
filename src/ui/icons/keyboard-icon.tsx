@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 
-export default function KeyboardIcon() {
+export function KeyboardIcon(): Malevic.Child {
     return (
         <svg viewBox="0 0 16 16">
             <rect fill="none" stroke="var(--icon-color)" stroke-width="1" x="2" y="4" width="12" height="8" />

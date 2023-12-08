@@ -1,6 +1,11 @@
 import {m} from 'malevic';
 
-export default function SettingsIcon(props: {color?: string; class?: string}) {
+interface SettingsIconProps {
+    class?: string;
+    color?: string;
+}
+
+export function SettingsIcon(props: SettingsIconProps): Malevic.Child {
     return (
         <svg viewBox="0 0 16 16" class={props.class}>
             <defs>

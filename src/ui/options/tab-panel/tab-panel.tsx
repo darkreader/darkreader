@@ -10,13 +10,15 @@ interface TabProps {
     id: string;
     label: string;
     isActive?: boolean;
+    icon?: Malevic.Child;
+    iconClass?: string;
 }
 
 function TabPanel(props: TabPanelProps, ...children: Array<Malevic.ComponentSpec<TabProps>>) {
     const {activeTabId} = props;
 
     function createTabButton(tabSpec: Malevic.ComponentSpec<TabProps>) {
-        const {id, label} = tabSpec.props;
+        const {id, label, iconClass = ''} = tabSpec.props;
 
         function onClick() {
             props.onTabChange(id);
@@ -29,6 +31,10 @@ function TabPanel(props: TabPanelProps, ...children: Array<Malevic.ComponentSpec
             }}
             onclick={onClick}
         >
+            <span class={{
+                'settings-tab-panel__button__icon': true,
+                [iconClass]: Boolean(iconClass),
+            }} />
             {label}
         </Button>;
     }

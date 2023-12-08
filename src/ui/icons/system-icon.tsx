@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 
-export default function SystemIcon() {
+export function SystemIcon(): Malevic.Child {
     return (
         <svg viewBox="0 0 16 16">
             <path

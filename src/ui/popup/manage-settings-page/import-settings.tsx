@@ -1,8 +1,6 @@
 import {m} from 'malevic';
-import type {ViewProps} from '../types';
-import ControlGroup from '../control-group';
-import type {UserSettings} from '../../../definitions';
-import {Button, MessageBox} from '../../controls';
+import type {UserSettings, ViewProps} from '../../../definitions';
+import {Button, ControlGroup, MessageBox} from '../../controls';
 import {openFile} from '../../utils';
 import {getContext} from 'malevic/dom';
 import {validateSettings} from '../../../utils/validation';

@@ -1,8 +1,9 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import Body from './components/body';
+import type {DevToolsData, ExtensionData, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
+import {DebugMessageTypeBGtoUI} from '../../utils/message';
+import Body from './body/body';
 import Connector from '../connect/connector';
-import type {DevToolsData, ExtensionData} from '../../definitions';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -27,6 +28,27 @@ async function start(): Promise<void> {
 }
 
 start();
+
+declare const __DEBUG__: boolean;
+if (__DEBUG__) {
+    chrome.runtime.onMessage.addListener(({type}: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
+        if (type === DebugMessageTypeBGtoUI.CSS_UPDATE) {
+            document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
+                const url = link.href;
+                link.disabled = true;
+                const newLink = document.createElement('link');
+                newLink.rel = 'stylesheet';
+                newLink.href = url.replace(/\?.*$/, `?nocache=${Date.now()}`);
+                link.parentElement!.insertBefore(newLink, link);
+                link.remove();
+            });
+        }
+
+        if (type === DebugMessageTypeBGtoUI.UPDATE) {
+            location.reload();
+        }
+    });
+}
 
 if (__CHROMIUM_MV3__) {
     // See getExtensionPageTabMV3() for explanation of what it is

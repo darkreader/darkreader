@@ -8,13 +8,14 @@
         display: flex;
         flex-direction: column;
         flex: none;
-        min-width: 6rem;
+        min-width: 7.5rem;
     }
 
     &__button {
         border: none;
         box-shadow: none;
         color: @color-fore;
+        height: @size-control-inner + 2 * @size-border;
         text-align: left;
 
         &--active {
@@ -23,16 +24,24 @@
         }
 
         &__icon {
-            display: inline-block;
+            align-items: center;
+            display: inline-flex;
             height: 1rem;
-            margin-right: @indent-small;
+            justify-content: center;
+            margin-right: 0.25rem;
             width: 1rem;
 
-            > svg {
+            svg {
                 display: inline-block;
                 height: 100%;
                 width: 100%;
             }
+        }
+
+        .button__wrapper {
+            align-items: center;
+            display: flex;
+            flex-direction: row;
         }
     }
 

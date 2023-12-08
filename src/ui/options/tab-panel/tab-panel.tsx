@@ -18,7 +18,7 @@ function TabPanel(props: TabPanelProps, ...children: Array<Malevic.ComponentSpec
     const {activeTabId} = props;
 
     function createTabButton(tabSpec: Malevic.ComponentSpec<TabProps>) {
-        const {id, label, iconClass = ''} = tabSpec.props;
+        const {id, label, icon, iconClass = ''} = tabSpec.props;
 
         function onClick() {
             props.onTabChange(id);
@@ -34,7 +34,9 @@ function TabPanel(props: TabPanelProps, ...children: Array<Malevic.ComponentSpec
             <span class={{
                 'settings-tab-panel__button__icon': true,
                 [iconClass]: Boolean(iconClass),
-            }} />
+            }}>
+                {icon}
+            </span>
             {label}
         </Button>;
     }

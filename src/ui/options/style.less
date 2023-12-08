@@ -48,5 +48,21 @@ main {
 }
 
 .settings-tab {
-    max-width: 17.5rem;
+    max-width: 16rem;
+}
+
+.settings-tab > :not(:first-child) {
+    margin-top: @indent-small;
+}
+
+.settings-icon-list {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+
+    svg {
+        fill: currentColor;
+        height: 75%;
+        width: 75%;
+    }
 }

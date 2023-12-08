@@ -1,11 +1,13 @@
 import {m} from 'malevic';
 
 interface WatchIconProps {
+    color?: string;
     hours: number;
     minutes: number;
 }
 
-export function WatchIcon({hours, minutes}: WatchIconProps): Malevic.Child {
+export function WatchIcon(props: WatchIconProps): Malevic.Child {
+    const {hours, minutes, color = 'white'} = props;
     const cx = 8;
     const cy = 8.5;
     const lenHour = 3;
@@ -22,13 +24,13 @@ export function WatchIcon({hours, minutes}: WatchIconProps): Malevic.Child {
 
     return (
         <svg viewBox="0 0 16 16">
-            <circle fill="none" stroke="white" stroke-width="1.5" cx={cx} cy={cy} r={clockR} />
-            <line stroke="white" stroke-width="1.5" x1={cx} y1={cy} x2={hx} y2={hy} />
-            <line stroke="white" stroke-width="1.5" opacity="0.67" x1={cx} y1={cy} x2={mx} y2={my} />
+            <circle fill="none" stroke={color} stroke-width="1.5" cx={cx} cy={cy} r={clockR} />
+            <line stroke={color} stroke-width="1.5" x1={cx} y1={cy} x2={hx} y2={hy} />
+            <line stroke={color} stroke-width="1.5" opacity="0.67" x1={cx} y1={cy} x2={mx} y2={my} />
             {[30, -30].map((angle) => {
                 return (
                     <path
-                        fill="white"
+                        fill={color}
                         transform={`rotate(${angle})`}
                         transform-origin={`${cx} ${cy}`}
                         d={`M${cx - btnSize},${cy - clockR - btnPad} a${btnSize},${btnSize} 0 0 1 ${2 * btnSize},0 z`} />

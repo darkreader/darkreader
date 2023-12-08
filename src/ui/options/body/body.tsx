@@ -19,8 +19,12 @@ export default function Body(props: BodyProps): Malevic.Child {
     }
 
     const now = new Date();
-    const listIcon = <ListIcon />;
-    const watchIcon = <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />;
+    const autoIcon = <span class="settings-icon-auto">
+        <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} color="currentColor" />
+    </span>;
+    const listIcon = <span class="settings-icon-list">
+        <ListIcon />
+    </span>;
 
     return (
         <body>
@@ -35,7 +39,7 @@ export default function Body(props: BodyProps): Malevic.Child {
                 <TabPanel.Tab id="site-list" label="Site List" icon={listIcon}>
                     <p>Site List</p>
                 </TabPanel.Tab>
-                <TabPanel.Tab id="automation" label="Automation" icon={watchIcon}>
+                <TabPanel.Tab id="automation" label="Automation" icon={autoIcon}>
                     <p>Automation</p>
                 </TabPanel.Tab>
             </TabPanel>

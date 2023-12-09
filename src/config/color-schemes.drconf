@@ -78,18 +78,6 @@ text: #575279
 
 ================================
 
-Solarized
-
-DARK
-background: #002b36
-text: #93a1a1
-
-LIGHT
-background: #fdf6e3
-text: #586e75
-
-================================
-
 Selenized
 
 DARK
@@ -99,6 +87,18 @@ text: #adbcbc
 LIGHT
 background: #fbf3db
 text: #53676d
+
+================================
+
+Solarized
+
+DARK
+background: #002b36
+text: #93a1a1
+
+LIGHT
+background: #fdf6e3
+text: #586e75
 
 ================================
 

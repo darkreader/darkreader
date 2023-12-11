@@ -1,8 +1,8 @@
 import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
-import SiteList from './site-list';
+import {SiteList} from '../../options/site-list/site-list';
 import {CheckButton} from '../../controls';
-import RemoveAllButton from '../remove-all-sites-button/remove-site-list-button';
+import {ClearSiteList} from '../../options/site-list/clear-site-list';
 import {isFirefox} from '../../../utils/platform';
 
 export default function SiteListPage(props: ViewProps) {
@@ -35,7 +35,7 @@ export default function SiteListPage(props: ViewProps) {
     return (
         <div class="site-list-page">
             <label class="site-list-page__label">{label}</label>
-            {sites.length ? <RemoveAllButton {...props} /> : null}
+            {sites.length ? <ClearSiteList {...props} /> : null}
             <SiteList
                 siteList={sites}
                 onChange={onSiteListChange}

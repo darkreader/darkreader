@@ -4,7 +4,7 @@ import DeleteAllButton from '../../controls/delete-all-button';
 import {ControlGroup, MessageBox} from '../../controls';
 import type {ViewProps} from '../../../definitions';
 
-export default function RemoveAllButton(props: ViewProps) {
+export function ClearSiteList(props: ViewProps): Malevic.Child {
     const context = getContext();
 
     function showDialog() {

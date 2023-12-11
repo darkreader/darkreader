@@ -14,7 +14,7 @@ interface SiteListStore {
     wasVisible: boolean;
 }
 
-export default function SiteList(props: SiteListProps) {
+export function SiteList(props: SiteListProps): Malevic.Child {
     const context = getContext();
     const store: SiteListStore = context.store;
     if (!context.prev) {

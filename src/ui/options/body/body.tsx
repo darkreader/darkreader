@@ -2,7 +2,9 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import type {DevToolsData, ViewProps} from '../../../definitions';
 import {ListIcon, WatchIcon} from '../../icons';
-import GeneralTab from '../general/general-tab';
+import {AdvancedTab} from '../advanced/advanced-tab';
+import {GeneralTab} from '../general/general-tab';
+import {SiteListTab} from '../site-list/site-list-tab';
 import TabPanel from '../tab-panel/tab-panel';
 
 type BodyProps = ViewProps & {
@@ -37,10 +39,13 @@ export default function Body(props: BodyProps): Malevic.Child {
                     <GeneralTab {...props} />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="site-list" label="Site List" icon={listIcon}>
-                    <p>Site List</p>
+                    <SiteListTab {...props} />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="automation" label="Automation" icon={autoIcon}>
                     <p>Automation</p>
+                </TabPanel.Tab>
+                <TabPanel.Tab id="advanced" label="Advanced">
+                    <AdvancedTab {...props} />
                 </TabPanel.Tab>
             </TabPanel>
         </body>

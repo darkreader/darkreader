@@ -1,28 +1,29 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import DeleteAllButton from '../../controls/delete-all-button';
-import {ControlGroup, MessageBox} from '../../controls';
+import {Button, ControlGroup, MessageBox} from '../../controls';
+import {DeleteIcon} from '../../icons';
 import type {ViewProps} from '../../../definitions';
 
 export function ClearSiteList(props: ViewProps): Malevic.Child {
     const context = getContext();
+    const store = context.getStore({isDialogVisible: false});
 
     function showDialog() {
-        context.store.isDialogVisible = true;
+        store.isDialogVisible = true;
         context.refresh();
     }
 
     function hideDialog() {
-        context.store.isDialogVisible = false;
+        store.isDialogVisible = false;
         context.refresh();
     }
 
     function reset() {
-        context.store.isDialogVisible = false;
+        store.isDialogVisible = false;
         props.actions.changeSettings({enabledFor: [], disabledFor: []});
     }
 
-    const dialog = context.store.isDialogVisible ? (
+    const dialog = store.isDialogVisible ? (
         <MessageBox
             caption="Are you sure you want to remove all your sites from the list? You cannot restore them later"
             onOK={reset}
@@ -31,11 +32,17 @@ export function ClearSiteList(props: ViewProps): Malevic.Child {
     ) : null;
 
     return (
-        <ControlGroup class="delete-all-icon-group">
+        <ControlGroup>
             <ControlGroup.Control>
-                <DeleteAllButton onClick={showDialog}>
+                <Button onclick={showDialog} class="clear-site-list-button">
+                    <span class="clear-site-list-button__content">
+                        <span class="clear-site-list-button__icon">
+                            <DeleteIcon />
+                        </span>
+                        Clear site list
+                    </span>
                     {dialog}
-                </DeleteAllButton>
+                </Button>
             </ControlGroup.Control>
         </ControlGroup>
     );

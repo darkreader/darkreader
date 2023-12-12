@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import type {DevToolsData, ViewProps} from '../../../definitions';
+import {Overlay} from '../../controls';
 import {ListIcon, WatchIcon} from '../../icons';
 import {AdvancedTab} from '../advanced/advanced-tab';
 import {GeneralTab} from '../general/general-tab';
@@ -48,6 +49,7 @@ export default function Body(props: BodyProps): Malevic.Child {
                     <AdvancedTab {...props} />
                 </TabPanel.Tab>
             </TabPanel>
+            <Overlay />
         </body>
     );
 }

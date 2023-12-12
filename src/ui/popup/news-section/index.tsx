@@ -1,8 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {getDuration} from '../../../utils/time';
-import type {News} from '../../../definitions';
-import type {ViewProps} from '../types';
+import type {News, ViewProps} from '../../../definitions';
 
 function isFresh(n: News) {
     try {

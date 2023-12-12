@@ -64,13 +64,13 @@ export class VariablesStore {
         this.rulesQueue.push(rules);
     }
 
-    public matchVariablesAndDependants(): void {
+    public matchVariablesAndDependents(): void {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();
         this.collectVariablesAndVarDep(this.rulesQueue);
         this.rulesQueue.splice(0);
-        this.collectRootVarDependants();
+        this.collectRootVarDependents();
 
         this.varRefs.forEach((refs, v) => {
             refs.forEach((r) => {
@@ -100,7 +100,7 @@ export class VariablesStore {
                 );
             }) != null;
             if (hasColor) {
-                this.itarateVarRefs(v, (ref) => {
+                this.iterateVarRefs(v, (ref) => {
                     this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
                 });
             } else if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
@@ -329,10 +329,10 @@ export class VariablesStore {
     }
 
     // Because of the similar expensive task between the old `collectVariables`
-    // and `collectVarDepandant`, we only want to do it once.
+    // and `collectVarDependent`, we only want to do it once.
     // This function should only do the same expensive task once
     // and ensure that the result comes to the correct task.
-    // The task is either `inspectVariable` or `inspectVarDependant`.
+    // The task is either `inspectVariable` or `inspectVarDependent`.
     private collectVariablesAndVarDep(ruleList: CSSRuleList[]) {
         ruleList.forEach((rules) => {
             iterateCSSRules(rules, (rule) => {
@@ -395,7 +395,7 @@ export class VariablesStore {
         this.unknownBgVars.delete(varName);
     }
 
-    private collectRootVarDependants() {
+    private collectRootVarDependents() {
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVarDependant(value)) {
                 this.inspectVarDependant(property, value);
@@ -428,7 +428,7 @@ export class VariablesStore {
                         this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
                     );
                 }) != null;
-                this.itarateVarRefs(v, (ref) => {
+                this.iterateVarRefs(v, (ref) => {
                     if (isBgColor) {
                         this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
                     } else {
@@ -470,7 +470,7 @@ export class VariablesStore {
         return null;
     }
 
-    private itarateVarRefs(varName: string, iterator: (v: string) => void) {
+    private iterateVarRefs(varName: string, iterator: (v: string) => void) {
         this.findVarRef(varName, (ref) => {
             iterator(ref);
             return false;

@@ -78,6 +78,18 @@ text: #575279
 
 ================================
 
+Selenized
+
+DARK
+background: #103c48
+text: #adbcbc
+
+LIGHT
+background: #fbf3db
+text: #53676d
+
+================================
+
 Solarized
 
 DARK

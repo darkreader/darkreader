@@ -1,0 +1,59 @@
+.settings-tab-panel {
+    display: flex;
+    flex-direction: row;
+    gap: @indent-small;
+    height: 100%;
+
+    &__buttons {
+        display: flex;
+        flex-direction: column;
+        flex: none;
+        min-width: 7.5rem;
+    }
+
+    &__button {
+        border: none;
+        box-shadow: none;
+        color: @color-fore;
+        height: @size-control-inner + 2 * @size-border;
+        text-align: left;
+
+        &--active {
+            color: @color-heading;
+            font-weight: bold;
+        }
+
+        &__icon {
+            align-items: center;
+            display: inline-flex;
+            height: 1rem;
+            justify-content: center;
+            margin-right: 0.25rem;
+            width: 1rem;
+
+            svg {
+                display: inline-block;
+                height: 100%;
+                width: 100%;
+            }
+        }
+
+        .button__wrapper {
+            align-items: center;
+            display: flex;
+            flex-direction: row;
+        }
+    }
+
+    &__tabs {
+        flex: auto;
+    }
+
+    &__tab {
+        display: none;
+
+        &--active {
+            display: initial;
+        }
+    }
+}

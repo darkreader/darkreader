@@ -21,6 +21,10 @@ const cssEntries = [
         dest: 'ui/devtools/style.css',
     },
     {
+        src: 'src/ui/options/style.less',
+        dest: 'ui/options/style.css',
+    },
+    {
         src: 'src/ui/popup/style.less',
         dest: 'ui/popup/style.css',
     },
@@ -57,10 +61,22 @@ async function bundleCSS({platforms, debug}) {
     }
 }
 
+/**
+ * @param {CSSEntry} entry
+ * @returns {string}
+ */
+function getEntryFile(entry) {
+    return rootPath(entry.src);
+}
+
 function getWatchFiles() {
     const watchFiles = new Set();
     cssEntries.forEach((entry) => {
         entry.watchFiles?.forEach((file) => watchFiles.add(file));
+        const entryFile = getEntryFile(entry);
+        if (!watchFiles.has(entryFile)) {
+            watchFiles.add(entryFile);
+        }
     });
     return Array.from(watchFiles);
 }
@@ -74,7 +90,12 @@ const bundleCSSTask = createTask(
         return watchFiles;
     },
     async (changedFiles, watcher, platforms) => {
-        const entries = cssEntries.filter((entry) => changedFiles.some((changed) => entry.watchFiles?.includes(changed)));
+        const entries = cssEntries.filter((entry) => {
+            const entryFile = getEntryFile(entry);
+            return changedFiles.some((changed) => {
+                return entry.watchFiles?.includes(changed) || changed === entryFile;
+            });
+        });
         for (const entry of entries) {
             const css = await bundleCSSEntry(entry);
             await writeFiles(entry.dest, platforms, true, css);

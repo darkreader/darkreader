@@ -45,6 +45,7 @@ export default class Messenger {
         const allowedSenderURL = [
             chrome.runtime.getURL('/ui/popup/index.html'),
             chrome.runtime.getURL('/ui/devtools/index.html'),
+            chrome.runtime.getURL('/ui/options/index.html'),
             chrome.runtime.getURL('/ui/stylesheet-editor/index.html'),
         ];
         if (allowedSenderURL.includes(sender.url!)) {

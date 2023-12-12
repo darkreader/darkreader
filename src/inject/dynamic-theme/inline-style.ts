@@ -316,7 +316,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
 
     // We can catch some link elements here, that are from `<link rel="mask-icon" color="#000000">`.
     // It's valid HTML code according to the specs, https://html.spec.whatwg.org/#attr-link-color
-    // We don't want to touch such link as it cause weird behavior of the browser(Silent DOMException).
+    // We don't want to touch such links, as it cause weird browser behavior (silent DOMException).
     if (element.hasAttribute('color') && (element as HTMLLinkElement).rel !== 'mask-icon') {
         let value = element.getAttribute('color')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
@@ -330,10 +330,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             const value = element.getAttribute('fill')!;
             if (value !== 'none') {
                 if (!(element instanceof SVGTextElement)) {
-                    // getBoundingClientRect forces a layout change. And when it so happens that.
-                    // The DOM is not in the `complete` readystate. It will cause the layout to be drawn.
-                    // And it will cause a layout of unstyled content which results in white flashes.
-                    // Therefor the check if the DOM is at the `complete` readystate.
+                    // getBoundingClientRect forces a layout change. And when it happens and
+                    // the DOM is not in the `complete` readystate, it will cause the layout to be drawn
+                    // and it will cause a layout of unstyled content which results in white flashes.
+                    // Therefore, check if the DOM is at the `complete` readystate.
                     const handleSVGElement = () => {
                         const {width, height} = element.getBoundingClientRect();
                         const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
@@ -359,9 +359,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
-        // Temporaty ignore background images
-        // due to possible performance issues
-        // and complexity of handling async requests
+        // Temporarily ignore background images due to the possible performance
+        // issues and complexity of handling async requests.
         if (property === 'background-image' && value.includes('url')) {
             return;
         }

@@ -1,8 +1,7 @@
 import {m} from 'malevic';
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
-import type {Theme} from '../../../../definitions';
+import type {Theme, ViewProps} from '../../../../definitions';
 import type {ParsedColorSchemeConfig} from '../../../../utils/colorscheme-parser';
-import type {ViewProps} from '../../types';
 import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls, ColorSchemeDropDown, ImmediateModify} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';

@@ -127,7 +127,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     const observerOptions: MutationObserverInit = {attributes: true, childList: true, subtree: true, characterData: true};
 
     function containsCSSImport() {
-        return element instanceof HTMLStyleElement && element.textContent!.trim().match(cssImportRegex);
+        if (!(element instanceof HTMLStyleElement)) {
+            return false;
+        }
+        const cssText = removeCSSComments(element.textContent ?? '').trim();
+        return cssText.match(cssImportRegex);
     }
 
     // It loops trough the cssRules and check for CSSImportRule and their `href`.

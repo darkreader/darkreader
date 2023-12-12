@@ -130,10 +130,10 @@ function firefoxExtractHashMetaInfOrder(manifest) {
         return {type};
     }
 
-    const desiredOrder = [...realOrder].sort();
+    const sortedOrder = [...realOrder].sort();
     const order = [];
     for (let i = 0; i < realOrder.length; i++) {
-        order.push(realOrder.indexOf(desiredOrder[i]));
+        order.push(sortedOrder.indexOf(realOrder[i]));
     }
 
     return {type, order};

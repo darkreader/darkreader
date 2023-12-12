@@ -135,6 +135,80 @@ footer {
     }
 }
 
+.mobile-link {
+    align-items: center;
+    background-color: @color-control-back;
+    border: @size-border solid @color-border;
+    border-bottom-left-radius: @size-text-normal-height;
+    border-top-left-radius: @size-text-normal-height;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: @indent-large;
+    position: relative;
+    text-decoration: none;
+    user-select: none;
+
+    &__icon {
+        background-image: url('../assets/images/mobile-icon-40x64.svg');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        border-radius: 0.4375rem;
+        display: inline-block;
+        flex: none;
+        height: 2.8rem;
+        left: -@size-border;
+        overflow: hidden;
+        position: absolute;
+        width: 1.75rem;
+    }
+    &__text {
+        color: @color-control-fore;
+        flex: auto;
+        font-weight: bold;
+        height: @size-text-normal-height * 2;
+        line-height: @size-text-normal-height;
+        margin: @size-border 1rem @size-border 2rem;
+        text-align: center;
+        overflow: hidden;
+
+        &::after {
+            content: " →";
+            font-weight: bold;
+        }
+    }
+
+    &:hover {
+        background-color: @color-control-hover;
+    }
+
+    &:hover &__icon {
+        box-shadow: 0 0 0.5rem @color-fore;
+    }
+
+    &:active {
+        background-color: @color-control-active;
+    }
+}
+
+.footer-help-link {
+    color: @color-control-fore;
+    font-weight: bold;
+
+    &::after {
+        background-color: @color-control-active;
+        border-radius: 50%;
+        content: "?";
+        display: inline-block;
+        height: @size-text-normal-height;
+        margin-left: 0.125rem;
+        width: @size-text-normal-height;
+    }
+}
+
 //
 // Make popup borders the same
 // across platforms and browser versions
@@ -143,36 +217,15 @@ body {
     border: 2px solid white;
 }
 
+html:not(.mobile):not(.preview) body {
+    height: @popup-content-height + 4rem;
+}
+
 .overlay {
     height: calc(100% - 4px);
     left: 2px;
     top: 2px;
     width: calc(100% - 4px);
-}
-
-.built-in-horizontal-borders {
-    body {
-        border-bottom: none;
-        border-top: none;
-    }
-
-    .overlay {
-        height: 100%;
-        top: 0;
-    }
-}
-
-.built-in-borders {
-    body {
-        border: none;
-    }
-
-    .overlay {
-        height: 100%;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
 }
 
 @import "./body/style";

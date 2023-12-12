@@ -1,6 +1,6 @@
 import {m} from 'malevic';
-import type {ViewProps} from '../types';
-import CheckButton from '../check-button';
+import type {ViewProps} from '../../../definitions';
+import {CheckButton} from '../../controls';
 
 export default function SyncConfigButton(props: ViewProps) {
     function syncConfig(syncSitesFixes: boolean) {

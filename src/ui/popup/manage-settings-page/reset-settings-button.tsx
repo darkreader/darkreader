@@ -1,9 +1,8 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {DEFAULT_SETTINGS} from '../../../defaults';
-import {MessageBox, ResetButton} from '../../controls';
-import ControlGroup from '../control-group';
-import type {ViewProps} from '../types';
+import type {ViewProps} from '../../../definitions';
+import {ControlGroup, MessageBox, ResetButton} from '../../controls';
 
 export default function ResetButtonGroup(props: ViewProps) {
     const context = getContext();

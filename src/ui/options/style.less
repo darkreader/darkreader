@@ -1,0 +1,69 @@
+@import "../theme";
+@import "../shared";
+
+@import "./tab-panel/tab-panel";
+@import "./site-list/site-list";
+
+html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#logo {
+    display: inline-block;
+    font-size: @size-text-large;
+    height: @size-control-inner;
+    width: 15rem;
+}
+
+#title {
+    align-items: stretch;
+    display: inline-flex;
+    flex-direction: row;
+    font-size: @size-control-inner * 4 / 3;
+    font-weight: 100;
+    line-height: @size-control-inner;
+    height: @size-control-inner;
+    margin: 0 0 0 @indent-small;
+    text-transform: uppercase;
+    transform: translateY(-0.0625rem);
+}
+
+body {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: @indent-small;
+    height: 100%;
+    margin: 0;
+    padding: 1rem;
+}
+
+main {
+    flex: none;
+}
+
+.settings-tab-panel {
+    flex: auto;
+}
+
+.settings-tab {
+    max-width: 16rem;
+}
+
+.settings-tab > :not(:first-child) {
+    margin-top: @indent-small;
+}
+
+.settings-icon-list {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+
+    svg {
+        fill: currentColor;
+        height: 75%;
+        width: 75%;
+    }
+}

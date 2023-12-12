@@ -59,6 +59,10 @@ export interface ExtWrapper {
     actions: ExtensionActions;
 }
 
+export type ViewProps = ExtWrapper & {
+    fonts?: string[];
+};
+
 export interface Theme {
     mode: FilterMode;
     brightness: number;
@@ -103,14 +107,15 @@ export interface Automation {
 }
 
 export interface UserSettings {
+    schemeVersion: number;
     enabled: boolean;
     fetchNews: boolean;
     theme: FilterConfig;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
-    siteList: string[];
-    siteListEnabled: string[];
-    applyToListedOnly: boolean;
+    enabledByDefault: boolean;
+    enabledFor: string[];
+    disabledFor: string[];
     changeBrowserTheme: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
@@ -212,6 +217,13 @@ export interface InversionFix {
     noinvert: string[];
     removebg: string[];
     css: string;
+}
+
+export interface DetectorHint {
+    url: string[];
+    target: string;
+    match: string[];
+    noDarkTheme: boolean;
 }
 
 export interface StaticTheme {

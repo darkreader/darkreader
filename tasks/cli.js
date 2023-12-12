@@ -169,7 +169,7 @@ async function run() {
             const signatureDir = getSignatureDir(version);
             const stats = await stat(signatureDir);
             assert(stats.isDirectory());
-        } catch(e) {
+        } catch (e) {
             console.log(`Could not find signature files for version ${version}`);
             return;
         }

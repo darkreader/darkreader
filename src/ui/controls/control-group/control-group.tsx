@@ -13,18 +13,18 @@ function ControlGroup(
     );
 }
 
-function Control(props: {class?: string}, control: Malevic.Child) {
+function Control(props: {class?: string}, ...content: Malevic.Child[]) {
     return (
         <span class={['control-group__control', props.class]} >
-            {control}
+            {...content}
         </span>
     );
 }
 
-function Description(props: {class?: string}, description: Malevic.Child) {
+function Description(props: {class?: string}, ...content: Malevic.Child[]) {
     return (
-        <span class={['control-group__description', props.class]} >
-            {description}
+        <span class={['control-group__description', props.class]}>
+            {...content}
         </span>
     );
 }

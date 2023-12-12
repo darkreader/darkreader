@@ -4,6 +4,7 @@ import type {DevToolsData, ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
 import {ListIcon, WatchIcon} from '../../icons';
 import {AdvancedTab} from '../advanced/advanced-tab';
+import {AutomationTab} from '../automation/automation-tab';
 import {GeneralTab} from '../general/general-tab';
 import {SiteListTab} from '../site-list/site-list-tab';
 import TabPanel from '../tab-panel/tab-panel';
@@ -43,7 +44,7 @@ export default function Body(props: BodyProps): Malevic.Child {
                     <SiteListTab {...props} />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="automation" label="Automation" icon={autoIcon}>
-                    <p>Automation</p>
+                    <AutomationTab {...props} />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
                     <AdvancedTab {...props} />

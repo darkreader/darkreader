@@ -1,15 +1,16 @@
 import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
-import {EnableForProtectedPages} from './enable-for-protected-pages';
-import {ResetSettings} from './reset-settings';
-import {ImportSettings} from './import-settings';
-import {ExportSettings} from './export-settings';
-import {SyncSettings} from './sync-settings';
-import {ExportTheme} from './export-theme';
-import {isURLEnabled, isURLInList} from '../../../utils/url';
 import {ThemeEngine} from '../../../generators/theme-engines';
-import {SyncConfig} from './sync-config';
+import {isURLEnabled, isURLInList} from '../../../utils/url';
+import {DevTools} from './devtools';
+import {EnableForProtectedPages} from './enable-for-protected-pages';
+import {ExportSettings} from './export-settings';
+import {ExportTheme} from './export-theme';
 import {FetchNews} from './fetch-news';
+import {ImportSettings} from './import-settings';
+import {ResetSettings} from './reset-settings';
+import {SyncConfig} from './sync-config';
+import {SyncSettings} from './sync-settings';
 
 export function AdvancedTab(props: ViewProps): Malevic.Child {
     const custom = props.data.settings.customThemes.find(
@@ -34,5 +35,6 @@ export function AdvancedTab(props: ViewProps): Malevic.Child {
         <ExportSettings {...props} />
         {canExportTheme ? <ExportTheme {...props} /> : null}
         <ResetSettings {...props} />
+        <DevTools />
     </div>;
 }

@@ -1,17 +1,17 @@
 import {m} from 'malevic';
-import {openExtensionPage} from '../../utils';
 import {getLocalMessage} from '../../../utils/locales';
+import {openExtensionPage} from '../../utils';
 import {ControlGroup, NavButton} from '../../controls';
 
 async function openDevTools() {
     await openExtensionPage('devtools');
 }
 
-export default function DevToolsGroup() {
+export function DevTools(): Malevic.Child {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <NavButton onClick={openDevTools} class="dev-tools-button">
+                <NavButton onClick={openDevTools} class="advanced__dev-tools-button">
                     🛠 {getLocalMessage('open_dev_tools')}
                 </NavButton>
             </ControlGroup.Control>

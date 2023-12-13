@@ -1,14 +1,14 @@
 .settings-tab-panel {
     display: flex;
     flex-direction: row;
-    gap: @indent-small;
+    gap: 1rem;
     height: 100%;
 
     &__buttons {
         display: flex;
         flex-direction: column;
         flex: none;
-        min-width: 7.5rem;
+        min-width: 10rem;
     }
 
     &__button {
@@ -28,7 +28,7 @@
             display: inline-flex;
             height: 1rem;
             justify-content: center;
-            margin-right: 0.25rem;
+            margin-right: 0.5rem;
             width: 1rem;
 
             svg {
@@ -55,5 +55,22 @@
         &--active {
             display: initial;
         }
+    }
+}
+
+@media screen and (max-width: 30rem) {
+    .settings-tab-panel {
+        flex-direction: column;
+    }
+
+    .settings-tab-panel__buttons {
+        column-gap: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .settings-tab-panel__button__icon {
+        display: none;
     }
 }

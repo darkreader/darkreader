@@ -132,6 +132,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./ui/options/index.tsx",
     "./ui/options/advanced/advanced-tab.tsx",
     "./ui/options/advanced/enable-for-protected-pages.tsx",
+    "./ui/options/automation/automation-tab.tsx",
     "./ui/options/body/body.tsx",
     "./ui/options/general/change-browser-theme.tsx",
     "./ui/options/general/context-menus.tsx",

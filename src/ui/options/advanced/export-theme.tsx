@@ -10,7 +10,7 @@ declare const __CHROMIUM_MV3__: boolean;
 declare const __FIREFOX_MV2__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
-export default function ExportTheme({data}: ViewProps) {
+export function ExportTheme({data}: ViewProps): Malevic.Child {
     const documentId = data.activeTab.documentId!;
     const tabId = data.activeTab.id;
     const listener = ({type, data}: MessageCStoUI, sender: chrome.runtime.MessageSender) => {
@@ -39,7 +39,7 @@ export default function ExportTheme({data}: ViewProps) {
             <ControlGroup.Control>
                 <Button
                     onclick={exportCSS}
-                    class="settings-button"
+                    class="export-settings-button"
                 >
                     Export Dynamic Theme
                 </Button>

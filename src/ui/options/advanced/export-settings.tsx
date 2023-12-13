@@ -3,7 +3,7 @@ import type {ViewProps} from '../../../definitions';
 import {Button, ControlGroup} from '../../controls';
 import {saveFile} from '../../utils';
 
-export default function ExportButton(props: ViewProps) {
+export function ExportSettings(props: ViewProps): Malevic.Child {
     function exportSettings() {
         saveFile('Dark-Reader-Settings.json', JSON.stringify(props.data.settings, null, 4));
     }
@@ -13,7 +13,7 @@ export default function ExportButton(props: ViewProps) {
             <ControlGroup.Control>
                 <Button
                     onclick={exportSettings}
-                    class="settings-button"
+                    class="advanced__export-settings-button"
                 >
                     Export Settings
                 </Button>

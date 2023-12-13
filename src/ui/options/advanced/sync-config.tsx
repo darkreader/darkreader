@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
 import {CheckButton} from '../../controls';
 
-export default function SyncConfigButton(props: ViewProps) {
+export function SyncConfig(props: ViewProps): Malevic.Child {
     function syncConfig(syncSitesFixes: boolean) {
         props.actions.changeSettings({syncSitesFixes});
         props.actions.loadConfig({local: !syncSitesFixes});

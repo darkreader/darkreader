@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
 import {CheckButton} from '../../controls';
 
-export default function SyncSettings(props: ViewProps) {
+export function SyncSettings(props: ViewProps): Malevic.Child {
     function onSyncSettingsChange(checked: boolean) {
         props.actions.changeSettings({syncSettings: checked});
     }

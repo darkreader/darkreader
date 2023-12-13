@@ -5,7 +5,7 @@ import {openFile} from '../../utils';
 import {getContext} from 'malevic/dom';
 import {validateSettings} from '../../../utils/validation';
 
-export default function ImportButton(props: ViewProps) {
+export function ImportSettings(props: ViewProps): Malevic.Child {
     const context = getContext();
 
     function showDialog(caption: string) {
@@ -53,7 +53,7 @@ export default function ImportButton(props: ViewProps) {
             <ControlGroup.Control>
                 <Button
                     onclick={importSettings}
-                    class="settings-button"
+                    class="advanced__import-settings-button"
                 >
                     Import Settings
                     {dialog}

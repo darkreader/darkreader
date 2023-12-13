@@ -4,7 +4,7 @@ import {DEFAULT_SETTINGS} from '../../../defaults';
 import type {ViewProps} from '../../../definitions';
 import {ControlGroup, MessageBox, ResetButton} from '../../controls';
 
-export default function ResetButtonGroup(props: ViewProps) {
+export function ResetSettings(props: ViewProps): Malevic.Child {
     const context = getContext();
 
     function showDialog() {

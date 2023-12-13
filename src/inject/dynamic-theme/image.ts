@@ -174,6 +174,11 @@ function analyzeImage(image: HTMLImageElement) {
 }
 
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
+    // If the url is itself an SVG data URL `data:image/svg+xml,<svg>...</svg>`.
+    // Branch based on starting with 'data:' because we don't want to escape `&` (query param separator) inside URLs.
+    if (dataURL.startsWith('data:')) {
+        dataURL = escapeXML(dataURL);
+    }
     const matrix = getSVGFilterMatrixValue(theme);
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
@@ -186,6 +191,20 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
         '</svg>',
     ].join('');
     return `data:image/svg+xml;base64,${btoa(svg)}`;
+}
+
+// https://stackoverflow.com/a/27979933
+function escapeXML(str: string): string {
+    return str.replace(/[<>&'"]/g, (c: string) => {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+            default: return c;
+        }
+    });
 }
 
 export function cleanImageProcessingCache(): void {

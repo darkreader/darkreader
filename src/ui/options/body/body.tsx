@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import type {DevToolsData, ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
 import {ListIcon, WatchIcon} from '../../icons';
+import {AboutTab} from '../about/about-tab';
 import {AdvancedTab} from '../advanced/advanced-tab';
 import {AutomationTab} from '../automation/automation-tab';
 import {GeneralTab} from '../general/general-tab';
@@ -48,6 +49,9 @@ export default function Body(props: BodyProps): Malevic.Child {
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
                     <AdvancedTab {...props} />
+                </TabPanel.Tab>
+                <TabPanel.Tab id="about" label="About">
+                    <AboutTab {...props} />
                 </TabPanel.Tab>
             </TabPanel>
             <Overlay />

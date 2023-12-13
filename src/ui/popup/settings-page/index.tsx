@@ -8,7 +8,7 @@ import {EnabledByDefault as EnabledByDefaultGroup} from '../../options/general/e
 import {DetectDarkTheme as DetectDarkThemeGroup} from '../../options/general/detect-dark-theme';
 import {ChangeBrowserTheme} from '../../options/general/change-browser-theme';
 import {ContextMenus as ContextMenusGroup} from '../../options/general/context-menus';
-import {AppVersion as Version} from '../../options/version/version';
+import {AppVersion} from '../../options/about/version';
 import {isFirefox} from '../../../utils/platform';
 
 type SettingsPageProps = ViewProps & {
@@ -28,7 +28,7 @@ export default function SettingsPage(props: SettingsPageProps) {
             <ContextMenusGroup {...props} />
             <ManageSettingsButton onClick={props.onManageSettingsClick} />
             <DetectDarkThemeGroup {...props} />
-            <Version />
+            <AppVersion />
         </section>
     );
 }

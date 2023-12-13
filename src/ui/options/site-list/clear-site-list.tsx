@@ -44,6 +44,9 @@ export function ClearSiteList(props: ViewProps): Malevic.Child {
                     {dialog}
                 </Button>
             </ControlGroup.Control>
+            <ControlGroup.Description>
+                Remove all sites from the list
+            </ControlGroup.Description>
         </ControlGroup>
     );
 }

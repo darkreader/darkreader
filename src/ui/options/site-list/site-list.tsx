@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {TextBox} from '../../controls';
+import {ControlGroup, TextBox} from '../../controls';
 import VirtualScroll from '../../controls/virtual-scroll';
 
 interface SiteListProps {
@@ -90,20 +90,29 @@ export function SiteList(props: SiteListProps): Malevic.Child {
         );
     }
 
-    return (
-        <div class="site-list">
-            <VirtualScroll
-                root={(
-                    <div
-                        class="site-list__v-scroll-root"
-                        onchange={onTextChange}
-                    />
-                )}
-                items={props.siteList
-                    .map((site, index) => createTextBox(site, index))
-                    .concat(createTextBox('', props.siteList.length))}
-                scrollToIndex={store.shouldFocusAtIndex}
+    const virtualScroll = <VirtualScroll
+        root={(
+            <div
+                class="site-list__v-scroll-root"
+                onchange={onTextChange}
             />
-        </div>
+        )}
+        items={props.siteList
+            .map((site, index) => createTextBox(site, index))
+            .concat(createTextBox('', props.siteList.length))}
+        scrollToIndex={store.shouldFocusAtIndex}
+    />;
+
+    return (
+        <ControlGroup class="site-list-group">
+            <ControlGroup.Control class="site-list-group__control">
+                <div class="site-list">
+                    {virtualScroll}
+                </div>
+            </ControlGroup.Control>
+            <ControlGroup.Description class="site-list-group__description">
+                Type in the domain name and press Enter
+            </ControlGroup.Description>
+        </ControlGroup>
     );
 }

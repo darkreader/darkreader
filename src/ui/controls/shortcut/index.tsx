@@ -16,9 +16,9 @@ interface ShortcutLinkProps {
  * to Chrome Commands page on click.
  */
 export default function ShortcutLink(props: ShortcutLinkProps) {
-    const cls = mergeClass('shortcut', props.class);
     const shortcut = props.shortcuts[props.commandName];
     const shortcutMessage = props.textTemplate(shortcut);
+    const cls = mergeClass('shortcut', [shortcut ? 'shortcut--set' : null, props.class]);
 
     let enteringShortcutInProgress = false;
 

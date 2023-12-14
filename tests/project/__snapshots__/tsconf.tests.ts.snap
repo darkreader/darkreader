@@ -147,6 +147,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./ui/options/general/enabled-by-default.tsx",
     "./ui/options/general/enabled-for-pdf.tsx",
     "./ui/options/general/general-tab.tsx",
+    "./ui/options/hotkeys/hotkeys-tab.tsx",
     "./ui/options/site-list/clear-site-list.tsx",
     "./ui/options/site-list/site-list-tab.tsx",
     "./ui/options/site-list/site-list.tsx",

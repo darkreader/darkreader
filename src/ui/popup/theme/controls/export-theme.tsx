@@ -1,9 +1,9 @@
 import {m} from 'malevic';
-import type {ViewProps, MessageCStoUI, MessageUItoCS} from '../../../definitions';
-import {Button, ControlGroup} from '../../controls';
-import {saveFile} from '../../utils';
-import {getURLHostOrProtocol} from '../../../utils/url';
-import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../utils/message';
+import type {ViewProps, MessageCStoUI, MessageUItoCS} from '../../../../definitions';
+import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../../utils/message';
+import {getURLHostOrProtocol} from '../../../../utils/url';
+import {Button} from '../../../controls';
+import {saveFile} from '../../../utils';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -35,18 +35,11 @@ export function ExportTheme({data}: ViewProps): Malevic.Child {
     }
 
     return (
-        <ControlGroup>
-            <ControlGroup.Control>
-                <Button
-                    onclick={exportCSS}
-                    class="advanced__export-theme-button"
-                >
-                    Export Dynamic Theme
-                </Button>
-            </ControlGroup.Control>
-            <ControlGroup.Description>
-                Save generated CSS to a file
-            </ControlGroup.Description>
-        </ControlGroup>
+        <Button
+            onclick={exportCSS}
+            class="export-theme-button"
+        >
+            Export Dynamic Theme
+        </Button>
     );
 }

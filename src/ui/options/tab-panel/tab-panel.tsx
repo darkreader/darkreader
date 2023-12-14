@@ -12,6 +12,7 @@ interface TabProps {
     isActive?: boolean;
     icon?: Malevic.Child;
     iconClass?: string;
+    onClick?: () => void;
 }
 
 function TabPanel(props: TabPanelProps, ...children: Array<Malevic.ComponentSpec<TabProps>>) {
@@ -29,7 +30,7 @@ function TabPanel(props: TabPanelProps, ...children: Array<Malevic.ComponentSpec
                 'settings-tab-panel__button': true,
                 'settings-tab-panel__button--active': activeTabId === id,
             }}
-            onclick={onClick}
+            onclick={tabSpec.props.onClick ?? onClick}
         >
             <span class={{
                 'settings-tab-panel__button__icon': true,

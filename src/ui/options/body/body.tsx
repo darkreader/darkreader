@@ -2,11 +2,12 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import type {ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
-import {ListIcon, WatchIcon} from '../../icons';
+import {KeyboardIcon, ListIcon, WatchIcon} from '../../icons';
 import {AboutTab} from '../about/about-tab';
 import {AdvancedTab} from '../advanced/advanced-tab';
 import {AutomationTab} from '../automation/automation-tab';
 import {GeneralTab} from '../general/general-tab';
+import {HotkeysTab} from '../hotkeys/hotkeys-tab';
 import {SiteListTab} from '../site-list/site-list-tab';
 import TabPanel from '../tab-panel/tab-panel';
 
@@ -24,6 +25,9 @@ export default function Body(props: BodyProps): Malevic.Child {
     const now = new Date();
     const autoIcon = <span class="settings-icon-auto">
         <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} color="currentColor" />
+    </span>;
+    const keyboardIcon = <span class="keyboard-icon-list">
+        <KeyboardIcon />
     </span>;
     const listIcon = <span class="settings-icon-list">
         <ListIcon />
@@ -44,6 +48,9 @@ export default function Body(props: BodyProps): Malevic.Child {
                 </TabPanel.Tab>
                 <TabPanel.Tab id="automation" label="Automation" icon={autoIcon}>
                     <AutomationTab {...props} />
+                </TabPanel.Tab>
+                <TabPanel.Tab id="hotkeys" label="Hotkeys" icon={keyboardIcon}>
+                    <HotkeysTab {...props} />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
                     <AdvancedTab {...props} />

@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import type {DevToolsData, ViewProps} from '../../../definitions';
+import type {ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
 import {ListIcon, WatchIcon} from '../../icons';
 import {AboutTab} from '../about/about-tab';
@@ -10,9 +10,7 @@ import {GeneralTab} from '../general/general-tab';
 import {SiteListTab} from '../site-list/site-list-tab';
 import TabPanel from '../tab-panel/tab-panel';
 
-type BodyProps = ViewProps & {
-    devtools: DevToolsData;
-};
+type BodyProps = ViewProps;
 
 export default function Body(props: BodyProps): Malevic.Child {
     const context = getContext();

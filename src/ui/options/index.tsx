@@ -1,29 +1,24 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import type {DevToolsData, ExtensionData, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
+import type {ExtensionData, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
 import Body from './body/body';
 import Connector from '../connect/connector';
 
 declare const __CHROMIUM_MV3__: boolean;
 
-function renderBody(data: ExtensionData, devToolsData: DevToolsData, actions: Connector) {
-    sync(document.body, <Body data={data} devtools={devToolsData} actions={actions} />);
+function renderBody(data: ExtensionData, actions: Connector) {
+    sync(document.body, <Body data={data} actions={actions} />);
 }
 
 async function start(): Promise<void> {
     const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 
-    let [data, devToolsData] = await Promise.all([
-        connector.getData(),
-        connector.getDevToolsData(),
-    ]);
-    renderBody(data, devToolsData, connector);
-    connector.subscribeToChanges(async (data_) => {
-        data = data_;
-        devToolsData = await connector.getDevToolsData();
-        renderBody(data, devToolsData, connector);
+    const data = await connector.getData();
+    renderBody(data, connector);
+    connector.subscribeToChanges(async (newData) => {
+        renderBody(newData, connector);
     });
 }
 

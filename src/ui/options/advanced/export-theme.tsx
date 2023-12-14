@@ -39,7 +39,7 @@ export function ExportTheme({data}: ViewProps): Malevic.Child {
             <ControlGroup.Control>
                 <Button
                     onclick={exportCSS}
-                    class="export-settings-button"
+                    class="advanced__export-theme-button"
                 >
                     Export Dynamic Theme
                 </Button>

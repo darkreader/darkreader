@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import type {ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
-import {KeyboardIcon, ListIcon, WatchIcon} from '../../icons';
+import {AdvancedIcon, HelpIcon, KeyboardIcon, ListIcon, SettingsIcon, WatchIcon} from '../../icons';
 import {AboutTab} from '../about/about-tab';
 import {AdvancedTab} from '../advanced/advanced-tab';
 import {AutomationTab} from '../automation/automation-tab';
@@ -23,15 +23,7 @@ export default function Body(props: BodyProps): Malevic.Child {
     }
 
     const now = new Date();
-    const autoIcon = <span class="settings-icon-auto">
-        <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} color="currentColor" />
-    </span>;
-    const keyboardIcon = <span class="keyboard-icon-list">
-        <KeyboardIcon />
-    </span>;
-    const listIcon = <span class="settings-icon-list">
-        <ListIcon />
-    </span>;
+    const autoIcon = <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} color="currentColor" />;
 
     return (
         <body>
@@ -40,22 +32,22 @@ export default function Body(props: BodyProps): Malevic.Child {
                 <h1 id="title">Settings</h1>
             </header>
             <TabPanel activeTabId={store.activeTabId} onTabChange={onSettingsTabChange}>
-                <TabPanel.Tab id="general" label="General">
+                <TabPanel.Tab id="general" label="General" icon={<SettingsIcon />} iconClass="settings-icon-general">
                     <GeneralTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="site-list" label="Site List" icon={listIcon}>
+                <TabPanel.Tab id="site-list" label="Site List" icon={<ListIcon />} iconClass="settings-icon-list">
                     <SiteListTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="automation" label="Automation" icon={autoIcon}>
+                <TabPanel.Tab id="automation" label="Automation" icon={autoIcon} iconClass="settings-icon-auto">
                     <AutomationTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="hotkeys" label="Hotkeys" icon={keyboardIcon}>
+                <TabPanel.Tab id="hotkeys" label="Hotkeys" icon={<KeyboardIcon />} iconClass="settings-icon-hotkeys">
                     <HotkeysTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="advanced" label="Advanced">
+                <TabPanel.Tab id="advanced" label="Advanced" icon={<AdvancedIcon />} iconClass="settings-icon-advanced">
                     <AdvancedTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="about" label="About">
+                <TabPanel.Tab id="about" label="About" icon={<HelpIcon />} iconClass="settings-icon-about">
                     <AboutTab {...props} />
                 </TabPanel.Tab>
             </TabPanel>

@@ -11,7 +11,7 @@ export function SettingsIcon(props: SettingsIconProps): Malevic.Child {
             <defs>
                 <path id="cog" d="M-1.25,-6.5 h2.5 l1,3 h-4.5 z" />
             </defs>
-            <g transform="translate(8 8)" fill={props.color}>
+            <g transform="translate(8 8)" fill={props.color ?? 'currentColor'}>
                 <path d="M0,-5 a5,5 0 0 1 0,10 a5,5 0 0 1 0,-10 z M0,-3 a3,3 0 0 0 0,6 a3,3 0 0 0 0,-6 z" />
                 <use href="#cog" />
                 <use href="#cog" transform="rotate(60)" />

@@ -151,8 +151,11 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
             const getDeclarationText = (dec: ReadyDeclaration) => {
-                const {property, value, important, sourceValue} = dec;
-                return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
+                const {property, value, important} = dec;
+                if (!value) {
+                    return '--darkreader-async-placeholder: ^_^;';
+                }
+                return `${property}: ${value}${important ? ' !important' : ''};`;
             };
 
             let cssRulesText = '';

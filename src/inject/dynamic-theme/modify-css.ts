@@ -310,7 +310,7 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     return false;
 }
 
-interface bgImageMatches {
+interface BgImageMatches {
     type: 'url' | 'gradient';
     index: number;
     match: string;
@@ -342,8 +342,8 @@ export function getBgImageModifier(
             });
         };
 
-        const matches: bgImageMatches[] =
-            (gradients.map((i) => ({type: 'gradient', ...i})) as bgImageMatches[])
+        const matches: BgImageMatches[] =
+            (gradients.map((i) => ({type: 'gradient', ...i})) as BgImageMatches[])
                 .concat(getIndices(urls).map((i) => ({type: 'url', offset: 0, ...i})))
                 .sort((a, b) => a.index > b.index ? 1 : -1);
 
@@ -455,7 +455,7 @@ export function getBgImageModifier(
                 const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;
             } else {
-                logInfo(`Not modifying too large image ${imageDetails.src}`);
+                logInfo(`Not modifying the image ${imageDetails.src}`);
                 result = null;
             }
             return result;

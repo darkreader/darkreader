@@ -2,8 +2,10 @@ import type {DetectorHint} from '../definitions';
 import {getSRGBLightness, parseColorWithCache} from '../utils/color';
 
 function hasBuiltInDarkTheme() {
-    const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<HTMLStyleElement & {disabled: boolean}>;
-    drStyles.forEach((style) => style.disabled = true);
+    const rootStyle = getComputedStyle(document.documentElement);
+    if (rootStyle.filter.includes('invert(1)')) {
+        return true;
+    }
 
     const CELL_SIZE = 256;
     const MAX_ROW_COUNT = 4;
@@ -12,49 +14,46 @@ function hasBuiltInDarkTheme() {
     const stepX = Math.floor(winWidth / Math.min(MAX_ROW_COUNT, Math.ceil(winWidth / CELL_SIZE)));
     const stepY = Math.floor(winHeight / Math.min(MAX_ROW_COUNT, Math.ceil(winHeight / CELL_SIZE)));
 
-    let hasLightScheme = false;
     const processedElements = new Set<Element>();
 
-    loop: for (let y = Math.floor(stepY / 2); y < winHeight; y += stepY) {
+    for (let y = Math.floor(stepY / 2); y < winHeight; y += stepY) {
         for (let x = Math.floor(stepX / 2); x < winWidth; x += stepX) {
             const element = document.elementFromPoint(x, y);
             if (!element || processedElements.has(element)) {
                 continue;
             }
             processedElements.add(element);
-            const style = getComputedStyle(element);
+            const style = element === document.documentElement ? rootStyle : getComputedStyle(element);
             const bgColor = parseColorWithCache(style.backgroundColor)!;
             if (bgColor.a === 1) {
                 const bgLightness = getSRGBLightness(bgColor.r, bgColor.g, bgColor.b);
                 if (bgLightness > 0.5) {
-                    hasLightScheme = true;
-                    break loop;
+                    return false;
                 }
             } else {
                 const textColor = parseColorWithCache(style.color)!;
                 const textLightness = getSRGBLightness(textColor.r, textColor.g, textColor.b);
                 if (textLightness < 0.5) {
-                    hasLightScheme = true;
-                    break loop;
+                    return false;
                 }
             }
         }
     }
 
-    if (processedElements.size === 0) {
-        const rootColor = parseColorWithCache(getComputedStyle(document.documentElement).backgroundColor)!;
-        const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor)! : {r: 0, g: 0, b: 0, a: 0};
-        const rootLightness = (1 - rootColor.a!) + rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
-        const finalLightness = (1 - bodyColor.a!) * rootLightness + bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
-        hasLightScheme = finalLightness > 0.5;
-    }
-
-    drStyles.forEach((style) => style.disabled = false);
-    return !hasLightScheme;
+    const rootColor = parseColorWithCache(rootStyle.backgroundColor)!;
+    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor)! : {r: 0, g: 0, b: 0, a: 0};
+    const rootLightness = (1 - rootColor.a!) + rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
+    const finalLightness = (1 - bodyColor.a!) * rootLightness + bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
+    return finalLightness < 0.5;
 }
 
 function runCheck(callback: (hasDarkTheme: boolean) => void) {
+    const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<HTMLStyleElement & {disabled: boolean}>;
+    drStyles.forEach((style) => style.disabled = true);
+
     const darkThemeDetected = hasBuiltInDarkTheme();
+
+    drStyles.forEach((style) => style.disabled = false);
     callback(darkThemeDetected);
 }
 

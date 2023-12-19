@@ -109,7 +109,7 @@ test('Detector Hints config', async () => {
     expect(hints.every(({target, match}) => ![target].concat(match).some((s) => commaSelector.test(s)))).toBe(true);
 
     // only a single selector is allowed for target
-    expect(hints.every(({target, noDarkTheme}) => noDarkTheme || typeof target === 'string' && !target.includes('\n'))).toBe(true);
+    expect(hints.every(({target, noDarkTheme, systemTheme}) => noDarkTheme || systemTheme || typeof target === 'string' && !target.includes('\n'))).toBe(true);
 
     // hints are properly formatted
     expect(throwIfDifferent(file, formatDetectorHints(hints), 'Detector Hints format error')).not.toThrow();
@@ -125,6 +125,9 @@ test('Detector Hints config', async () => {
         'MATCH', '.b', '#c',
         'UNSUPPORTED', 'c',
         '========',
+        'proton.me',
+        'SYSTEM THEME',
+        '========',
         'twitter.com',
         'UNSUPPORTED', 'a', 'b',
         'TARGET', 'c',
@@ -134,6 +137,7 @@ test('Detector Hints config', async () => {
         'NO DARK THEME',
     ].join('\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], target: 'a', match: ['.b', '#c']},
+        {url: ['proton.me'], systemTheme: true},
         {url: ['twitter.com'], target: 'c', match: ['[d="e"]']},
         {url: ['wikipedia.org'], noDarkTheme: true},
     ] as any);

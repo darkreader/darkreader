@@ -1,5 +1,6 @@
 import type {DetectorHint} from '../definitions';
 import {getSRGBLightness, parseColorWithCache} from '../utils/color';
+import {isSystemDarkModeEnabled} from '../utils/media-query';
 
 function hasBuiltInDarkTheme() {
     const rootStyle = getComputedStyle(document.documentElement);
@@ -77,6 +78,11 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void, 
     if (hints && hints.length > 0) {
         const hint = hints[0];
         if (hint.noDarkTheme) {
+            callback(false);
+            return;
+        }
+        if (hint.systemTheme && isSystemDarkModeEnabled()) {
+            callback(true);
             return;
         }
         detectUsingHint(hint, () => callback(true));

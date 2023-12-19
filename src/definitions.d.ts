@@ -224,6 +224,7 @@ export interface DetectorHint {
     target: string;
     match: string[];
     noDarkTheme: boolean;
+    systemTheme: boolean;
 }
 
 export interface StaticTheme {

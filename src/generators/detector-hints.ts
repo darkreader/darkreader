@@ -9,6 +9,7 @@ const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
     'TARGET': 'target',
     'MATCH': 'match',
     'NO DARK THEME': 'noDarkTheme',
+    'SYSTEM THEME': 'systemTheme',
 };
 
 const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {
@@ -18,7 +19,7 @@ const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {
         if (command === 'TARGET') {
             return value.trim();
         }
-        if (command === 'NO DARK THEME') {
+        if (command === 'NO DARK THEME' || command === 'SYSTEM THEME') {
             return true;
         }
         return parseArray(value);
@@ -39,7 +40,7 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
             if (Array.isArray(value)) {
                 return formatArray(value).trim();
             }
-            if (prop === 'noDarkTheme') {
+            if (prop === 'noDarkTheme' || prop === 'systemTheme') {
                 return '';
             }
             return String(value).trim();

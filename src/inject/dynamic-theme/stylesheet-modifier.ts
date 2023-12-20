@@ -151,11 +151,8 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
             const getDeclarationText = (dec: ReadyDeclaration) => {
-                const {property, value, important, sourceValue} = dec;
+                const {property, value, important} = dec;
                 if (!value) {
-                    if (sourceValue.startsWith('url(data:')) {
-                        return `${property}: ${sourceValue}${important ? ' !important' : ''};`;
-                    }
                     return '--darkreader-async-placeholder: ^_^;';
                 }
                 return `${property}: ${value}${important ? ' !important' : ''};`;
@@ -236,9 +233,6 @@ export function createStyleSheetModifier(): StyleSheetModifier {
                         return;
                     }
                     asyncDeclaration.value = asyncValue;
-                    if (sourceValue.startsWith('url(data:') && sourceValue.startsWith(asyncValue.substring(0, 32))) {
-                        return;
-                    }
                     asyncQueue.add(() => {
                         if (isAsyncCancelled() || currentRenderId !== renderId) {
                             return;

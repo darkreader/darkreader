@@ -5,7 +5,7 @@ import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
-import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady} from './image';
+import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
@@ -395,13 +395,11 @@ export function getBgImageModifier(
                 parentStyleSheet!.ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
-            const absoluteValue = `url("${url}")`;
-
             return async (filter: FilterConfig): Promise<string | null> => {
                 if (isURLEmpty) {
                     return "url('')";
                 }
-                let imageDetails: ImageDetails | null;
+                let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
                 } else {
@@ -431,11 +429,21 @@ export function getBgImageModifier(
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(null));
                             awaitingForImageLoading.delete(url);
                         }
-                        return absoluteValue;
                     }
                 }
-                const bgImageValue = getBgImageValue(imageDetails, filter) || absoluteValue;
-                return bgImageValue;
+                if (imageDetails) {
+                    const bgImageValue = getBgImageValue(imageDetails, filter);
+                    if (bgImageValue) {
+                        return bgImageValue;
+                    }
+                }
+                if (url.startsWith('data:')) {
+                    const blobURL = await tryConvertDataURLToBlobURL(url);
+                    if (blobURL) {
+                        return `url("${blobURL}")`;
+                    }
+                }
+                return `url("${url}")`;;
             };
         };
 

@@ -257,9 +257,45 @@ function escapeXML(str: string): string {
     return str.replace(/[<>&'"]/g, (c: string) => xmlEscapeChars[c] ?? c);
 }
 
+const dataURLBlobURLs = new Map<string, string>();
+
+export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<string | null> {
+    if (!isBlobURLSupported) {
+        return null;
+    }
+    let blobURL = dataURLBlobURLs.get(dataURL);
+    if (blobURL) {
+        return blobURL;
+    }
+
+    let blob: Blob;
+    const colonIndex = dataURL.indexOf(':');
+    const semicolonIndex = dataURL.indexOf(';', colonIndex + 1);
+    const commaIndex = dataURL.indexOf(',', semicolonIndex + 1);
+    const encoding = dataURL.substring(semicolonIndex + 1, commaIndex).toLocaleLowerCase();
+    const mediaType = dataURL.substring(colonIndex + 1, semicolonIndex);
+    if (encoding === 'base64' && mediaType) {
+        const characters = atob(dataURL.substring(commaIndex + 1));
+        const bytes = new Uint8Array(characters.length);
+        for (let i = 0; i < characters.length; i++) {
+            bytes[i] = characters.charCodeAt(i);
+        }
+        blob = new Blob([bytes], {type: mediaType});
+    } else {
+        const response = await fetch(dataURL);
+        blob = await response.blob();
+    }
+
+    blobURL = URL.createObjectURL(blob);
+    dataURLBlobURLs.set(dataURL, blobURL);
+    return blobURL;
+}
+
 export function cleanImageProcessingCache(): void {
     imageManager && imageManager.stopQueue();
     removeCanvas();
     objectURLs.forEach((u) => URL.revokeObjectURL(u));
     objectURLs.clear();
+    dataURLBlobURLs.forEach((u) => URL.revokeObjectURL(u));
+    dataURLBlobURLs.clear();
 }

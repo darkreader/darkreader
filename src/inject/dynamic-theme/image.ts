@@ -175,6 +175,35 @@ function analyzeImage(image: HTMLImageElement) {
 
 let isBlobURLSupported: boolean | null = null;
 
+let canUseProxy = false;
+let blobURLCheckRequested = false;
+const blobURLCheckAwaiters: Array<() => void> = [];
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => canUseProxy = true, {once: true});
+
+export async function requestBlobURLCheck(): Promise<void> {
+    if (!canUseProxy) {
+        return;
+    }
+    if (blobURLCheckRequested) {
+        return await new Promise<void>((resolve) => blobURLCheckAwaiters.push(resolve));
+    }
+    blobURLCheckRequested = true;
+
+    await new Promise<void>((resolve) => {
+        document.addEventListener('__darkreader__blobURLCheckResponse', (e: CustomEvent) => {
+            isBlobURLSupported = e.detail.blobURLAllowed;
+            resolve();
+            blobURLCheckAwaiters.forEach((r) => r());
+            blobURLCheckAwaiters.splice(0);
+        }, {once: true});
+        document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckRequest'));
+    });
+}
+
+export function isBlobURLCheckResultReady(): boolean {
+    return isBlobURLSupported != null || !canUseProxy;
+}
+
 function onCSPError(err: SecurityPolicyViolationEvent) {
     if (err.blockedURI === 'blob') {
         isBlobURLSupported = false;
@@ -183,8 +212,6 @@ function onCSPError(err: SecurityPolicyViolationEvent) {
 }
 
 document.addEventListener('securitypolicyviolation', onCSPError);
-document.addEventListener('__darkreader__blobURLAllowed', () => isBlobURLSupported = true, {once: true});
-document.addEventListener('__darkreader__blobURLForbidden', () => isBlobURLSupported = false, {once: true});
 
 const objectURLs = new Set<string>();
 

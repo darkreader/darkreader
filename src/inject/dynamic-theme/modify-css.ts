@@ -5,7 +5,7 @@ import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
-import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
+import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady} from './image';
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
@@ -406,6 +406,9 @@ export function getBgImageModifier(
                     imageDetails = imageDetailsCache.get(url)!;
                 } else {
                     try {
+                        if (!isBlobURLCheckResultReady()) {
+                            await requestBlobURLCheck();
+                        }
                         if (awaitingForImageLoading.has(url)) {
                             const awaiters = awaitingForImageLoading.get(url)!;
                             imageDetails = await new Promise<ImageDetails | null>((resolve) => awaiters.push(resolve));

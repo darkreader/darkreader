@@ -172,6 +172,27 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         }), NodeList.prototype);
     }
 
+    async function runBlobURLSupportCheck(): Promise<void> {
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>';
+        const bytes = new Uint8Array(svg.length);
+        for (let i = 0; i < svg.length; i++) {
+            bytes[i] = svg.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], {type: 'image/svg+xml'});
+        const objectURL = URL.createObjectURL(blob);
+        try {
+            const image = new Image();
+            await new Promise<void>((resolve, reject) => {
+                image.onload = () => resolve();
+                image.onerror = () => reject();
+                image.src = objectURL;
+            });
+            document.dispatchEvent(new CustomEvent('__darkreader__blobURLAllowed'));
+        } catch (err) {
+            document.dispatchEvent(new CustomEvent('__darkreader__blobURLForbidden'));
+        }
+    }
+
     Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
@@ -188,4 +209,6 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     if (shouldProxyChildNodes) {
         Object.defineProperty(Node.prototype, 'childNodes', Object.assign({}, childNodesDescriptor, {get: proxyChildNodes}));
     }
+
+    runBlobURLSupportCheck();
 }

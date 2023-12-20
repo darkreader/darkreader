@@ -173,6 +173,21 @@ function analyzeImage(image: HTMLImageElement) {
     };
 }
 
+let isBlobURLSupported: boolean | null = null;
+
+function onCSPError(err: SecurityPolicyViolationEvent) {
+    if (err.blockedURI === 'blob') {
+        isBlobURLSupported = false;
+        document.removeEventListener('securitypolicyviolation', onCSPError);
+    }
+}
+
+document.addEventListener('securitypolicyviolation', onCSPError);
+document.addEventListener('__darkreader__blobURLAllowed', () => isBlobURLSupported = true, {once: true});
+document.addEventListener('__darkreader__blobURLForbidden', () => isBlobURLSupported = false, {once: true});
+
+const objectURLs = new Set<string>();
+
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
     if (dataURL.startsWith('data:image/svg+xml')) {
         dataURL = escapeXML(dataURL);
@@ -188,7 +203,19 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
         `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
         '</svg>',
     ].join('');
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
+
+    if (!isBlobURLSupported) {
+        return `data:image/svg+xml;base64,${btoa(svg)}`;
+    }
+
+    const bytes = new Uint8Array(svg.length);
+    for (let i = 0; i < svg.length; i++) {
+        bytes[i] = svg.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], {type: 'image/svg+xml'});
+    const objectURL = URL.createObjectURL(blob);
+    objectURLs.add(objectURL);
+    return objectURL;
 }
 
 const xmlEscapeChars: Record<string, string> = {
@@ -206,4 +233,6 @@ function escapeXML(str: string): string {
 export function cleanImageProcessingCache(): void {
     imageManager && imageManager.stopQueue();
     removeCanvas();
+    objectURLs.forEach((u) => URL.revokeObjectURL(u));
+    objectURLs.clear();
 }

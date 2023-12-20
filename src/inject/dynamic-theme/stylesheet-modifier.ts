@@ -152,15 +152,14 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             const {selector, declarations} = rule;
             const getDeclarationText = (dec: ReadyDeclaration) => {
                 const {property, value, important} = dec;
-                if (!value) {
-                    return '--darkreader-async-placeholder: ^_^;';
-                }
                 return `${property}: ${value}${important ? ' !important' : ''};`;
             };
 
             let cssRulesText = '';
-            declarations.forEach((declarations) => {
-                cssRulesText += `${getDeclarationText(declarations)} `;
+            declarations.forEach((dec) => {
+                if (dec.value) {
+                    cssRulesText += `${getDeclarationText(dec)} `;
+                }
             });
             let selectorText = selector;
             if (

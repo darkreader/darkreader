@@ -450,23 +450,24 @@ export function getBgImageModifier(
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
             const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string | null;
+            const logSrc = imageDetails.src.startsWith('data:') ? 'data:' : imageDetails.src;
             if (isLarge) {
-                logInfo(`Not modifying too large image ${imageDetails.src}`);
-                result = `url("${imageDetails.src}")`;
+                logInfo(`Not modifying too large image ${logSrc}`);
+                result = null;
             } else if (isDark && isTransparent && filter.mode === 1 && width > 2) {
-                logInfo(`Inverting dark image ${imageDetails.src}`);
+                logInfo(`Inverting dark image ${logSrc}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
             } else if (isLight && !isTransparent && filter.mode === 1) {
-                logInfo(`Dimming light image ${imageDetails.src}`);
+                logInfo(`Dimming light image ${logSrc}`);
                 const dimmed = getFilteredImageDataURL(imageDetails, filter);
                 result = `url("${dimmed}")`;
             } else if (filter.mode === 0 && isLight) {
-                logInfo(`Applying filter to image ${imageDetails.src}`);
+                logInfo(`Applying filter to image ${logSrc}`);
                 const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;
             } else {
-                logInfo(`Not modifying the image ${imageDetails.src}`);
+                logInfo(`Not modifying the image ${logSrc}`);
                 result = null;
             }
             return result;

@@ -150,17 +150,7 @@ export function createStyleSheetModifier(): StyleSheetModifier {
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            const getDeclarationText = (dec: ReadyDeclaration) => {
-                const {property, value, important} = dec;
-                return `${property}: ${value}${important ? ' !important' : ''};`;
-            };
 
-            let cssRulesText = '';
-            declarations.forEach((dec) => {
-                if (dec.value) {
-                    cssRulesText += `${getDeclarationText(dec)} `;
-                }
-            });
             let selectorText = selector;
             if (
                 isChromium &&
@@ -177,7 +167,16 @@ export function createStyleSheetModifier(): StyleSheetModifier {
                 // break Chrome 119 when calling deleteRule()
                 selectorText = '.darkreader-unsupported-selector';
             }
-            const ruleText = `${selectorText} { ${cssRulesText} }`;
+
+            let ruleText = `${selectorText} {`;
+            for (const dec of declarations) {
+                const {property, value, important} = dec;
+                if (value) {
+                    ruleText += ` ${property}: ${value}${important ? ' !important' : ''};`;
+                }
+            }
+            ruleText += ' }';
+
             target.insertRule(ruleText, index);
         }
 

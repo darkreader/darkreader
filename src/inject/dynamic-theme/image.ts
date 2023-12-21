@@ -62,6 +62,7 @@ async function getImageDataURL(url: string): Promise<string> {
 async function urlToImage(url: string): Promise<HTMLImageElement> {
     return new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image();
+        image.loading = 'lazy';
         image.onload = () => resolve(image);
         image.onerror = () => reject(`Unable to load image ${url}`);
         image.src = url;

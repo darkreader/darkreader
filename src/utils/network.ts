@@ -31,6 +31,11 @@ export async function loadAsDataURL(url: string, mimeType?: string): Promise<str
     return await readResponseAsDataURL(response);
 }
 
+export async function loadAsBlob(url: string, mimeType?: string): Promise<Blob> {
+    const response = await getOKResponse(url, mimeType);
+    return await response.blob();
+}
+
 export async function readResponseAsDataURL(response: Response): Promise<string> {
     const blob = await response.blob();
     const dataURL = await (new Promise<string>((resolve) => {

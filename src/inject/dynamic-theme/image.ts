@@ -1,13 +1,14 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
 import {getSRGBLightness} from '../../utils/color';
-import {loadAsDataURL} from '../../utils/network';
+import {loadAsBlob, loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
 import {logInfo, logWarn} from '../utils/log';
 import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {
     src: string;
+    blob: Blob;
     dataURL: string;
     width: number;
     height: number;
@@ -21,27 +22,23 @@ const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string): Promise<ImageDetails> {
     return new Promise<ImageDetails>(async (resolve, reject) => {
-        let dataURL: string;
-        if (url.startsWith('data:')) {
-            dataURL = url;
-        } else {
-            try {
-                dataURL = await getImageDataURL(url);
-            } catch (error) {
-                reject(error);
-                return;
-            }
+        let dataURL = url.startsWith('data:') ? url : '';
+        if (!dataURL) {
+            dataURL = await getDataURL(url);
         }
+        const syncBlob = dataURL ? tryConvertDataURLToBlobSync(dataURL) : null;
+        const blob = syncBlob ?? await loadAsBlob(url);
 
         try {
-            const image = await urlToImage(dataURL);
-            imageManager.addToQueue(() => {
+            const image = await createImageBitmap(blob);
+            imageManager.addTask(() => {
                 const analysis = analyzeImage(image);
                 resolve({
                     src: url,
-                    dataURL: analysis.isLarge ? '' : dataURL,
-                    width: image.naturalWidth,
-                    height: image.naturalHeight,
+                    blob,
+                    dataURL,
+                    width: image.width,
+                    height: image.height,
                     ...analysis,
                 });
             });
@@ -51,21 +48,12 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
     });
 }
 
-async function getImageDataURL(url: string): Promise<string> {
+async function getDataURL(url: string): Promise<string> {
     const parsedURL = new URL(url);
     if (parsedURL.origin === location.origin) {
         return await loadAsDataURL(url);
     }
     return await bgFetch({url, responseType: 'data-url'});
-}
-
-async function urlToImage(url: string): Promise<HTMLImageElement> {
-    return new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-        image.onload = () => resolve(image);
-        image.onerror = () => reject(`Unable to load image ${url}`);
-        image.src = url;
-    });
 }
 
 const MAX_ANALYSIS_PIXELS_COUNT = 32 * 32;
@@ -89,13 +77,14 @@ function removeCanvas() {
 
 const LARGE_IMAGE_PIXELS_COUNT = 512 * 512;
 
-function analyzeImage(image: HTMLImageElement) {
+function analyzeImage(image: ImageBitmap) {
     if (!canvas) {
         createCanvas();
     }
-    const {naturalWidth, naturalHeight} = image;
-    if (naturalHeight === 0 || naturalWidth === 0) {
-        logWarn(`logWarn(Image is empty ${image.currentSrc})`);
+    const sw = image.width;
+    const sh = image.height;
+    if (sw === 0 || sh === 0) {
+        logWarn('Image is empty');
         return {
             isDark: false,
             isLight: false,
@@ -105,7 +94,7 @@ function analyzeImage(image: HTMLImageElement) {
         };
     }
 
-    if (naturalWidth * naturalHeight > LARGE_IMAGE_PIXELS_COUNT) {
+    if (sw * sh > LARGE_IMAGE_PIXELS_COUNT) {
         logInfo('Skipped large image analysis');
         return {
             isDark: false,
@@ -115,13 +104,13 @@ function analyzeImage(image: HTMLImageElement) {
         };
     }
 
-    const naturalPixelsCount = naturalWidth * naturalHeight;
-    const k = Math.min(1, Math.sqrt(MAX_ANALYSIS_PIXELS_COUNT / naturalPixelsCount));
-    const width = Math.ceil(naturalWidth * k);
-    const height = Math.ceil(naturalHeight * k);
+    const sourcePixelsCount = sw * sh;
+    const k = Math.min(1, Math.sqrt(MAX_ANALYSIS_PIXELS_COUNT / sourcePixelsCount));
+    const width = Math.ceil(sw * k);
+    const height = Math.ceil(sh * k);
     context!.clearRect(0, 0, width, height);
 
-    context!.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
+    context!.drawImage(image, 0, 0, sw, sh, 0, 0, width, height);
     const imageData = context!.getImageData(0, 0, width, height);
     const d = imageData.data;
 
@@ -215,7 +204,7 @@ document.addEventListener('securitypolicyviolation', onCSPError);
 
 const objectURLs = new Set<string>();
 
-export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
+export function getFilteredImageURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
     if (dataURL.startsWith('data:image/svg+xml')) {
         dataURL = escapeXML(dataURL);
     }
@@ -259,6 +248,27 @@ function escapeXML(str: string): string {
 
 const dataURLBlobURLs = new Map<string, string>();
 
+function tryConvertDataURLToBlobSync(dataURL: string): Blob | null {
+    const colonIndex = dataURL.indexOf(':');
+    const semicolonIndex = dataURL.indexOf(';', colonIndex + 1);
+    const commaIndex = dataURL.indexOf(',', semicolonIndex + 1);
+    const encoding = dataURL.substring(semicolonIndex + 1, commaIndex).toLocaleLowerCase();
+    const mediaType = dataURL.substring(colonIndex + 1, semicolonIndex);
+
+    // It should be possible to easily convert UTF-8,
+    // though it is unclear if decodeURIComponent will be necessary
+    // and if it will be performant enough for big Data URLs
+    if (encoding !== 'base64' || !mediaType) {
+        return null;
+    }
+    const characters = atob(dataURL.substring(commaIndex + 1));
+    const bytes = new Uint8Array(characters.length);
+    for (let i = 0; i < characters.length; i++) {
+        bytes[i] = characters.charCodeAt(i);
+    }
+    return new Blob([bytes], {type: mediaType});
+}
+
 export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<string | null> {
     if (!isBlobURLSupported) {
         return null;
@@ -268,20 +278,8 @@ export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<strin
         return blobURL;
     }
 
-    let blob: Blob;
-    const colonIndex = dataURL.indexOf(':');
-    const semicolonIndex = dataURL.indexOf(';', colonIndex + 1);
-    const commaIndex = dataURL.indexOf(',', semicolonIndex + 1);
-    const encoding = dataURL.substring(semicolonIndex + 1, commaIndex).toLocaleLowerCase();
-    const mediaType = dataURL.substring(colonIndex + 1, semicolonIndex);
-    if (encoding === 'base64' && mediaType) {
-        const characters = atob(dataURL.substring(commaIndex + 1));
-        const bytes = new Uint8Array(characters.length);
-        for (let i = 0; i < characters.length; i++) {
-            bytes[i] = characters.charCodeAt(i);
-        }
-        blob = new Blob([bytes], {type: mediaType});
-    } else {
+    let blob = tryConvertDataURLToBlobSync(dataURL);
+    if (!blob) {
         const response = await fetch(dataURL);
         blob = await response.blob();
     }
@@ -292,7 +290,7 @@ export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<strin
 }
 
 export function cleanImageProcessingCache(): void {
-    imageManager && imageManager.stopQueue();
+    imageManager && imageManager.stop();
     removeCanvas();
     objectURLs.forEach((u) => URL.revokeObjectURL(u));
     objectURLs.clear();

@@ -22,12 +22,8 @@ const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string): Promise<ImageDetails> {
     return new Promise<ImageDetails>(async (resolve, reject) => {
-        let dataURL = url.startsWith('data:') ? url : '';
-        if (!dataURL) {
-            dataURL = await getDataURL(url);
-        }
-        const syncBlob = dataURL ? tryConvertDataURLToBlobSync(dataURL) : null;
-        const blob = syncBlob ?? await loadAsBlob(url);
+        const dataURL = url.startsWith('data:') ? url : await getDataURL(url);
+        const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadAsBlob(url);
 
         try {
             const image = await createImageBitmap(blob);

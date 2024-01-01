@@ -116,7 +116,7 @@ jobs:
           run: npm run test:firefox -- --json --outputFile=test-results-firefox-mv2.json
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-chrome-${{ matrix.chrome }}-firefox-${{ matrix.firefox }}-coverage-${{ matrix.coverage }}
           path: test-results-*

@@ -26,7 +26,12 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
         const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadAsBlob(url);
 
         try {
-            const image = await createImageBitmap(blob);
+            let image: ImageBitmap | HTMLImageElement;
+            if (dataURL.startsWith('data:image/svg+xml')) {
+                image = await loadImage(dataURL);
+            } else {
+                image = await tryCreateImageBitmap(blob) ?? await loadImage(dataURL);
+            }
             imageManager.addTask(() => {
                 const analysis = analyzeImage(image);
                 resolve({
@@ -52,6 +57,24 @@ async function getDataURL(url: string): Promise<string> {
     return await bgFetch({url, responseType: 'data-url'});
 }
 
+async function tryCreateImageBitmap(blob: Blob) {
+    try {
+        return await createImageBitmap(blob);
+    } catch (err) {
+        logWarn(`Unable to create image bitmap for type ${blob.type}: ${String(err)}`);
+        return null;
+    }
+}
+
+async function loadImage(url: string): Promise<HTMLImageElement> {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(`Unable to load image ${url}`);
+        image.src = url;
+    });
+}
+
 const MAX_ANALYSIS_PIXELS_COUNT = 32 * 32;
 let canvas: HTMLCanvasElement | OffscreenCanvas | null;
 let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
@@ -73,12 +96,21 @@ function removeCanvas() {
 
 const LARGE_IMAGE_PIXELS_COUNT = 512 * 512;
 
-function analyzeImage(image: ImageBitmap) {
+function analyzeImage(image: ImageBitmap | HTMLImageElement) {
     if (!canvas) {
         createCanvas();
     }
-    const sw = image.width;
-    const sh = image.height;
+
+    let sw: number;
+    let sh: number;
+    if (image instanceof HTMLImageElement) {
+        sw = image.naturalWidth;
+        sh = image.naturalHeight;
+    } else {
+        sw = image.width;
+        sh = image.height;
+    }
+
     if (sw === 0 || sh === 0) {
         logWarn('Image is empty');
         return {

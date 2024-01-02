@@ -1,5 +1,6 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
+import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
 import {getSRGBLightness} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
@@ -66,12 +67,19 @@ async function tryCreateImageBitmap(blob: Blob) {
     }
 }
 
+const INCOMPLETE_DOC_LOADING_IMAGE_LIMIT = 256;
+let loadingImagesCount = 0;
+
 async function loadImage(url: string): Promise<HTMLImageElement> {
     return new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image();
         image.onload = () => resolve(image);
         image.onerror = () => reject(`Unable to load image ${url}`);
-        image.src = url;
+        if (++loadingImagesCount <= INCOMPLETE_DOC_LOADING_IMAGE_LIMIT || isReadyStateComplete()) {
+            image.src = url;
+        } else {
+            addReadyStateCompleteListener(() => image.src = url);
+        }
     });
 }
 

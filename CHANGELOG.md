@@ -1,3 +1,10 @@
+## 4.9.74 (January 3, 2024)
+
+- Improved image analysis performance.
+- Improved dark theme detection.
+- Fixed 404 errors when loading images with relative paths.
+- v5 Preview: Moved settings into a separate page.
+
 ## 4.9.73 (December 6, 2023)
 
 - Fixed URL subdomain handling.

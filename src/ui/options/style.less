@@ -9,7 +9,6 @@
 @import "./site-list/site-list";
 
 html {
-    height: 100%;
     margin: 0;
     padding: 0;
 }
@@ -35,11 +34,10 @@ html {
 }
 
 body {
-    box-sizing: border-box;
+    box-sizing: content-box;
     display: flex;
     flex-direction: column;
     gap: @indent-small;
-    height: 100%;
     margin: 0;
     padding: 1rem;
 }
@@ -71,5 +69,28 @@ main {
 @media screen and (max-width: 30rem) {
     #title {
         display: none;
+    }
+
+    body {
+        margin: 0 auto;
+        width: 15rem;
+    }
+}
+
+@media screen and (min-width: 21.25rem) {
+    .mobile {
+        font-size: 20px;
+    }
+}
+
+@media screen and (min-width: 25.5rem) {
+    .mobile {
+        font-size: 24px;
+    }
+}
+
+@media screen and (min-width: 29.75rem) {
+    .mobile {
+        font-size: 28px;
     }
 }

@@ -229,7 +229,13 @@ const bundleJSTask = createTask(
         watchFiles = getWatchFiles();
         return watchFiles;
     },
-    async (changedFiles, watcher, platforms) => {
+    async (changedFiles, watcher) => {
+        const platforms = reload
+            .getConnectedBrowsers()
+            .reduce((obj, platform) => {
+                obj[platform] = true;
+                return obj;
+            }, {});
         const entries = jsEntries.filter((entry) => {
             return changedFiles.some((changed) => {
                 return entry.watchFiles?.includes(changed);

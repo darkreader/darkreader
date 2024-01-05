@@ -71,6 +71,9 @@ export class VariablesStore {
     }
 
     public matchVariablesAndDependents(): void {
+        if (this.rulesQueue.length === 0 || this.inlineStyleQueue.length === 0) {
+            return;
+        }
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();

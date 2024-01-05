@@ -85,15 +85,24 @@ const overrides: Overrides = {
     },
 };
 
+const shorthandOverrides: Overrides = {
+    'background': {
+        customProp: '--darkreader-inline-bg',
+        cssProp: 'background',
+        dataAttr: 'data-darkreader-inline-bg',
+    },
+};
+
 const overridesList = Object.values(overrides);
-const normalizedPropList: { [key: string]: string } = {};
+const normalizedPropList: Record<string, string> = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle(): string {
-    return overridesList.map(({dataAttr, customProp, cssProp}) => {
+    const allOverrides = overridesList.concat(Object.values(shorthandOverrides));
+    return allOverrides.map(({dataAttr, customProp, cssProp}) => {
         return [
             `[${dataAttr}] {`,
             `  ${cssProp}: var(${customProp}) !important;`,
@@ -272,7 +281,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
 
         function setStaticValue(value: string) {
-            const {customProp, dataAttr} = overrides[targetCSSProp];
+            const {customProp, dataAttr} = overrides[targetCSSProp] ?? shorthandOverrides[targetCSSProp];
             element.style.setProperty(customProp, value);
             if (!element.hasAttribute(dataAttr)) {
                 element.setAttribute(dataAttr, '');
@@ -299,11 +308,19 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             mod.onTypeChange.addListener(setProps);
         }
 
+        function setAsyncValue(promise: Promise<string | null>) {
+            promise.then((value) => {
+                if (value && targetCSSProp === 'background' && value.startsWith('var(--darkreader-bg--')) {
+                    setStaticValue(value);
+                }
+            });
+        }
+
         const value = typeof mod.value === 'function' ? mod.value(theme) : mod.value;
         if (typeof value === 'string') {
             setStaticValue(value);
         } else if (value instanceof Promise) {
-            value.then((asyncValue) => setStaticValue(asyncValue ?? ''));
+            setAsyncValue(value);
         } else if (typeof value === 'object') {
             setVarDeclaration(value);
         }
@@ -378,6 +395,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
         if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {
             setCustomProp(property, property, value);
+        } else if (property === 'background' && value.includes('var(')) {
+            setCustomProp('background', 'background', value);
         } else {
             const overriddenProp = normalizedPropList[property];
             if (overriddenProp &&

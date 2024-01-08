@@ -15,7 +15,8 @@ export function createSVGFilterStylesheet(config: FilterConfig, url: string, isT
         filterValue = 'url(#dark-reader-filter)';
         reverseFilterValue = 'url(#dark-reader-reverse-filter)';
     }
-    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
+    const filterRoot = isFirefox ? 'body' : 'html';
+    return cssFilterStyleSheetTemplate(filterRoot, filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
 }
 
 function getEmbeddedSVGFilterValue(matrixValue: string): string {

@@ -71,7 +71,7 @@ export class VariablesStore {
     }
 
     public matchVariablesAndDependents(): void {
-        if (this.rulesQueue.length === 0 || this.inlineStyleQueue.length === 0) {
+        if (this.rulesQueue.length === 0 && this.inlineStyleQueue.length === 0) {
             return;
         }
         this.changedTypeVars.clear();
@@ -362,7 +362,17 @@ export class VariablesStore {
         });
     }
 
+    private shouldProcessRootVariables() {
+        return (
+            this.rulesQueue.length > 0 &&
+            document.documentElement.getAttribute('style')?.includes('--')
+        );
+    }
+
     private collectRootVariables() {
+        if (!this.shouldProcessRootVariables()) {
+            return;
+        }
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVariable(property)) {
                 this.inspectVariable(property, value);
@@ -410,6 +420,9 @@ export class VariablesStore {
     }
 
     private collectRootVarDependents() {
+        if (!this.shouldProcessRootVariables()) {
+            return;
+        }
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVarDependant(value)) {
                 this.inspectVarDependant(property, value);

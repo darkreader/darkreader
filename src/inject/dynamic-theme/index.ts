@@ -282,6 +282,7 @@ function createDynamicStyleOverrides() {
     });
     inlineStyleElements.forEach((el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
     handleAdoptedStyleSheets(document);
+    variablesStore.matchVariablesAndDependents();
 }
 
 let loadingStylesCounter = 0;

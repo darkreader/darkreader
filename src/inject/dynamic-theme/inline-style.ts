@@ -163,6 +163,7 @@ function deepWatchForInlineStyles(
             shadowRootDiscovered(n.shadowRoot!);
             deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });
+        variablesStore.matchVariablesAndDependents();
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
@@ -195,6 +196,7 @@ function deepWatchForInlineStyles(
                 elementStyleDidChange(target);
             }
         });
+        variablesStore.matchVariablesAndDependents();
     });
     const attrObserver = new MutationObserver((mutations) => {
         if (timeoutId) {
@@ -229,7 +231,6 @@ function deepWatchForInlineStyles(
         subtree: true,
     });
     attrObservers.set(root, attrObserver);
-    variablesStore.matchVariablesAndDependents();
 }
 
 export function stopWatchingForInlineStyles(): void {

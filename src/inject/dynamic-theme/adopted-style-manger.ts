@@ -9,6 +9,10 @@ export interface AdoptedStyleSheetManager {
     destroy(): void;
 }
 
+export function hasAdoptedStyleSheets(node: Document | ShadowRoot): boolean {
+    return Array.isArray(node.adoptedStyleSheets) && node.adoptedStyleSheets.length > 0;
+}
+
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
     let cancelAsyncOperations = false;
 

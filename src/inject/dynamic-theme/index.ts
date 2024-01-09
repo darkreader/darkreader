@@ -15,7 +15,7 @@ import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import type {AdoptedStyleSheetManager} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, hasAdoptedStyleSheets} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
@@ -376,13 +376,13 @@ function createThemeAndWatchForUpdates() {
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     try {
-        if (Array.isArray(node.adoptedStyleSheets)) {
-            if (node.adoptedStyleSheets.length > 0) {
-                const newManger = createAdoptedStyleSheetOverride(node);
-
-                adoptedStyleManagers.push(newManger);
-                newManger.render(filter!, ignoredImageAnalysisSelectors);
-            }
+        if (hasAdoptedStyleSheets(node)) {
+            const newManger = createAdoptedStyleSheetOverride(node);
+            adoptedStyleManagers.push(newManger);
+            newManger.render(filter!, ignoredImageAnalysisSelectors);
+            potentialAdoptedStyleNodes.delete(node);
+        } else if (!potentialAdoptedStyleNodes.has(node)) {
+            potentialAdoptedStyleNodes.add(node);
         }
     } catch (err) {
         // For future readers, Dark Reader typically does not use 'try/catch' in its
@@ -391,6 +391,27 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
         // Ref: https://github.com/darkreader/darkreader/issues/8789#issuecomment-1114210080
         logWarn('Error occurred in handleAdoptedStyleSheets: ', err);
     }
+}
+
+const potentialAdoptedStyleNodes = new Set<ShadowRoot | Document>();
+let potentialAdoptedStyleFrameId: number | null = null;
+
+function watchPotentialAdoptedStyleNodes() {
+    potentialAdoptedStyleFrameId = requestAnimationFrame(() => {
+        potentialAdoptedStyleNodes.forEach((node) => {
+            if (node.isConnected) {
+                handleAdoptedStyleSheets(node);
+            } else {
+                potentialAdoptedStyleNodes.delete(node);
+            }
+        });
+        watchPotentialAdoptedStyleNodes();
+    });
+}
+
+function stopWatchingPotentialAdoptedStyleNodes() {
+    potentialAdoptedStyleFrameId && cancelAnimationFrame(potentialAdoptedStyleFrameId);
+    potentialAdoptedStyleNodes.clear();
 }
 
 function watchForUpdates() {
@@ -419,6 +440,8 @@ function watchForUpdates() {
         createShadowStaticStyleOverrides(shadowRoot);
         handleAdoptedStyleSheets(shadowRoot);
     });
+
+    watchPotentialAdoptedStyleNodes();
 
     watchForInlineStyles((element) => {
         overrideInlineStyle(element, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
@@ -600,6 +623,7 @@ export function removeDynamicTheme(): void {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
+    stopWatchingPotentialAdoptedStyleNodes();
 
     metaObserver && metaObserver.disconnect();
 }

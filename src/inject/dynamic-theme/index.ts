@@ -383,6 +383,12 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node);
             adoptedStyleManagers.push(newManger);
             newManger.render(filter!, ignoredImageAnalysisSelectors);
+            newManger.watch((sheets) => {
+                sheets.forEach((s) => {
+                    variablesStore.addRulesForMatching(s.cssRules);
+                });
+                newManger.render(filter!, ignoredImageAnalysisSelectors);
+            });
             potentialAdoptedStyleNodes.delete(node);
         } else if (!potentialAdoptedStyleNodes.has(node)) {
             potentialAdoptedStyleNodes.add(node);
@@ -401,13 +407,18 @@ let potentialAdoptedStyleFrameId: number | null = null;
 
 function watchPotentialAdoptedStyleNodes() {
     potentialAdoptedStyleFrameId = requestAnimationFrame(() => {
+        let changed = false;
         potentialAdoptedStyleNodes.forEach((node) => {
             if (node.isConnected) {
                 handleAdoptedStyleSheets(node);
+                changed = true;
             } else {
                 potentialAdoptedStyleNodes.delete(node);
             }
         });
+        if (changed) {
+            variablesStore.matchVariablesAndDependents();
+        }
         watchPotentialAdoptedStyleNodes();
     });
 }

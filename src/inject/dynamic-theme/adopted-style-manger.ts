@@ -1,12 +1,12 @@
 import type {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
-const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-const overrideList = new WeakSet<CSSStyleSheet>();
+const overrides = new WeakSet<CSSStyleSheet>();
 
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     destroy(): void;
+    watch(callback: (sheets: CSSStyleSheet[]) => void): void;
 }
 
 export function hasAdoptedStyleSheets(node: Document | ShadowRoot): boolean {
@@ -19,65 +19,103 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
         const newSheets = [...node.adoptedStyleSheets];
         const sheetIndex = newSheets.indexOf(sheet);
-        const existingIndex = newSheets.indexOf(override);
-        if (sheetIndex === existingIndex - 1) {
-            return;
-        }
-        if (existingIndex >= 0) {
-            newSheets.splice(existingIndex, 1);
+        const overrideIndex = newSheets.indexOf(override);
+        if (overrideIndex >= 0) {
+            newSheets.splice(overrideIndex, 1);
         }
         newSheets.splice(sheetIndex + 1, 0, override);
         node.adoptedStyleSheets = newSheets;
     }
 
-    function destroy() {
-        cancelAsyncOperations = true;
+    function clear() {
         const newSheets = [...node.adoptedStyleSheets];
-        node.adoptedStyleSheets.forEach((adoptedStyleSheet) => {
-            if (overrideList.has(adoptedStyleSheet)) {
-                const existingIndex = newSheets.indexOf(adoptedStyleSheet);
-                if (existingIndex >= 0) {
-                    newSheets.splice(existingIndex, 1);
-                }
-                adoptedStyleOverrides.delete(adoptedStyleSheet);
-                overrideList.delete(adoptedStyleSheet);
+        for (let i = newSheets.length - 1; i >= 0; i--) {
+            const sheet = newSheets[i];
+            if (overrides.has(sheet)) {
+                newSheets.splice(i, 1);
+                overrides.delete(sheet);
             }
-        });
-        node.adoptedStyleSheets = newSheets;
+        }
+        if (node.adoptedStyleSheets.length !== newSheets.length) {
+            node.adoptedStyleSheets = newSheets;
+        }
     }
 
+    function destroy() {
+        cancelAsyncOperations = true;
+        clear();
+        if (frameId) {
+            cancelAnimationFrame(frameId);
+            frameId = null;
+        }
+    }
+
+    let sheetCount = 0;
+
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
-        node.adoptedStyleSheets.forEach((sheet) => {
-            if (overrideList.has(sheet)) {
-                return;
+        clear();
+        sheetCount = 0;
+        for (let i = node.adoptedStyleSheets.length - 1; i >= 0; i--) {
+            const sheet = node.adoptedStyleSheets[i];
+            if (overrides.has(sheet)) {
+                continue;
             }
-            const rules = sheet.rules;
+
+            sheetCount++;
+
+            const rules = sheet.cssRules;
             const override = new CSSStyleSheet();
 
-            function prepareOverridesSheet() {
+            const prepareSheet = () => {
                 for (let i = override.cssRules.length - 1; i >= 0; i--) {
                     override.deleteRule(i);
                 }
                 injectSheet(sheet, override);
-                adoptedStyleOverrides.set(sheet, override);
-                overrideList.add(override);
+                overrides.add(override);
                 return override;
-            }
+            };
 
             const sheetModifier = createStyleSheetModifier();
             sheetModifier.modifySheet({
-                prepareSheet: prepareOverridesSheet,
+                prepareSheet,
                 sourceCSSRules: rules,
                 theme,
                 ignoreImageAnalysis,
                 force: false,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
+        }
+    }
+
+    function checkForUpdate() {
+        let newSheetCount = 0;
+        node.adoptedStyleSheets.forEach((sheet) => {
+            if (!overrides.has(sheet)) {
+                newSheetCount++;
+            }
+        });
+        if (sheetCount !== newSheetCount) {
+            console.log('adopted count changed, was', sheetCount, 'now is', newSheetCount);
+            return true;
+        }
+        return false;
+    }
+
+    let frameId: number | null = null;
+
+    function watch(callback: (sheets: CSSStyleSheet[]) => void) {
+        frameId = requestAnimationFrame(() => {
+            if (checkForUpdate()) {
+                const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
+                callback(sheets);
+            }
+            watch(callback);
         });
     }
 
     return {
         render,
         destroy,
+        watch,
     };
 }

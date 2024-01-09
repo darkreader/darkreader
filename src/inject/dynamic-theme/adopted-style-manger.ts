@@ -16,6 +16,14 @@ export function hasAdoptedStyleSheets(node: Document | ShadowRoot): boolean {
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
     let cancelAsyncOperations = false;
 
+    function iterateSourceSheets(iterator: (sheet: CSSStyleSheet) => void) {
+        node.adoptedStyleSheets.forEach((sheet) => {
+            if (!overrides.has(sheet)) {
+                iterator(sheet);
+            }
+        });
+    }
+
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
         const newSheets = [...node.adoptedStyleSheets];
         const sheetIndex = newSheets.indexOf(sheet);
@@ -50,18 +58,30 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         }
     }
 
-    let sheetCount = 0;
+    let rulesChangeKey = 0;
+
+    function getRulesChangeKey() {
+        let count = 0;
+        iterateSourceSheets((sheet) => {
+            count += sheet.cssRules.length;
+        });
+        if (count === 1) {
+            // MS Copilot issue, where there is an empty `:root {}` style at the beginning.
+            // Counting all the rules for all the shadow DOM elements can be expensive.
+            const rule = node.adoptedStyleSheets[0].cssRules[0];
+            return rule instanceof CSSStyleRule ? rule.styleMap.size : count;
+        }
+        return count;
+    }
 
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         clear();
-        sheetCount = 0;
+
         for (let i = node.adoptedStyleSheets.length - 1; i >= 0; i--) {
             const sheet = node.adoptedStyleSheets[i];
             if (overrides.has(sheet)) {
                 continue;
             }
-
-            sheetCount++;
 
             const rules = sheet.cssRules;
             const override = new CSSStyleSheet();
@@ -85,27 +105,19 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
         }
+
+        rulesChangeKey = getRulesChangeKey();
     }
 
-    function checkForUpdate() {
-        let newSheetCount = 0;
-        node.adoptedStyleSheets.forEach((sheet) => {
-            if (!overrides.has(sheet)) {
-                newSheetCount++;
-            }
-        });
-        if (sheetCount !== newSheetCount) {
-            console.log('adopted count changed, was', sheetCount, 'now is', newSheetCount);
-            return true;
-        }
-        return false;
+    function checkForUpdates() {
+        return getRulesChangeKey() !== rulesChangeKey;
     }
 
     let frameId: number | null = null;
 
     function watch(callback: (sheets: CSSStyleSheet[]) => void) {
         frameId = requestAnimationFrame(() => {
-            if (checkForUpdate()) {
+            if (checkForUpdates()) {
                 const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
                 callback(sheets);
             }

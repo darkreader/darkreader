@@ -377,6 +377,9 @@ function createThemeAndWatchForUpdates() {
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     try {
         if (hasAdoptedStyleSheets(node)) {
+            node.adoptedStyleSheets.forEach((s) => {
+                variablesStore.addRulesForMatching(s.cssRules);
+            });
             const newManger = createAdoptedStyleSheetOverride(node);
             adoptedStyleManagers.push(newManger);
             newManger.render(filter!, ignoredImageAnalysisSelectors);

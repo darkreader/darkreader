@@ -374,6 +374,8 @@ function createThemeAndWatchForUpdates() {
     changeMetaThemeColorWhenAvailable(filter!);
 }
 
+let pendingAdoptedVarMatch = false;
+
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     try {
         if (hasAdoptedStyleSheets(node)) {
@@ -388,6 +390,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
                     variablesStore.addRulesForMatching(s.cssRules);
                 });
                 newManger.render(filter!, ignoredImageAnalysisSelectors);
+                pendingAdoptedVarMatch = true;
             });
             potentialAdoptedStyleNodes.delete(node);
         } else if (!potentialAdoptedStyleNodes.has(node)) {
@@ -416,8 +419,9 @@ function watchPotentialAdoptedStyleNodes() {
                 potentialAdoptedStyleNodes.delete(node);
             }
         });
-        if (changed) {
+        if (changed || pendingAdoptedVarMatch) {
             variablesStore.matchVariablesAndDependents();
+            pendingAdoptedVarMatch = false;
         }
         watchPotentialAdoptedStyleNodes();
     });

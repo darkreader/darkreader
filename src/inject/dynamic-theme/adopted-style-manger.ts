@@ -69,7 +69,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             // MS Copilot issue, where there is an empty `:root {}` style at the beginning.
             // Counting all the rules for all the shadow DOM elements can be expensive.
             const rule = node.adoptedStyleSheets[0].cssRules[0];
-            return rule instanceof CSSStyleRule ? rule.styleMap.size : count;
+            return rule instanceof CSSStyleRule ? rule.style.length : count;
         }
         return count;
     }
@@ -130,4 +130,74 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         destroy,
         watch,
     };
+}
+
+export interface AdoptedStyleSheetFallback {
+    render(theme: Theme, ignoreImageAnalysis: string[]): void;
+    updateCSS(cssRules: CSSRule[]): void;
+    destroy(): void;
+}
+
+function createOrUpdateStyle(className: string, parent: ParentNode): HTMLStyleElement {
+    let element: HTMLStyleElement | null = parent.querySelector(`.${className}`);
+    if (!element) {
+        element = document.createElement('style');
+        element.classList.add('darkreader');
+        element.classList.add(className);
+        element.media = 'screen';
+        element.textContent = '';
+        parent.insertBefore(element, parent.firstElementChild);
+    }
+    return element;
+}
+
+export function createAdoptedStyleSheetFallback(node: Document | ShadowRoot): AdoptedStyleSheetFallback {
+    const parent = node === document ? document.head ?? document : node;
+    let cancelAsyncOperations = false;
+
+    let sourceCSSRules: CSSRule[];
+    let lastTheme: Theme;
+    let lastIgnoreImageAnalysis: string[];
+
+    function updateCSS(cssRules: CSSRule[]) {
+        sourceCSSRules = cssRules;
+        if (lastTheme && lastIgnoreImageAnalysis) {
+            render(lastTheme, lastIgnoreImageAnalysis);
+        }
+    }
+
+    function render(theme: Theme, ignoreImageAnalysis: string[]) {
+        lastTheme = theme;
+        lastIgnoreImageAnalysis = ignoreImageAnalysis;
+
+        const prepareSheet = () => {
+            const styleNode = createOrUpdateStyle('darkreader--adopted-override', parent);
+            styleNode.textContent = '';
+            const sheet = styleNode.sheet!;
+            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+                sheet.deleteRule(i);
+            }
+            return sheet;
+        };
+
+        const sheetModifier = createStyleSheetModifier();
+        sheetModifier.modifySheet({
+            prepareSheet,
+            sourceCSSRules,
+            theme,
+            ignoreImageAnalysis,
+            force: false,
+            isAsyncCancelled: () => cancelAsyncOperations,
+        });
+    }
+
+    function destroy() {
+        cancelAsyncOperations = true;
+        const styleNode = node.querySelector('.darkreader--adopted-override');
+        if (styleNode) {
+            styleNode.remove();
+        }
+    }
+
+    return {render, destroy, updateCSS};
 }

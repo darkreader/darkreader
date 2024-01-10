@@ -1,3 +1,6 @@
+declare const __FIREFOX_MV2__: boolean;
+declare const __THUNDERBIRD__: boolean;
+
 export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {
     document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
 
@@ -36,6 +39,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     const childNodesDescriptor = shouldProxyChildNodes ?
         Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes') : null;
 
+    const cleaners: Array<() => void> = [];
 
     const cleanUp = () => {
         Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor!);
@@ -57,6 +61,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         if (shouldProxyChildNodes) {
             Object.defineProperty(Node.prototype, 'childNodes', childNodesDescriptor!);
         }
+        cleaners.forEach((clean) => clean());
+        cleaners.splice(0);
     };
 
     const addUndefinedResolverInner = (tag: string) => {
@@ -212,5 +218,173 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     }
     if (shouldProxyChildNodes) {
         Object.defineProperty(Node.prototype, 'childNodes', Object.assign({}, childNodesDescriptor, {get: proxyChildNodes}));
+    }
+
+    if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
+        const potentialAdoptedStyleNodes = new Map<Document | ShadowRoot, number>();
+
+        function iterateAdoptedStyleSheets(node: Document | ShadowRoot, iterator: (sheet: CSSStyleSheet) => void) {
+            if (Array.isArray(node.adoptedStyleSheets)) {
+                node.adoptedStyleSheets.forEach(iterator);
+            }
+        }
+
+        function getAdoptedStyleChangeKey(node: Document | ShadowRoot) {
+            let count = 0;
+            iterateAdoptedStyleSheets(node, (sheet) => {
+                count += sheet.cssRules.length;
+            });
+            if (count === 1) {
+                // MS Copilot issue, where there is an empty `:root {}` style at the beginning.
+                // Counting all the rules for all the shadow DOM elements can be expensive.
+                const rule = node.adoptedStyleSheets[0].cssRules[0];
+                return rule instanceof CSSStyleRule ? rule.style.length : count;
+            }
+            return count;
+        }
+
+        function getAdoptedCSSRules(node: Document | ShadowRoot) {
+            const cssRules: CSSRule[] = [];
+            iterateAdoptedStyleSheets(node, (sheet) => {
+                for (let i = 0; i < sheet.cssRules.length; i++) {
+                    const rule = sheet.cssRules[i];
+                    cssRules.push(rule);
+                }
+            });
+            return cssRules;
+        }
+
+        function sendAdoptedStyles(node: Document | ShadowRoot, cssRules: CSSRule[]) {
+            const data = {detail: {node, cssRules}};
+            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
+            document.dispatchEvent(event);
+        }
+
+        function sendAdoptedStylesBatch(entries: Array<[Document | ShadowRoot, CSSRule[]]>) {
+            const data = {detail: {entries}};
+            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
+            document.dispatchEvent(event);
+        }
+
+        let watcherFrameId = 0;
+
+        function handleAdoptedCSSChange(node: Document | ShadowRoot) {
+            if (!node.isConnected) {
+                potentialAdoptedStyleNodes.delete(node);
+                return;
+            }
+            const newKey = getAdoptedStyleChangeKey(node);
+            if (potentialAdoptedStyleNodes.has(node)) {
+                const key = potentialAdoptedStyleNodes.get(node);
+                if (newKey === key) {
+                    return;
+                }
+            }
+            potentialAdoptedStyleNodes.set(node, newKey);
+            const cssRules = getAdoptedCSSRules(node);
+            sendAdoptedStyles(node, cssRules);
+        }
+
+        function watchAdoptedStyles() {
+            potentialAdoptedStyleNodes.forEach((_key, node) => {
+                handleAdoptedCSSChange(node);
+            });
+            watcherFrameId = requestAnimationFrame(watchAdoptedStyles);
+        }
+
+        function iterateShadowHosts(root: Node | null, iterator: (host: Element) => void) {
+            if (root == null) {
+                return;
+            }
+            const acceptNode = (node: Node) => (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {acceptNode});
+            for (
+                let node = ((root as Element).shadowRoot ? walker.currentNode : walker.nextNode()) as Element;
+                node != null;
+                node = walker.nextNode() as Element
+            ) {
+                iterator(node);
+                iterateShadowHosts(node.shadowRoot, iterator);
+            }
+        }
+
+        function stopWatchingForAdoptedStyles() {
+            if (watcherFrameId) {
+                cancelAnimationFrame(watcherFrameId);
+                watcherFrameId = 0;
+            }
+        }
+
+        const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
+        const adoptedSheetsProxySources = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
+
+        function proxyArray(node: Document | ShadowRoot, source: CSSStyleSheet[]) {
+            if (adoptedSheetsProxySources.has(source)) {
+                return source;
+            }
+            if (adoptedSheetsSourceProxies.has(source)) {
+                return adoptedSheetsSourceProxies.get(source)!;
+            }
+            const proxy = new Proxy(source, {
+                deleteProperty(target, property) {
+                    delete target[property as any];
+                    return true;
+                },
+                set(target, property, value) {
+                    target[property as any] = value;
+                    if (property === 'length') {
+                        handleAdoptedCSSChange(node);
+                    }
+                    return true;
+                },
+            });
+            adoptedSheetsSourceProxies.set(source, proxy);
+            adoptedSheetsProxySources.set(proxy, source);
+            return proxy;
+        }
+
+        function overwriteAdoptedStyleSheetsProp(proto: Document | ShadowRoot) {
+            const native = Object.getOwnPropertyDescriptor(proto, 'adoptedStyleSheets')!;
+            Object.defineProperty(proto, 'adoptedStyleSheets', {
+                ...native,
+                get() {
+                    const source = native.get!.call(this) as CSSStyleSheet[];
+                    return proxyArray(this, source);
+                },
+                set(source) {
+                    if (adoptedSheetsProxySources.has(source)) {
+                        source = adoptedSheetsProxySources.get(source);
+                    }
+                    native.set!.call(this, source);
+                    handleAdoptedCSSChange(this);
+                },
+            });
+            cleaners.push(() => Object.defineProperty(proto, 'adoptedStyleSheets', native));
+        }
+
+        function startAdoptedStylesProcessing() {
+            const entries: Array<[Document | ShadowRoot, CSSRule[]]> = [];
+            entries.push([document, getAdoptedCSSRules(document)]);
+            iterateShadowHosts(document.documentElement, (host) => {
+                const shadowRoot = host.shadowRoot;
+                if (shadowRoot) {
+                    entries.push([shadowRoot, getAdoptedCSSRules(shadowRoot)]);
+                }
+            });
+            sendAdoptedStylesBatch(entries);
+            entries.forEach(([node]) => {
+                potentialAdoptedStyleNodes.set(node, getAdoptedStyleChangeKey(node));
+            });
+
+            overwriteAdoptedStyleSheetsProp(Document.prototype);
+            overwriteAdoptedStyleSheetsProp(ShadowRoot.prototype);
+
+            watchAdoptedStyles();
+            cleaners.push(stopWatchingForAdoptedStyles);
+        }
+
+        document.addEventListener('__darkreader__startAdoptedStyleSheetsWatcher', () => {
+            startAdoptedStylesProcessing();
+        });
     }
 }

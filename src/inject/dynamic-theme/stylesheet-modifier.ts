@@ -30,7 +30,7 @@ function getThemeKey(theme: Theme) {
 const asyncQueue = createAsyncTasksQueue();
 
 interface ModifySheetOptions {
-    sourceCSSRules: CSSRuleList;
+    sourceCSSRules: CSSRuleList | CSSRule[];
     theme: Theme;
     ignoreImageAnalysis: string[];
     force: boolean;

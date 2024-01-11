@@ -79,10 +79,15 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     const updateSheetEvent = new Event('__darkreader__updateSheet');
 
+    let onSheetChange: (sheet: CSSStyleSheet) => void;
+
     function proxyAddRule(selector?: string, style?: string, index?: number): number {
         addRuleDescriptor!.value.call(this, selector, style, index);
         if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
+        }
+        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
+            onSheetChange(this);
         }
         // Should always returns -1 https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/addRule#Return_value.
         return -1;
@@ -93,6 +98,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
+        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
+            onSheetChange(this);
+        }
         return returnValue;
     }
 
@@ -101,12 +109,18 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
+        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
+            onSheetChange(this);
+        }
     }
 
     function proxyRemoveRule(index?: number): void {
         removeRuleDescriptor!.value.call(this, index);
         if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
+        }
+        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
+            onSheetChange(this);
         }
     }
 
@@ -221,14 +235,15 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     }
 
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-        const potentialAdoptedStyleNodes = new Map<Document | ShadowRoot, number>();
-        const adoptedStyleOverrides = new WeakMap<Document | ShadowRoot, CSSStyleSheet>();
-
-        type DeepCSSCommand = {
+        type StyleSheetCommand = {
             type: 'insert' | 'delete';
             path: number[];
             value?: string;
         };
+        const targetNodes = new Set<Document | ShadowRoot>();
+        const sourceSheets = new WeakSet<CSSStyleSheet>();
+        const sourceSheetNodes = new WeakMap<CSSStyleSheet, Document | ShadowRoot>();
+        const overrideSheets = new WeakMap<Document | ShadowRoot, CSSStyleSheet>();
 
         let executing = false;
 
@@ -245,39 +260,43 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             return id;
         };
 
-        const clearNode = (node: Document | ShadowRoot) => {
-            potentialAdoptedStyleNodes.delete(node);
+        const cleanNode = (node: Document | ShadowRoot) => {
+            targetNodes.delete(node);
             nodesById.delete(getNodeId(node));
+            iterateSourceSheets(node, (sheet) => {
+                sourceSheets.delete(sheet);
+                sourceSheetNodes.delete(sheet);
+            });
+            const override = overrideSheets.get(node);
+            if (override && Array.isArray(node.adoptedStyleSheets)) {
+                const index = node.adoptedStyleSheets.indexOf(override);
+                if (index >= 0) {
+                    node.adoptedStyleSheets.splice(index, 1);
+                }
+            }
+            overrideSheets.delete(node);
         };
 
-        const iterateAdoptedStyleSheets = (node: Document | ShadowRoot, iterator: (sheet: CSSStyleSheet) => void) => {
+        const iterateSourceSheets = (node: Document | ShadowRoot, iterator: (sheet: CSSStyleSheet) => void) => {
             if (Array.isArray(node.adoptedStyleSheets)) {
                 node.adoptedStyleSheets.forEach((sheet) => {
-                    const override = adoptedStyleOverrides.get(node);
+                    const override = overrideSheets.get(node);
                     if (sheet !== override) {
+                        if (!sourceSheets.has(sheet)) {
+                            sourceSheets.add(sheet);
+                        }
+                        if (!sourceSheetNodes.has(sheet)) {
+                            sourceSheetNodes.set(sheet, node);
+                        }
                         iterator(sheet);
                     }
                 });
             }
         };
 
-        const getAdoptedStyleChangeKey = (node: Document | ShadowRoot) => {
-            let count = 0;
-            iterateAdoptedStyleSheets(node, (sheet) => {
-                count += sheet.cssRules.length;
-            });
-            if (count === 1) {
-                // MS Copilot issue, where there is an empty `:root {}` style at the beginning.
-                // Counting all the rules for all the shadow DOM elements can be expensive.
-                const rule = node.adoptedStyleSheets[0].cssRules[0];
-                return rule instanceof CSSStyleRule ? rule.style.length : count;
-            }
-            return count;
-        };
-
-        const getAdoptedCSSRules = (node: Document | ShadowRoot) => {
+        const getSourceCSSRules = (node: Document | ShadowRoot) => {
             const cssRules: CSSRule[] = [];
-            iterateAdoptedStyleSheets(node, (sheet) => {
+            iterateSourceSheets(node, (sheet) => {
                 for (let i = 0; i < sheet.cssRules.length; i++) {
                     const rule = sheet.cssRules[i];
                     cssRules.push(rule);
@@ -286,66 +305,64 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             return cssRules;
         };
 
-        const sendAdoptedStyles = (node: Document | ShadowRoot, cssRules: CSSRule[]) => {
-            const id = getNodeId(node);
-            const data = {detail: {node, id, cssRules}};
-            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
-            document.dispatchEvent(event);
-        };
-
-        const sendAdoptedStylesBatch = (entries: Array<[Document | ShadowRoot, number, CSSRule[]]>) => {
-            const data = {detail: {entries}};
-            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
-            document.dispatchEvent(event);
-        };
-
-        let watcherFrameId = 0;
-
-        const handleAdoptedCSSChange = (node: Document | ShadowRoot) => {
-            if (!node.isConnected) {
-                clearNode(node);
-                return;
-            }
-            const newKey = getAdoptedStyleChangeKey(node);
-            if (potentialAdoptedStyleNodes.has(node)) {
-                const key = potentialAdoptedStyleNodes.get(node);
-                if (newKey === key) {
-                    return;
-                }
-            }
-            potentialAdoptedStyleNodes.set(node, newKey);
-            const cssRules = getAdoptedCSSRules(node);
-            sendAdoptedStyles(node, cssRules);
-        };
-
-        const watchAdoptedStyles = () => {
-            potentialAdoptedStyleNodes.forEach((_key, node) => {
-                handleAdoptedCSSChange(node);
-            });
-            watcherFrameId = requestAnimationFrame(watchAdoptedStyles);
-        };
-
-        const iterateShadowHosts = (root: Node | null, iterator: (host: Element) => void) => {
-            if (root == null) {
-                return;
-            }
+        const walkNodesWithAdoptedStyles = (root: Document | ShadowRoot, iterator: (host: Document | ShadowRoot) => void) => {
+            iterator(root);
             const acceptNode = (node: Node) => (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
             const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {acceptNode});
-            for (
-                let node = ((root as Element).shadowRoot ? walker.currentNode : walker.nextNode()) as Element;
-                node != null;
-                node = walker.nextNode() as Element
-            ) {
-                iterator(node);
-                iterateShadowHosts(node.shadowRoot, iterator);
+            const start = root === document ? walker.nextNode() : root;
+            for (let node = start; node != null; node = walker.nextNode() as Element) {
+                const shadowRoot = (node as Element).shadowRoot;
+                if (shadowRoot) {
+                    walkNodesWithAdoptedStyles(shadowRoot, iterator);
+                }
             }
         };
 
-        const stopWatchingForAdoptedStyles = () => {
-            if (watcherFrameId) {
-                cancelAnimationFrame(watcherFrameId);
-                watcherFrameId = 0;
+        const handleSheetChange = (node: Document | ShadowRoot) => {
+            if (!node.isConnected) {
+                cleanNode(node);
+                return;
             }
+            if (!targetNodes.has(node)) {
+                targetNodes.add(node);
+            }
+            const cssRules = getSourceCSSRules(node);
+            sendSourceStyles(node, cssRules);
+        };
+
+        const executeCommands = (node: Document | ShadowRoot, commands: StyleSheetCommand[]) => {
+            executing = true;
+
+            let sheet: CSSStyleSheet;
+            if (overrideSheets.has(node)) {
+                sheet = overrideSheets.get(node)!;
+            } else {
+                sheet = new CSSStyleSheet();
+                overrideSheets.set(node, sheet);
+            }
+
+            commands.forEach((c) => {
+                const {type} = c;
+                if (c.path.length === 1) {
+                    const index = c.path[0];
+                    if (type === 'insert') {
+                        const cssText = c.value!;
+                        sheet.insertRule(cssText, index);
+                    } else if (type === 'delete') {
+                        sheet.deleteRule(index);
+                    }
+                }
+            });
+
+            const overrideIndex = node.adoptedStyleSheets.indexOf(sheet);
+            if (overrideIndex < 0) {
+                node.adoptedStyleSheets.push(sheet);
+            } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
+                node.adoptedStyleSheets.splice(overrideIndex, 1);
+                node.adoptedStyleSheets.push(sheet);
+            }
+
+            executing = false;
         };
 
         const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
@@ -366,7 +383,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 set(target, property, value) {
                     target[property as any] = value;
                     if (property === 'length' && !executing) {
-                        handleAdoptedCSSChange(node);
+                        handleSheetChange(node);
                     }
                     return true;
                 },
@@ -389,81 +406,61 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                         source = adoptedSheetsProxySources.get(source);
                     }
                     native.set!.call(this, source);
-                    handleAdoptedCSSChange(this);
+                    handleSheetChange(this);
                 },
             });
             cleaners.push(() => Object.defineProperty(proto, 'adoptedStyleSheets', native));
         };
 
-        const startAdoptedStylesProcessing = () => {
-            const entries: Array<[Document | ShadowRoot, number, CSSRule[]]> = [];
-            const push = (node: Document | ShadowRoot) => {
-                const id = getNodeId(node);
-                const rules = getAdoptedCSSRules(node);
-                entries.push([node, id, rules]);
-            };
+        const sendSourceStyles = (node: Document | ShadowRoot, cssRules: CSSRule[]) => {
+            const id = getNodeId(node);
+            const data = {detail: {node, id, cssRules}};
+            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
+            document.dispatchEvent(event);
+        };
 
-            push(document);
-            iterateShadowHosts(document.documentElement, (host) => {
-                const shadowRoot = host.shadowRoot;
-                if (shadowRoot) {
-                    push(shadowRoot);
-                }
+        const sendSourceStylesBatch = (entries: Array<[Document | ShadowRoot, number, CSSRule[]]>) => {
+            const data = {detail: {entries}};
+            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
+            document.dispatchEvent(event);
+        };
+
+        const commandsListener = (e: CustomEvent) => {
+            const {id, commands} = JSON.parse(e.detail);
+            const node = nodesById.get(id)!;
+            executeCommands(node, commands);
+        };
+
+        const queuedSheetChanges = new Set<CSSStyleSheet>();
+
+        onSheetChange = (sheet) => {
+            if (sourceSheets.has(sheet) && !queuedSheetChanges.has(sheet)) {
+                queuedSheetChanges.add(sheet);
+                queueMicrotask(() => {
+                    queuedSheetChanges.delete(sheet);
+                    const node = sourceSheetNodes.get(sheet)!;
+                    handleSheetChange(node);
+                });
+            }
+        };
+
+        const startAdoptedStylesProcessing = () => {
+            document.addEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener);
+            cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener));
+
+            walkNodesWithAdoptedStyles(document, (node) => targetNodes.add(node));
+            cleaners.push(() => targetNodes.forEach((node) => cleanNode(node)));
+
+            const entries: Array<[Document | ShadowRoot, number, CSSRule[]]> = [];
+            targetNodes.forEach((node) => {
+                const id = getNodeId(node);
+                const rules = getSourceCSSRules(node);
+                entries.push([node, id, rules]);
             });
-            sendAdoptedStylesBatch(entries);
-            entries.forEach(([node]) => {
-                potentialAdoptedStyleNodes.set(node, getAdoptedStyleChangeKey(node));
-            });
+            sendSourceStylesBatch(entries);
 
             overwriteAdoptedStyleSheetsProp(Document.prototype);
             overwriteAdoptedStyleSheetsProp(ShadowRoot.prototype);
-
-            watchAdoptedStyles();
-            cleaners.push(stopWatchingForAdoptedStyles);
-
-            const executeCommands = (node: Document | ShadowRoot, commands: DeepCSSCommand[]) => {
-                executing = true;
-
-                let sheet: CSSStyleSheet;
-                if (adoptedStyleOverrides.has(node)) {
-                    sheet = adoptedStyleOverrides.get(node)!;
-                } else {
-                    sheet = new CSSStyleSheet();
-                    adoptedStyleOverrides.set(node, sheet);
-                }
-
-                commands.forEach((c) => {
-                    const {type} = c;
-                    if (c.path.length === 1) {
-                        const index = c.path[0];
-                        if (type === 'insert') {
-                            const cssText = c.value!;
-                            sheet.insertRule(cssText, index);
-                        } else if (type === 'delete') {
-                            sheet.deleteRule(index);
-                        }
-                    }
-                });
-
-                const overrideIndex = node.adoptedStyleSheets.indexOf(sheet);
-                if (overrideIndex < 0) {
-                    node.adoptedStyleSheets.push(sheet);
-                } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
-                    node.adoptedStyleSheets.splice(overrideIndex, 1);
-                    node.adoptedStyleSheets.push(sheet);
-                }
-
-                executing = false;
-            };
-
-            const onCommands = (e: CustomEvent) => {
-                const {id, commands} = JSON.parse(e.detail);
-                const node = nodesById.get(id)!;
-                executeCommands(node, commands);
-            };
-
-            document.addEventListener('__darkreader__adoptedStyleSheetCommands', onCommands);
-            cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetCommands', onCommands));
         };
 
         document.addEventListener('__darkreader__startAdoptedStyleSheetsWatcher', () => {

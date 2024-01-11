@@ -7,7 +7,7 @@ import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
-import {runOnceLater, throttle} from '../../utils/throttle';
+import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
@@ -293,21 +293,19 @@ function createDynamicStyleOverrides() {
     variablesStore.matchVariablesAndDependents();
 
     if (isFirefox) {
-        document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
-
         const MATCH_VAR = Symbol();
 
         const onAdoptedCSSChange = (e: CustomEvent) => {
             const {node, id, cssRules, entries} = e.detail;
             if (Array.isArray(entries)) {
                 entries.forEach((e) => {
-                    const {cssRules} = e;
+                    const cssRules = e[2];
                     variablesStore.addRulesForMatching(cssRules);
                 });
                 variablesStore.matchVariablesAndDependents();
             } else if (cssRules) {
                 variablesStore.addRulesForMatching(cssRules);
-                runOnceLater(MATCH_VAR, () => variablesStore.matchVariablesAndDependents());
+                requestAnimationFrameOnce(MATCH_VAR, () => variablesStore.matchVariablesAndDependents());
             }
             const tuples = Array.isArray(entries) ? entries : node && cssRules ? [[node, id, cssRules]] : [];
             tuples.forEach(([node, id, cssRules]) => {
@@ -319,6 +317,8 @@ function createDynamicStyleOverrides() {
 
         document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCSSChange);
         cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCSSChange));
+
+        document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
     }
 }
 
@@ -472,12 +472,21 @@ function stopWatchingPotentialAdoptedStyleNodes() {
     }
 }
 
+function getAdoptedStyleChangeToken(node: Document | ShadowRoot) {
+    if (adoptedStyleChangeTokens.has(node)) {
+        return adoptedStyleChangeTokens.get(node)!;
+    }
+    const token = Symbol();
+    adoptedStyleChangeTokens.set(node, token);
+    return token;
+}
+
 function getAdoptedStyleSheetFallback(node: Document | ShadowRoot) {
     let fallback = adoptedStyleFallbacks.get(node);
     if (!fallback) {
         fallback = createAdoptedStyleSheetFallback(() => {
-            const token = adoptedStyleChangeTokens.get(node)!;
-            runOnceLater(token, () => {
+            const token = getAdoptedStyleChangeToken(node);
+            requestAnimationFrameOnce(token, () => {
                 const id = adoptedStyleNodeIds.get(node)!;
                 const commands = fallback?.commands();
                 const data = {id, commands};

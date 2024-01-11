@@ -136,26 +136,26 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 export interface AdoptedStyleSheetFallback {
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     updateCSS(cssRules: CSSRule[]): void;
-    commands(): DeepCSSCommand[];
+    commands(): DeepStyleSheetCommand[];
     destroy(): void;
 }
 
-interface CSSCommand {
+interface StyleSheetCommand {
     type: 'insert' | 'delete';
     index: number;
     value?: string;
 }
 
-interface DeepCSSCommand {
+interface DeepStyleSheetCommand {
     type: 'insert' | 'delete';
     path: number[];
     value?: string;
 }
 
-class CSSCommandBuilder implements CSSBuilder {
-    public cssRules: CSSCommandBuilder[] = [];
+class StyleSheetCommandBuilder implements CSSBuilder {
+    public cssRules: StyleSheetCommandBuilder[] = [];
 
-    private commands: CSSCommand[] = [];
+    private commands: StyleSheetCommand[] = [];
     private onChange: () => void;
 
     public constructor(onChange: () => void) {
@@ -164,7 +164,7 @@ class CSSCommandBuilder implements CSSBuilder {
 
     public insertRule(rule: string, index = 0): number {
         this.commands.push({type: 'insert', index, value: rule});
-        this.cssRules.splice(index, 0, new CSSCommandBuilder(this.onChange));
+        this.cssRules.splice(index, 0, new StyleSheetCommandBuilder(this.onChange));
         this.onChange();
         return index;
     }
@@ -175,7 +175,7 @@ class CSSCommandBuilder implements CSSBuilder {
     }
 
     public getDeepCSSCommands() {
-        const deep: DeepCSSCommand[] = [];
+        const deep: DeepStyleSheetCommand[] = [];
         this.commands.forEach((command) => {
             deep.push({
                 type: command.type,
@@ -210,14 +210,14 @@ export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedSt
         }
     }
 
-    let builder: CSSCommandBuilder;
+    let builder: StyleSheetCommandBuilder;
 
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         lastTheme = theme;
         lastIgnoreImageAnalysis = ignoreImageAnalysis;
 
         const prepareSheet = () => {
-            builder = new CSSCommandBuilder(onChange);
+            builder = new StyleSheetCommandBuilder(onChange);
             return builder;
         };
 

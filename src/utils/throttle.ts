@@ -70,15 +70,15 @@ export function createAsyncTasksQueue(): AsyncTaskQueue {
     return {add, cancel};
 }
 
-const delayedTasks = new Map<symbol, () => void>;
+const delayTokens = new Set<symbol>;
 
-export function runOnceLater(id: symbol, task: () => void): void {
-    if (delayedTasks.has(id)) {
+export function requestAnimationFrameOnce(token: symbol, callback: () => void): void {
+    if (delayTokens.has(token)) {
         return;
     }
-    delayedTasks.set(id, task);
+    delayTokens.add(token);
     requestAnimationFrame(() => {
-        delayedTasks.forEach((task) => task());
-        delayedTasks.clear();
+        delayTokens.delete(token);
+        callback();
     });
 }

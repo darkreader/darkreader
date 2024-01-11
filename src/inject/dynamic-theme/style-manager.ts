@@ -18,9 +18,6 @@ declare global {
     interface ShadowRoot {
         adoptedStyleSheets: CSSStyleSheet[];
     }
-    interface CSSStyleSheet {
-        replaceSync(text: string): void;
-    }
 }
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;

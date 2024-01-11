@@ -140,16 +140,28 @@ export interface AdoptedStyleSheetFallback {
     destroy(): void;
 }
 
-interface StyleSheetCommand {
-    type: 'insert' | 'delete';
+interface StyleSheetInsertCommand {
+    type: 'insert';
     index: number;
-    value?: string;
+    cssText: string;
 }
 
+interface StyleSheetDeleteCommand {
+    type: 'delete';
+    index: number;
+}
+
+interface StyleSheetReplaceCommand {
+    type: 'replace';
+    cssText: string;
+}
+
+type StyleSheetCommand = StyleSheetInsertCommand | StyleSheetDeleteCommand | StyleSheetReplaceCommand;
+
 interface DeepStyleSheetCommand {
-    type: 'insert' | 'delete';
+    type: 'insert' | 'delete' | 'replace';
     path: number[];
-    value?: string;
+    cssText?: string;
 }
 
 class StyleSheetCommandBuilder implements CSSBuilder {
@@ -162,8 +174,8 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         this.onChange = onChange;
     }
 
-    public insertRule(rule: string, index = 0): number {
-        this.commands.push({type: 'insert', index, value: rule});
+    public insertRule(cssText: string, index = 0): number {
+        this.commands.push({type: 'insert', index, cssText});
         this.cssRules.splice(index, 0, new StyleSheetCommandBuilder(this.onChange));
         this.onChange();
         return index;
@@ -171,6 +183,17 @@ class StyleSheetCommandBuilder implements CSSBuilder {
 
     public deleteRule(index: number): void {
         this.commands.push({type: 'delete', index});
+        this.cssRules.splice(index, 1);
+        this.onChange();
+    }
+
+    public replaceSync(cssText: string) {
+        this.commands.push({type: 'replace', cssText});
+        if (cssText === '') {
+            this.cssRules.splice(0);
+        } else {
+            throw new Error('StyleSheetCommandBuilder.replaceSync() is not fully supported');
+        }
         this.onChange();
     }
 
@@ -179,8 +202,8 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         this.commands.forEach((command) => {
             deep.push({
                 type: command.type,
-                value: command.value,
-                path: [command.index],
+                cssText: command.type !== 'delete' ? command.cssText : '',
+                path: command.type === 'replace' ? [] : [command.index],
             });
         });
         this.cssRules.forEach((rule, i) => {
@@ -210,14 +233,14 @@ export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedSt
         }
     }
 
-    let builder: StyleSheetCommandBuilder;
+    const builder = new StyleSheetCommandBuilder(onChange);;
 
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         lastTheme = theme;
         lastIgnoreImageAnalysis = ignoreImageAnalysis;
 
         const prepareSheet = () => {
-            builder = new StyleSheetCommandBuilder(onChange);
+            builder.replaceSync('');
             return builder;
         };
 

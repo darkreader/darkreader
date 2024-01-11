@@ -236,9 +236,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
         type StyleSheetCommand = {
-            type: 'insert' | 'delete';
+            type: 'insert' | 'delete' | 'replace';
             path: number[];
-            value?: string;
+            cssText?: string;
         };
         const targetNodes = new Set<Document | ShadowRoot>();
         const sourceSheets = new WeakSet<CSSStyleSheet>();
@@ -346,10 +346,13 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 if (c.path.length === 1) {
                     const index = c.path[0];
                     if (type === 'insert') {
-                        const cssText = c.value!;
+                        const cssText = c.cssText!;
                         sheet.insertRule(cssText, index);
                     } else if (type === 'delete') {
                         sheet.deleteRule(index);
+                    } else if (type === 'replace') {
+                        const cssText = c.cssText!;
+                        sheet.replaceSync(cssText);
                     }
                 }
             });

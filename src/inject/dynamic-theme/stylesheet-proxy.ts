@@ -274,6 +274,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         const sourceSheetNodes = new WeakMap<CSSStyleSheet, Document | ShadowRoot>();
         const overrideSheets = new WeakMap<Document | ShadowRoot, CSSStyleSheet>();
 
+        let observableStyleDeclarations = new WeakMap<CSSStyleDeclaration, Document | ShadowRoot>();
+        cleaners.push(() => observableStyleDeclarations = new WeakMap());
+
         let executing = false;
 
         let nodeCounter = 0;
@@ -329,6 +332,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 for (let i = 0; i < sheet.cssRules.length; i++) {
                     const rule = sheet.cssRules[i];
                     cssRules.push(rule);
+                    if ((rule as CSSStyleRule).style) {
+                        observableStyleDeclarations.set((rule as CSSStyleRule).style, node);
+                    }
                 }
             });
             return cssRules;
@@ -347,16 +353,25 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             }
         };
 
+        const queuedSheetChanges = new Set<Document | ShadowRoot>();
+
         const handleSheetChange = (node: Document | ShadowRoot) => {
             if (!node.isConnected) {
                 cleanNode(node);
                 return;
             }
+            if (queuedSheetChanges.has(node)) {
+                return;
+            }
             if (!targetNodes.has(node)) {
                 targetNodes.add(node);
             }
-            const cssRules = getSourceCSSRules(node);
-            sendSourceStyles(node, cssRules);
+            queuedSheetChanges.add(node);
+            queueMicrotask(() => {
+                queuedSheetChanges.delete(node);
+                const cssRules = getSourceCSSRules(node);
+                sendSourceStyles(node, cssRules);
+            });
         };
 
         const executeCommands = (node: Document | ShadowRoot, commands: StyleSheetCommand[]) => {
@@ -427,7 +442,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             return proxy;
         };
 
-        const overwriteAdoptedStyleSheetsProp = (proto: Document | ShadowRoot) => {
+        const proxyAdoptedStyleSheets = (proto: Document | ShadowRoot) => {
             const native = Object.getOwnPropertyDescriptor(proto, 'adoptedStyleSheets')!;
             Object.defineProperty(proto, 'adoptedStyleSheets', {
                 ...native,
@@ -444,6 +459,27 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 },
             });
             cleaners.push(() => Object.defineProperty(proto, 'adoptedStyleSheets', native));
+        };
+
+        const proxyStyleDeclaration = (property: keyof CSSStyleDeclaration) => {
+            const proto = CSSStyleDeclaration.prototype;
+            const native = Object.getOwnPropertyDescriptor(proto, property)!;
+            Object.defineProperty(proto, property, {
+                ...native,
+                value(...args: any[]) {
+                    const returnValue = native.value!.apply(this, args);
+                    if (observableStyleDeclarations.has(this)) {
+                        const node = observableStyleDeclarations.get(this)!;
+                        if (!targetNodes.has(node)) {
+                            observableStyleDeclarations.delete(this);
+                            return;
+                        }
+                        handleSheetChange(node);
+                    }
+                    return returnValue;
+                },
+            });
+            cleaners.push(() => Object.defineProperty(proto, property, native));
         };
 
         const sendSourceStyles = (node: Document | ShadowRoot, cssRules: CSSRule[]) => {
@@ -465,20 +501,19 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             executeCommands(node, commands);
         };
 
-        const queuedSheetChanges = new Set<CSSStyleSheet>();
-
         onSheetChange = (sheet) => {
-            if (sourceSheets.has(sheet) && !queuedSheetChanges.has(sheet)) {
-                queuedSheetChanges.add(sheet);
-                queueMicrotask(() => {
-                    queuedSheetChanges.delete(sheet);
-                    const node = sourceSheetNodes.get(sheet)!;
-                    handleSheetChange(node);
-                });
+            if (sourceSheets.has(sheet)) {
+                const node = sourceSheetNodes.get(sheet)!;
+                handleSheetChange(node);
             }
         };
 
         const startAdoptedStylesProcessing = () => {
+            proxyAdoptedStyleSheets(Document.prototype);
+            proxyAdoptedStyleSheets(ShadowRoot.prototype);
+            proxyStyleDeclaration('setProperty');
+            proxyStyleDeclaration('removeProperty');
+
             document.addEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener);
             cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener));
 
@@ -492,9 +527,6 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 entries.push([node, id, rules]);
             });
             sendSourceStylesBatch(entries);
-
-            overwriteAdoptedStyleSheetsProp(Document.prototype);
-            overwriteAdoptedStyleSheetsProp(ShadowRoot.prototype);
         };
 
         document.addEventListener('__darkreader__startAdoptedStyleSheetsWatcher', startAdoptedStylesProcessing);

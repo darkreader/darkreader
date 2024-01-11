@@ -154,28 +154,29 @@ interface DeepCSSCommand {
 
 class CSSCommandBuilder implements CSSBuilder {
     public cssRules: CSSCommandBuilder[] = [];
-    #commands: CSSCommand[] = [];
-    #onChange: () => void;
+
+    private commands: CSSCommand[] = [];
+    private onChange: () => void;
 
     public constructor(onChange: () => void) {
-        this.#onChange = onChange;
+        this.onChange = onChange;
     }
 
     public insertRule(rule: string, index = 0): number {
-        this.#commands.push({type: 'insert', index, value: rule});
-        this.cssRules.splice(index, 0, new CSSCommandBuilder(this.#onChange));
-        this.#onChange();
+        this.commands.push({type: 'insert', index, value: rule});
+        this.cssRules.splice(index, 0, new CSSCommandBuilder(this.onChange));
+        this.onChange();
         return index;
     }
 
     public deleteRule(index: number): void {
-        this.#commands.push({type: 'delete', index});
-        this.#onChange();
+        this.commands.push({type: 'delete', index});
+        this.onChange();
     }
 
     public getDeepCSSCommands() {
         const deep: DeepCSSCommand[] = [];
-        this.#commands.forEach((command) => {
+        this.commands.forEach((command) => {
             deep.push({
                 type: command.type,
                 value: command.value,
@@ -190,7 +191,7 @@ class CSSCommandBuilder implements CSSBuilder {
     }
 
     public clearDeepCSSCommands() {
-        this.#commands.splice(0);
+        this.commands.splice(0);
         this.cssRules.forEach((rule) => rule.clearDeepCSSCommands());
     }
 }

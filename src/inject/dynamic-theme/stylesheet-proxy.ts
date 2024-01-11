@@ -463,8 +463,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             overwriteAdoptedStyleSheetsProp(ShadowRoot.prototype);
         };
 
-        document.addEventListener('__darkreader__startAdoptedStyleSheetsWatcher', () => {
-            startAdoptedStylesProcessing();
-        });
+        document.addEventListener('__darkreader__startAdoptedStyleSheetsWatcher', startAdoptedStylesProcessing);
+        cleaners.push(() => document.removeEventListener('__darkreader__startAdoptedStyleSheetsWatcher', startAdoptedStylesProcessing));
     }
 }

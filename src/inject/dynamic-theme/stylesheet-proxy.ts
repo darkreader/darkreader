@@ -8,6 +8,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     const insertRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
     const deleteRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
     const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
+    const replaceDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'replace');
+    const replaceSyncDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'replaceSync');
 
     const documentStyleSheetsDescriptor = enableStyleSheetsProxy ?
         Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
@@ -46,6 +48,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', insertRuleDescriptor!);
         Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', deleteRuleDescriptor!);
         Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor!);
+        Object.defineProperty(CSSStyleSheet.prototype, 'replace', replaceDescriptor!);
+        Object.defineProperty(CSSStyleSheet.prototype, 'replaceSync', replaceSyncDescriptor!);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
         document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
         document.removeEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport);
@@ -116,6 +120,29 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyRemoveRule(index?: number): void {
         removeRuleDescriptor!.value.call(this, index);
+        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
+            this.ownerNode.dispatchEvent(updateSheetEvent);
+        }
+        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
+            onSheetChange(this);
+        }
+    }
+
+    function proxyReplace(cssText: string): Promise<CSSStyleSheet> {
+        const returnValue = replaceDescriptor!.value.call(this, cssText);
+        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader')) && returnValue && returnValue instanceof Promise) {
+            returnValue.then(() => this.ownerNode.dispatchEvent(updateSheetEvent));
+        }
+        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
+            if (returnValue && returnValue instanceof Promise) {
+                returnValue.then(() => onSheetChange(this));
+            }
+        }
+        return returnValue;
+    }
+
+    function proxyReplaceSync(cssText: string): void {
+        replaceSyncDescriptor!.value.call(this, cssText);
         if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
@@ -217,21 +244,23 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
     }
 
-    Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
-    Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
-    Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
-    Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'addRule', {...addRuleDescriptor, value: proxyAddRule});
+    Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', {...insertRuleDescriptor, value: proxyInsertRule});
+    Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', {...deleteRuleDescriptor, value: proxyDeleteRule});
+    Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', {...removeRuleDescriptor, value: proxyRemoveRule});
+    Object.defineProperty(CSSStyleSheet.prototype, 'replace', {...replaceDescriptor, value: proxyReplace});
+    Object.defineProperty(CSSStyleSheet.prototype, 'replaceSync', {...replaceSyncDescriptor, value: proxyReplaceSync});
     if (enableStyleSheetsProxy) {
-        Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
+        Object.defineProperty(Document.prototype, 'styleSheets', {...documentStyleSheetsDescriptor, get: proxyDocumentStyleSheets});
     }
     if (enableCustomElementRegistryProxy) {
-        Object.defineProperty(CustomElementRegistry.prototype, 'define', Object.assign({}, customElementRegistryDefineDescriptor, {value: proxyCustomElementRegistryDefine}));
+        Object.defineProperty(CustomElementRegistry.prototype, 'define', {...customElementRegistryDefineDescriptor, value: proxyCustomElementRegistryDefine});
     }
     if (shouldWrapHTMLElement) {
-        Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));
+        Object.defineProperty(Element.prototype, 'getElementsByTagName', {...getElementsByTagNameDescriptor, value: proxyGetElementsByTagName});
     }
     if (shouldProxyChildNodes) {
-        Object.defineProperty(Node.prototype, 'childNodes', Object.assign({}, childNodesDescriptor, {get: proxyChildNodes}));
+        Object.defineProperty(Node.prototype, 'childNodes', {...childNodesDescriptor, get: proxyChildNodes});
     }
 
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {

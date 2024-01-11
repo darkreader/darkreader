@@ -342,18 +342,20 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             }
 
             commands.forEach((c) => {
-                const {type} = c;
-                if (c.path.length === 1) {
-                    const index = c.path[0];
-                    if (type === 'insert') {
-                        const cssText = c.cssText!;
-                        sheet.insertRule(cssText, index);
-                    } else if (type === 'delete') {
-                        sheet.deleteRule(index);
-                    } else if (type === 'replace') {
-                        const cssText = c.cssText!;
-                        sheet.replaceSync(cssText);
-                    }
+                const {type, path, cssText} = c;
+                let target: CSSStyleSheet | CSSGroupingRule = sheet;
+                const pathLength = path.length - (type === 'replace' ? 0 : 1);
+                for (let i = 0; i < pathLength; i++) {
+                    target = target.cssRules[path[i]] as CSSGroupingRule;
+                }
+                const index = path.at(-1)!;
+                if (type === 'insert') {
+                    const cssText = c.cssText!;
+                    target.insertRule(cssText, index);
+                } else if (type === 'delete') {
+                    target.deleteRule(index);
+                } else if (type === 'replace') {
+                    (target as CSSStyleSheet).replaceSync(cssText!);
                 }
             });
 

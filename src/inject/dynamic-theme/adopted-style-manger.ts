@@ -188,6 +188,7 @@ class StyleSheetCommandBuilder implements CSSBuilder {
     }
 
     public replaceSync(cssText: string) {
+        this.commands.splice(0);
         this.commands.push({type: 'replace', cssText});
         if (cssText === '') {
             this.cssRules.splice(0);

@@ -34,13 +34,22 @@ interface ModifySheetOptions {
     theme: Theme;
     ignoreImageAnalysis: string[];
     force: boolean;
-    prepareSheet: () => CSSStyleSheet;
+    prepareSheet: () => CSSBuilder;
     isAsyncCancelled: () => boolean;
 }
 
 interface StyleSheetModifier {
     modifySheet: (options: ModifySheetOptions) => void;
     shouldRebuildStyle: () => boolean;
+}
+
+export interface CSSBuilder {
+    deleteRule(index: number): void;
+    insertRule(rule: string, index?: number): number;
+    cssRules: {
+        readonly length: number;
+        [index: number]: CSSBuilder | object;
+    };
 }
 
 export function createStyleSheetModifier(): StyleSheetModifier {
@@ -148,7 +157,7 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             varKey?: number;
         }
 
-        function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
+        function setRule(target: CSSBuilder, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
 
             let selectorText = selector;
@@ -182,7 +191,7 @@ export function createStyleSheetModifier(): StyleSheetModifier {
 
         interface RuleInfo {
             rule: ReadyStyleRule;
-            target: (CSSStyleSheet | CSSGroupingRule);
+            target: CSSBuilder;
             index: number;
         }
 
@@ -295,21 +304,21 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         const sheet = prepareSheet();
 
         function buildStyleSheet() {
-            function createTarget(group: ReadyGroup, parent: CSSStyleSheet | CSSGroupingRule): CSSStyleSheet | CSSGroupingRule {
+            function createTarget(group: ReadyGroup, parent: CSSBuilder): CSSBuilder {
                 const {rule} = group;
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
                     parent.insertRule(`@media ${media.mediaText} {}`, index);
-                    return parent.cssRules[index] as CSSMediaRule;
+                    return parent.cssRules[index] as CSSBuilder;
                 }
                 return parent;
             }
 
             function iterateReadyRules(
                 group: ReadyGroup,
-                target: CSSStyleSheet | CSSGroupingRule,
-                styleIterator: (s: ReadyStyleRule, t: CSSStyleSheet | CSSGroupingRule) => void,
+                target: CSSBuilder,
+                styleIterator: (s: ReadyStyleRule, t: CSSBuilder) => void,
             ) {
                 group.rules.forEach((r) => {
                     if (r.isGroup) {

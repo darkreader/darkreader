@@ -7,7 +7,7 @@ import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
-import {throttle} from '../../utils/throttle';
+import {runOnceLater, throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
@@ -32,6 +32,8 @@ const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
 const adoptedStyleFallbacks = new Map<Document | ShadowRoot, AdoptedStyleSheetFallback>();
+const adoptedStyleNodeIds = new WeakMap<Document | ShadowRoot, number>();
+const adoptedStyleChangeTokens = new WeakMap<Document | ShadowRoot, symbol>();
 let filter: FilterConfig | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
@@ -293,18 +295,23 @@ function createDynamicStyleOverrides() {
     if (isFirefox) {
         document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
 
+        const MATCH_VAR = Symbol();
+
         const onAdoptedCSSChange = (e: CustomEvent) => {
-            const {node, cssRules, entries} = e.detail;
+            const {node, id, cssRules, entries} = e.detail;
             if (Array.isArray(entries)) {
-                entries.forEach(([, cssRules]) => {
+                entries.forEach((e) => {
+                    const {cssRules} = e;
                     variablesStore.addRulesForMatching(cssRules);
                 });
                 variablesStore.matchVariablesAndDependents();
             } else if (cssRules) {
                 variablesStore.addRulesForMatching(cssRules);
+                runOnceLater(MATCH_VAR, () => variablesStore.matchVariablesAndDependents());
             }
-            const tuples = Array.isArray(entries) ? entries : node && cssRules ? [node, cssRules] : [];
-            tuples.forEach(([node, cssRules]) => {
+            const tuples = Array.isArray(entries) ? entries : node && cssRules ? [[node, id, cssRules]] : [];
+            tuples.forEach(([node, id, cssRules]) => {
+                adoptedStyleNodeIds.set(node, id);
                 const fallback = getAdoptedStyleSheetFallback(node);
                 fallback.updateCSS(cssRules);
             });
@@ -468,7 +475,15 @@ function stopWatchingPotentialAdoptedStyleNodes() {
 function getAdoptedStyleSheetFallback(node: Document | ShadowRoot) {
     let fallback = adoptedStyleFallbacks.get(node);
     if (!fallback) {
-        fallback = createAdoptedStyleSheetFallback(node);
+        fallback = createAdoptedStyleSheetFallback(() => {
+            const token = adoptedStyleChangeTokens.get(node)!;
+            runOnceLater(token, () => {
+                const id = adoptedStyleNodeIds.get(node)!;
+                const commands = fallback?.commands();
+                const data = {id, commands};
+                document.dispatchEvent(new CustomEvent('__darkreader__adoptedStyleSheetCommands', {detail: JSON.stringify(data)}));
+            });
+        });
         adoptedStyleFallbacks.set(node, fallback);
     }
     return fallback;

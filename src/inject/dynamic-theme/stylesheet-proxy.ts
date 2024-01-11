@@ -222,10 +222,42 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
         const potentialAdoptedStyleNodes = new Map<Document | ShadowRoot, number>();
+        const adoptedStyleOverrides = new WeakMap<Document | ShadowRoot, CSSStyleSheet>();
+
+        type DeepCSSCommand = {
+            type: 'insert' | 'delete';
+            path: number[];
+            value?: string;
+        };
+
+        let executing = false;
+
+        let nodeCounter = 0;
+        const nodeIds = new WeakMap<Document | ShadowRoot, number>();
+        const nodesById = new Map<number, Document | ShadowRoot>();
+        const getNodeId = (node: Document | ShadowRoot) => {
+            if (nodeIds.has(node)) {
+                return nodeIds.get(node)!;
+            }
+            const id = ++nodeCounter;
+            nodeIds.set(node, id);
+            nodesById.set(id, node);
+            return id;
+        };
+
+        const clearNode = (node: Document | ShadowRoot) => {
+            potentialAdoptedStyleNodes.delete(node);
+            nodesById.delete(getNodeId(node));
+        };
 
         const iterateAdoptedStyleSheets = (node: Document | ShadowRoot, iterator: (sheet: CSSStyleSheet) => void) => {
             if (Array.isArray(node.adoptedStyleSheets)) {
-                node.adoptedStyleSheets.forEach(iterator);
+                node.adoptedStyleSheets.forEach((sheet) => {
+                    const override = adoptedStyleOverrides.get(node);
+                    if (sheet !== override) {
+                        iterator(sheet);
+                    }
+                });
             }
         };
 
@@ -255,12 +287,13 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         };
 
         const sendAdoptedStyles = (node: Document | ShadowRoot, cssRules: CSSRule[]) => {
-            const data = {detail: {node, cssRules}};
+            const id = getNodeId(node);
+            const data = {detail: {node, id, cssRules}};
             const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
             document.dispatchEvent(event);
         };
 
-        const sendAdoptedStylesBatch = (entries: Array<[Document | ShadowRoot, CSSRule[]]>) => {
+        const sendAdoptedStylesBatch = (entries: Array<[Document | ShadowRoot, number, CSSRule[]]>) => {
             const data = {detail: {entries}};
             const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
             document.dispatchEvent(event);
@@ -270,7 +303,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
         const handleAdoptedCSSChange = (node: Document | ShadowRoot) => {
             if (!node.isConnected) {
-                potentialAdoptedStyleNodes.delete(node);
+                clearNode(node);
                 return;
             }
             const newKey = getAdoptedStyleChangeKey(node);
@@ -332,7 +365,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 },
                 set(target, property, value) {
                     target[property as any] = value;
-                    if (property === 'length') {
+                    if (property === 'length' && !executing) {
                         handleAdoptedCSSChange(node);
                     }
                     return true;
@@ -363,12 +396,18 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         };
 
         const startAdoptedStylesProcessing = () => {
-            const entries: Array<[Document | ShadowRoot, CSSRule[]]> = [];
-            entries.push([document, getAdoptedCSSRules(document)]);
+            const entries: Array<[Document | ShadowRoot, number, CSSRule[]]> = [];
+            const push = (node: Document | ShadowRoot) => {
+                const id = getNodeId(node);
+                const rules = getAdoptedCSSRules(node);
+                entries.push([node, id, rules]);
+            };
+
+            push(document);
             iterateShadowHosts(document.documentElement, (host) => {
                 const shadowRoot = host.shadowRoot;
                 if (shadowRoot) {
-                    entries.push([shadowRoot, getAdoptedCSSRules(shadowRoot)]);
+                    push(shadowRoot);
                 }
             });
             sendAdoptedStylesBatch(entries);
@@ -381,6 +420,50 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
             watchAdoptedStyles();
             cleaners.push(stopWatchingForAdoptedStyles);
+
+            const executeCommands = (node: Document | ShadowRoot, commands: DeepCSSCommand[]) => {
+                executing = true;
+
+                let sheet: CSSStyleSheet;
+                if (adoptedStyleOverrides.has(node)) {
+                    sheet = adoptedStyleOverrides.get(node)!;
+                } else {
+                    sheet = new CSSStyleSheet();
+                    adoptedStyleOverrides.set(node, sheet);
+                }
+
+                commands.forEach((c) => {
+                    const {type} = c;
+                    if (c.path.length === 1) {
+                        const index = c.path[0];
+                        if (type === 'insert') {
+                            const cssText = c.value!;
+                            sheet.insertRule(cssText, index);
+                        } else if (type === 'delete') {
+                            sheet.deleteRule(index);
+                        }
+                    }
+                });
+
+                const overrideIndex = node.adoptedStyleSheets.indexOf(sheet);
+                if (overrideIndex < 0) {
+                    node.adoptedStyleSheets.push(sheet);
+                } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
+                    node.adoptedStyleSheets.splice(overrideIndex, 1);
+                    node.adoptedStyleSheets.push(sheet);
+                }
+
+                executing = false;
+            };
+
+            const onCommands = (e: CustomEvent) => {
+                const {id, commands} = JSON.parse(e.detail);
+                const node = nodesById.get(id)!;
+                executeCommands(node, commands);
+            };
+
+            document.addEventListener('__darkreader__adoptedStyleSheetCommands', onCommands);
+            cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetCommands', onCommands));
         };
 
         document.addEventListener('__darkreader__startAdoptedStyleSheetsWatcher', () => {

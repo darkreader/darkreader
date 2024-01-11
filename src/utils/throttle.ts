@@ -69,3 +69,16 @@ export function createAsyncTasksQueue(): AsyncTaskQueue {
 
     return {add, cancel};
 }
+
+const delayedTasks = new Map<symbol, () => void>;
+
+export function runOnceLater(id: symbol, task: () => void): void {
+    if (delayedTasks.has(id)) {
+        return;
+    }
+    delayedTasks.set(id, task);
+    requestAnimationFrame(() => {
+        delayedTasks.forEach((task) => task());
+        delayedTasks.clear();
+    });
+}

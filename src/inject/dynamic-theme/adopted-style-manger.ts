@@ -1,4 +1,5 @@
 import type {Theme} from '../../definitions';
+import type {CSSBuilder} from './stylesheet-modifier';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
 const overrides = new WeakSet<CSSStyleSheet>();
@@ -135,27 +136,69 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 export interface AdoptedStyleSheetFallback {
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     updateCSS(cssRules: CSSRule[]): void;
+    commands(): DeepCSSCommand[];
     destroy(): void;
 }
 
-function createOrUpdateStyle(className: string, parent: ParentNode): HTMLStyleElement {
-    let element: HTMLStyleElement | null = parent.querySelector(`.${className}`);
-    if (!element) {
-        element = document.createElement('style');
-        element.classList.add('darkreader');
-        element.classList.add(className);
-        element.media = 'screen';
-        element.textContent = '';
-        parent.insertBefore(element, parent.firstElementChild);
-    }
-    return element;
+interface CSSCommand {
+    type: 'insert' | 'delete';
+    index: number;
+    value?: string;
 }
 
-export function createAdoptedStyleSheetFallback(node: Document | ShadowRoot): AdoptedStyleSheetFallback {
-    const parent = node === document ? document.head ?? document : node;
+interface DeepCSSCommand {
+    type: 'insert' | 'delete';
+    path: number[];
+    value?: string;
+}
+
+class CSSCommandBuilder implements CSSBuilder {
+    public cssRules: CSSCommandBuilder[] = [];
+    #commands: CSSCommand[] = [];
+    #onChange: () => void;
+
+    public constructor(onChange: () => void) {
+        this.#onChange = onChange;
+    }
+
+    public insertRule(rule: string, index = 0): number {
+        this.#commands.push({type: 'insert', index, value: rule});
+        this.cssRules.splice(index, 0, new CSSCommandBuilder(this.#onChange));
+        this.#onChange();
+        return index;
+    }
+
+    public deleteRule(index: number): void {
+        this.#commands.push({type: 'delete', index});
+        this.#onChange();
+    }
+
+    public getDeepCSSCommands() {
+        const deep: DeepCSSCommand[] = [];
+        this.#commands.forEach((command) => {
+            deep.push({
+                type: command.type,
+                value: command.value,
+                path: [command.index],
+            });
+        });
+        this.cssRules.forEach((rule, i) => {
+            const childCommands = rule.getDeepCSSCommands();
+            childCommands.forEach((c) => c.path.unshift(i));
+        });
+        return deep;
+    }
+
+    public clearDeepCSSCommands() {
+        this.#commands.splice(0);
+        this.cssRules.forEach((rule) => rule.clearDeepCSSCommands());
+    }
+}
+
+export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedStyleSheetFallback {
     let cancelAsyncOperations = false;
 
-    let sourceCSSRules: CSSRule[];
+    let sourceCSSRules: CSSRule[] = [];
     let lastTheme: Theme;
     let lastIgnoreImageAnalysis: string[];
 
@@ -166,18 +209,15 @@ export function createAdoptedStyleSheetFallback(node: Document | ShadowRoot): Ad
         }
     }
 
+    let builder: CSSCommandBuilder;
+
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         lastTheme = theme;
         lastIgnoreImageAnalysis = ignoreImageAnalysis;
 
         const prepareSheet = () => {
-            const styleNode = createOrUpdateStyle('darkreader--adopted-override', parent);
-            styleNode.textContent = '';
-            const sheet = styleNode.sheet!;
-            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
-                sheet.deleteRule(i);
-            }
-            return sheet;
+            builder = new CSSCommandBuilder(onChange);
+            return builder;
         };
 
         const sheetModifier = createStyleSheetModifier();
@@ -191,13 +231,15 @@ export function createAdoptedStyleSheetFallback(node: Document | ShadowRoot): Ad
         });
     }
 
-    function destroy() {
-        cancelAsyncOperations = true;
-        const styleNode = node.querySelector('.darkreader--adopted-override');
-        if (styleNode) {
-            styleNode.remove();
-        }
+    function commands() {
+        const commands = builder.getDeepCSSCommands();
+        builder.clearDeepCSSCommands();
+        return commands;
     }
 
-    return {render, destroy, updateCSS};
+    function destroy() {
+        cancelAsyncOperations = true;
+    }
+
+    return {render, destroy, updateCSS, commands};
 }

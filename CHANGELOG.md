@@ -1,3 +1,11 @@
+## 4.9.75 (January 12, 2024)
+
+- Fixed CSS variables processing in inline styles.
+- Chrome: Improved Adopted Style Sheets support (Bing AI and Copilot issues).
+- Firefox: Adopted Style Sheets support.
+- Firefox: Fixed issues with Filter+ mode.
+- Improved Constructed Style Sheets changes handling.
+
 ## 4.9.74 (January 3, 2024)
 
 - Improved image analysis performance.

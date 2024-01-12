@@ -1,9 +1,9 @@
-import {timeout} from '../support/test-utils';
-import {childClosed, watchStream} from './utils';
 import {join, resolve} from 'node:path';
 import {tmpdir} from 'node:os';
 import {mkdtemp} from 'node:fs/promises';
 import {fork} from 'node:child_process';
+import {timeout} from '../support/test-utils.ts';
+import {childClosed, watchStream} from './utils.ts';
 
 const rootPath = (path: string) => resolve(__dirname, '../..', path);
 const buildModule = rootPath('tasks/cli.js');

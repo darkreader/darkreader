@@ -134,7 +134,7 @@ export class VariablesStore {
         varName: string;
         sourceValue: string;
         rule: CSSStyleRule;
-        ignoredImgSelectors: string[];
+        ignoredImgSelectors: Array<string | RegExp>;
         isCancelled: () => boolean;
     }): CSSVariableModifier {
         return (theme) => {

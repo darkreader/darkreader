@@ -47,7 +47,7 @@ export function getModifiableCSSDeclaration(
     value: string,
     rule: CSSStyleRule,
     variablesStore: VariablesStore,
-    ignoreImageSelectors: string[],
+    ignoreImageSelectors: Array<string | RegExp>,
     isCancelled: (() => boolean) | null,
 ): ModifiableCSSDeclaration | null {
     if (property.startsWith('--')) {
@@ -293,7 +293,7 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails | null) => void>>();
 
-function shouldIgnoreImage(selectorText: string, selectors: string[]) {
+function shouldIgnoreImage(selectorText: string, selectors: Array<string | RegExp>) {
     if (!selectorText || selectors.length === 0) {
         return false;
     }
@@ -303,7 +303,7 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
-        if (ruleSelectors.some((s) => s === ignoredSelector)) {
+        if (ruleSelectors.some((s) => typeof ignoredSelector === 'string' ? s === ignoredSelector : ignoredSelector.test(s))) {
             return true;
         }
     }
@@ -322,7 +322,7 @@ interface BgImageMatches {
 export function getBgImageModifier(
     value: string,
     rule: CSSStyleRule,
-    ignoreImageSelectors: string[],
+    ignoreImageSelectors: Array<string | RegExp>,
     isCancelled: () => boolean,
 ): string | CSSValueModifier | null {
     try {
@@ -575,7 +575,7 @@ function getVariableModifier(
     prop: string,
     value: string,
     rule: CSSStyleRule,
-    ignoredImgSelectors: string[],
+    ignoredImgSelectors: Array<string | RegExp>,
     isCancelled: () => boolean,
 ): CSSVariableModifier {
     return variablesStore.getModifierForVariable({

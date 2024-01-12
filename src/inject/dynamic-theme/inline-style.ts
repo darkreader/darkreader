@@ -260,7 +260,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boo
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: Array<string | RegExp>): void {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;

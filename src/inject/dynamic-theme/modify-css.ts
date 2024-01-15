@@ -303,7 +303,12 @@ function shouldIgnoreImage(selectorText: string, selectors: Array<string | RegEx
     const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
-        if (ruleSelectors.some((s) => typeof ignoredSelector === 'string' ? s === ignoredSelector : ignoredSelector.test(s))) {
+        if (ruleSelectors.some((s) => {
+            if (ignoredSelector && ignoredSelector.constructor === RegExp) {
+                return ignoredSelector.test(s);
+            }
+            return s === ignoredSelector;
+        })) {
             return true;
         }
     }

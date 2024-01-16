@@ -293,6 +293,12 @@ export class VariablesStore {
 
                 const modified = modify();
                 if (unknownVars.size > 0) {
+                    // web.dev issue where the variable is never defined, but the fallback is.
+                    // TODO: Return a fallback value along with a way to subscribe for a change.
+                    const isFallbackResolved = modified.match(/^var\(.*?, var\(--darkreader-bg--.*\)\)$/);
+                    if (isFallbackResolved) {
+                        return modified;
+                    }
                     return new Promise<string>((resolve) => {
                         const firstUnknownVar = unknownVars.values().next().value;
                         const callback = () => {

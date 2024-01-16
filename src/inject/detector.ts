@@ -2,6 +2,8 @@ import type {DetectorHint} from '../definitions';
 import {getSRGBLightness, parseColorWithCache} from '../utils/color';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 
+const COLOR_SCHEME_META_SELECTOR = 'meta[name="color-scheme"]';
+
 function hasBuiltInDarkTheme() {
     const rootStyle = getComputedStyle(document.documentElement);
     if (rootStyle.filter.includes('invert(1)')) {
@@ -49,6 +51,13 @@ function hasBuiltInDarkTheme() {
 }
 
 function runCheck(callback: (hasDarkTheme: boolean) => void) {
+    const colorSchemeMeta = document.querySelector(COLOR_SCHEME_META_SELECTOR) as HTMLMetaElement;
+    if (colorSchemeMeta) {
+        const isMetaDark = colorSchemeMeta.content === 'dark' || (colorSchemeMeta.content.includes('dark') && isSystemDarkModeEnabled());
+        callback(isMetaDark);
+        return;
+    }
+
     const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<HTMLStyleElement & {disabled: boolean}>;
     drStyles.forEach((style) => style.disabled = true);
 
@@ -59,6 +68,9 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
 }
 
 function hasSomeStyle() {
+    if (document.querySelector(COLOR_SCHEME_META_SELECTOR) != null) {
+        return true;
+    }
     if (document.documentElement.style.backgroundColor || (document.body && document.body.style.backgroundColor)) {
         return true;
     }

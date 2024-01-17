@@ -1,3 +1,8 @@
+## 4.9.76 (January 17, 2024)
+
+- Improved dark theme detection.
+- Dynamic mode bug fixes.
+
 ## 4.9.75 (January 12, 2024)
 
 - Fixed CSS variables processing in inline styles.

@@ -50,11 +50,15 @@ function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
     }
 }
 
+const hostsBreakingOnSVGStyleOverride = [
+    'www.onet.pl',
+];
+
 export function shouldManageStyle(element: Node | null): boolean {
     return (
         (
             (element instanceof HTMLStyleElement) ||
-            (element instanceof SVGStyleElement) ||
+            (element instanceof SVGStyleElement && !hostsBreakingOnSVGStyleOverride.includes(location.hostname)) ||
             (
                 element instanceof HTMLLinkElement &&
                 Boolean(element.rel) &&

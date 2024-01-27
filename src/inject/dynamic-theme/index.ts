@@ -156,11 +156,6 @@ function createStaticStyleOverrides() {
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
-    if (isFirefox) {
-        const adoptedOverridesStyle = createOrUpdateStyle('darkreader--adopted-override');
-        document.head.insertBefore(adoptedOverridesStyle, rootVarsStyle.nextSibling);
-    }
-
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
     const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
     if (__CHROMIUM_MV3__) {
@@ -692,9 +687,6 @@ export function removeDynamicTheme(): void {
         removeNode(document.head.querySelector('.darkreader--override'));
         removeNode(document.head.querySelector('.darkreader--variables'));
         removeNode(document.head.querySelector('.darkreader--root-vars'));
-        if (isFirefox) {
-            removeNode(document.head.querySelector('.darkreader--adopted-override'));
-        }
         removeNode(document.head.querySelector('meta[name="darkreader"]'));
         removeProxy();
     }

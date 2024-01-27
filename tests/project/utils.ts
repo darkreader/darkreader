@@ -2,11 +2,11 @@ import type {Readable} from 'stream';
 import {PassThrough} from 'stream';
 import type {ChildProcess} from 'child_process';
 import {once} from 'events';
-import type {OptionsWithEncoding} from 'get-stream';
+import type {Options} from 'get-stream';
 import getStream from 'get-stream';
-import {promiseWithTimeout} from '../support/test-utils';
+import {promiseWithTimeout} from '../support/test-utils.ts';
 
-export type ChildClosedOptions = OptionsWithEncoding & {serialization?: false | 'json'; timeout?: number};
+export type ChildClosedOptions = Options & {serialization?: false | 'json'; timeout?: number};
 
 export type ChildClosedPayload = {stdout: string; stderr: string; response?: any};
 

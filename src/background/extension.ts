@@ -316,7 +316,7 @@ export class Extension {
                         return (await chrome.scripting.executeScript({
                             target: {tabId, frameIds: [frameId]},
                             func: detectPDF,
-                        }))[0].result;
+                        }))[0].result || false;
                     } else if (__CHROMIUM_MV2__) {
                         return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
                             frameId,

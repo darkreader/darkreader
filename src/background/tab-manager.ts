@@ -309,7 +309,7 @@ export default class TabManager {
                         frameIds: [0],
                     },
                     func: () => window.location.href,
-                }))[0].result;
+                }))[0].result || 'about:blank';
             } catch (e) {
                 return 'about:blank';
             }

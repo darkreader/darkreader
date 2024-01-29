@@ -30,6 +30,18 @@ text: #e8e6e3
 
 ================================
 
+Everforest
+
+DARK
+background: #2b3339
+text: #d1c4a9
+
+LIGHT
+background: #fdf9ed
+text: #5b6971
+
+================================
+
 Gruvbox
 
 DARK

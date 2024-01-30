@@ -482,8 +482,11 @@ function getAdoptedStyleSheetFallback(node: Document | ShadowRoot) {
         fallback = createAdoptedStyleSheetFallback(() => {
             const token = getAdoptedStyleChangeToken(node);
             requestAnimationFrameOnce(token, () => {
-                const id = adoptedStyleNodeIds.get(node)!;
+                const id = adoptedStyleNodeIds.get(node);
                 const commands = fallback?.commands();
+                if (!id || !commands) {
+                    return;
+                }
                 const data = {id, commands};
                 document.dispatchEvent(new CustomEvent('__darkreader__adoptedStyleSheetCommands', {detail: JSON.stringify(data)}));
             });

@@ -234,7 +234,7 @@ export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedSt
         }
     }
 
-    const builder = new StyleSheetCommandBuilder(onChange);;
+    const builder = new StyleSheetCommandBuilder(onChange);
 
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         lastTheme = theme;

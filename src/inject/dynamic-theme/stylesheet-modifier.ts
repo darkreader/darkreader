@@ -161,19 +161,16 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             const {selector, declarations} = rule;
 
             let selectorText = selector;
-            if (
-                isChromium &&
-                selector.startsWith(':is(') && (
-                    selector.includes(':is()') ||
-                    selector.includes(':where()') || (
-                        selector.includes(':where(') &&
-                        selector.includes(':-moz')
-                    )
-                )
-            ) {
-                // Empty :is() and :where() selectors or
-                // selectors like :is(:where(:-unknown))
-                // break Chrome 119 when calling deleteRule()
+            // Empty :is() and :where() selectors or
+            // selectors like :is(:where(:-unknown))
+            // break Chrome 119 when calling deleteRule()
+            const emptyIsWhereSelector = isChromium && selector.startsWith(':is(') && (
+                selector.includes(':is()') ||
+                selector.includes(':where()') ||
+                (selector.includes(':where(') && selector.includes(':-moz'))
+            );
+            const viewTransitionSelector = selector.includes('::view-transition-');
+            if (emptyIsWhereSelector || viewTransitionSelector) {
                 selectorText = '.darkreader-unsupported-selector';
             }
 

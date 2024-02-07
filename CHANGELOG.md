@@ -1,3 +1,8 @@
+## 4.9.77 (February 7, 2024)
+
+- Firefox: Fixed errors when Adopted Stylesheets were not present.
+- Fixed breaking on ::view-transition selectors (Airbnb issue).
+
 ## 4.9.76 (January 17, 2024)
 
 - Improved dark theme detection.

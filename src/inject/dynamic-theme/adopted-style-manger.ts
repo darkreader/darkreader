@@ -3,6 +3,7 @@ import type {CSSBuilder} from './stylesheet-modifier';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
 const overrides = new WeakSet<CSSStyleSheet>();
+const overridesBySource = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
@@ -84,8 +85,16 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 continue;
             }
 
+            const readyOverride = overridesBySource.get(sheet);
+            if (readyOverride) {
+                rulesChangeKey = getRulesChangeKey();
+                injectSheet(sheet, readyOverride);
+                return;
+            }
+
             const rules = sheet.cssRules;
             const override = new CSSStyleSheet();
+            overridesBySource.set(sheet, override);
 
             const prepareSheet = () => {
                 for (let i = override.cssRules.length - 1; i >= 0; i--) {
@@ -120,6 +129,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         frameId = requestAnimationFrame(() => {
             if (checkForUpdates()) {
                 const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
+                sheets.forEach((sheet) => overridesBySource.delete(sheet));
                 callback(sheets);
             }
             watch(callback);

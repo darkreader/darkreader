@@ -8,8 +8,7 @@ import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFac
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
-
-declare const __THUNDERBIRD__: boolean;
+import {createSheetWatcher} from './watch/sheet-changes';
 
 declare global {
     interface Document {
@@ -92,11 +91,6 @@ export function getManageableStyles(node: Node | null, results: StyleElement[] =
 
 const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
 const corsStyleSet = new WeakSet<HTMLStyleElement>();
-
-let canOptimizeUsingProxy = false;
-document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
-    canOptimizeUsingProxy = true;
-}, {once: true, passive: true});
 
 let loadingLinkCounter = 0;
 const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
@@ -434,94 +428,14 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    function watchForSheetChanges() {
-        watchForSheetChangesUsingProxy();
-        // Sometimes sheet can be null in Firefox and Safari
-        // So need to watch for it using rAF
-        if (!__THUNDERBIRD__ && !(canOptimizeUsingProxy && element.sheet)) {
-            watchForSheetChangesUsingRAF();
-        }
-    }
-
-    let rulesChangeKey: number | null = null;
-    let rulesCheckFrameId: number | null = null;
-
-    function getRulesChangeKey() {
-        const rules = safeGetSheetRules();
-        return rules ? rules.length : null;
-    }
-
-    function didRulesKeyChange() {
-        return getRulesChangeKey() !== rulesChangeKey;
-    }
-
-    function watchForSheetChangesUsingRAF() {
-        rulesChangeKey = getRulesChangeKey();
-        stopWatchingForSheetChangesUsingRAF();
-        const checkForUpdate = () => {
-            if (didRulesKeyChange()) {
-                rulesChangeKey = getRulesChangeKey();
-                update();
-            }
-            if (canOptimizeUsingProxy && element.sheet) {
-                stopWatchingForSheetChangesUsingRAF();
-                return;
-            }
-            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
-        };
-
-        checkForUpdate();
-    }
-
-    function stopWatchingForSheetChangesUsingRAF() {
-        // TODO: reove cast once types are updated
-        cancelAnimationFrame(rulesCheckFrameId as number);
-    }
-
-    let areSheetChangesPending = false;
-
-    function onSheetChange() {
-        canOptimizeUsingProxy = true;
-        stopWatchingForSheetChangesUsingRAF();
-        if (areSheetChangesPending) {
-            return;
-        }
-
-        function handleSheetChanges() {
-            areSheetChangesPending = false;
-            if (cancelAsyncOperations) {
-                return;
-            }
-            update();
-        }
-
-        areSheetChangesPending = true;
-        if (typeof queueMicrotask === 'function') {
-            queueMicrotask(handleSheetChanges);
-        } else {
-            requestAnimationFrame(handleSheetChanges);
-        }
-    }
-
-    function watchForSheetChangesUsingProxy() {
-        element.addEventListener('__darkreader__updateSheet', onSheetChange, {passive: true});
-    }
-
-    function stopWatchingForSheetChangesUsingProxy() {
-        element.removeEventListener('__darkreader__updateSheet', onSheetChange);
-    }
-
-    function stopWatchingForSheetChanges() {
-        stopWatchingForSheetChangesUsingProxy();
-        stopWatchingForSheetChangesUsingRAF();
-    }
+    const sheetChangeWatcher = createSheetWatcher(element, safeGetSheetRules, update);
 
     function pause() {
         observer.disconnect();
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
-        stopWatchingForSheetChanges();
+        sheetChangeWatcher.stop();
     }
 
     function destroy() {
@@ -539,7 +453,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     function watch() {
         observer.observe(element, observerOptions);
         if (element instanceof HTMLStyleElement) {
-            watchForSheetChanges();
+            sheetChangeWatcher.start();
         }
     }
 

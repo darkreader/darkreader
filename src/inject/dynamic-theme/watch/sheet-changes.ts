@@ -53,8 +53,7 @@ export function createSheetWatcher(
     }
 
     function stopWatchingForSheetChangesUsingRAF() {
-        // TODO: reove cast once types are updated
-        cancelAnimationFrame(rulesCheckFrameId as number);
+        rulesCheckFrameId && cancelAnimationFrame(rulesCheckFrameId);
     }
 
     let areSheetChangesPending = false;
@@ -75,11 +74,7 @@ export function createSheetWatcher(
         }
 
         areSheetChangesPending = true;
-        if (typeof queueMicrotask === 'function') {
-            queueMicrotask(handleSheetChanges);
-        } else {
-            requestAnimationFrame(handleSheetChanges);
-        }
+        queueMicrotask(handleSheetChanges);
     }
 
     function watchForSheetChangesUsingProxy() {

@@ -14,54 +14,23 @@ export function createSheetWatcher(
     update: () => void,
     isCancelled: () => boolean,
 ): SheetWatcher {
+    let rafSheetWatcher: SheetWatcher | null = null;
+
     function watchForSheetChanges() {
         watchForSheetChangesUsingProxy();
         // Sometimes sheet can be null in Firefox and Safari
         // So need to watch for it using rAF
         if (!__THUNDERBIRD__ && !(canUseSheetProxy && element.sheet)) {
-            watchForSheetChangesUsingRAF();
+            rafSheetWatcher = createRAFSheetWatcher(element, safeGetSheetRules, update, isCancelled);
+            rafSheetWatcher.start();
         }
-    }
-
-    let rulesChangeKey: number | null = null;
-    let rulesCheckFrameId: number | null = null;
-
-    function getRulesChangeKey() {
-        const rules = safeGetSheetRules();
-        return rules ? rules.length : null;
-    }
-
-    function didRulesKeyChange() {
-        return getRulesChangeKey() !== rulesChangeKey;
-    }
-
-    function watchForSheetChangesUsingRAF() {
-        rulesChangeKey = getRulesChangeKey();
-        stopWatchingForSheetChangesUsingRAF();
-        const checkForUpdate = () => {
-            if (didRulesKeyChange()) {
-                rulesChangeKey = getRulesChangeKey();
-                update();
-            }
-            if (canUseSheetProxy && element.sheet) {
-                stopWatchingForSheetChangesUsingRAF();
-                return;
-            }
-            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
-        };
-
-        checkForUpdate();
-    }
-
-    function stopWatchingForSheetChangesUsingRAF() {
-        rulesCheckFrameId && cancelAnimationFrame(rulesCheckFrameId);
     }
 
     let areSheetChangesPending = false;
 
     function onSheetChange() {
         canUseSheetProxy = true;
-        stopWatchingForSheetChangesUsingRAF();
+        rafSheetWatcher?.stop();
         if (areSheetChangesPending) {
             return;
         }
@@ -88,11 +57,58 @@ export function createSheetWatcher(
 
     function stopWatchingForSheetChanges() {
         stopWatchingForSheetChangesUsingProxy();
-        stopWatchingForSheetChangesUsingRAF();
+        rafSheetWatcher?.stop();
     }
 
     return {
         start: watchForSheetChanges,
         stop: stopWatchingForSheetChanges,
+    };
+}
+
+function createRAFSheetWatcher(
+    element: HTMLLinkElement | HTMLStyleElement,
+    safeGetSheetRules: () => CSSRuleList | null,
+    update: () => void,
+    isCancelled: () => boolean,
+): SheetWatcher {
+    let rulesChangeKey: number | null = null;
+    let rulesCheckFrameId: number | null = null;
+
+    function getRulesChangeKey() {
+        const rules = safeGetSheetRules();
+        return rules ? rules.length : null;
+    }
+
+    function didRulesKeyChange() {
+        return getRulesChangeKey() !== rulesChangeKey;
+    }
+
+    function watchForSheetChangesUsingRAF() {
+        rulesChangeKey = getRulesChangeKey();
+        stopWatchingForSheetChangesUsingRAF();
+        const checkForUpdate = () => {
+            const cancelled = isCancelled();
+            if (!cancelled && didRulesKeyChange()) {
+                rulesChangeKey = getRulesChangeKey();
+                update();
+            }
+            if (cancelled || canUseSheetProxy && element.sheet) {
+                stopWatchingForSheetChangesUsingRAF();
+                return;
+            }
+            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
+        };
+
+        checkForUpdate();
+    }
+
+    function stopWatchingForSheetChangesUsingRAF() {
+        rulesCheckFrameId && cancelAnimationFrame(rulesCheckFrameId);
+    }
+
+    return {
+        start: watchForSheetChangesUsingRAF,
+        stop: stopWatchingForSheetChangesUsingRAF,
     };
 }

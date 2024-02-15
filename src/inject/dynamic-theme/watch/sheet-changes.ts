@@ -11,7 +11,8 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => canUseShee
 export function createSheetWatcher(
     element: HTMLLinkElement | HTMLStyleElement,
     safeGetSheetRules: () => CSSRuleList | null,
-    update: () => void
+    update: () => void,
+    isCancelled: () => boolean,
 ): SheetWatcher {
     function watchForSheetChanges() {
         watchForSheetChangesUsingProxy();
@@ -67,7 +68,7 @@ export function createSheetWatcher(
 
         function handleSheetChanges() {
             areSheetChangesPending = false;
-            if (canUseSheetProxy) {
+            if (isCancelled()) {
                 return;
             }
             update();

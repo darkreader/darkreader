@@ -113,6 +113,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let cancelAsyncOperations = false;
     let isOverrideEmpty = true;
+    const isAsyncCancelled = () => cancelAsyncOperations;
 
     const sheetModifier = createStyleSheetModifier();
 
@@ -385,7 +386,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 theme,
                 ignoreImageAnalysis,
                 force,
-                isAsyncCancelled: () => cancelAsyncOperations,
+                isAsyncCancelled,
             });
             isOverrideEmpty = syncStyle!.sheet!.cssRules.length === 0;
             if (sheetModifier.shouldRebuildStyle()) {
@@ -428,7 +429,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    const sheetChangeWatcher = createSheetWatcher(element, safeGetSheetRules, update);
+    const sheetChangeWatcher = createSheetWatcher(element, safeGetSheetRules, update, isAsyncCancelled);
 
     function pause() {
         observer.disconnect();

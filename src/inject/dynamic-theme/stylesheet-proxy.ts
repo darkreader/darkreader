@@ -85,9 +85,17 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     let onSheetChange: (sheet: CSSStyleSheet) => void;
 
+    function isDRElement(element?: Element) {
+        return element?.classList?.contains('darkreader');
+    }
+
+    function isDRSheet(sheet: CSSStyleSheet) {
+        return isDRElement(sheet.ownerNode as Element);
+    }
+
     function proxyAddRule(selector?: string, style?: string, index?: number): number {
         addRuleDescriptor!.value.call(this, selector, style, index);
-        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
+        if (this.ownerNode && !isDRSheet(this)) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
@@ -99,7 +107,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyInsertRule(rule: string, index?: number): number {
         const returnValue = insertRuleDescriptor!.value.call(this, rule, index);
-        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
+        if (this.ownerNode && !isDRSheet(this)) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
@@ -110,7 +118,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyDeleteRule(index: number): void {
         deleteRuleDescriptor!.value.call(this, index);
-        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
+        if (this.ownerNode && !isDRSheet(this)) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
@@ -120,7 +128,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyRemoveRule(index?: number): void {
         removeRuleDescriptor!.value.call(this, index);
-        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
+        if (this.ownerNode && !isDRSheet(this)) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
@@ -130,7 +138,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyReplace(cssText: string): Promise<CSSStyleSheet> {
         const returnValue = replaceDescriptor!.value.call(this, cssText);
-        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader')) && returnValue && returnValue instanceof Promise) {
+        if (this.ownerNode && !isDRSheet(this) && returnValue && returnValue instanceof Promise) {
             returnValue.then(() => this.ownerNode.dispatchEvent(updateSheetEvent));
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
@@ -143,7 +151,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     function proxyReplaceSync(cssText: string): void {
         replaceSyncDescriptor!.value.call(this, cssText);
-        if (this.ownerNode && !(this.ownerNode.classList && this.ownerNode.classList.contains('darkreader'))) {
+        if (this.ownerNode && !isDRSheet(this)) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
@@ -154,16 +162,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     function proxyDocumentStyleSheets() {
         const getCurrentValue = () => {
             const docSheets: StyleSheetList = documentStyleSheetsDescriptor!.get!.call(this);
-
-            const filteredSheets = [...docSheets].filter((styleSheet) =>
-                styleSheet.ownerNode && !(
-                    (styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList &&
-                    (styleSheet.ownerNode as Exclude<typeof styleSheet.ownerNode, ProcessingInstruction>).classList.contains('darkreader')
-                )
-            );
-
+            const filteredSheets = [...docSheets].filter((styleSheet) => styleSheet.ownerNode && !isDRSheet(styleSheet));
             (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
-
             return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
         };
 
@@ -195,7 +195,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             const elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor!.value.call(this, tagName);
 
             return Object.setPrototypeOf([...elements].filter((element: HTMLElement) =>
-                element && !(element.classList && element.classList.contains('darkreader'))
+                element && !isDRElement(element)
             ), NodeList.prototype);
         };
 

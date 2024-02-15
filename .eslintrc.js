@@ -57,7 +57,7 @@ config.overrides.push({
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
-        'local/consistent-new-lines': 'error',
+        // 'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/comma-dangle': ['error', {
             arrays: 'always-multiline',

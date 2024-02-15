@@ -1,89 +1,40 @@
 declare const __FIREFOX_MV2__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
+type OverrideFactory<T, P extends keyof T> = (native: T[P] & ((...args: any[]) => any)) => (this: T, ...args: Parameters<typeof native>) => ReturnType<typeof native>;
+
 export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {
     document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
 
-    const addRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
-    const insertRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
-    const deleteRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
-    const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
-    const replaceDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'replace');
-    const replaceSyncDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'replaceSync');
-
-    const documentStyleSheetsDescriptor = enableStyleSheetsProxy ?
-        Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
-
-    const customElementRegistryDefineDescriptor = enableCustomElementRegistryProxy ?
-        Object.getOwnPropertyDescriptor(CustomElementRegistry.prototype, 'define') : null;
-
-    // Reference:
-    // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
-    const shouldWrapHTMLElement = [
-        'baidu.com',
-        'baike.baidu.com',
-        'ditu.baidu.com',
-        'map.baidu.com',
-        'maps.baidu.com',
-        'haokan.baidu.com',
-        'pan.baidu.com',
-        'passport.baidu.com',
-        'tieba.baidu.com',
-        'www.baidu.com'].includes(location.hostname);
-
-    const getElementsByTagNameDescriptor = shouldWrapHTMLElement ?
-        Object.getOwnPropertyDescriptor(Element.prototype, 'getElementsByTagName') : null;
-
-    // Reference:
-    // https://github.com/darkreader/darkreader/issues/10300#issuecomment-1317445632
-    const shouldProxyChildNodes = location.hostname === 'www.vy.no';
-
-    const childNodesDescriptor = shouldProxyChildNodes ?
-        Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes') : null;
-
     const cleaners: Array<() => void> = [];
 
-    const cleanUp = () => {
-        Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor!);
-        Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', insertRuleDescriptor!);
-        Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', deleteRuleDescriptor!);
-        Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor!);
-        Object.defineProperty(CSSStyleSheet.prototype, 'replace', replaceDescriptor!);
-        Object.defineProperty(CSSStyleSheet.prototype, 'replaceSync', replaceSyncDescriptor!);
-        document.removeEventListener('__darkreader__cleanUp', cleanUp);
-        document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
-        document.removeEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport);
-        if (enableStyleSheetsProxy) {
-            Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor!);
-        }
-        if (enableCustomElementRegistryProxy) {
-            Object.defineProperty(CustomElementRegistry.prototype, 'define', customElementRegistryDefineDescriptor!);
-        }
-        if (shouldWrapHTMLElement) {
-            Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor!);
-        }
-        if (shouldProxyChildNodes) {
-            Object.defineProperty(Node.prototype, 'childNodes', childNodesDescriptor!);
-        }
+    function cleanUp() {
         cleaners.forEach((clean) => clean());
         cleaners.splice(0);
-    };
+    }
 
-    const addUndefinedResolverInner = (tag: string) => {
-        customElements.whenDefined(tag).then(() => {
-            document.dispatchEvent(new CustomEvent('__darkreader__isDefined', {detail: {tag}}));
-        });
-    };
+    function documentEventListener(type: string, listener: (e: CustomEvent) => void, options?: AddEventListenerOptions) {
+        document.addEventListener(type, listener, options);
+        cleaners.push(() => document.removeEventListener(type, listener));
+    }
 
-    const addUndefinedResolver = (e: CustomEvent<{tag: string}>) => addUndefinedResolverInner(e.detail.tag);
+    documentEventListener('__darkreader__cleanUp', cleanUp);
 
-    document.addEventListener('__darkreader__cleanUp', cleanUp, {passive: true});
-    document.addEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver, {passive: true});
-    document.addEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport, {once: true});
+    function overrideProperty<T, P extends keyof T>(cls: {prototype: T}, prop: P, descriptorProp: keyof PropertyDescriptor, factory: OverrideFactory<T, P>) {
+        const proto = cls.prototype;
+        const descriptor = Object.getOwnPropertyDescriptor(proto, prop)!;
+        const newValue = factory(descriptor[descriptorProp]);
+        Object.defineProperty(proto, prop, {...descriptor, [descriptorProp]: newValue});
+        cleaners.push(() => Object.defineProperty(proto, prop, descriptor));
+    }
 
-    const updateSheetEvent = new Event('__darkreader__updateSheet');
+    function override<T, P extends keyof T>(cls: {prototype: T}, prop: P, factory: OverrideFactory<T, P>) {
+        overrideProperty(cls, prop, 'value', factory);
+    }
 
-    let onSheetChange: (sheet: CSSStyleSheet) => void;
+    function overrideField<T, P extends keyof T>(cls: {prototype: T}, prop: P, factory: OverrideFactory<T, P>) {
+        overrideProperty(cls, prop, 'get', factory);
+    }
 
     function isDRElement(element?: Element) {
         return element?.classList?.contains('darkreader');
@@ -93,132 +44,118 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         return isDRElement(sheet.ownerNode as Element);
     }
 
-    function proxyAddRule(selector?: string, style?: string, index?: number): number {
-        addRuleDescriptor!.value.call(this, selector, style, index);
-        if (this.ownerNode && !isDRSheet(this)) {
-            this.ownerNode.dispatchEvent(updateSheetEvent);
-        }
-        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            onSheetChange(this);
-        }
-        // Should always returns -1 https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/addRule#Return_value.
-        return -1;
-    }
+    const updateSheetEvent = new CustomEvent('__darkreader__updateSheet');
+    let onSheetChange: (sheet: CSSStyleSheet) => void;
 
-    function proxyInsertRule(rule: string, index?: number): number {
-        const returnValue = insertRuleDescriptor!.value.call(this, rule, index);
-        if (this.ownerNode && !isDRSheet(this)) {
-            this.ownerNode.dispatchEvent(updateSheetEvent);
+    const reportSheetChange = (sheet: CSSStyleSheet) => {
+        if (sheet.ownerNode && !isDRSheet(sheet)) {
+            sheet.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            onSheetChange(this);
+            onSheetChange(sheet);
         }
-        return returnValue;
-    }
+    };
 
-    function proxyDeleteRule(index: number): void {
-        deleteRuleDescriptor!.value.call(this, index);
-        if (this.ownerNode && !isDRSheet(this)) {
-            this.ownerNode.dispatchEvent(updateSheetEvent);
+    const reportSheetChangeAsync = (sheet: CSSStyleSheet, promise: Promise<any>) => {
+        const {ownerNode} = sheet;
+        if (ownerNode && !isDRSheet(sheet) && promise && promise instanceof Promise) {
+            promise.then(() => ownerNode.dispatchEvent(updateSheetEvent));
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            onSheetChange(this);
-        }
-    }
-
-    function proxyRemoveRule(index?: number): void {
-        removeRuleDescriptor!.value.call(this, index);
-        if (this.ownerNode && !isDRSheet(this)) {
-            this.ownerNode.dispatchEvent(updateSheetEvent);
-        }
-        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            onSheetChange(this);
-        }
-    }
-
-    function proxyReplace(cssText: string): Promise<CSSStyleSheet> {
-        const returnValue = replaceDescriptor!.value.call(this, cssText);
-        if (this.ownerNode && !isDRSheet(this) && returnValue && returnValue instanceof Promise) {
-            returnValue.then(() => this.ownerNode.dispatchEvent(updateSheetEvent));
-        }
-        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            if (returnValue && returnValue instanceof Promise) {
-                returnValue.then(() => onSheetChange(this));
+            if (promise && promise instanceof Promise) {
+                promise.then(() => onSheetChange(this));
             }
         }
+    };
+
+    override(CSSStyleSheet, 'addRule', (native) => function (selector?: string, style?: string, index?: number) {
+        native.call(this, selector, style, index);
+        reportSheetChange(this);
+        // Should always returns -1 https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/addRule#Return_value.
+        return -1;
+    });
+
+    override(CSSStyleSheet, 'insertRule', (native) => function (rule: string, index?: number) {
+        const returnValue = native.call(this, rule, index) as number;
+        reportSheetChange(this);
         return returnValue;
+    });
+
+    override(CSSStyleSheet, 'deleteRule', (native) => function (index: number) {
+        native.call(this, index);
+        reportSheetChange(this);
+    });
+
+    override(CSSStyleSheet, 'removeRule', (native) => function (index?: number) {
+        native.call(this, index);
+        reportSheetChange(this);
+    });
+
+    override(CSSStyleSheet, 'replace', (native) => function (cssText: string) {
+        const returnValue = native.call(this, cssText);
+        reportSheetChangeAsync(this, returnValue);
+        return returnValue;
+    });
+
+    override(CSSStyleSheet, 'replaceSync', (native) => function (cssText: string) {
+        native.call(this, cssText);
+        reportSheetChange(this);
+    });
+
+    // Reference:
+    // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
+    const shouldWrapHTMLElement = location.hostname === 'baidu.com' || location.hostname.endsWith('.baidu.com');
+    if (shouldWrapHTMLElement) {
+        override(Element, 'getElementsByTagName', (native) => function (tagName: string): NodeListOf<HTMLElement> {
+            if (tagName !== 'style') {
+                return native.call(this, tagName);
+            }
+
+            const getCurrentElementValue = () => {
+                const elements: NodeListOf<HTMLElement> = native.call(this, tagName);
+
+                return Object.setPrototypeOf([...elements].filter((element: HTMLElement) =>
+                    element && !isDRElement(element)
+                ), NodeList.prototype);
+            };
+
+            let elements = getCurrentElementValue();
+            const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
+                get: function (_: NodeListOf<HTMLElement>, property: string) {
+                    return getCurrentElementValue()[Number(property) || property];
+                },
+            };
+            elements = new Proxy(elements, nodeListBehavior);
+            return elements;
+        });
     }
 
-    function proxyReplaceSync(cssText: string): void {
-        replaceSyncDescriptor!.value.call(this, cssText);
-        if (this.ownerNode && !isDRSheet(this)) {
-            this.ownerNode.dispatchEvent(updateSheetEvent);
-        }
-        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            onSheetChange(this);
-        }
+    // Reference:
+    // https://github.com/darkreader/darkreader/issues/10300#issuecomment-1317445632
+    const shouldProxyChildNodes = location.hostname === 'www.vy.no';
+    if (shouldProxyChildNodes) {
+        overrideField(Node, 'childNodes', (native) => function (): NodeListOf<ChildNode> {
+            const childNodes: NodeListOf<ChildNode> = native.call(this);
+
+            return Object.setPrototypeOf([...childNodes].filter((element: ChildNode) => {
+                return !isDRElement(element as Element);
+            }), NodeList.prototype);
+        });
     }
 
-    function proxyDocumentStyleSheets() {
-        const getCurrentValue = () => {
-            const docSheets: StyleSheetList = documentStyleSheetsDescriptor!.get!.call(this);
-            const filteredSheets = [...docSheets].filter((styleSheet) => styleSheet.ownerNode && !isDRSheet(styleSheet));
-            (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
-            return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
-        };
+    const resolveCustomElement = (tag: string) => {
+        customElements.whenDefined(tag).then(() => {
+            document.dispatchEvent(new CustomEvent('__darkreader__isDefined', {detail: {tag}}));
+        });
+    };
 
-        let elements = getCurrentValue();
+    documentEventListener('__darkreader__addUndefinedResolver', (e: CustomEvent<{tag: string}>) => resolveCustomElement(e.detail.tag));
 
-        // Because StyleSheetList are so called "live objects".
-        // Every time you access them, it will return all stylesheets from
-        // current situation of the DOM. Instead of a static list.
-        const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
-            get: function (_: StyleSheetList, property: string) {
-                return getCurrentValue()[property];
-            },
-        };
-        elements = new Proxy(elements, styleSheetListBehavior);
-        return elements;
-    }
-
-    function proxyCustomElementRegistryDefine(name: string, constructor: any, options: any) {
-        addUndefinedResolverInner(name);
-        customElementRegistryDefineDescriptor!.value.call(this, name, constructor, options);
-    }
-
-    function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
-        if (tagName !== 'style') {
-            return getElementsByTagNameDescriptor!.value.call(this, tagName);
-        }
-
-        const getCurrentElementValue = () => {
-            const elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor!.value.call(this, tagName);
-
-            return Object.setPrototypeOf([...elements].filter((element: HTMLElement) =>
-                element && !isDRElement(element)
-            ), NodeList.prototype);
-        };
-
-        let elements = getCurrentElementValue();
-        // Don't ask just trust me.
-        // Because NodeListOf and HTMLCollection are so called "live objects".
-        // Every time you access them, it will return all tagnames from
-        // current situation of the DOM. Instead of a static list.
-        const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
-            get: function (_: NodeListOf<HTMLElement>, property: string) {
-                return getCurrentElementValue()[Number(property) || property];
-            },
-        };
-        elements = new Proxy(elements, nodeListBehavior);
-        return elements;
-    }
-
-    function proxyChildNodes(): NodeListOf<ChildNode> {
-        const childNodes: NodeListOf<ChildNode> = childNodesDescriptor!.get!.call(this);
-
-        return Object.setPrototypeOf([...childNodes].filter((element: ChildNode) => {
-            return !(element as HTMLElement).classList || !(element as HTMLElement).classList.contains('darkreader');
-        }), NodeList.prototype);
+    if (enableCustomElementRegistryProxy) {
+        override(CustomElementRegistry, 'define', (native) => function (name: string, constructor: any, options: any) {
+            resolveCustomElement(name);
+            native.call(this, name, constructor, options);
+        });
     }
 
     async function checkBlobURLSupport(): Promise<void> {
@@ -244,23 +181,26 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
     }
 
-    Object.defineProperty(CSSStyleSheet.prototype, 'addRule', {...addRuleDescriptor, value: proxyAddRule});
-    Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', {...insertRuleDescriptor, value: proxyInsertRule});
-    Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', {...deleteRuleDescriptor, value: proxyDeleteRule});
-    Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', {...removeRuleDescriptor, value: proxyRemoveRule});
-    Object.defineProperty(CSSStyleSheet.prototype, 'replace', {...replaceDescriptor, value: proxyReplace});
-    Object.defineProperty(CSSStyleSheet.prototype, 'replaceSync', {...replaceSyncDescriptor, value: proxyReplaceSync});
+    documentEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport, {once: true});
+
     if (enableStyleSheetsProxy) {
-        Object.defineProperty(Document.prototype, 'styleSheets', {...documentStyleSheetsDescriptor, get: proxyDocumentStyleSheets});
-    }
-    if (enableCustomElementRegistryProxy) {
-        Object.defineProperty(CustomElementRegistry.prototype, 'define', {...customElementRegistryDefineDescriptor, value: proxyCustomElementRegistryDefine});
-    }
-    if (shouldWrapHTMLElement) {
-        Object.defineProperty(Element.prototype, 'getElementsByTagName', {...getElementsByTagNameDescriptor, value: proxyGetElementsByTagName});
-    }
-    if (shouldProxyChildNodes) {
-        Object.defineProperty(Node.prototype, 'childNodes', {...childNodesDescriptor, get: proxyChildNodes});
+        overrideField(Document, 'styleSheets', (native) => function () {
+            const getCurrentValue = () => {
+                const docSheets: StyleSheetList = native.call(this);
+                const filteredSheets = [...docSheets].filter((styleSheet) => styleSheet.ownerNode && !isDRSheet(styleSheet));
+                (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
+                return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
+            };
+
+            let elements = getCurrentValue();
+            const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
+                get: function (_: StyleSheetList, property: string) {
+                    return getCurrentValue()[property];
+                },
+            };
+            elements = new Proxy(elements, styleSheetListBehavior);
+            return elements;
+        });
     }
 
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {

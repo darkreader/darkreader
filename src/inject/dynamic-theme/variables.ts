@@ -40,7 +40,7 @@ export class VariablesStore {
     private unstableVarValues = new Map<string, string>();
     private onRootVariableDefined: () => void;
 
-    public clear(): void {
+    clear(): void {
         this.varTypes.clear();
         this.rulesQueue.splice(0);
         this.inlineStyleQueue.splice(0);
@@ -62,15 +62,15 @@ export class VariablesStore {
         );
     }
 
-    public addRulesForMatching(rules: CSSRuleList): void {
+    addRulesForMatching(rules: CSSRuleList): void {
         this.rulesQueue.push(rules);
     }
 
-    public addInlineStyleForMatching(style: CSSStyleDeclaration): void {
+    addInlineStyleForMatching(style: CSSStyleDeclaration): void {
         this.inlineStyleQueue.push(style);
     }
 
-    public matchVariablesAndDependents(): void {
+    matchVariablesAndDependents(): void {
         if (this.rulesQueue.length === 0 && this.inlineStyleQueue.length === 0) {
             return;
         }
@@ -130,7 +130,7 @@ export class VariablesStore {
         this.changedTypeVars.clear();
     }
 
-    public getModifierForVariable(options: {
+    getModifierForVariable(options: {
         varName: string;
         sourceValue: string;
         rule: CSSStyleRule;
@@ -225,7 +225,7 @@ export class VariablesStore {
         };
     }
 
-    public getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
+    getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
         // TODO(gusted): This condition is incorrect, as the sourceValue still contains a variable.
         // Simply replacing it with some definition is incorrect as variables are element-independent.
         // Fully handling this requires having a function that gives the variable's value given an
@@ -510,11 +510,11 @@ export class VariablesStore {
         });
     }
 
-    public setOnRootVariableChange(callback: () => void): void {
+    setOnRootVariableChange(callback: () => void): void {
         this.onRootVariableDefined = callback;
     }
 
-    public putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
+    putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
         const sheet = styleElement.sheet!;
         if (sheet.cssRules.length > 0) {
             sheet.deleteRule(0);

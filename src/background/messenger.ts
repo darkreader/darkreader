@@ -26,7 +26,7 @@ export default class Messenger {
     private static adapter: ExtensionAdapter;
     private static changeListenerCount: number;
 
-    public static init(adapter: ExtensionAdapter): void {
+    static init(adapter: ExtensionAdapter): void {
         Messenger.adapter = adapter;
         Messenger.changeListenerCount = 0;
 
@@ -172,7 +172,7 @@ export default class Messenger {
         }
     }
 
-    public static reportChanges(data: ExtensionData): void {
+    static reportChanges(data: ExtensionData): void {
         if (Messenger.changeListenerCount > 0) {
             chrome.runtime.sendMessage<MessageBGtoUI>({
                 type: MessageTypeBGtoUI.CHANGES,

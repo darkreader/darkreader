@@ -225,7 +225,7 @@ export class Extension {
         }, WAKE_CHECK_INTERVAL);
     }
 
-    public static async start(): Promise<void> {
+    static async start(): Promise<void> {
         Extension.init();
         await Promise.all([
             ConfigManager.load({local: true}),
@@ -390,7 +390,7 @@ export class Extension {
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name!]: cmd.shortcut}), {} as Shortcuts);
     }
 
-    public static async collectData(): Promise<ExtensionData> {
+    static async collectData(): Promise<ExtensionData> {
         await Extension.loadData();
         const [
             news,
@@ -419,7 +419,7 @@ export class Extension {
         };
     }
 
-    public static async collectDevToolsData(): Promise<DevToolsData> {
+    static async collectDevToolsData(): Promise<DevToolsData> {
         const [
             dynamicFixesText,
             filterFixesText,
@@ -504,7 +504,7 @@ export class Extension {
         }
     };
 
-    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
+    static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
         const promises = [];
         const prev = {...UserStorage.settings};
 

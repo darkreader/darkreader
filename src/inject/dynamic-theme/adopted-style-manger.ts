@@ -175,29 +175,29 @@ interface DeepStyleSheetCommand {
 }
 
 class StyleSheetCommandBuilder implements CSSBuilder {
-    public cssRules: StyleSheetCommandBuilder[] = [];
+    cssRules: StyleSheetCommandBuilder[] = [];
 
     private commands: StyleSheetCommand[] = [];
     private onChange: () => void;
 
-    public constructor(onChange: () => void) {
+    constructor(onChange: () => void) {
         this.onChange = onChange;
     }
 
-    public insertRule(cssText: string, index = 0): number {
+    insertRule(cssText: string, index = 0): number {
         this.commands.push({type: 'insert', index, cssText});
         this.cssRules.splice(index, 0, new StyleSheetCommandBuilder(this.onChange));
         this.onChange();
         return index;
     }
 
-    public deleteRule(index: number): void {
+    deleteRule(index: number): void {
         this.commands.push({type: 'delete', index});
         this.cssRules.splice(index, 1);
         this.onChange();
     }
 
-    public replaceSync(cssText: string) {
+    replaceSync(cssText: string) {
         this.commands.splice(0);
         this.commands.push({type: 'replace', cssText});
         if (cssText === '') {
@@ -208,7 +208,7 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         this.onChange();
     }
 
-    public getDeepCSSCommands() {
+    getDeepCSSCommands() {
         const deep: DeepStyleSheetCommand[] = [];
         this.commands.forEach((command) => {
             deep.push({
@@ -224,7 +224,7 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         return deep;
     }
 
-    public clearDeepCSSCommands() {
+    clearDeepCSSCommands() {
         this.commands.splice(0);
         this.cssRules.forEach((rule) => rule.clearDeepCSSCommands());
     }

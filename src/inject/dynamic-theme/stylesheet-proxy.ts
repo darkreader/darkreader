@@ -20,20 +20,20 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     documentEventListener('__darkreader__cleanUp', cleanUp);
 
-    function overrideProperty<T, P extends keyof T>(cls: {prototype: T}, prop: P, descriptorProp: keyof PropertyDescriptor, factory: OverrideFactory<T, P>) {
+    function overrideProperty<T, P extends keyof T>(cls: {prototype: T}, prop: P, overrides: Record<string, OverrideFactory<T, P>>) {
         const proto = cls.prototype;
-        const descriptor = Object.getOwnPropertyDescriptor(proto, prop)!;
-        const newValue = factory(descriptor[descriptorProp]);
-        Object.defineProperty(proto, prop, {...descriptor, [descriptorProp]: newValue});
-        cleaners.push(() => Object.defineProperty(proto, prop, descriptor));
+        const oldDescriptor = Object.getOwnPropertyDescriptor(proto, prop)!;
+        const newDescriptor: PropertyDescriptor = {...oldDescriptor};
+        Object.keys(overrides).forEach((key: keyof PropertyDescriptor) => {
+            const factory = overrides[key];
+            newDescriptor[key] = factory(oldDescriptor[key]);
+        });
+        Object.defineProperty(proto, prop, newDescriptor);
+        cleaners.push(() => Object.defineProperty(proto, prop, oldDescriptor));
     }
 
     function override<T, P extends keyof T>(cls: {prototype: T}, prop: P, factory: OverrideFactory<T, P>) {
-        overrideProperty(cls, prop, 'value', factory);
-    }
-
-    function overrideField<T, P extends keyof T>(cls: {prototype: T}, prop: P, factory: OverrideFactory<T, P>) {
-        overrideProperty(cls, prop, 'get', factory);
+        overrideProperty(cls, prop, {value: factory});
     }
 
     function isDRElement(element?: Element) {
@@ -47,16 +47,16 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     const updateSheetEvent = new CustomEvent('__darkreader__updateSheet');
     let onSheetChange: (sheet: CSSStyleSheet) => void;
 
-    const reportSheetChange = (sheet: CSSStyleSheet) => {
+    function reportSheetChange(sheet: CSSStyleSheet) {
         if (sheet.ownerNode && !isDRSheet(sheet)) {
             sheet.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
             onSheetChange(sheet);
         }
-    };
+    }
 
-    const reportSheetChangeAsync = (sheet: CSSStyleSheet, promise: Promise<any>) => {
+    function reportSheetChangeAsync(sheet: CSSStyleSheet, promise: Promise<any>) {
         const {ownerNode} = sheet;
         if (ownerNode && !isDRSheet(sheet) && promise && promise instanceof Promise) {
             promise.then(() => ownerNode.dispatchEvent(updateSheetEvent));
@@ -66,7 +66,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 promise.then(() => onSheetChange(this));
             }
         }
-    };
+    }
 
     override(CSSStyleSheet, 'addRule', (native) => function (selector?: string, style?: string, index?: number) {
         native.call(this, selector, style, index);
@@ -134,20 +134,21 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     // https://github.com/darkreader/darkreader/issues/10300#issuecomment-1317445632
     const shouldProxyChildNodes = location.hostname === 'www.vy.no';
     if (shouldProxyChildNodes) {
-        overrideField(Node, 'childNodes', (native) => function (): NodeListOf<ChildNode> {
-            const childNodes: NodeListOf<ChildNode> = native.call(this);
-
-            return Object.setPrototypeOf([...childNodes].filter((element: ChildNode) => {
-                return !isDRElement(element as Element);
-            }), NodeList.prototype);
+        overrideProperty(Node, 'childNodes', {
+            get: (native) => function (): NodeListOf<ChildNode> {
+                const childNodes: NodeListOf<ChildNode> = native.call(this);
+                return Object.setPrototypeOf([...childNodes].filter((element: ChildNode) => {
+                    return !isDRElement(element as Element);
+                }), NodeList.prototype);
+            },
         });
     }
 
-    const resolveCustomElement = (tag: string) => {
+    function resolveCustomElement(tag: string) {
         customElements.whenDefined(tag).then(() => {
             document.dispatchEvent(new CustomEvent('__darkreader__isDefined', {detail: {tag}}));
         });
-    };
+    }
 
     documentEventListener('__darkreader__addUndefinedResolver', (e: CustomEvent<{tag: string}>) => resolveCustomElement(e.detail.tag));
 
@@ -184,22 +185,24 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     documentEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport, {once: true});
 
     if (enableStyleSheetsProxy) {
-        overrideField(Document, 'styleSheets', (native) => function () {
-            const getCurrentValue = () => {
-                const docSheets: StyleSheetList = native.call(this);
-                const filteredSheets = [...docSheets].filter((styleSheet) => styleSheet.ownerNode && !isDRSheet(styleSheet));
-                (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
-                return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
-            };
+        overrideProperty(Document, 'styleSheets', {
+            get: (native) => function () {
+                const getCurrentValue = () => {
+                    const docSheets: StyleSheetList = native.call(this);
+                    const filteredSheets = [...docSheets].filter((styleSheet) => styleSheet.ownerNode && !isDRSheet(styleSheet));
+                    (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
+                    return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
+                };
 
-            let elements = getCurrentValue();
-            const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
-                get: function (_: StyleSheetList, property: string) {
-                    return getCurrentValue()[property];
-                },
-            };
-            elements = new Proxy(elements, styleSheetListBehavior);
-            return elements;
+                let elements = getCurrentValue();
+                const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
+                    get: function (_: StyleSheetList, property: string) {
+                        return getCurrentValue()[property];
+                    },
+                };
+                elements = new Proxy(elements, styleSheetListBehavior);
+                return elements;
+            },
         });
     }
 
@@ -382,32 +385,26 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             return proxy;
         };
 
-        const proxyAdoptedStyleSheets = (proto: Document | ShadowRoot) => {
-            const native = Object.getOwnPropertyDescriptor(proto, 'adoptedStyleSheets')!;
-            Object.defineProperty(proto, 'adoptedStyleSheets', {
-                ...native,
-                get() {
-                    const source = native.get!.call(this) as CSSStyleSheet[];
+        const proxyAdoptedStyleSheets = () => [Document, ShadowRoot].forEach((ctor: {prototype: Document | ShadowRoot}) => {
+            overrideProperty(ctor, 'adoptedStyleSheets', {
+                get: (native) => function () {
+                    const source = native.call(this) as CSSStyleSheet[];
                     return proxyArray(this, source);
                 },
-                set(source) {
+                set: (native) => function (source) {
                     if (adoptedSheetsProxySources.has(source)) {
                         source = adoptedSheetsProxySources.get(source);
                     }
-                    native.set!.call(this, source);
+                    native.call(this, source);
                     handleSheetChange(this);
                 },
             });
-            cleaners.push(() => Object.defineProperty(proto, 'adoptedStyleSheets', native));
-        };
+        });
 
-        const proxyStyleDeclaration = (property: keyof CSSStyleDeclaration) => {
-            const proto = CSSStyleDeclaration.prototype;
-            const native = Object.getOwnPropertyDescriptor(proto, property)!;
-            Object.defineProperty(proto, property, {
-                ...native,
-                value(...args: any[]) {
-                    const returnValue = native.value!.apply(this, args);
+        const proxyStyleDeclaration = () => (['setProperty', 'removeProperty'] as Array<keyof CSSStyleDeclaration>).forEach((key) => {
+            override(CSSStyleDeclaration, key, (native) => {
+                return function (...args: any[]) {
+                    const returnValue = native.apply(this, args);
                     if (observableStyleDeclarations.has(this)) {
                         const node = observableStyleDeclarations.get(this)!;
                         if (!targetNodes.has(node)) {
@@ -417,10 +414,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                         handleSheetChange(node);
                     }
                     return returnValue;
-                },
+                };
             });
-            cleaners.push(() => Object.defineProperty(proto, property, native));
-        };
+        });
 
         const sendSourceStyles = (node: Document | ShadowRoot, cssRules: CSSRule[]) => {
             const id = getNodeId(node);
@@ -448,14 +444,11 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             }
         };
 
-        const startAdoptedStylesProcessing = () => {
-            proxyAdoptedStyleSheets(Document.prototype);
-            proxyAdoptedStyleSheets(ShadowRoot.prototype);
-            proxyStyleDeclaration('setProperty');
-            proxyStyleDeclaration('removeProperty');
+        documentEventListener('__darkreader__startAdoptedStyleSheetsWatcher', () => {
+            proxyAdoptedStyleSheets();
+            proxyStyleDeclaration();
 
-            document.addEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener);
-            cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener));
+            documentEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener);
 
             walkNodesWithAdoptedStyles(document, (node) => targetNodes.add(node));
             cleaners.push(() => targetNodes.forEach((node) => cleanNode(node)));
@@ -467,9 +460,6 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 entries.push([node, id, rules]);
             });
             sendSourceStylesBatch(entries);
-        };
-
-        document.addEventListener('__darkreader__startAdoptedStyleSheetsWatcher', startAdoptedStylesProcessing);
-        cleaners.push(() => document.removeEventListener('__darkreader__startAdoptedStyleSheetsWatcher', startAdoptedStylesProcessing));
+        });
     }
 }

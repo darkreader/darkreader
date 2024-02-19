@@ -178,7 +178,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 return;
             }
             callbackRequested = true;
-            requestIdleCallback(() => {
+            queueMicrotask(() => {
                 callbackRequested = false;
                 handleArrayChange(callback);
             });

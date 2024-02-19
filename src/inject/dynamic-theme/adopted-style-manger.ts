@@ -2,8 +2,19 @@ import type {Theme} from '../../definitions';
 import type {CSSBuilder} from './stylesheet-modifier';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
+let canUseSheetProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => canUseSheetProxy = true, {once: true});
+
 const overrides = new WeakSet<CSSStyleSheet>();
 const overridesBySource = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
+
+const adoptedSheetChangeListeners = new Set<(sheet: CSSStyleSheet) => void>();
+document.addEventListener('__darkreader__adoptedStyleSheetChange', (e: CustomEvent) => {
+    const {sheet} = e.detail;
+    if (sheet) {
+        adoptedSheetChangeListeners.forEach((callback) => callback(sheet));
+    }
+});
 
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
@@ -49,9 +60,14 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         if (node.adoptedStyleSheets.length !== newSheets.length) {
             node.adoptedStyleSheets = newSheets;
         }
+        sourceSheets = new WeakSet();
     }
 
+    const cleaners: Array<() => void> = [];
+
     function destroy() {
+        cleaners.forEach((c) => c());
+        cleaners.splice(0);
         cancelAsyncOperations = true;
         clear();
         if (frameId) {
@@ -76,6 +92,8 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         return count;
     }
 
+    let sourceSheets = new WeakSet<CSSStyleSheet>();
+
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         clear();
 
@@ -85,6 +103,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 continue;
             }
 
+            sourceSheets.add(sheet);
             const readyOverride = overridesBySource.get(sheet);
             if (readyOverride) {
                 rulesChangeKey = getRulesChangeKey();
@@ -100,6 +119,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 for (let i = override.cssRules.length - 1; i >= 0; i--) {
                     override.deleteRule(i);
                 }
+                override.insertRule('#__darkreader__adoptedOverride {}');
                 injectSheet(sheet, override);
                 overrides.add(override);
                 return override;
@@ -119,21 +139,57 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         rulesChangeKey = getRulesChangeKey();
     }
 
+    function handleArrayChange(callback: (sheets: CSSStyleSheet[]) => void) {
+        const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
+        sheets.forEach((sheet) => overridesBySource.delete(sheet));
+        callback(sheets);
+    }
+
     function checkForUpdates() {
         return getRulesChangeKey() !== rulesChangeKey;
     }
 
     let frameId: number | null = null;
 
-    function watch(callback: (sheets: CSSStyleSheet[]) => void) {
+    function watchUsingRAF(callback: (sheets: CSSStyleSheet[]) => void) {
         frameId = requestAnimationFrame(() => {
-            if (checkForUpdates()) {
-                const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
-                sheets.forEach((sheet) => overridesBySource.delete(sheet));
-                callback(sheets);
+            if (canUseSheetProxy) {
+                return;
             }
-            watch(callback);
+            if (checkForUpdates()) {
+                handleArrayChange(callback);
+            }
+            watchUsingRAF(callback);
         });
+    }
+
+    function watch(callback: (sheets: CSSStyleSheet[]) => void) {
+        const onAdoptedSheetsArrayChange = () => handleArrayChange(callback);
+        node.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsArrayChange);
+        cleaners.push(() => node.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsArrayChange));
+
+        let callbackRequested = false;
+
+        const onSheetChange = (changedSheet: CSSStyleSheet) => {
+            if (callbackRequested) {
+                return;
+            }
+            if (!sourceSheets.has(changedSheet)) {
+                return;
+            }
+            callbackRequested = true;
+            requestIdleCallback(() => {
+                callbackRequested = false;
+                handleArrayChange(callback);
+            });
+        };
+        adoptedSheetChangeListeners.add(onSheetChange);
+        cleaners.push(() => adoptedSheetChangeListeners.delete(onSheetChange));
+
+        if (canUseSheetProxy) {
+            return;
+        }
+        watchUsingRAF(callback);
     }
 
     return {

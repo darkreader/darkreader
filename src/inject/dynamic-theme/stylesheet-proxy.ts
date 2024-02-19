@@ -45,6 +45,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     }
 
     const updateSheetEvent = new CustomEvent('__darkreader__updateSheet');
+    const adoptedSheets = new WeakSet<CSSStyleSheet>();
     let onSheetChange: (sheet: CSSStyleSheet) => void;
 
     function reportSheetChange(sheet: CSSStyleSheet) {
@@ -53,6 +54,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
             onSheetChange(sheet);
+        } else if (adoptedSheets.has(sheet)) {
+            const evt = new CustomEvent('__darkreader__adoptedStyleSheetChange', {detail: {sheet}});
+            document.dispatchEvent(evt);
         }
     }
 
@@ -203,6 +207,83 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 elements = new Proxy(elements, styleSheetListBehavior);
                 return elements;
             },
+        });
+    }
+
+    if (!(__FIREFOX_MV2__ || __THUNDERBIRD__)) {
+        const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
+        const adoptedSheetsProxySources = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
+        const adoptedSheetsChangeEvent = new CustomEvent('__darkreader__adoptedStyleSheetsChange');
+        const adoptedSheetOverrideCache = new WeakSet<CSSStyleSheet>();
+        const adoptedSheetsSnapshots = new WeakMap<Document | ShadowRoot, CSSStyleSheet[]>();
+
+        const isDRAdoptedSheetOverride = (sheet: CSSStyleSheet) => {
+            if (!sheet || !sheet.cssRules) {
+                return false;
+            }
+            if (adoptedSheetOverrideCache.has(sheet)) {
+                return true;
+            }
+            if (sheet.cssRules.length > 0 && sheet.cssRules[0].cssText.startsWith('#__darkreader__adoptedOverride')) {
+                adoptedSheetOverrideCache.add(sheet);
+                return true;
+            }
+            return false;
+        };
+
+        const areArraysEqual = (a: any[], b: any[]) => {
+            return a.length === b.length && a.every((x, i) => x === b[i]);
+        };
+
+        const onAdoptedSheetsChange = (node: Document | ShadowRoot) => {
+            const prev = adoptedSheetsSnapshots.get(node);
+            const curr = (node.adoptedStyleSheets || []).filter((s) => !isDRAdoptedSheetOverride(s));
+            adoptedSheetsSnapshots.set(node, curr);
+            if (!prev || !areArraysEqual(prev, curr)) {
+                curr.forEach((s) => adoptedSheets.add(s));
+                node.dispatchEvent(adoptedSheetsChangeEvent);
+            }
+        };
+
+        const proxyAdoptedSheetsArray = (node: Document | ShadowRoot, source: CSSStyleSheet[]) => {
+            if (adoptedSheetsProxySources.has(source)) {
+                return source;
+            }
+            if (adoptedSheetsSourceProxies.has(source)) {
+                return adoptedSheetsSourceProxies.get(source)!;
+            }
+            const proxy = new Proxy(source, {
+                deleteProperty(target, property) {
+                    delete target[property as any];
+                    return true;
+                },
+                set(target, property, value) {
+                    target[property as any] = value;
+                    if (property === 'length') {
+                        onAdoptedSheetsChange(node);
+                    }
+                    return true;
+                },
+            });
+            adoptedSheetsSourceProxies.set(source, proxy);
+            adoptedSheetsProxySources.set(proxy, source);
+            return proxy;
+        };
+
+        [Document, ShadowRoot].forEach((ctor: {prototype: Document | ShadowRoot}) => {
+            overrideProperty(ctor, 'adoptedStyleSheets', {
+                get: (native) => function () {
+                    const source = native.call(this) as CSSStyleSheet[];
+                    return proxyAdoptedSheetsArray(this, source);
+                },
+                set: (native) => function (source) {
+                    if (adoptedSheetsProxySources.has(source)) {
+                        source = adoptedSheetsProxySources.get(source);
+                    }
+                    native.call(this, source);
+                    onAdoptedSheetsChange(this);
+                },
+            });
         });
     }
 

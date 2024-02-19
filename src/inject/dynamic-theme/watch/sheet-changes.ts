@@ -11,7 +11,7 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => canUseShee
 export function createSheetWatcher(
     element: HTMLLinkElement | HTMLStyleElement,
     safeGetSheetRules: () => CSSRuleList | null,
-    update: () => void,
+    callback: () => void,
     isCancelled: () => boolean,
 ): SheetWatcher {
     let rafSheetWatcher: SheetWatcher | null = null;
@@ -21,7 +21,7 @@ export function createSheetWatcher(
         // Sometimes sheet can be null in Firefox and Safari
         // So need to watch for it using rAF
         if (!__THUNDERBIRD__ && !(canUseSheetProxy && element.sheet)) {
-            rafSheetWatcher = createRAFSheetWatcher(element, safeGetSheetRules, update, isCancelled);
+            rafSheetWatcher = createRAFSheetWatcher(element, safeGetSheetRules, callback, isCancelled);
             rafSheetWatcher.start();
         }
     }
@@ -40,7 +40,7 @@ export function createSheetWatcher(
             if (isCancelled()) {
                 return;
             }
-            update();
+            callback();
         }
 
         areSheetChangesPending = true;
@@ -69,7 +69,7 @@ export function createSheetWatcher(
 function createRAFSheetWatcher(
     element: HTMLLinkElement | HTMLStyleElement,
     safeGetSheetRules: () => CSSRuleList | null,
-    update: () => void,
+    callback: () => void,
     isCancelled: () => boolean,
 ): SheetWatcher {
     let rulesChangeKey: number | null = null;
@@ -91,7 +91,7 @@ function createRAFSheetWatcher(
             const cancelled = isCancelled();
             if (!cancelled && didRulesKeyChange()) {
                 rulesChangeKey = getRulesChangeKey();
-                update();
+                callback();
             }
             if (cancelled || canUseSheetProxy && element.sheet) {
                 stopWatchingForSheetChangesUsingRAF();

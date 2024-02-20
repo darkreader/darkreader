@@ -285,6 +285,17 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 },
             });
         });
+
+        (['setProperty', 'removeProperty'] as Array<keyof CSSStyleDeclaration>).forEach((key) => {
+            override(CSSStyleDeclaration, key, (native) => {
+                return function (...args: any[]) {
+                    const returnValue = native.apply(this, args);
+                    const evt = new CustomEvent('__darkreader__adoptedStyleDeclarationChange', {detail: {declaration: this}});
+                    document.dispatchEvent(evt);
+                    return returnValue;
+                };
+            });
+        });
     }
 
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {

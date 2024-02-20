@@ -1,4 +1,5 @@
 import type {Theme} from '../../definitions';
+import {iterateCSSRules} from './css-rules';
 import type {CSSBuilder} from './stylesheet-modifier';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
@@ -13,6 +14,14 @@ document.addEventListener('__darkreader__adoptedStyleSheetChange', (e: CustomEve
     const {sheet} = e.detail;
     if (sheet) {
         adoptedSheetChangeListeners.forEach((callback) => callback(sheet));
+    }
+});
+
+const adoptedDeclarationChangeListeners = new Set<(declaration: CSSStyleDeclaration) => void>();
+document.addEventListener('__darkreader__adoptedStyleDeclarationChange', (e: CustomEvent) => {
+    const {declaration} = e.detail;
+    if (declaration) {
+        adoptedDeclarationChangeListeners.forEach((callback) => callback(declaration));
     }
 });
 
@@ -61,6 +70,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             node.adoptedStyleSheets = newSheets;
         }
         sourceSheets = new WeakSet();
+        sourceDeclarations = new WeakSet();
     }
 
     const cleaners: Array<() => void> = [];
@@ -93,6 +103,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     let sourceSheets = new WeakSet<CSSStyleSheet>();
+    let sourceDeclarations = new WeakSet<CSSStyleDeclaration>();
 
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         clear();
@@ -114,6 +125,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             const rules = sheet.cssRules;
             const override = new CSSStyleSheet();
             overridesBySource.set(sheet, override);
+            iterateCSSRules(rules, (rule) => sourceDeclarations.add(rule.style));
 
             const prepareSheet = () => {
                 for (let i = override.cssRules.length - 1; i >= 0; i--) {
@@ -185,6 +197,22 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         };
         adoptedSheetChangeListeners.add(onSheetChange);
         cleaners.push(() => adoptedSheetChangeListeners.delete(onSheetChange));
+
+        const onDeclarationChange = (changedDeclaration: CSSStyleDeclaration) => {
+            if (callbackRequested) {
+                return;
+            }
+            if (!sourceDeclarations.has(changedDeclaration)) {
+                return;
+            }
+            callbackRequested = true;
+            queueMicrotask(() => {
+                callbackRequested = false;
+                handleArrayChange(callback);
+            });
+        };
+        adoptedDeclarationChangeListeners.add(onDeclarationChange);
+        cleaners.push(() => adoptedDeclarationChangeListeners.delete(onDeclarationChange));
 
         if (canUseSheetProxy) {
             return;

@@ -3,15 +3,12 @@ import {getContext} from 'malevic/dom';
 import {DONATE_URL, HOMEPAGE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {Overlay} from '../../controls';
-import AutomationPage from '../automation-page';
+import {openExtensionPage} from '../../utils';
 import MainPage from '../main-page';
 import NewsSection from '../news-section';
 import {Page, PageViewer} from '../page-viewer';
-import SettingsPage from '../settings-page';
-import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
-import type {ViewProps} from '../types';
-import ManageSettingsPage from '../manage-settings-page';
+import type {ViewProps} from '../../../definitions';
 import {isMobile} from '../../../utils/platform';
 
 interface IndexStore {
@@ -57,27 +54,7 @@ function Pages(props: ViewProps) {
     }
 
     function onSettingsNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'settings';
-        context.refresh();
-    }
-
-    function onAutomationNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'automation';
-        context.refresh();
-    }
-
-    function onManageSettingsClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'manage-settings';
-        context.refresh();
-    }
-
-    function onSiteListNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'site-list';
-        context.refresh();
+        openExtensionPage('options');
     }
 
     function goBack() {
@@ -115,25 +92,6 @@ function Pages(props: ViewProps) {
             </Page>
             <Page id="theme">
                 <ThemePage {...props} />
-            </Page>
-            <Page id="settings">
-                <SettingsPage
-                    {...props}
-                    onAutomationNavClick={onAutomationNavClick}
-                    onManageSettingsClick={onManageSettingsClick}
-                    onSiteListNavClick={onSiteListNavClick}
-                />
-            </Page>
-            <Page id="site-list">
-                <SiteListPage
-                    {...props}
-                />
-            </Page>
-            <Page id="automation">
-                <AutomationPage {...props} />
-            </Page>
-            <Page id="manage-settings">
-                <ManageSettingsPage {...props} />
             </Page>
 
         </PageViewer>

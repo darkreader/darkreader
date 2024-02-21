@@ -125,15 +125,16 @@ const prepareURL = cachedFactory((url: string) => {
     } catch (err) {
         return null;
     }
-    const {host, pathname: path, protocol} = parsed;
-    const hostParts = host.split('.').reverse();
-    const pathParts = path.split('/').slice(1);
+    const {hostname, pathname, protocol, port} = parsed;
+    const hostParts = hostname.split('.').reverse();
+    const pathParts = pathname.split('/').slice(1);
     if (!pathParts[pathParts.length - 1]) {
         pathParts.splice(pathParts.length - 1, 1);
     }
     return {
         hostParts,
         pathParts,
+        port,
         protocol,
     };
 }, URL_CACHE_SIZE);
@@ -162,8 +163,18 @@ const preparePattern = cachedFactory((pattern: string) => {
 
     const slashIndex = pattern.indexOf('/');
     const host = slashIndex < 0 ? pattern : pattern.substring(0, slashIndex);
+
+    let hostName = host;
+    let port = '*';
+    const portIndex = host.indexOf(':');
+    if (portIndex >= 0) {
+        hostName = host.substring(0, portIndex);
+        port = host.substring(portIndex + 1);
+    }
+
+    const hostParts = hostName.split('.').reverse();
+
     const path = slashIndex < 0 ? '' : pattern.substring(slashIndex + 1);
-    const hostParts = host.split('.').reverse();
     const pathParts = path.split('/');
     if (!pathParts[pathParts.length - 1]) {
         pathParts.splice(pathParts.length - 1, 1);
@@ -172,6 +183,7 @@ const preparePattern = cachedFactory((pattern: string) => {
     return {
         hostParts,
         pathParts,
+        port,
         exactStart,
         exactEnd,
         protocol,
@@ -187,6 +199,7 @@ function matchURLPattern(url: string, pattern: string) {
         || (p.hostParts.length > u.hostParts.length)
         || (p.exactStart && p.hostParts.length !== u.hostParts.length)
         || (p.exactEnd && p.pathParts.length !== u.pathParts.length)
+        || (p.port !== '*' && p.port !== u.port)
         || (p.protocol && p.protocol !== u.protocol)
     ) {
         return false;
@@ -198,6 +211,20 @@ function matchURLPattern(url: string, pattern: string) {
         if (pHostPart !== '*' && pHostPart !== uHostPart) {
             return false;
         }
+    }
+
+    if (
+        p.hostParts.length >= 2
+        && p.hostParts.at(-1) !== '*'
+        && (
+            p.hostParts.length < u.hostParts.length - 1
+            || (
+                p.hostParts.length === u.hostParts.length - 1
+                && u.hostParts.at(-1) !== 'www'
+            )
+        )
+    ) {
+        return false;
     }
 
     if (p.pathParts.length === 0) {

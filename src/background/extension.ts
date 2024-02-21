@@ -225,7 +225,7 @@ export class Extension {
         }, WAKE_CHECK_INTERVAL);
     }
 
-    public static async start(): Promise<void> {
+    static async start(): Promise<void> {
         Extension.init();
         await Promise.all([
             ConfigManager.load({local: true}),
@@ -316,7 +316,7 @@ export class Extension {
                         return (await chrome.scripting.executeScript({
                             target: {tabId, frameIds: [frameId]},
                             func: detectPDF,
-                        }))[0].result;
+                        }))[0].result || false;
                     } else if (__CHROMIUM_MV2__) {
                         return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
                             frameId,
@@ -390,7 +390,7 @@ export class Extension {
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name!]: cmd.shortcut}), {} as Shortcuts);
     }
 
-    public static async collectData(): Promise<ExtensionData> {
+    static async collectData(): Promise<ExtensionData> {
         await Extension.loadData();
         const [
             news,
@@ -419,7 +419,7 @@ export class Extension {
         };
     }
 
-    public static async collectDevToolsData(): Promise<DevToolsData> {
+    static async collectDevToolsData(): Promise<DevToolsData> {
         const [
             dynamicFixesText,
             filterFixesText,
@@ -504,7 +504,7 @@ export class Extension {
         }
     };
 
-    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
+    static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
         const promises = [];
         const prev = {...UserStorage.settings};
 
@@ -577,7 +577,13 @@ export class Extension {
 
         function getToggledList(sourceList: string[]) {
             const list = sourceList.slice();
-            const index = list.indexOf(host);
+
+            let index = list.indexOf(host);
+            if (index < 0 && host.startsWith('www.')) {
+                const noWwwHost = host.substring(4);
+                index = list.indexOf(noWwwHost);
+            }
+
             if (index < 0) {
                 list.push(host);
             } else {

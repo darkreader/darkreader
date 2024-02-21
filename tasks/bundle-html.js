@@ -64,6 +64,12 @@ const copyEntries = [
         reloadType: reload.UI,
     },
     {
+        title: 'Dark Reader settings',
+        dest: 'ui/options/index.html',
+        args: [false, true, false],
+        reloadType: reload.UI,
+    },
+    {
         title: 'Dark Reader developer tools',
         dest: 'ui/devtools/index.html',
         args: [false, true, false],

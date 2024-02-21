@@ -28,6 +28,7 @@ const VAR_TYPE_BGIMG = 1 << 3;
 export class VariablesStore {
     private varTypes = new Map<string, number>();
     private rulesQueue: CSSRuleList[] = [];
+    private inlineStyleQueue: CSSStyleDeclaration[] = [];
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
     private unknownColorVars = new Set<string>();
@@ -39,9 +40,10 @@ export class VariablesStore {
     private unstableVarValues = new Map<string, string>();
     private onRootVariableDefined: () => void;
 
-    public clear(): void {
+    clear(): void {
         this.varTypes.clear();
         this.rulesQueue.splice(0);
+        this.inlineStyleQueue.splice(0);
         this.definedVars.clear();
         this.varRefs.clear();
         this.unknownColorVars.clear();
@@ -60,16 +62,22 @@ export class VariablesStore {
         );
     }
 
-    public addRulesForMatching(rules: CSSRuleList): void {
+    addRulesForMatching(rules: CSSRuleList): void {
         this.rulesQueue.push(rules);
     }
 
-    public matchVariablesAndDependents(): void {
+    addInlineStyleForMatching(style: CSSStyleDeclaration): void {
+        this.inlineStyleQueue.push(style);
+    }
+
+    matchVariablesAndDependents(): void {
+        if (this.rulesQueue.length === 0 && this.inlineStyleQueue.length === 0) {
+            return;
+        }
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();
-        this.collectVariablesAndVarDep(this.rulesQueue);
-        this.rulesQueue.splice(0);
+        this.collectVariablesAndVarDep();
         this.collectRootVarDependents();
 
         this.varRefs.forEach((refs, v) => {
@@ -122,7 +130,7 @@ export class VariablesStore {
         this.changedTypeVars.clear();
     }
 
-    public getModifierForVariable(options: {
+    getModifierForVariable(options: {
         varName: string;
         sourceValue: string;
         rule: CSSStyleRule;
@@ -217,7 +225,7 @@ export class VariablesStore {
         };
     }
 
-    public getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
+    getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
         // TODO(gusted): This condition is incorrect, as the sourceValue still contains a variable.
         // Simply replacing it with some definition is incorrect as variables are element-independent.
         // Fully handling this requires having a function that gives the variable's value given an
@@ -285,6 +293,12 @@ export class VariablesStore {
 
                 const modified = modify();
                 if (unknownVars.size > 0) {
+                    // web.dev issue where the variable is never defined, but the fallback is.
+                    // TODO: Return a fallback value along with a way to subscribe for a change.
+                    const isFallbackResolved = modified.match(/^var\(.*?, var\(--darkreader-bg--.*\)\)$/);
+                    if (isFallbackResolved) {
+                        return modified;
+                    }
                     return new Promise<string>((resolve) => {
                         const firstUnknownVar = unknownVars.values().next().value;
                         const callback = () => {
@@ -328,27 +342,43 @@ export class VariablesStore {
         }
     }
 
-    // Because of the similar expensive task between the old `collectVariables`
-    // and `collectVarDependent`, we only want to do it once.
-    // This function should only do the same expensive task once
-    // and ensure that the result comes to the correct task.
-    // The task is either `inspectVariable` or `inspectVarDependent`.
-    private collectVariablesAndVarDep(ruleList: CSSRuleList[]) {
-        ruleList.forEach((rules) => {
+    private collectVariablesAndVarDep() {
+        this.rulesQueue.forEach((rules) => {
             iterateCSSRules(rules, (rule) => {
-                rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-                    if (isVariable(property)) {
-                        this.inspectVariable(property, value);
-                    }
-                    if (isVarDependant(value)) {
-                        this.inspectVarDependant(property, value);
-                    }
-                });
+                if (rule.style) {
+                    this.collectVarsFromCSSDeclarations(rule.style);
+                }
             });
+        });
+        this.inlineStyleQueue.forEach((style) => {
+            this.collectVarsFromCSSDeclarations(style);
+        });
+        this.rulesQueue.splice(0);
+        this.inlineStyleQueue.splice(0);
+    }
+
+    private collectVarsFromCSSDeclarations(style: CSSStyleDeclaration) {
+        iterateCSSDeclarations(style, (property, value) => {
+            if (isVariable(property)) {
+                this.inspectVariable(property, value);
+            }
+            if (isVarDependant(value)) {
+                this.inspectVarDependant(property, value);
+            }
         });
     }
 
+    private shouldProcessRootVariables() {
+        return (
+            this.rulesQueue.length > 0 &&
+            document.documentElement.getAttribute('style')?.includes('--')
+        );
+    }
+
     private collectRootVariables() {
+        if (!this.shouldProcessRootVariables()) {
+            return;
+        }
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVariable(property)) {
                 this.inspectVariable(property, value);
@@ -396,6 +426,9 @@ export class VariablesStore {
     }
 
     private collectRootVarDependents() {
+        if (!this.shouldProcessRootVariables()) {
+            return;
+        }
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVarDependant(value)) {
                 this.inspectVarDependant(property, value);
@@ -477,11 +510,11 @@ export class VariablesStore {
         });
     }
 
-    public setOnRootVariableChange(callback: () => void): void {
+    setOnRootVariableChange(callback: () => void): void {
         this.onRootVariableDefined = callback;
     }
 
-    public putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
+    putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
         const sheet = styleElement.sheet!;
         if (sheet.cssRules.length > 0) {
             sheet.deleteRule(0);

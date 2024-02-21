@@ -2,7 +2,7 @@ import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
-import type {CSSVariableModifier} from './variables';
+import type {CSSVariableModifier, ModifiedVarDeclaration} from './variables';
 import {variablesStore} from './variables';
 import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
@@ -85,15 +85,24 @@ const overrides: Overrides = {
     },
 };
 
+const shorthandOverrides: Overrides = {
+    'background': {
+        customProp: '--darkreader-inline-bg',
+        cssProp: 'background',
+        dataAttr: 'data-darkreader-inline-bg',
+    },
+};
+
 const overridesList = Object.values(overrides);
-const normalizedPropList: { [key: string]: string } = {};
+const normalizedPropList: Record<string, string> = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle(): string {
-    return overridesList.map(({dataAttr, customProp, cssProp}) => {
+    const allOverrides = overridesList.concat(Object.values(shorthandOverrides));
+    return allOverrides.map(({dataAttr, customProp, cssProp}) => {
         return [
             `[${dataAttr}] {`,
             `  ${cssProp}: var(${customProp}) !important;`,
@@ -154,6 +163,7 @@ function deepWatchForInlineStyles(
             shadowRootDiscovered(n.shadowRoot!);
             deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });
+        variablesStore.matchVariablesAndDependents();
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
@@ -186,6 +196,7 @@ function deepWatchForInlineStyles(
                 elementStyleDidChange(target);
             }
         });
+        variablesStore.matchVariablesAndDependents();
     });
     const attrObserver = new MutationObserver((mutations) => {
         if (timeoutId) {
@@ -258,9 +269,6 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     const unsetProps = new Set(Object.keys(overrides));
 
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
-        const isPropertyVariable = targetCSSProp.startsWith('--');
-        const {customProp, dataAttr} = isPropertyVariable ? ({} as Overrides['']) : overrides[targetCSSProp];
-
         const mod = getModifiableCSSDeclaration(
             modifierCSSProp,
             cssVal,
@@ -272,28 +280,50 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (!mod) {
             return;
         }
-        let value = mod.value;
-        if (typeof value === 'function') {
-            value = value(theme) as string;
-        }
 
-        // typeof value === 'object' always evaluate to true when
-        // `isPropertyVariable` is true, but it serves as a type hint for typescript.
-        // Such that `as ReturnType<CSSVariableModifier>` won't error about the possible
-        // string type.
-        if (isPropertyVariable && typeof value === 'object') {
-            const typedValue: ReturnType<CSSVariableModifier> = value;
-            typedValue.declarations.forEach(({property, value}) => {
-                !(value instanceof Promise) && element.style.setProperty(property, value);
-            });
-
-            // TODO: add listener for `onTypeChange`.
-        } else {
+        function setStaticValue(value: string) {
+            const {customProp, dataAttr} = overrides[targetCSSProp] ?? shorthandOverrides[targetCSSProp];
             element.style.setProperty(customProp, value);
             if (!element.hasAttribute(dataAttr)) {
                 element.setAttribute(dataAttr, '');
             }
             unsetProps.delete(targetCSSProp);
+        }
+
+        function setVarDeclaration(mod: ReturnType<CSSVariableModifier>) {
+            let prevDeclarations: ModifiedVarDeclaration[] = [];
+
+            function setProps(declarations: ModifiedVarDeclaration[]) {
+                prevDeclarations.forEach(({property}) => {
+                    element.style.removeProperty(property);
+                });
+                declarations.forEach(({property, value}) => {
+                    if (!(value instanceof Promise)) {
+                        element.style.setProperty(property, value);
+                    }
+                });
+                prevDeclarations = declarations;
+            }
+
+            setProps(mod.declarations);
+            mod.onTypeChange.addListener(setProps);
+        }
+
+        function setAsyncValue(promise: Promise<string | null>) {
+            promise.then((value) => {
+                if (value && targetCSSProp === 'background' && value.startsWith('var(--darkreader-bg--')) {
+                    setStaticValue(value);
+                }
+            });
+        }
+
+        const value = typeof mod.value === 'function' ? mod.value(theme) : mod.value;
+        if (typeof value === 'string') {
+            setStaticValue(value);
+        } else if (value instanceof Promise) {
+            setAsyncValue(value);
+        } else if (typeof value === 'object') {
+            setVarDeclaration(value);
         }
     }
 
@@ -366,11 +396,13 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
         if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {
             setCustomProp(property, property, value);
+        } else if (property === 'background' && value.includes('var(')) {
+            setCustomProp('background', 'background', value);
         } else {
-            const overridenProp = normalizedPropList[property];
-            if (overridenProp &&
-                (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp))) {
-                if (overridenProp === 'background-color' && element.hasAttribute('bgcolor')) {
+            const overriddenProp = normalizedPropList[property];
+            if (overriddenProp &&
+                (!element.style.getPropertyValue(overriddenProp) && !element.hasAttribute(overriddenProp))) {
+                if (overriddenProp === 'background-color' && element.hasAttribute('bgcolor')) {
                     return;
                 }
                 element.style.setProperty(property, '');
@@ -379,6 +411,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     });
     if (element.style && element instanceof SVGTextElement && element.style.fill) {
         setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
+    }
+
+    if (element.getAttribute('style')?.includes('--')) {
+        variablesStore.addInlineStyleForMatching(element.style);
     }
 
     forEach(unsetProps, (cssProp) => {

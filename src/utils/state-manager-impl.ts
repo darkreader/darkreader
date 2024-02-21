@@ -114,7 +114,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
     private listeners: Set<() => void>;
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    public constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
+    constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
         this.localStorageKey = localStorageKey;
         this.parent = parent;
         this.defaults = defaults;
@@ -209,7 +209,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
     }
 
     // This function is not guaranteed to save state before returning
-    public async saveState(): Promise<void> {
+    async saveState(): Promise<void> {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 // Make sure not to overwrite data before it is loaded
@@ -265,7 +265,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
         });
     }
 
-    public async loadState(): Promise<void> {
+    async loadState(): Promise<void> {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 this.meta = StateManagerImplState.LOADING;
@@ -287,11 +287,11 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
         }
     }
 
-    public addChangeListener(callback: () => void): void {
+    addChangeListener(callback: () => void): void {
         this.listeners.add(callback);
     }
 
-    public getStateForTesting(): string {
+    getStateForTesting(): string {
         if (!__TEST__) {
             return '';
         }

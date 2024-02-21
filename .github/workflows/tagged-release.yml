@@ -42,7 +42,7 @@ jobs:
             build/release/darkreader-*
 
       - name: Upload built artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: build/release/darkreader-*
           retention-days: ${{ inputs.retention_days }}

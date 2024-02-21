@@ -30,6 +30,18 @@ text: #e8e6e3
 
 ================================
 
+Everforest
+
+DARK
+background: #2b3339
+text: #d1c4a9
+
+LIGHT
+background: #fdf9ed
+text: #5b6971
+
+================================
+
 Gruvbox
 
 DARK
@@ -66,6 +78,18 @@ text: #3b4252
 
 ================================
 
+One Dark
+
+DARK
+background: #282c34
+text: #abb2bf
+
+LIGHT
+background: #fafafa
+text: #383a42
+
+================================
+
 Rosé Pine
 
 DARK
@@ -75,6 +99,18 @@ text: #e0def4
 LIGHT
 background: #faf4ed
 text: #575279
+
+================================
+
+Selenized
+
+DARK
+background: #103c48
+text: #adbcbc
+
+LIGHT
+background: #fbf3db
+text: #53676d
 
 ================================
 

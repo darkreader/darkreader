@@ -5,7 +5,7 @@ import {DONATE_URL} from '../../../../utils/links';
 import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../../utils/platform';
-import KeyboardIcon from '../../main-page/keyboard-icon';
+import {KeyboardIcon} from '../../../icons';
 
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;

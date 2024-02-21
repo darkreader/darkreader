@@ -41,8 +41,19 @@ describe('Domain utilities', () => {
     });
 
     test('URL match', () => {
+        expect(isURLMatched('https://www.example.com/', '*')).toEqual(true);
+        expect(isURLMatched('https://www.example.com/', '*.*')).toEqual(true);
+        expect(isURLMatched('https://www.example.com/', '*.*.*')).toEqual(true);
+        expect(isURLMatched('https://www.example.com/', '*.*.*.*')).toEqual(false);
+
         expect(isURLMatched('https://www.example.com/page/1', 'example.com')).toEqual(true);
         expect(isURLMatched('https://www.failure.com/page/1', 'example.com')).toEqual(false);
+        expect(isURLMatched('https://xyz.example.com/page/1', 'example.com')).toEqual(false);
+        expect(isURLMatched('https://xyz.www.example.com/page/1', 'example.com')).toEqual(false);
+
+        expect(isURLMatched('https://xyz.example.com/page/1', '*.example.com')).toEqual(true);
+        expect(isURLMatched('https://abc.xyz.example.com/page/1', '*.example.com')).toEqual(true);
+        expect(isURLMatched('https://xyz.failure.com/page/1', '*.example.com')).toEqual(false);
 
         expect(isURLMatched('https://www.example.com/page/1', 'example.com/page')).toEqual(true);
         expect(isURLMatched('https://www.example.com/fail/1', 'example.com/page')).toEqual(false);
@@ -64,6 +75,9 @@ describe('Domain utilities', () => {
 
         expect(isURLMatched('http://localhost:8080/', 'localhost:8080')).toEqual(true);
         expect(isURLMatched('http://localhost:1024/', 'localhost:8080')).toEqual(false);
+
+        expect(isURLMatched('http://localhost:8080/', 'localhost:*')).toEqual(true);
+        expect(isURLMatched('http://172.168.0.100:8080/', 'localhost:*')).toEqual(false);
 
         expect(isURLMatched('http://www.example.com/page/1', 'http://*')).toEqual(true);
         expect(isURLMatched('https://www.example.com/page/1', 'http://*')).toEqual(false);

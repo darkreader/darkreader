@@ -5,7 +5,7 @@ import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
-import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
+import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
@@ -310,7 +310,7 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     return false;
 }
 
-interface bgImageMatches {
+interface BgImageMatches {
     type: 'url' | 'gradient';
     index: number;
     match: string;
@@ -342,8 +342,8 @@ export function getBgImageModifier(
             });
         };
 
-        const matches: bgImageMatches[] =
-            (gradients.map((i) => ({type: 'gradient', ...i})) as bgImageMatches[])
+        const matches: BgImageMatches[] =
+            (gradients.map((i) => ({type: 'gradient', ...i})) as BgImageMatches[])
                 .concat(getIndices(urls).map((i) => ({type: 'url', offset: 0, ...i})))
                 .sort((a, b) => a.index > b.index ? 1 : -1);
 
@@ -395,17 +395,18 @@ export function getBgImageModifier(
                 parentStyleSheet!.ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
-            const absoluteValue = `url("${url}")`;
-
             return async (filter: FilterConfig): Promise<string | null> => {
                 if (isURLEmpty) {
                     return "url('')";
                 }
-                let imageDetails: ImageDetails | null;
+                let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
                 } else {
                     try {
+                        if (!isBlobURLCheckResultReady()) {
+                            await requestBlobURLCheck();
+                        }
                         if (awaitingForImageLoading.has(url)) {
                             const awaiters = awaitingForImageLoading.get(url)!;
                             imageDetails = await new Promise<ImageDetails | null>((resolve) => awaiters.push(resolve));
@@ -428,39 +429,45 @@ export function getBgImageModifier(
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(null));
                             awaitingForImageLoading.delete(url);
                         }
-                        return absoluteValue;
                     }
                 }
-                const bgImageValue = getBgImageValue(imageDetails, filter) || absoluteValue;
-                return bgImageValue;
+                if (imageDetails) {
+                    const bgImageValue = getBgImageValue(imageDetails, filter);
+                    if (bgImageValue) {
+                        return bgImageValue;
+                    }
+                }
+                if (url.startsWith('data:')) {
+                    const blobURL = await tryConvertDataURLToBlobURL(url);
+                    if (blobURL) {
+                        return `url("${blobURL}")`;
+                    }
+                }
+                return `url("${url}")`;;
             };
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge, isTooLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string | null;
-            if (isTooLarge) {
-                logInfo(`Not modifying too large image ${imageDetails.src}`);
-                result = `url("${imageDetails.src}")`;
-            } else if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
-                logInfo(`Inverting dark image ${imageDetails.src}`);
-                const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
+            const logSrc = imageDetails.src.startsWith('data:') ? 'data:' : imageDetails.src;
+            if (isLarge) {
+                logInfo(`Not modifying too large image ${logSrc}`);
+                result = null;
+            } else if (isDark && isTransparent && filter.mode === 1 && width > 2) {
+                logInfo(`Inverting dark image ${logSrc}`);
+                const inverted = getFilteredImageURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
             } else if (isLight && !isTransparent && filter.mode === 1) {
-                if (isLarge) {
-                    logInfo(`Not modifying light non-transparent large image ${imageDetails.src}`);
-                    result = 'none';
-                } else {
-                    logInfo(`Dimming light image ${imageDetails.src}`);
-                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
-                    result = `url("${dimmed}")`;
-                }
-            } else if (filter.mode === 0 && isLight && !isLarge) {
-                logInfo(`Applying filter to image ${imageDetails.src}`);
-                const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
+                logInfo(`Dimming light image ${logSrc}`);
+                const dimmed = getFilteredImageURL(imageDetails, filter);
+                result = `url("${dimmed}")`;
+            } else if (filter.mode === 0 && isLight) {
+                logInfo(`Applying filter to image ${logSrc}`);
+                const filtered = getFilteredImageURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;
             } else {
-                logInfo(`Not modifying too large image ${imageDetails.src}`);
+                logInfo(`Not modifying the image ${logSrc}`);
                 result = null;
             }
             return result;

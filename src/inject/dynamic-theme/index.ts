@@ -7,15 +7,15 @@ import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
-import {throttle} from '../../utils/throttle';
+import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
-import type {AdoptedStyleSheetManager} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
+import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, hasAdoptedStyleSheets} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
@@ -31,6 +31,9 @@ declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
+const adoptedStyleFallbacks = new Map<Document | ShadowRoot, AdoptedStyleSheetFallback>();
+const adoptedStyleNodeIds = new WeakMap<Document | ShadowRoot, number>();
+const adoptedStyleChangeTokens = new WeakMap<Document | ShadowRoot, symbol>();
 let filter: FilterConfig | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
@@ -282,6 +285,36 @@ function createDynamicStyleOverrides() {
     });
     inlineStyleElements.forEach((el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
     handleAdoptedStyleSheets(document);
+    variablesStore.matchVariablesAndDependents();
+
+    if (isFirefox) {
+        const MATCH_VAR = Symbol();
+
+        const onAdoptedCSSChange = (e: CustomEvent) => {
+            const {node, id, cssRules, entries} = e.detail;
+            if (Array.isArray(entries)) {
+                entries.forEach((e) => {
+                    const cssRules = e[2];
+                    variablesStore.addRulesForMatching(cssRules);
+                });
+                variablesStore.matchVariablesAndDependents();
+            } else if (cssRules) {
+                variablesStore.addRulesForMatching(cssRules);
+                requestAnimationFrameOnce(MATCH_VAR, () => variablesStore.matchVariablesAndDependents());
+            }
+            const tuples = Array.isArray(entries) ? entries : node && cssRules ? [[node, id, cssRules]] : [];
+            tuples.forEach(([node, id, cssRules]) => {
+                adoptedStyleNodeIds.set(node, id);
+                const fallback = getAdoptedStyleSheetFallback(node);
+                fallback.updateCSS(cssRules);
+            });
+        };
+
+        document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCSSChange);
+        cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCSSChange));
+
+        document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
+    }
 }
 
 let loadingStylesCounter = 0;
@@ -373,23 +406,94 @@ function createThemeAndWatchForUpdates() {
     changeMetaThemeColorWhenAvailable(filter!);
 }
 
-function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    try {
-        if (Array.isArray(node.adoptedStyleSheets)) {
-            if (node.adoptedStyleSheets.length > 0) {
-                const newManger = createAdoptedStyleSheetOverride(node);
+let pendingAdoptedVarMatch = false;
 
-                adoptedStyleManagers.push(newManger);
-                newManger.render(filter!, ignoredImageAnalysisSelectors);
-            }
-        }
-    } catch (err) {
-        // For future readers, Dark Reader typically does not use 'try/catch' in its
-        // code, but this exception is due to a problem in Firefox Nightly and does
-        // not cause any consequences.
-        // Ref: https://github.com/darkreader/darkreader/issues/8789#issuecomment-1114210080
-        logWarn('Error occurred in handleAdoptedStyleSheets: ', err);
+function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
+    const theme = filter!;
+
+    if (isFirefox) {
+        const fallback = getAdoptedStyleSheetFallback(node);
+        fallback.render(theme, ignoredImageAnalysisSelectors);
+        return;
     }
+
+    if (hasAdoptedStyleSheets(node)) {
+        node.adoptedStyleSheets.forEach((s) => {
+            variablesStore.addRulesForMatching(s.cssRules);
+        });
+        const newManger = createAdoptedStyleSheetOverride(node);
+        adoptedStyleManagers.push(newManger);
+        newManger.render(theme, ignoredImageAnalysisSelectors);
+        newManger.watch((sheets) => {
+            sheets.forEach((s) => {
+                variablesStore.addRulesForMatching(s.cssRules);
+            });
+            newManger.render(theme, ignoredImageAnalysisSelectors);
+            pendingAdoptedVarMatch = true;
+        });
+        potentialAdoptedStyleNodes.delete(node);
+    } else if (!potentialAdoptedStyleNodes.has(node)) {
+        potentialAdoptedStyleNodes.add(node);
+    }
+}
+
+const potentialAdoptedStyleNodes = new Set<ShadowRoot | Document>();
+let potentialAdoptedStyleFrameId: number | null = null;
+
+function watchPotentialAdoptedStyleNodes() {
+    potentialAdoptedStyleFrameId = requestAnimationFrame(() => {
+        let changed = false;
+        potentialAdoptedStyleNodes.forEach((node) => {
+            if (node.isConnected) {
+                handleAdoptedStyleSheets(node);
+                changed = true;
+            } else {
+                potentialAdoptedStyleNodes.delete(node);
+            }
+        });
+        if (changed || pendingAdoptedVarMatch) {
+            variablesStore.matchVariablesAndDependents();
+            pendingAdoptedVarMatch = false;
+        }
+        watchPotentialAdoptedStyleNodes();
+    });
+}
+
+function stopWatchingPotentialAdoptedStyleNodes() {
+    potentialAdoptedStyleFrameId && cancelAnimationFrame(potentialAdoptedStyleFrameId);
+    potentialAdoptedStyleNodes.clear();
+    if (isFirefox) {
+        document.dispatchEvent(new CustomEvent('__darkreader__stopAdoptedStyleSheetsWatcher'));
+    }
+}
+
+function getAdoptedStyleChangeToken(node: Document | ShadowRoot) {
+    if (adoptedStyleChangeTokens.has(node)) {
+        return adoptedStyleChangeTokens.get(node)!;
+    }
+    const token = Symbol();
+    adoptedStyleChangeTokens.set(node, token);
+    return token;
+}
+
+function getAdoptedStyleSheetFallback(node: Document | ShadowRoot) {
+    let fallback = adoptedStyleFallbacks.get(node);
+    if (!fallback) {
+        fallback = createAdoptedStyleSheetFallback(() => {
+            const token = getAdoptedStyleChangeToken(node);
+            requestAnimationFrameOnce(token, () => {
+                const id = adoptedStyleNodeIds.get(node);
+                const commands = fallback?.commands();
+                if (!id || !commands) {
+                    return;
+                }
+                const data = {id, commands};
+                document.dispatchEvent(new CustomEvent('__darkreader__adoptedStyleSheetCommands', {detail: JSON.stringify(data)}));
+            });
+        });
+        adoptedStyleFallbacks.set(node, fallback);
+    }
+    return fallback;
 }
 
 function watchForUpdates() {
@@ -418,6 +522,8 @@ function watchForUpdates() {
         createShadowStaticStyleOverrides(shadowRoot);
         handleAdoptedStyleSheets(shadowRoot);
     });
+
+    watchPotentialAdoptedStyleNodes();
 
     watchForInlineStyles((element) => {
         overrideInlineStyle(element, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
@@ -568,6 +674,8 @@ function removeProxy() {
     removeNode(document.head.querySelector('.darkreader--proxy'));
 }
 
+const cleaners: Array<() => void> = [];
+
 export function removeDynamicTheme(): void {
     document.documentElement.removeAttribute(`data-darkreader-mode`);
     document.documentElement.removeAttribute(`data-darkreader-scheme`);
@@ -595,12 +703,16 @@ export function removeDynamicTheme(): void {
     cleanLoadingLinks();
     forEach(document.querySelectorAll('.darkreader'), removeNode);
 
-    adoptedStyleManagers.forEach((manager) => {
-        manager.destroy();
-    });
+    adoptedStyleManagers.forEach((manager) => manager.destroy());
     adoptedStyleManagers.splice(0);
+    adoptedStyleFallbacks.forEach((fallback) => fallback.destroy());
+    adoptedStyleFallbacks.clear();
+    stopWatchingPotentialAdoptedStyleNodes();
 
     metaObserver && metaObserver.disconnect();
+
+    cleaners.forEach((clean) => clean());
+    cleaners.splice(0);
 }
 
 export function cleanDynamicThemeCache(): void {

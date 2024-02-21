@@ -1,4 +1,5 @@
 import type {Theme} from '../../definitions';
+import {isChromium} from '../../utils/platform';
 import {createAsyncTasksQueue} from '../../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
@@ -29,17 +30,26 @@ function getThemeKey(theme: Theme) {
 const asyncQueue = createAsyncTasksQueue();
 
 interface ModifySheetOptions {
-    sourceCSSRules: CSSRuleList;
+    sourceCSSRules: CSSRuleList | CSSRule[];
     theme: Theme;
     ignoreImageAnalysis: string[];
     force: boolean;
-    prepareSheet: () => CSSStyleSheet;
+    prepareSheet: () => CSSBuilder;
     isAsyncCancelled: () => boolean;
 }
 
 interface StyleSheetModifier {
     modifySheet: (options: ModifySheetOptions) => void;
     shouldRebuildStyle: () => boolean;
+}
+
+export interface CSSBuilder {
+    deleteRule(index: number): void;
+    insertRule(rule: string, index?: number): number;
+    cssRules: {
+        readonly length: number;
+        [index: number]: CSSBuilder | object;
+    };
 }
 
 export function createStyleSheetModifier(): StyleSheetModifier {
@@ -147,24 +157,38 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             varKey?: number;
         }
 
-        function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
+        function setRule(target: CSSBuilder, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            const getDeclarationText = (dec: ReadyDeclaration) => {
-                const {property, value, important, sourceValue} = dec;
-                return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
-            };
 
-            let cssRulesText = '';
-            declarations.forEach((declarations) => {
-                cssRulesText += `${getDeclarationText(declarations)} `;
-            });
-            const ruleText = `${selector} { ${cssRulesText} }`;
+            let selectorText = selector;
+            // Empty :is() and :where() selectors or
+            // selectors like :is(:where(:-unknown))
+            // break Chrome 119 when calling deleteRule()
+            const emptyIsWhereSelector = isChromium && selector.startsWith(':is(') && (
+                selector.includes(':is()') ||
+                selector.includes(':where()') ||
+                (selector.includes(':where(') && selector.includes(':-moz'))
+            );
+            const viewTransitionSelector = selector.includes('::view-transition-');
+            if (emptyIsWhereSelector || viewTransitionSelector) {
+                selectorText = '.darkreader-unsupported-selector';
+            }
+
+            let ruleText = `${selectorText} {`;
+            for (const dec of declarations) {
+                const {property, value, important} = dec;
+                if (value) {
+                    ruleText += ` ${property}: ${value}${important ? ' !important' : ''};`;
+                }
+            }
+            ruleText += ' }';
+
             target.insertRule(ruleText, index);
         }
 
         interface RuleInfo {
             rule: ReadyStyleRule;
-            target: (CSSStyleSheet | CSSGroupingRule);
+            target: CSSBuilder;
             index: number;
         }
 
@@ -277,21 +301,21 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         const sheet = prepareSheet();
 
         function buildStyleSheet() {
-            function createTarget(group: ReadyGroup, parent: CSSStyleSheet | CSSGroupingRule): CSSStyleSheet | CSSGroupingRule {
+            function createTarget(group: ReadyGroup, parent: CSSBuilder): CSSBuilder {
                 const {rule} = group;
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
                     parent.insertRule(`@media ${media.mediaText} {}`, index);
-                    return parent.cssRules[index] as CSSMediaRule;
+                    return parent.cssRules[index] as CSSBuilder;
                 }
                 return parent;
             }
 
             function iterateReadyRules(
                 group: ReadyGroup,
-                target: CSSStyleSheet | CSSGroupingRule,
-                styleIterator: (s: ReadyStyleRule, t: CSSStyleSheet | CSSGroupingRule) => void,
+                target: CSSBuilder,
+                styleIterator: (s: ReadyStyleRule, t: CSSBuilder) => void,
             ) {
                 group.rules.forEach((r) => {
                     if (r.isGroup) {

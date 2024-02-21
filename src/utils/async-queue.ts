@@ -1,19 +1,17 @@
-export type QueueEntry = () => void;
+export type Task = () => void;
 
-// AsyncQueue is a class that helps with managing tasks.
-// More specifically, it helps with tasks that are often used.
-// It's fully asyncronous and uses promises and tries to get 60FPS.
+const MAX_FRAME_DURATION = 1000 / 60;
+
 export default class AsyncQueue {
-    private queue: QueueEntry[] = [];
+    private queue: Task[] = [];
     private timerId: number | null = null;
-    private frameDuration = 1000 / 60;
 
-    public addToQueue(entry: QueueEntry): void {
-        this.queue.push(entry);
-        this.startQueue();
+    addTask(task: Task): void {
+        this.queue.push(task);
+        this.scheduleFrame();
     }
 
-    public stopQueue(): void {
+    stop(): void {
         if (this.timerId !== null) {
             cancelAnimationFrame(this.timerId);
             this.timerId = null;
@@ -21,19 +19,18 @@ export default class AsyncQueue {
         this.queue = [];
     }
 
-    // Ensures 60FPS.
-    private startQueue(): void {
+    private scheduleFrame(): void {
         if (this.timerId) {
             return;
         }
         this.timerId = requestAnimationFrame(() => {
             this.timerId = null;
             const start = Date.now();
-            let cb: QueueEntry | undefined;
+            let cb: Task | undefined;
             while ((cb = this.queue.shift())) {
                 cb();
-                if (Date.now() - start >= this.frameDuration) {
-                    this.startQueue();
+                if (Date.now() - start >= MAX_FRAME_DURATION) {
+                    this.scheduleFrame();
                     break;
                 }
             }

@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import ControlGroup from '../control-group';
+import {ControlGroup} from '../../controls';
 
 export default function HelpGroup() {
     return (

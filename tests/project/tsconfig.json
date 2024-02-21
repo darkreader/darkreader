@@ -1,10 +1,10 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
     "compilerOptions": {
-        "target": "ES2021",
-        "module": "CommonJS",
+        "target": "ESNext",
+        "module": "Node16",
         "lib": [
-            "ES2021",
+            "ESNext",
             "Dom"
         ],
         "types": [
@@ -13,11 +13,13 @@
             "jest-extended"
         ],
         "esModuleInterop": true,
+        "moduleResolution": "Node16",
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "noImplicitAny": true,
         "inlineSourceMap": true,
         "noEmit": true,
-        "allowJs": true
+        "allowJs": true,
+        "allowImportingTsExtensions": true
     }
 }

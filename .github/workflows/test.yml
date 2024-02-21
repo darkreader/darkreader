@@ -46,7 +46,7 @@ jobs:
         run: npm run test:unit -- --json --outputFile=test-results-unit.json
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-unit
           path: test-results-unit.json

@@ -2,12 +2,13 @@ import {expect, jest, test} from '@jest/globals';
 import {StateManagerImpl} from '../../../src/utils/state-manager-impl';
 
 class PromiseWrapper {
-    public promises: Map<Promise<void>, 'pending' | 'resolved' | 'rejected'>;
-    public constructor() {
+    promises: Map<Promise<void>, 'pending' | 'resolved' | 'rejected'>;
+
+    constructor() {
         this.promises = new Map();
     }
 
-    public add(promises: Promise<void> | Array<Promise<void>>) {
+    add(promises: Promise<void> | Array<Promise<void>>) {
         if (!Array.isArray(promises)) {
             promises = [promises];
         }
@@ -21,15 +22,15 @@ class PromiseWrapper {
         });
     }
 
-    public clear() {
+    clear() {
         this.promises.clear();
     }
 
-    public getState(promise: Promise<void>) {
+    getState(promise: Promise<void>) {
         return this.promises.get(promise);
     }
 
-    public all(state: 'pending' | 'resolved' | 'rejected') {
+    all(state: 'pending' | 'resolved' | 'rejected') {
         this.promises.forEach((s) => expect(s).toEqual(state));
     }
 }

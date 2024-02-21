@@ -6,7 +6,7 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
     private resolution: RESOLVUTION;
     private reason: REJECTION;
 
-    public async entry(): Promise<RESOLVUTION>{
+    async entry(): Promise<RESOLVUTION>{
         if (this.wasResolved) {
             return Promise.resolve(this.resolution);
         }
@@ -19,7 +19,7 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
         });
     }
 
-    public async resolve(value: RESOLVUTION): Promise<void> {
+    async resolve(value: RESOLVUTION): Promise<void> {
         if (this.wasRejected || this.wasResolved) {
             return;
         }
@@ -31,7 +31,7 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    public async reject(reason: REJECTION): Promise<void> {
+    async reject(reason: REJECTION): Promise<void> {
         if (this.wasRejected || this.wasResolved) {
             return;
         }
@@ -43,15 +43,15 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    public isPending(): boolean {
+    isPending(): boolean {
         return !this.wasResolved && !this.wasRejected;
     }
 
-    public isFulfilled(): boolean {
+    isFulfilled(): boolean {
         return this.wasResolved;
     }
 
-    public isRejected(): boolean {
+    isRejected(): boolean {
         return this.wasRejected;
     }
 }

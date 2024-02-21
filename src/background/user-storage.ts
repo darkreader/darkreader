@@ -12,9 +12,9 @@ const SAVE_TIMEOUT = 1000;
 export default class UserStorage {
     private static loadBarrier: PromiseBarrier<UserSettings, void>;
     private static saveStorageBarrier: PromiseBarrier<void, void> | null;
-    public static settings: Readonly<UserSettings>;
+    static settings: Readonly<UserSettings>;
 
-    public static async loadSettings(): Promise<void> {
+    static async loadSettings(): Promise<void> {
         if (!UserStorage.settings) {
             UserStorage.settings = await UserStorage.loadSettingsFromStorage();
         }
@@ -82,22 +82,25 @@ export default class UserStorage {
         let local = await readLocalStorage(DEFAULT_SETTINGS);
 
         if (local.schemeVersion < 2) {
-            const deprecatedDefaults = {
-                siteList: [],
-                siteListEnabled: [],
-                applyToListedOnly: false,
-            };
-            const localDeprecated = await readLocalStorage(deprecatedDefaults);
-            const localTransformed = UserStorage.migrateSiteListsV2(localDeprecated);
-            await writeLocalStorage({schemeVersion: 2, ...localTransformed});
-            await removeLocalStorage(Object.keys(deprecatedDefaults));
+            const sync = await readSyncStorage({schemeVersion: 0});
+            if (!sync || sync.schemeVersion < 2) {
+                const deprecatedDefaults = {
+                    siteList: [],
+                    siteListEnabled: [],
+                    applyToListedOnly: false,
+                };
+                const localDeprecated = await readLocalStorage(deprecatedDefaults);
+                const localTransformed = UserStorage.migrateSiteListsV2(localDeprecated);
+                await writeLocalStorage({schemeVersion: 2, ...localTransformed});
+                await removeLocalStorage(Object.keys(deprecatedDefaults));
 
-            const syncDeprecated = await readSyncStorage(deprecatedDefaults);
-            const syncTransformed = UserStorage.migrateSiteListsV2(syncDeprecated);
-            await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
-            await removeSyncStorage(Object.keys(deprecatedDefaults));
+                const syncDeprecated = await readSyncStorage(deprecatedDefaults);
+                const syncTransformed = UserStorage.migrateSiteListsV2(syncDeprecated);
+                await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
+                await removeSyncStorage(Object.keys(deprecatedDefaults));
 
-            local = await readLocalStorage(DEFAULT_SETTINGS);
+                local = await readLocalStorage(DEFAULT_SETTINGS);
+            }
         }
 
         const {errors: localCfgErrors} = validateSettings(local);
@@ -132,7 +135,7 @@ export default class UserStorage {
         return $sync;
     }
 
-    public static async saveSettings(): Promise<void> {
+    static async saveSettings(): Promise<void> {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.saveSettings().
@@ -142,7 +145,7 @@ export default class UserStorage {
         await UserStorage.saveSettingsIntoStorage();
     }
 
-    public static async saveSyncSetting(sync: boolean): Promise<void> {
+    static async saveSyncSetting(sync: boolean): Promise<void> {
         const obj = {syncSettings: sync};
         await writeLocalStorage(obj);
         try {
@@ -178,7 +181,7 @@ export default class UserStorage {
         UserStorage.saveStorageBarrier = null;
     });
 
-    public static set($settings: Partial<UserSettings>): void {
+    static set($settings: Partial<UserSettings>): void {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.set().

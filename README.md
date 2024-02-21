@@ -152,11 +152,11 @@ Step 1: change Dark Reader's settings.
 Step 2: change Firefox's settings.
 
 - Type `about:config` in the address bar and press Enter.
-A warning page may appear. Click `Accept the Risk and Continue` to go to the `about:config` page. 
+A warning page may appear. Click `Accept the Risk and Continue` to proceed.
 - Search for and set `extensions.webextensions.restrictedDomains` to an empty value.
 - Create `extensions.webextensions.addons-restricted-domains@mozilla.com.disabled` with `boolean` as type and set its value to `true`.
 - Set `extensions.quarantinedDomains.enabled` to `false`.
-- Create `privacy.resistFingerprinting.block_mozAddonManager` with `boolean` as type and set its value to `true`.
+- Set `privacy.resistFingerprinting.block_mozAddonManager` to `true`.
 - Restart Firefox.
 
 <h2 align="center">Contributors</h2>

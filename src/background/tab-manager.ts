@@ -64,7 +64,7 @@ export default class TabManager {
     private static timestamp: TabManagerState['timestamp'];
     private static readonly LOCAL_STORAGE_KEY = 'TabManager-state';
 
-    public static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions): void {
+    static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions): void {
         TabManager.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0}, logWarn);
         TabManager.tabs = {};
         TabManager.onColorSchemeChange = onColorSchemeChange;
@@ -294,7 +294,7 @@ export default class TabManager {
         TabManager.stateManager.saveState();
     }
 
-    public static async getTabURL(tab: chrome.tabs.Tab | null): Promise<string> {
+    static async getTabURL(tab: chrome.tabs.Tab | null): Promise<string> {
         if (__CHROMIUM_MV3__) {
             if (!tab) {
                 return 'abou:blank';
@@ -309,7 +309,7 @@ export default class TabManager {
                         frameIds: [0],
                     },
                     func: () => window.location.href,
-                }))[0].result;
+                }))[0].result || 'about:blank';
             } catch (e) {
                 return 'about:blank';
             }
@@ -321,7 +321,7 @@ export default class TabManager {
         return tab && tab.url || 'about:blank';
     }
 
-    public static async updateContentScript(options: {runOnProtectedPages: boolean}): Promise<void> {
+    static async updateContentScript(options: {runOnProtectedPages: boolean}): Promise<void> {
         (await queryTabs({discarded: false}))
             .filter((tab) => __CHROMIUM_MV3__ || options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !Boolean(TabManager.tabs[tab.id!]))
@@ -345,7 +345,7 @@ export default class TabManager {
             });
     }
 
-    public static async registerMailDisplayScript(): Promise<void> {
+    static async registerMailDisplayScript(): Promise<void> {
         await (chrome as any).messageDisplayScripts.register({
             js: [
                 {file: '/inject/fallback.js'},
@@ -360,7 +360,7 @@ export default class TabManager {
     // has multiple tabs of the same website, every tab will receive the new message
     // and not just that tab as Dark Reader currently doesn't have per-tab operations,
     // this should be the expected behavior.
-    public static async sendMessage(onlyUpdateActiveTab = false): Promise<void> {
+    static async sendMessage(onlyUpdateActiveTab = false): Promise<void> {
         TabManager.timestamp++;
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await TabManager.getActiveTabURL()) : null;
@@ -397,19 +397,19 @@ export default class TabManager {
             });
     }
 
-    public static canAccessTab(tab: chrome.tabs.Tab | null): boolean {
+    static canAccessTab(tab: chrome.tabs.Tab | null): boolean {
         return tab && Boolean(TabManager.tabs[tab.id!]) || false;
     }
 
-    public static getTabDocumentId(tab: chrome.tabs.Tab | null): documentId | null {
+    static getTabDocumentId(tab: chrome.tabs.Tab | null): documentId | null {
         return tab && TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0] && TabManager.tabs[tab.id!][0].documentId;
     }
 
-    public static isTabDarkThemeDetected(tab: chrome.tabs.Tab | null): boolean | null {
+    static isTabDarkThemeDetected(tab: chrome.tabs.Tab | null): boolean | null {
         return tab && TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0] && TabManager.tabs[tab.id!][0].darkThemeDetected || null;
     }
 
-    public static async getActiveTabURL(): Promise<string> {
+    static async getActiveTabURL(): Promise<string> {
         return TabManager.getTabURL(await getActiveTab());
     }
 }

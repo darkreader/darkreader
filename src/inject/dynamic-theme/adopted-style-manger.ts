@@ -9,22 +9,6 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => canUseShee
 const overrides = new WeakSet<CSSStyleSheet>();
 const overridesBySource = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 
-const adoptedSheetChangeListeners = new Set<(sheet: CSSStyleSheet) => void>();
-document.addEventListener('__darkreader__adoptedStyleSheetChange', (e: CustomEvent) => {
-    const {sheet} = e.detail;
-    if (sheet) {
-        adoptedSheetChangeListeners.forEach((callback) => callback(sheet));
-    }
-});
-
-const adoptedDeclarationChangeListeners = new Set<(declaration: CSSStyleDeclaration) => void>();
-document.addEventListener('__darkreader__adoptedStyleDeclarationChange', (e: CustomEvent) => {
-    const {declaration} = e.detail;
-    if (declaration) {
-        adoptedDeclarationChangeListeners.forEach((callback) => callback(declaration));
-    }
-});
-
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     destroy(): void;
@@ -151,10 +135,19 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         rulesChangeKey = getRulesChangeKey();
     }
 
+    let callbackRequested = false;
+
     function handleArrayChange(callback: (sheets: CSSStyleSheet[]) => void) {
-        const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
-        sheets.forEach((sheet) => overridesBySource.delete(sheet));
-        callback(sheets);
+        if (callbackRequested) {
+            return;
+        }
+        callbackRequested = true;
+        queueMicrotask(() => {
+            callbackRequested = false;
+            const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
+            sheets.forEach((sheet) => overridesBySource.delete(sheet));
+            callback(sheets);
+        });
     }
 
     function checkForUpdates() {
@@ -175,44 +168,16 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         });
     }
 
+    function addSheetChangeEventListener(type: string, listener: (e: CustomEvent) => void) {
+        node.addEventListener(type, listener);
+        cleaners.push(() => node.removeEventListener(type, listener));
+    }
+
     function watch(callback: (sheets: CSSStyleSheet[]) => void) {
-        const onAdoptedSheetsArrayChange = () => handleArrayChange(callback);
-        node.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsArrayChange);
-        cleaners.push(() => node.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsArrayChange));
-
-        let callbackRequested = false;
-
-        const onSheetChange = (changedSheet: CSSStyleSheet) => {
-            if (callbackRequested) {
-                return;
-            }
-            if (!sourceSheets.has(changedSheet)) {
-                return;
-            }
-            callbackRequested = true;
-            queueMicrotask(() => {
-                callbackRequested = false;
-                handleArrayChange(callback);
-            });
-        };
-        adoptedSheetChangeListeners.add(onSheetChange);
-        cleaners.push(() => adoptedSheetChangeListeners.delete(onSheetChange));
-
-        const onDeclarationChange = (changedDeclaration: CSSStyleDeclaration) => {
-            if (callbackRequested) {
-                return;
-            }
-            if (!sourceDeclarations.has(changedDeclaration)) {
-                return;
-            }
-            callbackRequested = true;
-            queueMicrotask(() => {
-                callbackRequested = false;
-                handleArrayChange(callback);
-            });
-        };
-        adoptedDeclarationChangeListeners.add(onDeclarationChange);
-        cleaners.push(() => adoptedDeclarationChangeListeners.delete(onDeclarationChange));
+        const onAdoptedSheetsChange = () => handleArrayChange(callback);
+        addSheetChangeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsChange);
+        addSheetChangeEventListener('__darkreader__adoptedStyleSheetChange', onAdoptedSheetsChange);
+        addSheetChangeEventListener('__darkreader__adoptedStyleDeclarationChange', onAdoptedSheetsChange);
 
         if (canUseSheetProxy) {
             return;

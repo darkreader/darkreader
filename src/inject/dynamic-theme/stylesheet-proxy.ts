@@ -45,18 +45,30 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     }
 
     const updateSheetEvent = new CustomEvent('__darkreader__updateSheet');
-    const adoptedSheets = new WeakSet<CSSStyleSheet>();
-    let onSheetChange: (sheet: CSSStyleSheet) => void;
+    const adoptedSheetChangeEvent = new CustomEvent('__darkreader__adoptedStyleSheetChange');
+    const adoptedSheetOwners = new WeakMap<CSSStyleSheet, Set<Document | ShadowRoot>>();
+    const adoptedDeclarationSheets = new WeakMap<CSSStyleDeclaration, CSSStyleSheet>();
+    let onFFSheetChange: (sheet: CSSStyleSheet) => void;
+
+    function onAdoptedSheetChange(sheet: CSSStyleSheet) {
+        const owners = adoptedSheetOwners.get(sheet);
+        owners?.forEach((node) => {
+            if (node.isConnected) {
+                node.dispatchEvent(adoptedSheetChangeEvent);
+            } else {
+                owners.delete(node);
+            }
+        });
+    }
 
     function reportSheetChange(sheet: CSSStyleSheet) {
         if (sheet.ownerNode && !isDRSheet(sheet)) {
             sheet.ownerNode.dispatchEvent(updateSheetEvent);
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            onSheetChange(sheet);
-        } else if (adoptedSheets.has(sheet)) {
-            const evt = new CustomEvent('__darkreader__adoptedStyleSheetChange', {detail: {sheet}});
-            document.dispatchEvent(evt);
+            onFFSheetChange(sheet);
+        } else if (adoptedSheetOwners.has(sheet)) {
+            onAdoptedSheetChange(sheet);
         }
     }
 
@@ -67,7 +79,11 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         }
         if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
             if (promise && promise instanceof Promise) {
-                promise.then(() => onSheetChange(this));
+                promise.then(() => onFFSheetChange(sheet));
+            }
+        } else if (adoptedSheetOwners.has(sheet)) {
+            if (promise && promise instanceof Promise) {
+                promise.then(() => onAdoptedSheetChange(sheet));
             }
         }
     }
@@ -240,7 +256,18 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             const curr = (node.adoptedStyleSheets || []).filter((s) => !isDRAdoptedSheetOverride(s));
             adoptedSheetsSnapshots.set(node, curr);
             if (!prev || !areArraysEqual(prev, curr)) {
-                curr.forEach((s) => adoptedSheets.add(s));
+                curr.forEach((sheet) => {
+                    if (!adoptedSheetOwners.has(sheet)) {
+                        adoptedSheetOwners.set(sheet, new Set());
+                    }
+                    adoptedSheetOwners.get(sheet)!.add(node);
+                    for (const rule of sheet.cssRules) {
+                        const declaration = (rule as CSSStyleRule).style;
+                        if (declaration) {
+                            adoptedDeclarationSheets.set(declaration, sheet);
+                        }
+                    }
+                });
                 node.dispatchEvent(adoptedSheetsChangeEvent);
             }
         };
@@ -286,12 +313,20 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             });
         });
 
+        const adoptedDeclarationChangeEvent = new CustomEvent('__darkreader__adoptedStyleDeclarationChange');
         (['setProperty', 'removeProperty'] as Array<keyof CSSStyleDeclaration>).forEach((key) => {
             override(CSSStyleDeclaration, key, (native) => {
                 return function (...args: any[]) {
                     const returnValue = native.apply(this, args);
-                    const evt = new CustomEvent('__darkreader__adoptedStyleDeclarationChange', {detail: {declaration: this}});
-                    document.dispatchEvent(evt);
+                    const sheet = adoptedDeclarationSheets.get(this);
+                    if (sheet) {
+                        const owners = adoptedSheetOwners.get(sheet);
+                        if (owners) {
+                            owners.forEach((node) => {
+                                node.dispatchEvent(adoptedDeclarationChangeEvent);
+                            });
+                        }
+                    }
                     return returnValue;
                 };
             });
@@ -529,7 +564,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             executeCommands(node, commands);
         };
 
-        onSheetChange = (sheet) => {
+        onFFSheetChange = (sheet) => {
             if (sourceSheets.has(sheet)) {
                 const node = sourceSheetNodes.get(sheet)!;
                 handleSheetChange(node);

@@ -117,8 +117,14 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     const sheetModifier = createStyleSheetModifier();
 
-    const observer = new MutationObserver(() => {
-        update();
+    const observer = new MutationObserver((mutations) => {
+        if (mutations.some((m) => m.type === 'characterData') && containsCSSImport() && !corsCopy) {
+            // Sometimes when <style> element text is too long, it
+            // may still be loading and contain @import later.
+            createCORSCopyWithReplacedImports((element.textContent ?? '').trim(), location.href).then(update);
+        } else {
+            update();
+        }
     });
     const observerOptions: MutationObserverInit = {attributes: true, childList: true, subtree: true, characterData: true};
 
@@ -274,6 +280,15 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             return null;
         }
 
+        await createCORSCopyWithReplacedImports(cssText, cssBasePath);
+        if (corsCopy) {
+            return corsCopy.sheet!.cssRules;
+        }
+
+        return null;
+    }
+
+    async function createCORSCopyWithReplacedImports(cssText: string, cssBasePath: string) {
         if (cssText) {
             // Sometimes cross-origin stylesheets are protected from direct access
             // so need to load CSS text and insert it into style element
@@ -288,8 +303,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 return corsCopy.sheet!.cssRules;
             }
         }
-
-        return null;
     }
 
     function details(options: detailsArgument) {

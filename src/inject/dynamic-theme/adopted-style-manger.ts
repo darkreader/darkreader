@@ -1,8 +1,13 @@
 import type {Theme} from '../../definitions';
+import {iterateCSSRules} from './css-rules';
 import type {CSSBuilder} from './stylesheet-modifier';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
+let canUseSheetProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => canUseSheetProxy = true, {once: true});
+
 const overrides = new WeakSet<CSSStyleSheet>();
+const overridesBySource = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
@@ -48,9 +53,15 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         if (node.adoptedStyleSheets.length !== newSheets.length) {
             node.adoptedStyleSheets = newSheets;
         }
+        sourceSheets = new WeakSet();
+        sourceDeclarations = new WeakSet();
     }
 
+    const cleaners: Array<() => void> = [];
+
     function destroy() {
+        cleaners.forEach((c) => c());
+        cleaners.splice(0);
         cancelAsyncOperations = true;
         clear();
         if (frameId) {
@@ -75,6 +86,9 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         return count;
     }
 
+    let sourceSheets = new WeakSet<CSSStyleSheet>();
+    let sourceDeclarations = new WeakSet<CSSStyleDeclaration>();
+
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         clear();
 
@@ -84,13 +98,24 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 continue;
             }
 
+            sourceSheets.add(sheet);
+            const readyOverride = overridesBySource.get(sheet);
+            if (readyOverride) {
+                rulesChangeKey = getRulesChangeKey();
+                injectSheet(sheet, readyOverride);
+                return;
+            }
+
             const rules = sheet.cssRules;
             const override = new CSSStyleSheet();
+            overridesBySource.set(sheet, override);
+            iterateCSSRules(rules, (rule) => sourceDeclarations.add(rule.style));
 
             const prepareSheet = () => {
                 for (let i = override.cssRules.length - 1; i >= 0; i--) {
                     override.deleteRule(i);
                 }
+                override.insertRule('#__darkreader__adoptedOverride {}');
                 injectSheet(sheet, override);
                 overrides.add(override);
                 return override;
@@ -110,20 +135,54 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         rulesChangeKey = getRulesChangeKey();
     }
 
+    let callbackRequested = false;
+
+    function handleArrayChange(callback: (sheets: CSSStyleSheet[]) => void) {
+        if (callbackRequested) {
+            return;
+        }
+        callbackRequested = true;
+        queueMicrotask(() => {
+            callbackRequested = false;
+            const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
+            sheets.forEach((sheet) => overridesBySource.delete(sheet));
+            callback(sheets);
+        });
+    }
+
     function checkForUpdates() {
         return getRulesChangeKey() !== rulesChangeKey;
     }
 
     let frameId: number | null = null;
 
-    function watch(callback: (sheets: CSSStyleSheet[]) => void) {
+    function watchUsingRAF(callback: (sheets: CSSStyleSheet[]) => void) {
         frameId = requestAnimationFrame(() => {
-            if (checkForUpdates()) {
-                const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
-                callback(sheets);
+            if (canUseSheetProxy) {
+                return;
             }
-            watch(callback);
+            if (checkForUpdates()) {
+                handleArrayChange(callback);
+            }
+            watchUsingRAF(callback);
         });
+    }
+
+    function addSheetChangeEventListener(type: string, listener: (e: CustomEvent) => void) {
+        node.addEventListener(type, listener);
+        cleaners.push(() => node.removeEventListener(type, listener));
+    }
+
+    function watch(callback: (sheets: CSSStyleSheet[]) => void) {
+        const onAdoptedSheetsChange = () => handleArrayChange(callback);
+        addSheetChangeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsChange);
+        addSheetChangeEventListener('__darkreader__adoptedStyleSheetChange', onAdoptedSheetsChange);
+        addSheetChangeEventListener('__darkreader__adoptedStyleDeclarationChange', onAdoptedSheetsChange);
+
+        if (canUseSheetProxy) {
+            return;
+        }
+        watchUsingRAF(callback);
     }
 
     return {
@@ -165,29 +224,29 @@ interface DeepStyleSheetCommand {
 }
 
 class StyleSheetCommandBuilder implements CSSBuilder {
-    public cssRules: StyleSheetCommandBuilder[] = [];
+    cssRules: StyleSheetCommandBuilder[] = [];
 
     private commands: StyleSheetCommand[] = [];
     private onChange: () => void;
 
-    public constructor(onChange: () => void) {
+    constructor(onChange: () => void) {
         this.onChange = onChange;
     }
 
-    public insertRule(cssText: string, index = 0): number {
+    insertRule(cssText: string, index = 0): number {
         this.commands.push({type: 'insert', index, cssText});
         this.cssRules.splice(index, 0, new StyleSheetCommandBuilder(this.onChange));
         this.onChange();
         return index;
     }
 
-    public deleteRule(index: number): void {
+    deleteRule(index: number): void {
         this.commands.push({type: 'delete', index});
         this.cssRules.splice(index, 1);
         this.onChange();
     }
 
-    public replaceSync(cssText: string) {
+    replaceSync(cssText: string) {
         this.commands.splice(0);
         this.commands.push({type: 'replace', cssText});
         if (cssText === '') {
@@ -198,7 +257,7 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         this.onChange();
     }
 
-    public getDeepCSSCommands() {
+    getDeepCSSCommands() {
         const deep: DeepStyleSheetCommand[] = [];
         this.commands.forEach((command) => {
             deep.push({
@@ -214,7 +273,7 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         return deep;
     }
 
-    public clearDeepCSSCommands() {
+    clearDeepCSSCommands() {
         this.commands.splice(0);
         this.cssRules.forEach((rule) => rule.clearDeepCSSCommands());
     }

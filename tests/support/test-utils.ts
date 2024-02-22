@@ -28,7 +28,7 @@ export function promiseWithTimeout<T>(ms: number, promise: Promise<T>): Promise<
 }
 
 class TimeoutError extends Error {
-    public constructor(delay: number) {
+    constructor(delay: number) {
         super(`timeout exceeded (${delay} ms)`);
         this.name = 'TimeoutError';
     }

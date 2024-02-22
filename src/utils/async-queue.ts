@@ -6,12 +6,12 @@ export default class AsyncQueue {
     private queue: Task[] = [];
     private timerId: number | null = null;
 
-    public addTask(task: Task): void {
+    addTask(task: Task): void {
         this.queue.push(task);
         this.scheduleFrame();
     }
 
-    public stop(): void {
+    stop(): void {
         if (this.timerId !== null) {
             cancelAnimationFrame(this.timerId);
             this.timerId = null;

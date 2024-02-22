@@ -34,6 +34,7 @@ config.overrides.push({
         'no-else-return': 'error',
         'no-cond-assign': 'error',
         'no-lonely-if': 'error',
+        'no-multiple-empty-lines': 'error',
         'no-multi-spaces': 'error',
         'no-implicit-coercion': 'error',
         'no-redeclare': 'error',
@@ -42,6 +43,10 @@ config.overrides.push({
         'no-trailing-spaces': 'error',
         'no-whitespace-before-property': 'error',
         'padded-blocks': ['error', 'never'],
+        'padding-line-between-statements': [
+            'error',
+            {blankLine: 'always', prev: 'function', next: 'function'},
+        ],
         'prefer-exponentiation-operator': 'error',
         'prefer-regex-literals': 'error',
         'semi': 'error',
@@ -57,7 +62,6 @@ config.overrides.push({
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
-        'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/comma-dangle': ['error', {
             arrays: 'always-multiline',
@@ -72,7 +76,6 @@ config.overrides.push({
         }],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/func-call-spacing': ['error', 'never'],
         '@typescript-eslint/keyword-spacing': ['error', {

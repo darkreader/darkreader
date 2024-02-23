@@ -15,7 +15,7 @@ import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, hasAdoptedStyleSheets} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
@@ -417,7 +417,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
         return;
     }
 
-    if (hasAdoptedStyleSheets(node)) {
+    if (canHaveAdoptedStyleSheets(node)) {
         node.adoptedStyleSheets.forEach((s) => {
             variablesStore.addRulesForMatching(s.cssRules);
         });

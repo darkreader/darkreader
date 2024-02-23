@@ -15,8 +15,8 @@ export interface AdoptedStyleSheetManager {
     watch(callback: (sheets: CSSStyleSheet[]) => void): void;
 }
 
-export function hasAdoptedStyleSheets(node: Document | ShadowRoot): boolean {
-    return Array.isArray(node.adoptedStyleSheets) && node.adoptedStyleSheets.length > 0;
+export function canHaveAdoptedStyleSheets(node: Document | ShadowRoot): boolean {
+    return Array.isArray(node.adoptedStyleSheets);
 }
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
@@ -103,7 +103,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             if (readyOverride) {
                 rulesChangeKey = getRulesChangeKey();
                 injectSheet(sheet, readyOverride);
-                return;
+                continue;
             }
 
             const rules = sheet.cssRules;
@@ -174,7 +174,10 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     function watch(callback: (sheets: CSSStyleSheet[]) => void) {
-        const onAdoptedSheetsChange = () => handleArrayChange(callback);
+        const onAdoptedSheetsChange = () => {
+            canUseSheetProxy = true;
+            handleArrayChange(callback);
+        };
         addSheetChangeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsChange);
         addSheetChangeEventListener('__darkreader__adoptedStyleSheetChange', onAdoptedSheetsChange);
         addSheetChangeEventListener('__darkreader__adoptedStyleDeclarationChange', onAdoptedSheetsChange);

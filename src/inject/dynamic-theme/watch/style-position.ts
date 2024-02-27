@@ -22,7 +22,23 @@ export function watchForStylePositions(
 ): void {
     stopWatchingForStylePositions();
 
-    const prevStyles = new Set<StyleElement>(currentStyles);
+    const prevStylesByRoot = new WeakMap<Node, Set<StyleElement>>();
+    const getPrevStyles = (root: Node) => {
+        if (!prevStylesByRoot.has(root)) {
+            prevStylesByRoot.set(root, new Set());
+        }
+        return prevStylesByRoot.get(root)!;
+    };
+    currentStyles.forEach((node) => {
+        let root: Node | null = node;
+        while ((root = root.parentNode)) {
+            if (root === document || root.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+                const prevStyles = getPrevStyles(root);
+                prevStyles.add(node);
+                break;
+            }
+        }
+    });
     const prevStyleSiblings = new WeakMap<Element, Element>();
     const nextStyleSiblings = new WeakMap<Element, Element>();
 
@@ -45,13 +61,14 @@ export function watchForStylePositions(
 
     currentStyles.forEach(saveStylePosition);
 
-    function handleStyleOperations(operations: {createdStyles: Set<StyleElement>; movedStyles: Set<StyleElement>; removedStyles: Set<StyleElement>}) {
+    function handleStyleOperations(root: Document | ShadowRoot, operations: {createdStyles: Set<StyleElement>; movedStyles: Set<StyleElement>; removedStyles: Set<StyleElement>}) {
         const {createdStyles, removedStyles, movedStyles} = operations;
 
         createdStyles.forEach((s) => saveStylePosition(s));
         movedStyles.forEach((s) => saveStylePosition(s));
         removedStyles.forEach((s) => forgetStylePosition(s));
 
+        const prevStyles = getPrevStyles(root);
         createdStyles.forEach((s) => prevStyles.add(s));
         removedStyles.forEach((s) => prevStyles.delete(s));
 
@@ -65,7 +82,7 @@ export function watchForStylePositions(
         }
     }
 
-    function handleMinorTreeMutations({additions, moves, deletions}: ElementsTreeOperations) {
+    function handleMinorTreeMutations(root: Document | ShadowRoot, {additions, moves, deletions}: ElementsTreeOperations) {
         const createdStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         const movedStyles = new Set<StyleElement>();
@@ -74,7 +91,7 @@ export function watchForStylePositions(
         deletions.forEach((node) => getManageableStyles(node).forEach((style) => removedStyles.add(style)));
         moves.forEach((node) => getManageableStyles(node).forEach((style) => movedStyles.add(style)));
 
-        handleStyleOperations({createdStyles, removedStyles, movedStyles});
+        handleStyleOperations(root, {createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
             deepObserve(n);
@@ -94,6 +111,7 @@ export function watchForStylePositions(
         const createdStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         const movedStyles = new Set<StyleElement>();
+        const prevStyles = getPrevStyles(root);
         styles.forEach((s) => {
             if (!prevStyles.has(s)) {
                 createdStyles.add(s);
@@ -110,7 +128,7 @@ export function watchForStylePositions(
             }
         });
 
-        handleStyleOperations({createdStyles, removedStyles, movedStyles});
+        handleStyleOperations(root, {createdStyles, removedStyles, movedStyles});
 
         deepObserve(root);
         collectUndefinedElements(root);

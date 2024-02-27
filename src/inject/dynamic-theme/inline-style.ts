@@ -167,7 +167,7 @@ function deepWatchForInlineStyles(
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
-        onMinorMutations: ({additions}) => {
+        onMinorMutations: (_root, {additions}) => {
             additions.forEach((added) => discoverNodes(added));
         },
         onHugeMutations: () => {

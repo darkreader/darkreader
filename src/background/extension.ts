@@ -294,7 +294,7 @@ export class Extension {
                 logInfo('Toggle command entered');
                 Extension.changeSettings({
                     enabled: !Extension.isExtensionSwitchedOn(),
-                    automation: {...UserStorage.settings.automation, ...{enable: false}},
+                    automation: {...UserStorage.settings.automation, ...{enabled: false}},
                 });
                 break;
             case 'addSite': {

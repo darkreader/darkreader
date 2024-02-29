@@ -1,3 +1,7 @@
+## 4.9.79 (February 29, 2024)
+
+- Use ES2020 for API bundle.
+
 ## 4.9.78 (February 29, 2024)
 
 - Optimized Adopted Style Sheets changes handling.

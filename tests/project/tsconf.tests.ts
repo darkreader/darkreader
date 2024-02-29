@@ -8,14 +8,13 @@ import {childClosed} from './utils';
 const rootDir = dirname(require.resolve('../../package.json'));
 const tsc = require.resolve('typescript/bin/tsc');
 
-const tsProjects: Array<{tsconfig: string}> = [
+const tsProjects: Array<{tsconfig: string, module?: 'es2020'}> = [
     // Browser extension
     {tsconfig: 'src'},
     // API
     {tsconfig: 'src/api'},
     // E2E tests (Jest, Puppeteer, Node.js)
-    // TODO(anton): fix upstream type conflict and uncomment me
-    // {tsconfig: 'tests/browser'},
+    {tsconfig: 'tests/browser', module: 'es2020'},
     // Browser tests (Karma, Jasmine)
     {tsconfig: 'tests/inject'},
     // Unit tests (Jest, Node.js)
@@ -38,13 +37,20 @@ describe('TypeScript project config', () => {
     }, 100000);
 
     // Slow test (run using `npm run test:project`)
-    it.each(tsProjects)('should compile without errors: $tsconfig', async ({tsconfig}) => {
+    it.each(tsProjects)('should compile without errors: $tsconfig', async ({tsconfig, module}) => {
         // Compile config from temp dir instead of root dir
         const cwd = await mkdtemp(join(tmpdir(), 'darkreader'));
         const project = join(rootDir, tsconfig, 'tsconfig.json');
 
         // Fire
-        const child = fork(tsc, ['--project', project, '--noEmit'], {silent: true, cwd});
+        const args = ['--project', project, '--noEmit'];
+        if (module) {
+            args.push('--module');
+            args.push(module);
+        }
+        const child = fork(tsc, args, {silent: true, cwd});
+        child.stderr.on('data', (d) => console.error(d.toString()));
+        child.stdout.on('data', (d) => console.error(d.toString()));
         await childClosed(child);
         expect(child.exitCode).toBe(ExitStatus.Success);
     }, 60000);

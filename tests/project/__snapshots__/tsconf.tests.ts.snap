@@ -266,7 +266,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src/
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "strictNullChecks": true,
-    "target": "es5",
+    "target": "es2020",
     "types": [
       "chrome",
       "offscreencanvas",

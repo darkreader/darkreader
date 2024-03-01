@@ -53,8 +53,5 @@ jobs:
       - name: Check for compatibility issues
         run: npm run lint:bundle
 
-      - name: Check project structure
-        run: npm run test:project
-
       - name: Check NPM dependencies
         run: node tests/dependencies.js

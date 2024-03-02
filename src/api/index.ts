@@ -3,7 +3,7 @@ import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
 import type {Theme, DynamicThemeFix} from '../definitions';
 import {ThemeEngine} from '../generators/theme-engines';
-import {createOrUpdateDynamicThemeInternal, removeDynamicTheme} from '../inject/dynamic-theme';
+import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
 
@@ -17,15 +17,13 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicThemeFix | null = null): void {
+export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicThemeFix[] | null = null): void {
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngine.dynamicTheme) {
         throw new Error('Theme engine is not supported.');
     }
-    // TODO: repalce with createOrUpdateDynamicTheme() and make fixes signature
-    // DynamicThemeFix | DynamicThemeFix[]
-    createOrUpdateDynamicThemeInternal(theme, fixes, isIFrame);
+    createOrUpdateDynamicTheme(theme, fixes || [], isIFrame);
     isDarkReaderEnabled = true;
 }
 
@@ -41,7 +39,7 @@ export function disable(): void {
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
 let store = {
     themeOptions: null as Partial<Theme> | null,
-    fixes: null as DynamicThemeFix | null,
+    fixes: null as DynamicThemeFix[] | null,
 };
 
 function handleColorScheme(): void {
@@ -52,7 +50,7 @@ function handleColorScheme(): void {
     }
 }
 
-export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix | null = null): void {
+export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix[] | null = null): void {
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();

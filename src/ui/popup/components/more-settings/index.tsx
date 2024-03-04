@@ -6,15 +6,15 @@ import {Toggle} from '../../../controls';
 import {isURLInList} from '../../../../utils/url';
 import {compileMarkdown} from '../../utils/markdown';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper, FilterConfig} from '../../../../definitions';
+import type {ExtWrapper, Theme} from '../../../../definitions';
 import {isFirefox} from '../../../../utils/platform';
 
 export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts: string[]}) {
     const tab = data.activeTab;
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
-    const filterConfig = custom ? custom.theme : data.settings.theme;
+    const theme = custom ? custom.theme : data.settings.theme;
 
-    function setConfig(config: Partial<FilterConfig>) {
+    function setConfig(config: Partial<Theme>) {
         if (custom) {
             custom.theme = {...custom.theme, ...config};
             actions.changeSettings({customThemes: data.settings.customThemes});
@@ -26,13 +26,13 @@ export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts
     return (
         <section class="more-settings">
             <div class="more-settings__section">
-                <FontSettings config={filterConfig} fonts={fonts} onChange={setConfig} />
+                <FontSettings config={theme} fonts={fonts} onChange={setConfig} />
             </div>
             <div class="more-settings__section">
                 {isFirefox ? null : <p class="more-settings__description">
                     {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
                 </p>}
-                <EngineSwitch engine={filterConfig.engine} onChange={(engine) => setConfig({engine})} />
+                <EngineSwitch engine={theme.engine} onChange={(engine) => setConfig({engine})} />
             </div>
             <div class="more-settings__section">
                 <CustomSettingsToggle data={data} actions={actions} />

@@ -39,7 +39,7 @@ export interface TabData {
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
-    setTheme(theme: Partial<FilterConfig>): void;
+    setTheme(theme: Partial<Theme>): void;
     setShortcut(command: string, shortcut: string): Promise<string | null>;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
@@ -86,11 +86,9 @@ export interface Theme {
     immediateModify: boolean;
 }
 
-export type FilterConfig = Theme;
-
 export interface CustomSiteConfig {
     url: string[];
-    theme: FilterConfig;
+    theme: Theme;
 }
 
 export interface ThemePreset {
@@ -110,7 +108,7 @@ export interface UserSettings {
     schemeVersion: number;
     enabled: boolean;
     fetchNews: boolean;
-    theme: FilterConfig;
+    theme: Theme;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
     enabledByDefault: boolean;

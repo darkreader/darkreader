@@ -4,7 +4,7 @@ import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import type {CSSVariableModifier, ModifiedVarDeclaration} from './variables';
 import {variablesStore} from './variables';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../../utils/throttle';
@@ -241,12 +241,12 @@ export function stopWatchingForInlineStyles(): void {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const themeProps: Array<keyof Theme> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
-function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig): string {
+function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {
     return INLINE_STYLE_ATTRS
         .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
-        .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
+        .concat(themeProps.map((prop) => `${prop}="${theme[prop]}"`))
         .join(' ');
 }
 
@@ -260,7 +260,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boo
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;

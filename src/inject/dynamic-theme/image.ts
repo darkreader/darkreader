@@ -3,7 +3,7 @@ import {bgFetch} from './network';
 import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
 import {getSRGBLightness} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {logInfo, logWarn} from '../utils/log';
 import AsyncQueue from '../../utils/async-queue';
 
@@ -239,7 +239,7 @@ document.addEventListener('securitypolicyviolation', onCSPError);
 
 const objectURLs = new Set<string>();
 
-export function getFilteredImageURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
+export function getFilteredImageURL({dataURL, width, height}: ImageDetails, theme: Theme): string {
     if (dataURL.startsWith('data:image/svg+xml')) {
         dataURL = escapeXML(dataURL);
     }

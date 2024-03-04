@@ -16,7 +16,7 @@ import {getDetectorHintsFor} from '../generators/detector-hints';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
+import type {ExtensionData, Theme, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
 import {MessageTypeBGtoCS} from '../utils/message';
@@ -550,7 +550,7 @@ export class Extension {
         await Promise.all(promises);
     }
 
-    private static setTheme($theme: Partial<FilterConfig>) {
+    private static setTheme($theme: Partial<Theme>) {
         UserStorage.set({theme: {...UserStorage.settings.theme, ...$theme}});
 
         if (Extension.isExtensionSwitchedOn() && UserStorage.settings.changeBrowserTheme) {

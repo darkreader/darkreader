@@ -13,6 +13,11 @@ if (
         '    opacity: 1 !important;',
         '    transition: none !important;',
         '}',
+        // MS Learn High Contrast issue
+        // https://github.com/darkreader/darkreader/issues/3618
+        'div[style*="background-color: rgb(135, 135, 135)"] {',
+        '    background-color: #878787 !important;',
+        '}',
     ].join('\n');
     const fallback = document.createElement('style');
     fallback.classList.add('darkreader');

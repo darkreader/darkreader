@@ -237,6 +237,11 @@ function defaultFallbackFactory(theme: Theme, {strict}: {strict: boolean}): stri
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, theme)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
+    // MS Learn High Contrast issue
+    // https://github.com/darkreader/darkreader/issues/3618
+    lines.push(`div[style*="background-color: rgb(135, 135, 135)"] {`);
+    lines.push(`    background-color: #878787 !important;`);
+    lines.push('}');
     return lines.join('\n');
 }
 

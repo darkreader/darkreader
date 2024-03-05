@@ -230,14 +230,12 @@ export function getModifiedFallbackStyle(theme: Theme, {strict}: {strict: boolea
 
 type FallbackFactory = (theme: Theme, options: {strict: boolean}) => string;
 
-function defaultFallbackFactory(filter: Theme, {strict}: {strict: boolean}): string {
+function defaultFallbackFactory(theme: Theme, {strict}: {strict: boolean}): string {
     const lines: string[] = [];
-    // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
-    const isMicrosoft = ['microsoft.com', 'docs.microsoft.com'].includes(location.hostname);
-    lines.push(`html, body, ${strict ? `body :not(iframe)${isMicrosoft ? ':not(div[style^="position:absolute;top:0;left:-"]' : ''}` : 'body > :not(iframe)'} {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
-    lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
     return lines.join('\n');
 }

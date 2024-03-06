@@ -309,9 +309,16 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
             mod.onTypeChange.addListener(setProps);
         }
 
-        function setAsyncValue(promise: Promise<string | null>) {
+        function setAsyncValue(promise: Promise<string | null>, sourceValue: string) {
             promise.then((value) => {
                 if (value && targetCSSProp === 'background' && value.startsWith('var(--darkreader-bg--')) {
+                    setStaticValue(value);
+                }
+                if (value && targetCSSProp === 'background-image') {
+                    if ((element === document.documentElement || element === document.body) && value === sourceValue) {
+                        // Remove big bright backgrounds from root or body
+                        value = 'none';
+                    }
                     setStaticValue(value);
                 }
             });
@@ -321,7 +328,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         if (typeof value === 'string') {
             setStaticValue(value);
         } else if (value instanceof Promise) {
-            setAsyncValue(value);
+            setAsyncValue(value, cssVal);
         } else if (typeof value === 'object') {
             setVarDeclaration(value);
         }
@@ -392,6 +399,9 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         // Temporarily ignore background images due to the possible performance
         // issues and complexity of handling async requests.
         if (property === 'background-image' && value.includes('url')) {
+            if (element === document.documentElement || element === document.body) {
+                setCustomProp(property, property, value);
+            }
             return;
         }
         if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {

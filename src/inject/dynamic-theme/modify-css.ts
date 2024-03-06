@@ -395,7 +395,7 @@ export function getBgImageModifier(
             const {parentStyleSheet} = rule;
             const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
-                parentStyleSheet!.ownerNode?.baseURI || location.origin;
+                parentStyleSheet?.ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
             return async (theme: Theme): Promise<string | null> => {

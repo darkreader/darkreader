@@ -152,7 +152,10 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     // Reference:
     // https://github.com/darkreader/darkreader/issues/10300#issuecomment-1317445632
-    const shouldProxyChildNodes = location.hostname === 'www.vy.no';
+    const shouldProxyChildNodes = [
+        'brilliant.org',
+        'www.vy.no',
+    ].includes(location.hostname);
     if (shouldProxyChildNodes) {
         overrideProperty(Node, 'childNodes', {
             get: (native) => function (): NodeListOf<ChildNode> {

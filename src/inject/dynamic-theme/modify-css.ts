@@ -10,8 +10,8 @@ import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {Theme} from '../../definitions';
 import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
-import type {parsedGradient} from '../../utils/parsing';
-import {parseGradient} from '../../utils/parsing';
+import type {ParsedGradient} from '../../utils/parse/gradient';
+import {parseGradient} from '../../utils/parse/gradient';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -350,7 +350,7 @@ export function getBgImageModifier(
                 .concat(getIndices(urls).map((i) => ({type: 'url', offset: 0, ...i})))
                 .sort((a, b) => a.index > b.index ? 1 : -1);
 
-        const getGradientModifier = (gradient: parsedGradient) => {
+        const getGradientModifier = (gradient: ParsedGradient) => {
             const {typeGradient, match, hasComma} = gradient;
 
             const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?([^\(\), ]|( (?!calc)))*),?/g;

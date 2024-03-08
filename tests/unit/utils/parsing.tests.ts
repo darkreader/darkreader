@@ -1,5 +1,5 @@
 import {parseCSS} from '../../../src/utils/parse/css';
-import {parseGradient} from '../../../src/utils/parsing';
+import {parseGradient} from '../../../src/utils/parse/gradient';
 
 test('Parse CSS', () => {
     const cssText = '@media all { div { } img[src*="a,b;c"] { background-color: black; background-image: url(data:image/gif;base64,XYZ); color: red !important; } } @media print, screen and (min-width: 20rem) { h1, h2 { } } button { color: green; }';

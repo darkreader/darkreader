@@ -47,8 +47,7 @@ test('CSS formatting', () => {
 
     expect(formatCSS('@media print, screen and (min-width: 20rem) { div, span { background: green; color: red; } }'))
         .toEqual([
-            '@media print,',
-            'screen and (min-width: 20rem) {',
+            '@media print, screen and (min-width: 20rem) {',
             '    div,',
             '    span {',
             '        background: green;',

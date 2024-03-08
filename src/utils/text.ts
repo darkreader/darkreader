@@ -1,3 +1,6 @@
+import {parseCSS} from './parse/css';
+import type {ParsedAtRule, ParsedStyleRule} from './parse/css';
+
 export interface TextRange {
     start: number;
     end: number;
@@ -66,50 +69,60 @@ export function getStringSize(value: string): number {
     return value.length * 2;
 }
 
-export function formatCSS(text: string): string {
-    function trimLeft(text: string) {
-        return text.replace(/^\s+/, '');
+export function formatCSS(cssText: string): string {
+    const parsed = parseCSS(cssText);
+
+    const lines: string[] = [];
+    const tab = '    ';
+
+    function isStyleRule(rule: ParsedAtRule | ParsedStyleRule): rule is ParsedStyleRule {
+        return 'selectors' in rule;
     }
 
-    function getIndent(depth: number) {
-        if (depth === 0) {
-            return '';
-        }
-        return ' '.repeat(4 * depth);
-    }
-
-    // Dont execute this kind of Regex on large CSS, as this isn't necessary.
-    // Maxium of 50K characters.
-    if (text.length < 50000) {
-        const emptyRuleRegexp = /[^{}]+{\s*}/;
-        while (emptyRuleRegexp.test(text)) {
-            text = text.replace(emptyRuleRegexp, '');
-        }
-    }
-    const css = (text
-        .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
-        .replace(/\{/g, '{\n') // {
-        .replace(/\}/g, '\n}\n') // }
-        .replace(/\;(?![^\(|\"]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
-        .replace(/\,(?![^\(|\"]*(\)|\"))/g, ',\n') // , and do not target between () and ""
-        .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
-        .split('\n'));
-
-    let depth = 0;
-    const formatted: string[] = [];
-
-    for (let x = 0, len = css.length; x < len; x++) {
-        const line = `${css[x] }\n`;
-        if (line.includes('{')) { // {
-            formatted.push(getIndent(depth++) + trimLeft(line));
-        } else if (line.includes('\}')) { // }
-            formatted.push(getIndent(--depth) + trimLeft(line));
-        } else { // CSS line
-            formatted.push(getIndent(depth) + trimLeft(line));
+    function clearEmpty(rules: Array<ParsedAtRule | ParsedStyleRule>) {
+        for (let i = rules.length - 1; i >= 0; i--) {
+            const rule = rules[i];
+            if (isStyleRule(rule)) {
+                if (rule.declarations.length === 0) {
+                    rules.splice(i, 1);
+                }
+            } else {
+                clearEmpty(rule.rules);
+                if (rule.rules.length === 0) {
+                    rules.splice(i, 1);
+                }
+            }
         }
     }
 
-    return formatted.join('').trim();
+    function formatRule(rule: ParsedAtRule | ParsedStyleRule, indent: string) {
+        if (isStyleRule(rule)) {
+            formatStyleRule(rule as ParsedStyleRule, indent);
+        } else {
+            formatAtRule(rule, indent);
+        }
+    }
+
+    function formatAtRule({type, query, rules}: ParsedAtRule, indent: string) {
+        lines.push(`${indent}${type} ${query} {`);
+        rules.forEach((child) => formatRule(child, `${indent}${tab}`));
+        lines.push(`${indent}}`);
+    }
+
+    function formatStyleRule({selectors, declarations}: ParsedStyleRule, indent: string) {
+        const lastSelectorIndex = selectors.length - 1;
+        selectors.forEach((selector, i) => {
+            lines.push(`${indent}${selector}${i < lastSelectorIndex ? ',' : ' {'}`);
+        });
+        declarations.forEach(({property, value, important}) => {
+            lines.push(`${indent}${tab}${property}: ${value}${important ? ' !important' : ''};`);
+        });
+        lines.push(`${indent}}`);
+    }
+
+    clearEmpty(parsed);
+    parsed.forEach((rule) => formatRule(rule, ''));
+    return lines.join('\n');
 }
 
 export function getParenthesesRange(input: string, searchStartIndex = 0): TextRange | null {

@@ -1,18 +1,18 @@
 import {getOpenCloseRange, splitExcluding} from '../text';
 import type {TextRange} from '../text';
 
-interface ParsedDeclaration {
+export interface ParsedDeclaration {
     property: string;
     value: string;
     important: boolean;
 }
 
-interface ParsedStyleRule {
+export interface ParsedStyleRule {
     selectors: string[];
     declarations: ParsedDeclaration[];
 }
 
-interface ParsedAtRule {
+export interface ParsedAtRule {
     type: string;
     query: string;
     rules: Array<ParsedAtRule | ParsedStyleRule>;

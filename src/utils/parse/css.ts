@@ -79,7 +79,7 @@ function removeCSSComments(cssText: string) {
 }
 
 function getTokenExclusionRanges(cssText: string) {
-    const singleQuoteGoesFirst = cssText.indexOf("'") < cssText.indexOf("'");
+    const singleQuoteGoesFirst = cssText.indexOf("'") < cssText.indexOf('"');
     const firstQuote = singleQuoteGoesFirst ? "'" : '"';
     const secondQuote = singleQuoteGoesFirst ? '"' : "'";
     const excludeRanges: TextRange[] = getAllOpenCloseRanges(cssText, firstQuote, firstQuote);

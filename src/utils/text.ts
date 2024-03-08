@@ -102,7 +102,7 @@ export function getOpenCloseRange(
                 break;
             }
             const openIndex = indexOf(openToken, i);
-            if (openIndex < 0 || closeIndex < openIndex) {
+            if (openIndex < 0 || closeIndex <= openIndex) {
                 depth--;
                 if (depth === 0) {
                     return {start: firstOpenIndex, end: closeIndex + 1};

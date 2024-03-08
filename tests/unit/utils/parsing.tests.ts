@@ -2,7 +2,7 @@ import {parseCSS} from '../../../src/utils/parse/css';
 import {parseGradient} from '../../../src/utils/parse/gradient';
 
 test('Parse CSS', () => {
-    const cssText = '@media all { div { } img[src*="a,b;c"] { background-color: black; background-image: url(data:image/gif;base64,XYZ); color: red !important; } } @media print, screen and (min-width: 20rem) { h1, h2 { } } button { color: green; }';
+    const cssText = '@media all { div { } img[src*="a,b;c"] { background-color: black; background-image: url(data:image/gif;base64,XYZ); color: red !important; } } @media print, screen and (min-width: 20rem) { h1, h2 { } } c-wiz[data-p^="%.@.[[1,3"] { color: green; }';
     const parsedCSS = parseCSS(cssText);
     expect(parsedCSS).toEqual([
         {
@@ -46,7 +46,7 @@ test('Parse CSS', () => {
             ],
         },
         {
-            selectors: ['button'],
+            selectors: ['c-wiz[data-p^="%.@.[[1,3"]'],
             declarations: [
                 {
                     property: 'color',

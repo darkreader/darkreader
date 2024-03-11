@@ -8,6 +8,7 @@ import type {Theme} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../../utils/throttle';
+import {getAbsoluteURL} from '../../utils/url';
 
 interface Overrides {
     [cssProp: string]: {
@@ -97,7 +98,7 @@ const overridesList = Object.values(overrides);
 const normalizedPropList: Record<string, string> = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
+const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color', 'background'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle(): string {
@@ -349,6 +350,12 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
             value = `#${value}`;
         }
         setCustomProp('background-color', 'background-color', value);
+    }
+
+    if ((element === document.documentElement || element === document.body) && element.hasAttribute('background')) {
+        const url = getAbsoluteURL(location.href, element.getAttribute('background') ?? '');
+        const value = `url("${url}")`;
+        setCustomProp('background-image', 'background-image', value);
     }
 
     // We can catch some link elements here, that are from `<link rel="mask-icon" color="#000000">`.

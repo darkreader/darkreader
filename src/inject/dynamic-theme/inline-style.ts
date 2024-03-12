@@ -322,6 +322,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
                     }
                     setStaticValue(value);
                 }
+                inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));
             });
         }
 

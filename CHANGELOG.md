@@ -1,3 +1,11 @@
+## 4.9.80 (March 13, 2024)
+
+- Analyze inline background images for root elements.
+- Support for "background" attribute.
+- Fixed performance for asynchronously resolved inline styles.
+- Fixed freezes and incorrect work on several websites.
+- Dev Tools: Formatting of CSS fixes.
+
 ## 4.9.79 (February 29, 2024)
 
 - Use ES2020 for API bundle.

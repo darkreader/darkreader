@@ -3,34 +3,31 @@ import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList | CSSRule[], iterate: (rule: CSSStyleRule) => void, onMediaRuleError?: () => void): void {
+export function iterateCSSRules(rules: CSSRuleList | CSSRule[], iterate: (rule: CSSStyleRule) => void, onImportError?: () => void): void {
     forEach(rules, (rule) => {
-        // Don't rely on prototype or instanceof, they are slow implementations within the browsers.
-        // However we can rely on certain properties to indentify which CSSRule we are dealing with.
-        // And it's 2x so fast, https://jsben.ch/B0eLa
-        if ((rule as CSSStyleRule).selectorText) {
-            iterate((rule as CSSStyleRule));
-        } else if ((rule as CSSImportRule).href) {
+        if (isStyleRule(rule)) {
+            iterate(rule);
+        } else if (isImportRule(rule)) {
             try {
-                iterateCSSRules((rule as CSSImportRule).styleSheet!.cssRules, iterate, onMediaRuleError);
+                iterateCSSRules(rule.styleSheet!.cssRules, iterate, onImportError);
             } catch (err) {
                 logInfo(`Found a non-loaded link.`);
-                onMediaRuleError && onMediaRuleError();
+                onImportError?.();
             }
-        } else if ((rule as CSSMediaRule).media) {
-            const media = Array.from((rule as CSSMediaRule).media);
+        } else if (isMediaRule(rule)) {
+            const media = Array.from(rule.media);
             const isScreenOrAllOrQuery = media.some((m) => m.startsWith('screen') || m.startsWith('all') || m.startsWith('('));
             const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
             if (isScreenOrAllOrQuery || !isPrintOrSpeech) {
-                iterateCSSRules((rule as CSSMediaRule).cssRules, iterate, onMediaRuleError);
+                iterateCSSRules(rule.cssRules, iterate, onImportError);
             }
-        } else if ((rule as CSSSupportsRule).conditionText) {
-            if (CSS.supports((rule as CSSSupportsRule).conditionText)) {
-                iterateCSSRules((rule as CSSSupportsRule).cssRules, iterate, onMediaRuleError);
+        } else if (isSupportsRule(rule)) {
+            if (CSS.supports(rule.conditionText)) {
+                iterateCSSRules(rule.cssRules, iterate, onImportError);
             }
-        } else if (rule.cssText.startsWith('@layer')) {
-            iterateCSSRules((rule as CSSLayerBlockRule).cssRules, iterate, onMediaRuleError);
+        } else if (isLayerRule(rule)) {
+            iterateCSSRules(rule.cssRules, iterate, onImportError);
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }
@@ -131,4 +128,94 @@ const fontFaceRegex = /@font-face\s*{[^}]*}/g;
 
 export function replaceCSSFontFace($css: string): string {
     return $css.replace(fontFaceRegex, '');
+}
+
+const styleRules = new WeakSet<CSSRule>();
+const importRules = new WeakSet<CSSRule>();
+const mediaRules = new WeakSet<CSSRule>();
+const supportsRules = new WeakSet<CSSRule>();
+const layerRules = new WeakSet<CSSRule>();
+
+export function isStyleRule(rule: CSSRule | null): rule is CSSStyleRule {
+    if (!rule) {
+        return false;
+    }
+    if (styleRules.has(rule)) {
+        return true;
+    }
+    // Duck typing is faster than instanceof
+    // https://jsben.ch/B0eLa
+    if ((rule as CSSStyleRule).selectorText) {
+        styleRules.add(rule);
+        return true;
+    }
+    return false;
+}
+
+export function isImportRule(rule: CSSRule | null): rule is CSSImportRule {
+    if (!rule) {
+        return false;
+    }
+    if (styleRules.has(rule)) {
+        return false;
+    }
+    if (importRules.has(rule)) {
+        return true;
+    }
+    if ((rule as CSSImportRule).href) {
+        importRules.add(rule);
+        return true;
+    }
+    return false;
+}
+
+export function isMediaRule(rule: CSSRule | null): rule is CSSMediaRule {
+    if (!rule) {
+        return false;
+    }
+    if (styleRules.has(rule)) {
+        return false;
+    }
+    if (mediaRules.has(rule)) {
+        return true;
+    }
+    if ((rule as CSSMediaRule).media) {
+        mediaRules.add(rule);
+        return true;
+    }
+    return false;
+}
+
+export function isSupportsRule(rule: CSSRule | null): rule is CSSSupportsRule {
+    if (!rule) {
+        return false;
+    }
+    if (styleRules.has(rule)) {
+        return false;
+    }
+    if (supportsRules.has(rule)) {
+        return true;
+    }
+    if (rule.cssText.startsWith('@supports')) {
+        supportsRules.add(rule);
+        return true;
+    }
+    return false;
+}
+
+export function isLayerRule(rule: CSSRule | null): rule is CSSLayerBlockRule {
+    if (!rule) {
+        return false;
+    }
+    if (styleRules.has(rule)) {
+        return false;
+    }
+    if (layerRules.has(rule)) {
+        return true;
+    }
+    if (rule.cssText.startsWith('@layer') && (rule as CSSLayerBlockRule).cssRules) {
+        layerRules.add(rule);
+        return true;
+    }
+    return false;
 }

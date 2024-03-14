@@ -1,7 +1,7 @@
 import type {Theme} from '../../definitions';
 import {isChromium} from '../../utils/platform';
 import {createAsyncTasksQueue} from '../../utils/throttle';
-import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
@@ -83,10 +83,10 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             let textDiffersFromPrev = false;
 
             notFoundCacheKeys.delete(cssText);
-            if (rule.parentRule instanceof CSSMediaRule) {
-                cssText += `;${(rule.parentRule as CSSMediaRule).media.mediaText}`;
+            if (isMediaRule(rule.parentRule)) {
+                cssText += `;${rule.parentRule.media.mediaText}`;
             }
-            if (rule.parentRule instanceof CSSLayerBlockRule) {
+            if (isLayerRule(rule.parentRule)) {
                 cssText += `;${rule.parentRule.name}`;
             }
             if (!rulesTextCache.has(cssText)) {
@@ -306,16 +306,17 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         function buildStyleSheet() {
             function createTarget(group: ReadyGroup, parent: CSSBuilder): CSSBuilder {
                 const {rule} = group;
-                if (rule instanceof CSSMediaRule) {
+                if (isMediaRule(rule)) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
                     parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSBuilder;
                 }
-                if (rule instanceof CSSLayerBlockRule) {
+                if (isLayerRule(rule)) {
                     const {name} = rule;
                     const index = parent.cssRules.length;
                     parent.insertRule(`@layer ${name} {}`, index);
+                    return parent.cssRules[index] as CSSBuilder;
                 }
                 return parent;
             }

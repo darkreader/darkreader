@@ -474,7 +474,7 @@ export class Extension {
 
     private static onColorSchemeChange = async (isDark: boolean) => {
         if (Extension.wasLastColorSchemeDark === isDark) {
-            // If color scheme was already correct, we do not need to do anyhting
+            // If color scheme was already correct, we do not need to do anything
             return;
         }
         Extension.wasLastColorSchemeDark = isDark;

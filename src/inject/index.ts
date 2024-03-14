@@ -310,7 +310,7 @@ if (__TEST__) {
                 }
                 case 'firefox-expectPageStyles': {
                     // Styles may not have been applied to the document yet,
-                    // so we check once immediatelly and then on an interval.
+                    // so we check once immediately and then on an interval.
                     function checkPageStylesNow() {
                         const errors = expectPageStyles(data);
                         if (errors.length === 0) {

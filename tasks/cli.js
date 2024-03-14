@@ -135,7 +135,7 @@ function validateArguments(args) {
 
     if (args.some((arg) => arg.startsWith('--version='))) {
         if (!args.includes('--firefox') || !args.includes('--release') || args.length !== 3) {
-            validaionErrors.push('Only Firefox build currenly supports signed builds');
+            validaionErrors.push('Only Firefox build currently supports signed builds');
         }
     }
     return validaionErrors;

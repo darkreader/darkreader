@@ -6,7 +6,7 @@ import ConfigManager from './config-manager';
 import {isFirefox} from '../utils/platform';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
-// TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
+// TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separately.
 interface DevToolsStorage {
     get(key: string): Promise<string | null>;
     set(key: string, value: string): Promise<void> | void;

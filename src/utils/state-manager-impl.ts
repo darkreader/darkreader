@@ -10,7 +10,7 @@ import {PromiseBarrier} from './promise-barrier';
  *  - no concurrent reads (calls to s.c.l.get()): if loadState() is called
  *    repeatedly before previous call is complete, this class will wait for
  *    active read to complete and will resolve all loadState() calls at once.
- *  - all simultaniously active calls to saveState() and loadState() wait for
+ *  - all simultaneously active calls to saveState() and loadState() wait for
  *    data to settle and resolve only after data is guaranteed to be coherent.
  *  - data saved with the browser always wins (because JS typically has only
  *    default values and to ensure that if the same class exists in multiple

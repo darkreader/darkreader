@@ -29,6 +29,8 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[], iterate: (rule: 
             if (CSS.supports((rule as CSSSupportsRule).conditionText)) {
                 iterateCSSRules((rule as CSSSupportsRule).cssRules, iterate, onMediaRuleError);
             }
+        } else if (rule.cssText.startsWith('@layer')) {
+            iterateCSSRules((rule as CSSLayerBlockRule).cssRules, iterate, onMediaRuleError);
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }

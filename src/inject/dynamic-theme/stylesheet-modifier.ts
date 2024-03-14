@@ -86,6 +86,9 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             if (rule.parentRule instanceof CSSMediaRule) {
                 cssText += `;${(rule.parentRule as CSSMediaRule).media.mediaText}`;
             }
+            if (rule.parentRule instanceof CSSLayerBlockRule) {
+                cssText += `;${rule.parentRule.name}`;
+            }
             if (!rulesTextCache.has(cssText)) {
                 rulesTextCache.add(cssText);
                 textDiffersFromPrev = true;
@@ -308,6 +311,11 @@ export function createStyleSheetModifier(): StyleSheetModifier {
                     const index = parent.cssRules.length;
                     parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSBuilder;
+                }
+                if (rule instanceof CSSLayerBlockRule) {
+                    const {name} = rule;
+                    const index = parent.cssRules.length;
+                    parent.insertRule(`@layer ${name} {}`, index);
                 }
                 return parent;
             }

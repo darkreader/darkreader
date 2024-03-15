@@ -95,7 +95,6 @@ config.overrides.push({
         'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
             ignore: [
-                'get-stream',
                 '^malevic\/',
             ],
         }],

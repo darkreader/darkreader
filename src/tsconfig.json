@@ -10,8 +10,7 @@
             "DOM.Iterable"
         ],
         "types": [
-            "chrome",
-            "offscreencanvas"
+            "chrome"
         ],
         "allowJs": true,
         "downlevelIteration": true,

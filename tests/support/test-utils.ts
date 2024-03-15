@@ -15,3 +15,7 @@ export function multiline(...lines: string[]): string {
     }
     return lines.join('\n');
 }
+
+export function timeout(delay: number): Promise<void> {
+    return new Promise<void>((resolve) => setTimeout(resolve, delay));
+}

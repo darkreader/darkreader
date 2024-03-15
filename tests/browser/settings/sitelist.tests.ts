@@ -9,7 +9,7 @@ describe('Modifying settings', () => {
             syncSettings: true,
         };
 
-        // Cummulative length should be over the browser limit on record size.
+        // Cumulative length should be over the browser limit on record size
         for (let i = 0; i < 1000; i ++) {
             newSettings.disabledFor.push(`example${i}.com`);
         }

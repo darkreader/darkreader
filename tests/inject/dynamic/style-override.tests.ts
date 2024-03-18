@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 describe('STYLE ELEMENTS', () => {
-    it('should fill CSSStyleSheet with overriden rules', () => {
+    it('should fill CSSStyleSheet with overridden rules', () => {
         const style = document.createElement('style');
         style.textContent = 'body { background-color: white; } h1 { color: black; }';
         container.append(style);

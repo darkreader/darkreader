@@ -145,8 +145,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
             // so we have to manually polyfill it via regular eval().
             // This plugin is necessary to avoid (benign) warnings in the console during builds, it just replaces
-            // literally one occurence of eval() in our code even before TypeSctipt even encounters it.
-            // With this plugin, warning apprears only on Firefox test builds.
+            // literally one occurrence of eval() in our code even before TypeSctipt even encounters it.
+            // With this plugin, warning appears only on Firefox test builds.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
             getRollupPluginInstance('removeEval', '', () => mustRemoveEval &&
                 rollupPluginReplace({

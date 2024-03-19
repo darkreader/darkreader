@@ -300,14 +300,14 @@ export class VariablesStore {
                         return modified;
                     }
                     return new Promise<string>((resolve) => {
-                        const firstUnknownVar = unknownVars.values().next().value;
-                        const callback = () => {
-                            this.unsubscribeFromVariableTypeChanges(firstUnknownVar, callback);
-                            const newValue = modify();
-                            resolve(newValue);
-                        };
-
-                        this.subscribeForVarTypeChange(firstUnknownVar, callback);
+                        for (const unknownVar of unknownVars.values()) {
+                            const callback = () => {
+                                this.unsubscribeFromVariableTypeChanges(unknownVar, callback);
+                                const newValue = modify();
+                                resolve(newValue);
+                            };
+                            this.subscribeForVarTypeChange(unknownVar, callback);
+                        }
                     });
                 }
 

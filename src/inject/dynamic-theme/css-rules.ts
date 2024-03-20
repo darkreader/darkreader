@@ -219,3 +219,43 @@ export function isLayerRule(rule: CSSRule | null): rule is CSSLayerBlockRule {
     }
     return false;
 }
+
+// `rule.cssText` fails when the rule has both
+// `background: var()` and `background-*`
+// https://issues.chromium.org/issues/40252592
+// [1. Selector] { [2. Anything] [3. BG longhand with anything] [4. BG shorthand with var] [5. Anything] [6. BG longhand with anything] }
+const BX_VAR_REGEX = /([^\s{}]+)\s*{([^}]+?)(background-[a-z]+:[^}]+?)?(background:\s*var\([^;]+\);)([^}]+?)(background-[a-z]+:[^}]+?)?}/g;
+
+export function fixShorthandVarProps<T extends CSSRuleList | CSSRule[]>(rules: T): T {
+    if (!(rules instanceof CSSRuleList) || rules.length === 0 || !rules[0].parentStyleSheet) {
+        return rules;
+    }
+    const sheet = rules[0].parentStyleSheet;
+    const owner = sheet && sheet.ownerNode;
+    if (!owner || !(owner instanceof HTMLStyleElement)) {
+        return rules;
+    }
+    const cssText = owner.textContent;
+    if (!cssText?.includes('var(--') || !cssText.match(BX_VAR_REGEX)) {
+        return rules;
+    }
+    try {
+        // Move `background: var()` declarations into separate rules
+        const sheet = new CSSStyleSheet();
+        const fixed = cssText.replaceAll(BX_VAR_REGEX, (match, selector, anyLeft, bgLongLeft, bgShort, anyRight, bgLongRight) => {
+            if (!bgLongLeft && !bgLongRight) {
+                return match;
+            }
+            const short = `${selector} { ${bgShort} }`;
+            const long = `${selector} { ${anyLeft ?? ''} ${bgLongLeft ?? ''} ${anyRight ?? ''} ${bgLongRight ?? ''} }`;
+            return `${short}\n${long}`;
+        });
+        sheet.replaceSync(fixed);
+        if (sheet.cssRules) {
+            return sheet.cssRules as T;
+        }
+    } catch (err) {
+        logWarn(err);
+    }
+    return rules;
+}

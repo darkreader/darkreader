@@ -1,7 +1,7 @@
 import type {Theme} from '../../definitions';
 import {isChromium} from '../../utils/platform';
 import {createAsyncTasksQueue} from '../../utils/throttle';
-import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule, fixShorthandVarProps} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
@@ -65,7 +65,7 @@ export function createStyleSheetModifier(): StyleSheetModifier {
     }
 
     function modifySheet(options: ModifySheetOptions) {
-        const rules = options.sourceCSSRules;
+        const rules = fixShorthandVarProps(options.sourceCSSRules);
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);

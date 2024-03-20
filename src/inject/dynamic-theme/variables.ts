@@ -1,6 +1,6 @@
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
-import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, fixShorthandVarProps} from './css-rules';
 import {getBgImageModifier, getShadowModifierWithInfo} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
@@ -344,7 +344,8 @@ export class VariablesStore {
 
     private collectVariablesAndVarDep() {
         this.rulesQueue.forEach((rules) => {
-            iterateCSSRules(rules, (rule) => {
+            const fixedRules = fixShorthandVarProps(rules);
+            iterateCSSRules(fixedRules, (rule) => {
                 if (rule.style) {
                     this.collectVarsFromCSSDeclarations(rule.style);
                 }

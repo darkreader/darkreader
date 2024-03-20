@@ -1,14 +1,17 @@
-import {parseCSS} from '../parse/css';
-import type {ParsedAtRule, ParsedDeclaration, ParsedStyleRule} from '../parse/css';
+import {isParsedStyleRule, parseCSS} from '../parse/css';
+import type {ParsedAtRule, ParsedCSS, ParsedDeclaration, ParsedStyleRule} from '../parse/css';
 
 export function formatCSS(cssText: string): string {
     const parsed = parseCSS(cssText);
+    return formatParsedCSS(parsed);
+}
 
+export function formatParsedCSS(parsed: ParsedCSS): string {
     const lines: string[] = [];
     const tab = '    ';
 
     function formatRule(rule: ParsedAtRule | ParsedStyleRule, indent: string) {
-        if (isStyleRule(rule)) {
+        if (isParsedStyleRule(rule)) {
             formatStyleRule(rule as ParsedStyleRule, indent);
         } else {
             formatAtRule(rule, indent);
@@ -54,14 +57,10 @@ function sortDeclarations(declarations: ParsedDeclaration[]) {
     });
 }
 
-function isStyleRule(rule: ParsedAtRule | ParsedStyleRule): rule is ParsedStyleRule {
-    return 'selectors' in rule;
-}
-
 function clearEmptyRules(rules: Array<ParsedAtRule | ParsedStyleRule>) {
     for (let i = rules.length - 1; i >= 0; i--) {
         const rule = rules[i];
-        if (isStyleRule(rule)) {
+        if (isParsedStyleRule(rule)) {
             if (rule.declarations.length === 0) {
                 rules.splice(i, 1);
             }

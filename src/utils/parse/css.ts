@@ -18,14 +18,16 @@ export interface ParsedAtRule {
     rules: Array<ParsedAtRule | ParsedStyleRule>;
 }
 
-export function parseCSS(cssText: string): Array<ParsedAtRule | ParsedStyleRule> {
+export type ParsedCSS = Array<ParsedAtRule | ParsedStyleRule>;
+
+export function parseCSS(cssText: string): ParsedCSS {
     cssText = removeCSSComments(cssText);
     cssText = cssText.trim();
     if (!cssText) {
         return [];
     }
 
-    const rules: Array<ParsedAtRule | ParsedStyleRule> = [];
+    const rules: ParsedCSS = [];
 
     // Find {...} ranges excluding inside of "...", [...] etc.
     const excludeRanges = getTokenExclusionRanges(cssText);
@@ -52,7 +54,7 @@ export function parseCSS(cssText: string): Array<ParsedAtRule | ParsedStyleRule>
             rules.push(rule);
         }
 
-        ruleStart = brackets.end + 1;
+        ruleStart = brackets.end;
     });
 
     return rules;
@@ -109,4 +111,8 @@ function parseDeclarations(cssDeclarationsText: string) {
         }
     });
     return declarations;
+}
+
+export function isParsedStyleRule(rule: ParsedAtRule | ParsedStyleRule): rule is ParsedStyleRule {
+    return 'selectors' in rule;
 }

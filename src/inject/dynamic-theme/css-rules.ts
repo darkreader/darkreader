@@ -1,4 +1,7 @@
 import {forEach} from '../../utils/array';
+import {formatParsedCSS} from '../../utils/format/css';
+import {isParsedStyleRule, parseCSS} from '../../utils/parse/css';
+import type {ParsedCSS} from '../../utils/parse/css';
 import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
@@ -221,36 +224,32 @@ export function isLayerRule(rule: CSSRule | null): rule is CSSLayerBlockRule {
 }
 
 // `rule.cssText` fails when the rule has both
-// `background: var()` and `background-*`
+// `background: var()` and `background-*`.
+// This fix moves `background: var()` declarations
+// into separate rules with the same selector.
 // https://issues.chromium.org/issues/40252592
-// [1. Selector] { [2. Anything] [3. BG longhand with anything] [4. BG shorthand with var] [5. Anything] [6. BG longhand with anything] }
-const BX_VAR_REGEX = /([^\s{}]+)\s*{([^}]+?)(background-[a-z]+:[^}]+?)?(background:\s*var\([^;]+\);)([^}]+?)(background-[a-z]+:[^}]+?)?}/g;
-
 export function fixShorthandVarProps<T extends CSSRuleList | CSSRule[]>(rules: T): T {
     if (!(rules instanceof CSSRuleList) || rules.length === 0 || !rules[0].parentStyleSheet) {
         return rules;
     }
+
     const sheet = rules[0].parentStyleSheet;
     const owner = sheet && sheet.ownerNode;
     if (!owner || !(owner instanceof HTMLStyleElement)) {
         return rules;
     }
+
     const cssText = owner.textContent;
-    if (!cssText?.includes('var(--') || !cssText.match(BX_VAR_REGEX)) {
+    if (!cssText?.includes('var(') || !cssText.match(/background:\s*var\(/)) {
         return rules;
     }
+
     try {
-        // Move `background: var()` declarations into separate rules
         const sheet = new CSSStyleSheet();
-        const fixed = cssText.replaceAll(BX_VAR_REGEX, (match, selector, anyLeft, bgLongLeft, bgShort, anyRight, bgLongRight) => {
-            if (!bgLongLeft && !bgLongRight) {
-                return match;
-            }
-            const short = `${selector} { ${bgShort} }`;
-            const long = `${selector} { ${anyLeft ?? ''} ${bgLongLeft ?? ''} ${anyRight ?? ''} ${bgLongRight ?? ''} }`;
-            return `${short}\n${long}`;
-        });
-        sheet.replaceSync(fixed);
+        const parsed = parseCSS(cssText);
+        splitShorthandParsedProps(parsed);
+        const fixedCSSText = formatParsedCSS(parsed);
+        sheet.replaceSync(fixedCSSText);
         if (sheet.cssRules) {
             return sheet.cssRules as T;
         }
@@ -258,4 +257,29 @@ export function fixShorthandVarProps<T extends CSSRuleList | CSSRule[]>(rules: T
         logWarn(err);
     }
     return rules;
+}
+
+function splitShorthandParsedProps(parsed: ParsedCSS) {
+    for (let i = parsed.length - 1; i >= 0; i--) {
+        const rule = parsed[i];
+        if (!isParsedStyleRule(rule)) {
+            splitShorthandParsedProps(rule.rules);
+            continue;
+        }
+        const backgroundIndex = rule.declarations.findIndex((d) => d.property === 'background' && d.value.startsWith('var('));
+        if (backgroundIndex < 0) {
+            continue;
+        }
+        const hasOtherBackground = rule.declarations.some((d) => d.property.startsWith('background-'));
+        if (!hasOtherBackground) {
+            continue;
+        }
+        parsed.splice(i, 0, {
+            selectors: rule.selectors,
+            declarations: [
+                rule.declarations[backgroundIndex],
+            ],
+        });
+        rule.declarations.splice(backgroundIndex, 1);
+    }
 }

@@ -64,6 +64,11 @@ export function getModifiableCSSDeclaration(
         // Note: this if statement needs to be above the next one
         logWarn('CSS property color-scheme is not supported');
         return null;
+    } else if (property === 'scrollbar-color') {
+        const modifier = getScrollbarColorModifier(value);
+        if (modifier) {
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+        }
     } else if (
         (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
@@ -264,6 +269,7 @@ const unparsableColors = new Set([
     'currentcolor',
     'none',
     'unset',
+    'auto',
 ]);
 
 function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier | null {
@@ -563,6 +569,22 @@ export function getShadowModifierWithInfo(value: string): CSSValueModifierWithIn
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;
     }
+}
+
+export function getScrollbarColorModifier(value: string): string | CSSValueModifier | null {
+    const colorsMatch = value.match(/^\s*([a-z]+(\(.*\))?)\s+([a-z]+(\(.*\))?)\s*$/);
+    if (!colorsMatch) {
+        return value;
+    }
+
+    const thumb = parseColorWithCache(colorsMatch[1]);
+    const track = parseColorWithCache(colorsMatch[3]);
+    if (!thumb || !track) {
+        logWarn("Couldn't parse color", ...([thumb, track].filter((c) => !c)));
+        return null;
+    }
+
+    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(thumb, theme)}`;
 }
 
 export function getShadowModifier(value: string): CSSValueModifier | null {

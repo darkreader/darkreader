@@ -50,47 +50,35 @@ export function getModifiableCSSDeclaration(
     ignoreImageSelectors: string[],
     isCancelled: (() => boolean) | null,
 ): ModifiableCSSDeclaration | null {
+    let modifier: ModifiableCSSDeclaration['value'] | null = null;
     if (property.startsWith('--')) {
-        const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
     } else if (value.includes('var(')) {
-        const modifier = getVariableDependantModifier(variablesStore, property, value);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
-    } else if (property === 'color-scheme') {
-        // Note: this if statement needs to be above the next one
-        logWarn('CSS property color-scheme is not supported');
-        return null;
+        modifier = getVariableDependantModifier(variablesStore, property, value);
     } else if (property === 'scrollbar-color') {
-        const modifier = getScrollbarColorModifier(value);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getScrollbarColorModifier(value);
     } else if (
-        (property.includes('color') && property !== '-webkit-print-color-adjust') ||
+        (
+            property.includes('color') &&
+            property !== 'color-scheme' &&
+            property !== '-webkit-print-color-adjust'
+        ) ||
         property === 'fill' ||
         property === 'stroke' ||
         property === 'stop-color'
     ) {
-        const modifier = getColorModifier(property, value, rule);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getColorModifier(property, value, rule);
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
     } else if (property.includes('shadow')) {
-        const modifier = getShadowModifier(value);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getShadowModifier(value);
     }
-    return null;
+
+    if (!modifier) {
+        return null;
+    }
+
+    return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
 }
 
 function joinSelectors(...selectors: string[]) {
@@ -289,14 +277,14 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
             (rule.style.mask && rule.style.mask !== 'none') ||
             (rule.style.getPropertyValue('mask-image') && rule.style.getPropertyValue('mask-image') !== 'none')
         ) {
-            return (filter) => modifyForegroundColor(rgb, filter);
+            return (theme) => modifyForegroundColor(rgb, theme);
         }
-        return (filter) => modifyBackgroundColor(rgb, filter);
+        return (theme) => modifyBackgroundColor(rgb, theme);
     }
     if (prop.includes('border') || prop.includes('outline')) {
-        return (filter) => modifyBorderColor(rgb, filter);
+        return (theme) => modifyBorderColor(rgb, theme);
     }
-    return (filter) => modifyForegroundColor(rgb, filter);
+    return (theme) => modifyForegroundColor(rgb, theme);
 }
 
 const imageDetailsCache = new Map<string, ImageDetails>();

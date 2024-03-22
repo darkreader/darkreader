@@ -146,6 +146,8 @@ export function hslToString(hsl: HSLA): string {
 const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
+const colorFnRegex = /^color\([^\(\)]+\)$/;
+const colorMixFnRegex = /^color-mix\([^\(\)]+\)$/;
 
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
@@ -172,6 +174,10 @@ export function parse($color: string): RGBA | null {
 
     if ($color === 'transparent') {
         return {r: 0, g: 0, b: 0, a: 0};
+    }
+
+    if (c.match(colorFnRegex) || c.match(colorMixFnRegex)) {
+        return domParseColor(c);
     }
 
     return null;
@@ -508,4 +514,21 @@ const systemColors: Map<string, number> = new Map(Object.entries({
 // https://en.wikipedia.org/wiki/Relative_luminance
 export function getSRGBLightness(r: number, g: number, b: number): number {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
+let canvas: HTMLCanvasElement;
+let context: CanvasRenderingContext2D;
+
+function domParseColor($color: string) {
+    if (!context) {
+        canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        context = canvas.getContext('2d', {willReadFrequently: true})!;
+    }
+    context.fillStyle = $color;
+    context.fillRect(0, 0, 1, 1);
+    const d = context.getImageData(0, 0, 1, 1).data;
+    const color = `rgba(${d[0]}, ${d[1]}, ${d[2]}, ${(d[3] / 255).toFixed(2)})`;
+    return parseRGB(color);
 }

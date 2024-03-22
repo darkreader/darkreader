@@ -401,7 +401,11 @@ export class VariablesStore {
 
         // Check if the value is either a raw value or a value that can be parsed
         // e.g. rgb, hsl.
-        const isColor = rawValueRegex.test(value) || parseColorWithCache(value);
+        const isColor = Boolean(
+            value.match(rawRGBSpaceRegex) ||
+            value.match(rawRGBCommaRegex) ||
+            parseColorWithCache(value)
+        );
         if (isColor) {
             this.unknownColorVars.add(varName);
         } else if (
@@ -679,29 +683,24 @@ function isTextColorProperty(property: string) {
     return property === 'color' || property === 'caret-color' || property === '-webkit-text-fill-color';
 }
 
-// ex. 131,123,132 | 1,341, 122
-const rawValueRegex = /^\d{1,3}, ?\d{1,3}, ?\d{1,3}$/;
+// [number], [number], [number]
+const rawRGBSpaceRegex = /^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})$/;
+// [number], [number], [number]
+const rawRGBCommaRegex = /^(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})$/;
 
-function parseRawValue(color: string) {
-    if (rawValueRegex.test(color)) {
-        // Convert the raw value into a useable rgb(...) value, such that it can
-        // be properly used with other functions that expect such value.
-        const splitted = color.split(',');
-        let resultInRGB = 'rgb(';
-        splitted.forEach((number) => {
-            resultInRGB += `${number.trim()}, `;
-        });
-        resultInRGB = resultInRGB.substring(0, resultInRGB.length - 2);
-        resultInRGB += ')';
-        return {isRaw: true, color: resultInRGB};
+function parseRawColorValue(input: string) {
+    const match = input.match(rawRGBSpaceRegex) ?? input.match(rawRGBCommaRegex);
+    if (match) {
+        const color = `rgb(${match[1]}, ${match[2]}, ${match[3]})`;
+        return {isRaw: true, color};
     }
-    return {isRaw: false, color: color};
+    return {isRaw: false, color: input};
 }
 
-function handleRawValue(color: string, theme: Theme, modifyFunction: (rgb: RGBA, theme: Theme) => string) {
-    const {isRaw, color: newColor} = parseRawValue(color);
+function handleRawColorValue(input: string, theme: Theme, modifyFunction: (rgb: RGBA, theme: Theme) => string) {
+    const {isRaw, color} = parseRawColorValue(input);
 
-    const rgb = parseColorWithCache(newColor);
+    const rgb = parseColorWithCache(color);
     if (rgb) {
         const outputColor = modifyFunction(rgb, theme);
 
@@ -714,19 +713,19 @@ function handleRawValue(color: string, theme: Theme, modifyFunction: (rgb: RGBA,
         }
         return outputColor;
     }
-    return newColor;
+    return color;
 }
 
 function tryModifyBgColor(color: string, theme: Theme) {
-    return handleRawValue(color, theme, modifyBackgroundColor);
+    return handleRawColorValue(color, theme, modifyBackgroundColor);
 }
 
 function tryModifyTextColor(color: string, theme: Theme) {
-    return handleRawValue(color, theme, modifyForegroundColor);
+    return handleRawColorValue(color, theme, modifyForegroundColor);
 }
 
 function tryModifyBorderColor(color: string, theme: Theme) {
-    return handleRawValue(color, theme, modifyBorderColor);
+    return handleRawColorValue(color, theme, modifyBorderColor);
 }
 
 function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>()) {

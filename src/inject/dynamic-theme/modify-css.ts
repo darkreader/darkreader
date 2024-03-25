@@ -55,12 +55,13 @@ export function getModifiableCSSDeclaration(
         modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
     } else if (value.includes('var(')) {
         modifier = getVariableDependantModifier(variablesStore, property, value);
+    } else if (property === 'color-scheme') {
+        modifier = getColorSchemeModifier();
     } else if (property === 'scrollbar-color') {
         modifier = getScrollbarColorModifier(value);
     } else if (
         (
             property.includes('color') &&
-            property !== 'color-scheme' &&
             property !== '-webkit-print-color-adjust'
         ) ||
         property === 'fill' ||
@@ -559,6 +560,14 @@ export function getShadowModifierWithInfo(value: string): CSSValueModifierWithIn
     }
 }
 
+export function getShadowModifier(value: string): CSSValueModifier | null {
+    const shadowModifier = getShadowModifierWithInfo(value);
+    if (!shadowModifier) {
+        return null;
+    }
+    return (theme: Theme) => shadowModifier(theme).result;
+}
+
 export function getScrollbarColorModifier(value: string): string | CSSValueModifier | null {
     const colorsMatch = value.match(/^\s*([a-z]+(\(.*\))?)\s+([a-z]+(\(.*\))?)\s*$/);
     if (!colorsMatch) {
@@ -575,12 +584,8 @@ export function getScrollbarColorModifier(value: string): string | CSSValueModif
     return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(thumb, theme)}`;
 }
 
-export function getShadowModifier(value: string): CSSValueModifier | null {
-    const shadowModifier = getShadowModifierWithInfo(value);
-    if (!shadowModifier) {
-        return null;
-    }
-    return (theme: Theme) => shadowModifier(theme).result;
+export function getColorSchemeModifier(): CSSValueModifier {
+    return (theme: Theme) => theme.mode === 0 ? 'dark light' : 'dark';
 }
 
 function getVariableModifier(

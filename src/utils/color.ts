@@ -148,6 +148,7 @@ const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
 const colorFnRegex = /^color\([^\(\)]+\)$/;
 const colorMixFnRegex = /^color-mix\([^\(\)]+\)$/;
+const lightDarkRegex = /^light-dark\([^\(\)]+\)$/;
 
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
@@ -176,7 +177,7 @@ export function parse($color: string): RGBA | null {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    if (c.match(colorFnRegex) || c.match(colorMixFnRegex)) {
+    if (c.match(colorFnRegex) || c.match(colorMixFnRegex) || c.match(lightDarkRegex)) {
         return domParseColor(c);
     }
 

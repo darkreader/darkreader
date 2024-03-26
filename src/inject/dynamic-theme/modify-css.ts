@@ -10,8 +10,8 @@ import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {Theme} from '../../definitions';
 import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
-import type {ParsedGradient} from '../../utils/parse/gradient';
-import {parseGradient} from '../../utils/parse/gradient';
+import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
+import {parseGradient} from '../../utils/css-text/parse-gradient';
 
 declare const __CHROMIUM_MV3__: boolean;
 

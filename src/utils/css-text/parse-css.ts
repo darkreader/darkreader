@@ -1,5 +1,6 @@
 import {getOpenCloseRange, splitExcluding} from '../text';
 import type {TextRange} from '../text';
+import {removeCSSComments} from './css-text';
 
 export interface ParsedDeclaration {
     property: string;
@@ -74,10 +75,6 @@ function getAllOpenCloseRanges(
         i = range.end;
     }
     return ranges;
-}
-
-function removeCSSComments(cssText: string) {
-    return cssText.trim().replace(/\/\*.*?\*\//g, '');
 }
 
 function getTokenExclusionRanges(cssText: string) {

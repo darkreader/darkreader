@@ -1,10 +1,11 @@
 import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
+import {removeCSSComments} from '../../utils/css-text/css-text';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL, isRelativeHrefOnAbsolutePath} from '../../utils/url';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
-import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';

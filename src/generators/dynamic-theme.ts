@@ -1,7 +1,7 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig, getSitesFixesFor, getDomain} from './utils/parse';
 import type {SitePropsIndex} from './utils/parse';
-import {formatCSS} from '../utils/format/css';
+import {formatCSS} from '../utils/css-text/format-css';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';

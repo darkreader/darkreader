@@ -1,7 +1,7 @@
 import {forEach} from '../../utils/array';
 import {loadAsDataURL} from '../../utils/network';
 import {getMatches} from '../../utils/text';
-import {formatCSS} from '../../utils/format/css';
+import {formatCSS} from '../../utils/css-text/format-css';
 
 const blobRegex = /url\(\"(blob\:.*?)\"\)/g;
 

@@ -1,5 +1,5 @@
-import {isParsedStyleRule, parseCSS} from '../parse/css';
-import type {ParsedAtRule, ParsedCSS, ParsedDeclaration, ParsedStyleRule} from '../parse/css';
+import {isParsedStyleRule, parseCSS} from '../css-text/parse-css';
+import type {ParsedAtRule, ParsedCSS, ParsedDeclaration, ParsedStyleRule} from '../css-text/parse-css';
 
 export function formatCSS(cssText: string): string {
     const parsed = parseCSS(cssText);

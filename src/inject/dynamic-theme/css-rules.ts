@@ -1,7 +1,7 @@
 import {forEach} from '../../utils/array';
-import {formatParsedCSS} from '../../utils/format/css';
-import {isParsedStyleRule, parseCSS} from '../../utils/parse/css';
-import type {ParsedCSS} from '../../utils/parse/css';
+import {formatParsedCSS} from '../../utils/css-text/format-css';
+import {isParsedStyleRule, parseCSS} from '../../utils/css-text/parse-css';
+import type {ParsedCSS} from '../../utils/css-text/parse-css';
 import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
@@ -119,12 +119,6 @@ export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: st
             return match;
         }
     });
-}
-
-const cssCommentsRegex = /\/\*[\s\S]*?\*\//g;
-
-export function removeCSSComments($css: string): string {
-    return $css.replace(cssCommentsRegex, '');
 }
 
 const fontFaceRegex = /@font-face\s*{[^}]*}/g;

@@ -1,5 +1,5 @@
 import {getParenthesesRange} from '../../../src/utils/text';
-import {formatCSS} from '../../../src/utils/format/css';
+import {formatCSS} from '../../../src/utils/css-text/format-css';
 
 test('CSS formatting', () => {
     expect(formatCSS('div { color: red; }'))

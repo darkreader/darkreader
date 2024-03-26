@@ -180,6 +180,7 @@ export function parse($color: string): RGBA | null {
     }
 
     if (c.startsWith('light-dark(') && c.endsWith(')')) {
+        // light-dark([color()], [color()])
         const match = c.match(/^light-dark\(\s*([a-z]+(\(.*\))?),\s*([a-z]+(\(.*\))?)\s*\)$/);
         if (match) {
             const schemeColor = isSystemDarkModeEnabled() ? match[3] : match[1];

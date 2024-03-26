@@ -683,7 +683,7 @@ function isTextColorProperty(property: string) {
     return property === 'color' || property === 'caret-color' || property === '-webkit-text-fill-color';
 }
 
-// [number], [number], [number]
+// [number] [number] [number]
 const rawRGBSpaceRegex = /^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})$/;
 // [number], [number], [number]
 const rawRGBCommaRegex = /^(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})$/;

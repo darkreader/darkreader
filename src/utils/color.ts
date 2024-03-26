@@ -1,5 +1,6 @@
 import {evalMath} from './math-eval';
 import {getParenthesesRange} from './text';
+import {isSystemDarkModeEnabled} from './media-query';
 
 export interface RGBA {
     r: number;
@@ -146,9 +147,6 @@ export function hslToString(hsl: HSLA): string {
 const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
-const colorFnRegex = /^color\([^\(\)]+\)$/;
-const colorMixFnRegex = /^color-mix\([^\(\)]+\)$/;
-const lightDarkRegex = /^light-dark\([^\(\)]+\)$/;
 
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
@@ -177,8 +175,16 @@ export function parse($color: string): RGBA | null {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    if (c.match(colorFnRegex) || c.match(colorMixFnRegex) || c.match(lightDarkRegex)) {
+    if ((c.startsWith('color(') || c.startsWith('color-mix(')) && c.endsWith(')')) {
         return domParseColor(c);
+    }
+
+    if (c.startsWith('light-dark(') && c.endsWith(')')) {
+        const match = c.match(/^light-dark\(\s*([a-z]+(\(.*\))?),\s*([a-z]+(\(.*\))?)\s*\)$/);
+        if (match) {
+            const schemeColor = isSystemDarkModeEnabled() ? match[3] : match[1];
+            return parse(schemeColor);
+        }
     }
 
     return null;

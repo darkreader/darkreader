@@ -104,7 +104,7 @@ export class VariablesStore {
             const hasColor = this.findVarRef(v, (ref) => {
                 return (
                     this.unknownColorVars.has(ref) ||
-                    this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                    this.isVarType(ref, VAR_TYPE_BGCOLOR | VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
                 );
             }) != null;
             if (hasColor) {
@@ -463,7 +463,7 @@ export class VariablesStore {
                 const isBgColor = this.findVarRef(v, (ref) => {
                     return (
                         this.unknownColorVars.has(ref) ||
-                        this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                        this.isVarType(ref, VAR_TYPE_BGCOLOR | VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
                     );
                 }) != null;
                 this.iterateVarRefs(v, (ref) => {

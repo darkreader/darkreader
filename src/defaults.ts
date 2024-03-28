@@ -56,14 +56,15 @@ export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {
+    schemeVersion: 0,
     enabled: true,
     fetchNews: true,
     theme: DEFAULT_THEME,
     presets: [],
     customThemes: [],
-    siteList: [],
-    siteListEnabled: [],
-    applyToListedOnly: false,
+    enabledByDefault: true,
+    enabledFor: [],
+    disabledFor: [],
     changeBrowserTheme: false,
     syncSettings: true,
     syncSitesFixes: false,

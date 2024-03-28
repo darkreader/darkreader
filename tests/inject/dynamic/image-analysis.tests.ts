@@ -254,6 +254,18 @@ describe('IMAGE ANALYSIS', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4="), linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))');
     });
 
+    it('should handle background-image with non-base64 data URL', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            `    h1 { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="3">%3Cpath%20d%3D%22m0%202.5%20l2%20-1.5%20l1%200%20l2%201.5%20l1%200%22%20stroke%3D%22%23d11%22%20fill%3D%22none%22%20stroke-width%3D%22.7%22%2F%3E</svg>');`,
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await waitForEvent('__darkreader__test__asyncQueueComplete');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNiIgaGVpZ2h0PSIzIj48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMjQ5IC0wLjYxNCAtMC42NzIgMC4wMDAgMS4wMzUgLTAuNjQ2IDAuMjg4IC0wLjY2NCAwLjAwMCAxLjAyMCAtMC42MzYgLTAuNjA5IDAuMjUwIDAuMDAwIDAuOTk0IDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjYiIGhlaWdodD0iMyIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sLCZsdDtzdmcgeG1sbnM9JnF1b3Q7aHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcmcXVvdDsgd2lkdGg9JnF1b3Q7NiZxdW90OyBoZWlnaHQ9JnF1b3Q7MyZxdW90OyZndDslM0NwYXRoJTIwZCUzRCUyMm0wJTIwMi41JTIwbDIlMjAtMS41JTIwbDElMjAwJTIwbDIlMjAxLjUlMjBsMSUyMDAlMjIlMjBzdHJva2UlM0QlMjIlMjNkMTElMjIlMjBmaWxsJTNEJTIybm9uZSUyMiUyMHN0cm9rZS13aWR0aCUzRCUyMi43JTIyJTJGJTNFJmx0Oy9zdmcmZ3Q7IiAvPjwvc3ZnPg==")');
+    });
+
     it('should handle background-image with URL and gradient (revered)', async () => {
         container.innerHTML = multiline(
             '<style>',

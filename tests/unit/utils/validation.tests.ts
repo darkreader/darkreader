@@ -53,6 +53,7 @@ test('Settings Validation', () => {
     expect(defaultSet).toEqual(DEFAULT_SETTINGS);
 
     const wonkySet = {
+        schemeVersion: 'x',
         enabled: '',
         fetchNews: null as boolean | null,
         theme: {
@@ -96,9 +97,9 @@ test('Settings Validation', () => {
             {url: ['a.com'], theme: null},
             null,
         ],
-        siteList: ['a.com', '', 'b.com'],
-        siteListEnabled: {0: 'a.com', 1: 'b.com'},
-        applyToListedOnly: null as boolean | null,
+        disabledFor: ['a.com', '', 'b.com'],
+        enabledFor: {0: 'a.com', 1: 'b.com'},
+        enabledByDefault: true,
         changeBrowserTheme: 1,
         syncSettings: null as boolean | null,
         syncSitesFixes: 0,
@@ -125,7 +126,7 @@ test('Settings Validation', () => {
     expect(validation.errors.length).toBeGreaterThan(0);
     expect(wonkySet as any).toEqual({
         ...DEFAULT_SETTINGS,
-        siteList: ['a.com', 'b.com'],
+        disabledFor: ['a.com', 'b.com'],
         presets: [{id: 'p5', name: 'P5', urls: ['a.com'], theme: {brightness: 100}}],
         customThemes: [{url: ['a.com'], theme: {brightness: 100}}],
     });
@@ -148,6 +149,7 @@ test('Settings Validation', () => {
     });
 
     const validSet: UserSettings = {
+        schemeVersion: 2,
         enabled: true,
         fetchNews: true,
         theme: {
@@ -178,9 +180,9 @@ test('Settings Validation', () => {
         customThemes: [
             {url: ['a.com'], theme: {brightness: 100} as Theme},
         ],
-        siteList: ['a.com', 'b.com'],
-        siteListEnabled: ['c.com'],
-        applyToListedOnly: true,
+        disabledFor: ['a.com', 'b.com'],
+        enabledFor: ['c.com'],
+        enabledByDefault: false,
         changeBrowserTheme: true,
         syncSettings: false,
         syncSitesFixes: true,

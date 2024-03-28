@@ -9,27 +9,29 @@ interface SiteListSettingsProps extends ExtWrapper {
 
 export default function SiteListSettings({data, actions, isFocused}: SiteListSettingsProps) {
     function isSiteUrlValid(value: string) {
-        return /^[0-9a-z-]+(\.[0-9a-z-]+)*$/.test(value) || /^(\[([0-9\:]+)\])$/.test(value);
+        return /^([^\.\s]+?\.?)+$/.test(value);
     }
 
     return (
         <section class="site-list-settings">
             <Toggle
                 class="site-list-settings__toggle"
-                checked={data.settings.applyToListedOnly}
+                checked={!data.settings.enabledByDefault}
                 labelOn={getLocalMessage('invert_listed_only')}
                 labelOff={getLocalMessage('not_invert_listed')}
-                onChange={(value) => actions.changeSettings({applyToListedOnly: value})}
+                onChange={(value) => actions.changeSettings({enabledByDefault: !value})}
             />
             <TextList
                 class="site-list-settings__text-list"
                 placeholder="google.com/maps"
-                values={data.settings.siteList}
+                values={data.settings.enabledByDefault ? data.settings.disabledFor : data.settings.enabledFor}
                 isFocused={isFocused}
                 onChange={(values) => {
-                    if (values.every(isSiteUrlValid)) {
-                        actions.changeSettings({siteList: values});
-                    }
+                    const siteList = values.filter(isSiteUrlValid);
+                    const changes = data.settings.enabledByDefault
+                        ? {disabledFor: siteList}
+                        : {enabledFor: siteList};
+                    actions.changeSettings(changes);
                 }}
             />
             <Shortcut

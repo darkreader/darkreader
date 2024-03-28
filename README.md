@@ -41,7 +41,7 @@ You can build Dark Reader with alternative runtime called [Deno](https://deno.la
 
 Please note that if you encounter error `Too many open files (os error 24)`, then you should use the newer version of Deno (preferably built from source or canary).
 
-### Bundling with official Firefox store signatures (Experimental)
+### Bundling with official Firefox store signatures (experimental)
 
 Prior to publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that extension bundle did not get corrupted or bit-rotted) and that extension store preformed very basic extension validation.
 
@@ -122,15 +122,41 @@ Automatically syncing the site fixes to every Dark Reader user was disabled beca
 However, this can be enabled using the following steps:
 
 - Click on the Dark Reader icon.
-- Click on the Dev tools button (in the bottom-right corner).
-- Click on the Preview new design button.
-- Enable the `Synchronize site fixes` setting under `Settings -> Manage Settings`.
+- Click on the `Dev tools` button (in the bottom-right corner).
+- Click on the `Preview new design` button.
+- Enable the `Synchronize site fixes` setting under `Settings` -> `Manage settings`.
 
 To force a synchronization of the sites fixes (when the corresponding setting is enabled), perform the following steps:
 
 - Click on the Dark Reader icon.
-- Click on the Dev tools button (in the bottom-right corner).
-- Click on the Reset button. This will remove any custom site fixes you may have.
+- Click on the `Dev tools` button (in the bottom-right corner).
+- Click on the `Reset` button. This will remove any custom site fixes you may have.
+
+## Enable Dark Reader for restricted websites on Firefox
+
+By default, Dark Reader does not work on some websites due to **security restrictions** enforced by Mozilla.
+
+The following instructions will guide you on how to bypass those restrictions.
+
+**Proceed with caution. This exposes you to a security risk if you do not know what you are doing.**
+
+**These settings will apply to all extensions, and not just Dark Reader.**
+
+Step 1: change Dark Reader's settings.
+
+- Click on the Dark Reader icon.
+- Click on the `Dev tools` button (in the bottom-right corner).
+- Click on the `Preview new design button`.
+- Enable the `Enable on restricted pages` setting under `Settings` -> `Site list`.
+
+Step 2: change Firefox's settings.
+
+- Type `about:config` in the address bar and press Enter.
+A warning page may appear. Click `Accept the Risk and Continue` to proceed.
+- Search for and set `extensions.webextensions.restrictedDomains` to an empty value.
+- Create `extensions.webextensions.addons-restricted-domains@mozilla.com.disabled` with `boolean` as type and set its value to `true`.
+- Set `privacy.resistFingerprinting.block_mozAddonManager` to `true`.
+- Restart Firefox.
 
 <h2 align="center">Contributors</h2>
 <br/>

@@ -23,7 +23,7 @@ class Task {
 
     /**
      * @param {string[] | (() => string[])} files
-     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher) => void | Promise<void>, platforms: object} onChange
+     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher, platforms: object) => void | Promise<void>} onChange
      */
     addWatcher(files, onChange) {
         this._watchFiles = files;

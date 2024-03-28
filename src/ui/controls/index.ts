@@ -1,7 +1,9 @@
 import Button from './button';
+import CheckButton from './check-button/check-button';
 import CheckBox from './checkbox';
 import ColorDropDown from './color-dropdown';
 import ColorPicker from './color-picker';
+import ControlGroup from './control-group/control-group';
 import DropDown from './dropdown';
 import MessageBox from './message-box';
 import MultiSwitch from './multi-switch';
@@ -21,8 +23,10 @@ import UpDown from './updown';
 export {
     Button,
     CheckBox,
+    CheckButton,
     ColorDropDown,
     ColorPicker,
+    ControlGroup,
     DropDown,
     MessageBox,
     MultiSwitch,

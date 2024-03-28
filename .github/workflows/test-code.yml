@@ -23,7 +23,7 @@ on:
       node_version:
         description: 'NodeJS version'
         required: true
-        default: '16.x'
+        default: '18.x'
 
 jobs:
   test:
@@ -33,12 +33,12 @@ jobs:
     steps:
 
       - name: Clone repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Node setup
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version || '16.x' }}
+          node-version: ${{ inputs.node_version || '18.x' }}
           cache: npm
 
       - name: Install npm dependencies
@@ -52,9 +52,6 @@ jobs:
 
       - name: Check for compatibility issues
         run: npm run lint:bundle
-
-      - name: Check project structure
-        run: npm run test:project
 
       - name: Check NPM dependencies
         run: node tests/dependencies.js

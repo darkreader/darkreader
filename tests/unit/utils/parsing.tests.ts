@@ -1,4 +1,62 @@
-import {parseGradient} from '../../../src/utils/parsing';
+import {parseCSS} from '../../../src/utils/css-text/parse-css';
+import {parseGradient} from '../../../src/utils/css-text/parse-gradient';
+
+test('Parse CSS', () => {
+    const cssText = '@media all { div { } img[src*="a,b;c"] { background-color: black; background-image: url(data:image/gif;base64,XYZ); color: red !important; } } @media print, screen and (min-width: 20rem) { h1, h2 { } } c-wiz[data-p^="%.@.[[1,3"] { color: green; }';
+    const parsedCSS = parseCSS(cssText);
+    expect(parsedCSS).toEqual([
+        {
+            type: '@media',
+            query: 'all',
+            rules: [
+                {
+                    selectors: ['div'],
+                    declarations: [],
+                },
+                {
+                    selectors: ['img[src*="a,b;c"]'],
+                    declarations: [
+                        {
+                            property: 'background-color',
+                            value: 'black',
+                            important: false,
+                        },
+                        {
+                            property: 'background-image',
+                            value: 'url(data:image/gif;base64,XYZ)',
+                            important: false,
+                        },
+                        {
+                            property: 'color',
+                            value: 'red',
+                            important: true,
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            type: '@media',
+            query: 'print, screen and (min-width: 20rem)',
+            rules: [
+                {
+                    selectors: ['h1', 'h2'],
+                    declarations: [],
+                },
+            ],
+        },
+        {
+            selectors: ['c-wiz[data-p^="%.@.[[1,3"]'],
+            declarations: [
+                {
+                    property: 'color',
+                    value: 'green',
+                    important: false,
+                },
+            ],
+        },
+    ]);
+});
 
 test('type gradients', () => {
     expect(parseGradient('linear-gradient(rgb(200))')).toEqual([{

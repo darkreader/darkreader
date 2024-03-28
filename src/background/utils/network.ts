@@ -86,7 +86,7 @@ class LimitedCacheStorage {
     private records = new Map<string, CacheRecord>();
     private static alarmIsActive = false;
 
-    public constructor() {
+    constructor() {
         chrome.alarms.onAlarm.addListener(async (alarm) => {
             if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
                 // We schedule only one-time alarms, so once it goes off,
@@ -104,11 +104,11 @@ class LimitedCacheStorage {
         }
     }
 
-    public has(url: string) {
+    has(url: string) {
         return this.records.has(url);
     }
 
-    public get(url: string) {
+    get(url: string) {
         if (this.records.has(url)) {
             const record = this.records.get(url)!;
             record.expires = Date.now() + LimitedCacheStorage.TTL;
@@ -119,7 +119,7 @@ class LimitedCacheStorage {
         return null;
     }
 
-    public set(url: string, value: string) {
+    set(url: string, value: string) {
         LimitedCacheStorage.ensureAlarmIsScheduled();
 
         const size = getStringSize(value);

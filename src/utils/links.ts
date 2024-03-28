@@ -6,6 +6,7 @@ export const NEWS_URL = 'https://darkreader.org/blog/posts.json';
 export const DEVTOOLS_DOCS_URL = 'https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md';
 export const DONATE_URL = 'https://opencollective.com/darkreader/donate';
 export const GITHUB_URL = 'https://github.com/darkreader/darkreader';
+export const MOBILE_URL = 'https://darkreader.org/tips/mobile/';
 export const PRIVACY_URL = 'https://darkreader.org/privacy/';
 export const TWITTER_URL = 'https://twitter.com/darkreaderapp';
 export const UNINSTALL_URL = 'https://darkreader.org/goodluck/';

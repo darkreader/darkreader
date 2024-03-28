@@ -1,6 +1,6 @@
-import type {FilterConfig} from '../definitions';
+import type {Theme} from '../definitions';
 
-export function createTextStyle(config: FilterConfig): string {
+export function createTextStyle(config: Theme): string {
     const lines: string[] = [];
     // Don't target pre elements as they are preformatted element's e.g. code blocks
     // Exclude font libraries to preserve icons

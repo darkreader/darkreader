@@ -58,6 +58,11 @@ const jsEntries = [
         reloadType: reload.UI,
     },
     {
+        src: 'src/ui/options/index.tsx',
+        dest: 'ui/options/index.js',
+        reloadType: reload.UI,
+    },
+    {
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,
@@ -140,8 +145,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
             // so we have to manually polyfill it via regular eval().
             // This plugin is necessary to avoid (benign) warnings in the console during builds, it just replaces
-            // literally one occurence of eval() in our code even before TypeSctipt even encounters it.
-            // With this plugin, warning apprears only on Firefox test builds.
+            // literally one occurrence of eval() in our code even before TypeSctipt even encounters it.
+            // With this plugin, warning appears only on Firefox test builds.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
             getRollupPluginInstance('removeEval', '', () => mustRemoveEval &&
                 rollupPluginReplace({
@@ -224,7 +229,13 @@ const bundleJSTask = createTask(
         watchFiles = getWatchFiles();
         return watchFiles;
     },
-    async (changedFiles, watcher, platforms) => {
+    async (changedFiles, watcher) => {
+        const platforms = reload
+            .getConnectedBrowsers()
+            .reduce((obj, platform) => {
+                obj[platform] = true;
+                return obj;
+            }, {});
         const entries = jsEntries.filter((entry) => {
             return changedFiles.some((changed) => {
                 return entry.watchFiles?.includes(changed);

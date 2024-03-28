@@ -1,3 +1,88 @@
+## 4.9.80 (March 13, 2024)
+
+- Analyze inline background images for root elements.
+- Support for "background" attribute.
+- Fixed performance for asynchronously resolved inline styles.
+- Fixed freezes and incorrect work on several websites.
+- Dev Tools: Formatting of CSS fixes.
+
+## 4.9.79 (February 29, 2024)
+
+- Use ES2020 for API bundle.
+
+## 4.9.78 (February 29, 2024)
+
+- Optimized Adopted Style Sheets changes handling.
+- Fixed watching for style/link element position changes.
+- Fixed processing large style elements loaded by chunks.
+- Fixed enabling the extension with a hotkey after it was disabled automatically.
+- Fixed sliders in mobile UI.
+
+## 4.9.77 (February 7, 2024)
+
+- Firefox: Fixed errors when Adopted Style Sheets were not present.
+- Fixed breaking on ::view-transition selectors (Airbnb issue).
+
+## 4.9.76 (January 17, 2024)
+
+- Improved dark theme detection.
+- Dynamic mode bug fixes.
+
+## 4.9.75 (January 12, 2024)
+
+- Fixed CSS variables processing in inline styles.
+- Chrome: Improved Adopted Style Sheets support (Bing AI and Copilot issues).
+- Firefox: Adopted Style Sheets support.
+- Firefox: Fixed issues with Filter+ mode.
+- Improved Constructed Style Sheets changes handling.
+
+## 4.9.74 (January 3, 2024)
+
+- Improved image analysis performance.
+- Improved dark theme detection.
+- Fixed 404 errors when loading images with relative paths.
+- v5 Preview: Moved settings into a separate page.
+
+## 4.9.73 (December 6, 2023)
+
+- Fixed URL subdomain handling.
+
+## 4.9.72 (December 5, 2023)
+
+- Fixed Salesforce and Excel Online issues.
+
+## 4.9.71 (December 5, 2023)
+
+- Improved subdomain handling in Site List.
+- Improved dark theme detection.
+- Fixed page crashes (Slack issue).
+- Fixed Site List migration.
+- Reduced image analysis memory usage.
+
+## 4.9.70 (November 22, 2023)
+
+- Fixed clearing site lists when synchronization is disabled.
+
+## 4.9.69 (November 21, 2023)
+
+- Separated Enabled and Disabled site lists.
+- Regular expressions support in Site List.
+- Fixed automation after computer waking up.
+
+## 4.9.68 (November 13, 2023)
+
+- Fixed incorrect CSS comment handling (Reddit issue #11583).
+- Fixed working on domains containing `constructor` part (#11877).
+
+## 4.9.67 (October 1, 2023)
+
+- Fixed Site List when there is any URL with port.
+
+## 4.9.66 (September 25, 2023)
+
+- Dynamic mode fixes.
+- UI improvements.
+
 ## 4.9.65 (August 7, 2023)
 
 - Optimize inline style handling (fixes DuckDuckGo issue).

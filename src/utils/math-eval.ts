@@ -1,6 +1,6 @@
-// evalMath is a function that's able to evaluates a mathematical expression and return it's ouput.
+// evalMath is a function that's able to evaluates a mathematical expression and return it's output.
 //
-// Internally it uses the Shunting Yard algoritm. First it produces a reverse polish notation(RPN) stack.
+// Internally it uses the Shunting Yard algorithm. First it produces a reverse polish notation(RPN) stack.
 // Example: 1 + 2 * 3 -> [1, 2, 3, *, +] which with parentheses means 1 (2 3 *) +
 //
 // Then it evaluates the RPN stack and returns the output.
@@ -78,16 +78,16 @@ class Operator {
     private precendce: number;
     private execMethod: (left: number, right: number) => number;
 
-    public constructor(precedence: number, method: (left: number, right: number) => number) {
+    constructor(precedence: number, method: (left: number, right: number) => number) {
         this.precendce = precedence;
         this.execMethod = method;
     }
 
-    public exec(left: number, right: number): number {
+    exec(left: number, right: number): number {
         return this.execMethod(left, right);
     }
 
-    public lessOrEqualThan(op: Operator) {
+    lessOrEqualThan(op: Operator) {
         return this.precendce <= op.precendce;
     }
 }

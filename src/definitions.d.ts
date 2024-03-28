@@ -39,7 +39,7 @@ export interface TabData {
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
-    setTheme(theme: Partial<FilterConfig>): void;
+    setTheme(theme: Partial<Theme>): void;
     setShortcut(command: string, shortcut: string): Promise<string | null>;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
@@ -58,6 +58,10 @@ export interface ExtWrapper {
     data: ExtensionData;
     actions: ExtensionActions;
 }
+
+export type ViewProps = ExtWrapper & {
+    fonts?: string[];
+};
 
 export interface Theme {
     mode: FilterMode;
@@ -82,11 +86,9 @@ export interface Theme {
     immediateModify: boolean;
 }
 
-export type FilterConfig = Theme;
-
 export interface CustomSiteConfig {
     url: string[];
-    theme: FilterConfig;
+    theme: Theme;
 }
 
 export interface ThemePreset {
@@ -103,14 +105,15 @@ export interface Automation {
 }
 
 export interface UserSettings {
+    schemeVersion: number;
     enabled: boolean;
     fetchNews: boolean;
-    theme: FilterConfig;
+    theme: Theme;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
-    siteList: string[];
-    siteListEnabled: string[];
-    applyToListedOnly: boolean;
+    enabledByDefault: boolean;
+    enabledFor: string[];
+    disabledFor: string[];
     changeBrowserTheme: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
@@ -212,6 +215,14 @@ export interface InversionFix {
     noinvert: string[];
     removebg: string[];
     css: string;
+}
+
+export interface DetectorHint {
+    url: string[];
+    target: string;
+    match: string[];
+    noDarkTheme: boolean;
+    systemTheme: boolean;
 }
 
 export interface StaticTheme {

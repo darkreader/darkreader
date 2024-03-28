@@ -256,14 +256,14 @@ function lookupConfigURLs(domain: string, index: ConfigIndex, getAllRecordURLs: 
     let recordIds: number[] = [];
 
     // Common fix
-    if ('*' in index.domainLabels) {
+    if (index.domainLabels.hasOwnProperty('*')) {
         recordIds = recordIds.concat(index.domainLabels['*']);
     }
 
     // Wildcard fixes
     for (const label of labels) {
         // We need to use in operator because ids are 0-based and 0 is falsy
-        if (label in index.domainLabels) {
+        if (index.domainLabels.hasOwnProperty(label)) {
             const currRecordIds = index.domainLabels[label];
             lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
         }
@@ -271,10 +271,10 @@ function lookupConfigURLs(domain: string, index: ConfigIndex, getAllRecordURLs: 
 
     for (let i = 0; i < labels.length; i++) {
         const substring = labels.slice(i).join('.');
-        if (substring in index.domains) {
+        if (index.domains.hasOwnProperty(substring)) {
             recordIds = recordIds.concat(index.domains[substring]);
         }
-        if (substring in index.domainLabels) {
+        if (index.domainLabels.hasOwnProperty(substring)) {
             const currRecordIds = index.domainLabels[substring];
             lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
         }
@@ -307,7 +307,7 @@ function lookupConfigURLs(domain: string, index: ConfigIndex, getAllRecordURLs: 
  * @returns a single fix
  */
 function getSiteFix<T extends SiteProps>(text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>, id: number): Readonly<T> {
-    if (id in index.cacheSiteFix) {
+    if (index.cacheSiteFix.hasOwnProperty(id)) {
         return index.cacheSiteFix[id];
     }
 

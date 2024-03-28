@@ -135,6 +135,22 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
     });
 }
 
+export async function removeSyncStorage(keys: string[]): Promise<void> {
+    return new Promise<void>(async (resolve) => {
+        chrome.storage.sync.remove(keys, () => {
+            resolve();
+        });
+    });
+}
+
+export async function removeLocalStorage(keys: string[]): Promise<void> {
+    return new Promise<void>(async (resolve) => {
+        chrome.storage.local.remove(keys, () => {
+            resolve();
+        });
+    });
+}
+
 export async function getCommands(): Promise<chrome.commands.Command[]> {
     return new Promise<chrome.commands.Command[]>((resolve) => {
         if (!chrome.commands) {

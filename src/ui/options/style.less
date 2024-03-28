@@ -1,0 +1,96 @@
+@import "../theme";
+@import "../shared";
+
+@import "./tab-panel/tab-panel";
+@import "./about/about";
+@import "./advanced/advanced";
+@import "./automation/automation";
+@import "./hotkeys/hotkeys";
+@import "./site-list/site-list";
+
+html {
+    margin: 0;
+    padding: 0;
+}
+
+#logo {
+    display: inline-block;
+    font-size: @size-text-large;
+    height: @size-control-inner;
+    width: 15rem;
+}
+
+#title {
+    align-items: stretch;
+    display: inline-flex;
+    flex-direction: row;
+    font-size: @size-control-inner * 4 / 3;
+    font-weight: 100;
+    line-height: @size-control-inner;
+    height: @size-control-inner;
+    margin: 0 0 0 @indent-small;
+    text-transform: uppercase;
+    transform: translateY(-0.0625rem);
+}
+
+body {
+    box-sizing: content-box;
+    display: flex;
+    flex-direction: column;
+    gap: @indent-small;
+    margin: 0;
+    padding: 1rem;
+}
+
+main {
+    flex: none;
+}
+
+.settings-tab-panel {
+    flex: auto;
+}
+
+.settings-tab {
+    max-width: 16rem;
+}
+
+.settings-tab > :not(:first-child) {
+    margin-top: @indent-small;
+}
+
+.settings-icon-list {
+    svg {
+        fill: currentColor;
+        height: 75%;
+        width: 75%;
+    }
+}
+
+@media screen and (max-width: 30rem) {
+    #title {
+        display: none;
+    }
+
+    body {
+        margin: 0 auto;
+        width: 15rem;
+    }
+}
+
+@media screen and (min-width: 21.25rem) {
+    .mobile {
+        font-size: 20px;
+    }
+}
+
+@media screen and (min-width: 25.5rem) {
+    .mobile {
+        font-size: 24px;
+    }
+}
+
+@media screen and (min-width: 29.75rem) {
+    .mobile {
+        font-size: 28px;
+    }
+}

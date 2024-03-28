@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {sync} from 'malevic/dom';
 import Connector from '../connect/connector';
 import Body from './components/body';
-import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
+import {fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
@@ -45,8 +45,6 @@ addEventListener('load', start, {passive: true});
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);
-document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
-document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
 
 if (isFirefox) {
     fixNotClosingPopupOnNavigation();

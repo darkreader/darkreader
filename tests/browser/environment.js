@@ -17,7 +17,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
     pageEventListeners = new Map();
 
     /** @type {Browser} */
-    broser;
+    browser;
     /** @type {WebSocketServer} */
     messageServer;
 

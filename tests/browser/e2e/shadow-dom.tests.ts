@@ -9,8 +9,8 @@ describe('Custom HTML elements', () => {
     // TODO: remove flakes and remove this line
     jest.retryTimes(10, {logErrorsBeforeRetry: true});
 
-    it('Asunchroneous define', async () => {
-        // Temprorarily disable this test on Firefox
+    it('Asynchronous define', async () => {
+        // Temporarily disable this test on Firefox
         if (product === 'firefox') {
             expect(true);
             return;
@@ -29,7 +29,7 @@ describe('Custom HTML elements', () => {
 
         await pageUtils.evaluateScript(async () => {
             class ElementWitAsync extends HTMLElement {
-                public constructor() {
+                constructor() {
                     super();
                     const root = this.attachShadow({mode: 'open'});
                     setTimeout(() => root.innerHTML =

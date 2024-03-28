@@ -1,0 +1,105 @@
+@import "../../theme.less";
+@import "../../icons/icons.less";
+
+.site-list {
+    align-items: stretch;
+    border: @size-border solid @color-border;
+    border-radius: @size-border;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-height: 15rem;
+    overflow: hidden;
+    width: calc(100% - 2 * @size-border);
+
+    &__v-scroll-root {
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        &::-webkit-scrollbar {
+            width: @size-scrollbar-thickness;
+        }
+    }
+
+    &__textbox {
+        border: none;
+        position: relative;
+        width: 100%;
+
+        &:focus {
+            box-shadow: 0 0 0 @size-border @color-border;
+            z-index: 1;
+        }
+    }
+
+    &__item {
+        position: relative;
+
+        &__remove {
+            background-color: transparent;
+            background-image: @icon-close-inactive;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            height: 1.25rem;
+            position: absolute;
+            right: 0.125rem;
+            top: 0.125rem;
+            width: 1.25rem;
+            z-index: 1;
+
+            &:hover {
+                background-color: @color-control-active;
+                background-image: @icon-close;
+            }
+        }
+
+        &:hover .site-list__item__remove {
+            display: inline-block;
+        }
+    }
+}
+
+.site-list-tab {
+    &__label {
+        color: @color-control-fore;
+        display: inline-block;
+        width: 100%;
+    }
+}
+
+.site-list-group {
+    &__control {
+        height: auto;
+    }
+}
+
+.clear-site-list-button {
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+
+    &__content {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+    &__icon {
+        align-items: center;
+        display: flex;
+        height: 1rem;
+        justify-content: center;
+        margin-right: 0.25rem;
+        width: 1rem;
+
+        > svg {
+            display: inline-block;
+            height: 85%;
+            width: 85%;
+        }
+    }
+}

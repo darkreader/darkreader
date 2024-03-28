@@ -10,7 +10,6 @@
         ],
         "types": [
             "chrome",
-            "offscreencanvas",
             "jasmine"
         ],
         "allowJs": true,

@@ -1,5 +1,5 @@
 import {isFirefox} from '../utils/platform';
-import type {ExtensionData, FilterConfig, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
+import type {ExtensionData, Theme, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT} from './utils/log';
@@ -8,7 +8,7 @@ export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     collectDevToolsData: () => Promise<DevToolsData>;
     changeSettings: (settings: Partial<UserSettings>) => void;
-    setTheme: (theme: Partial<FilterConfig>) => void;
+    setTheme: (theme: Partial<Theme>) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
     markNewsAsDisplayed: (ids: string[]) => Promise<void>;
     toggleActiveTab: () => void;
@@ -26,7 +26,7 @@ export default class Messenger {
     private static adapter: ExtensionAdapter;
     private static changeListenerCount: number;
 
-    public static init(adapter: ExtensionAdapter): void {
+    static init(adapter: ExtensionAdapter): void {
         Messenger.adapter = adapter;
         Messenger.changeListenerCount = 0;
 
@@ -45,6 +45,7 @@ export default class Messenger {
         const allowedSenderURL = [
             chrome.runtime.getURL('/ui/popup/index.html'),
             chrome.runtime.getURL('/ui/devtools/index.html'),
+            chrome.runtime.getURL('/ui/options/index.html'),
             chrome.runtime.getURL('/ui/stylesheet-editor/index.html'),
         ];
         if (allowedSenderURL.includes(sender.url!)) {
@@ -171,7 +172,7 @@ export default class Messenger {
         }
     }
 
-    public static reportChanges(data: ExtensionData): void {
+    static reportChanges(data: ExtensionData): void {
         if (Messenger.changeListenerCount > 0) {
             chrome.runtime.sendMessage<MessageBGtoUI>({
                 type: MessageTypeBGtoUI.CHANGES,

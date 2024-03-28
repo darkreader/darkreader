@@ -3,8 +3,8 @@ import {isChromium} from '../../../utils/platform';
 import {getLocalMessage} from '../../../utils/locales';
 import {isURLEnabled, isPDF, isLocalFile} from '../../../utils/url';
 import SiteToggle from '../components/site-toggle';
-import ControlGroup from '../control-group';
-import type {ViewProps} from '../types';
+import {ControlGroup} from '../../controls';
+import type {ViewProps} from '../../../definitions';
 
 export default function SiteToggleGroup(props: ViewProps) {
     const tab = props.data.activeTab;

@@ -406,8 +406,6 @@ function createThemeAndWatchForUpdates() {
     changeMetaThemeColorWhenAvailable(theme!);
 }
 
-let pendingAdoptedVarMatch = false;
-
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     if (isFirefox) {
         const fallback = getAdoptedStyleSheetFallback(node);
@@ -426,42 +424,9 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             sheets.forEach((s) => {
                 variablesStore.addRulesForMatching(s.cssRules);
             });
-            newManger.render(theme!, ignoredImageAnalysisSelectors);
-            pendingAdoptedVarMatch = true;
-        });
-        potentialAdoptedStyleNodes.delete(node);
-    } else if (!potentialAdoptedStyleNodes.has(node)) {
-        potentialAdoptedStyleNodes.add(node);
-    }
-}
-
-const potentialAdoptedStyleNodes = new Set<ShadowRoot | Document>();
-let potentialAdoptedStyleFrameId: number | null = null;
-
-function watchPotentialAdoptedStyleNodes() {
-    potentialAdoptedStyleFrameId = requestAnimationFrame(() => {
-        let changed = false;
-        potentialAdoptedStyleNodes.forEach((node) => {
-            if (node.isConnected) {
-                handleAdoptedStyleSheets(node);
-                changed = true;
-            } else {
-                potentialAdoptedStyleNodes.delete(node);
-            }
-        });
-        if (changed || pendingAdoptedVarMatch) {
             variablesStore.matchVariablesAndDependents();
-            pendingAdoptedVarMatch = false;
-        }
-        watchPotentialAdoptedStyleNodes();
-    });
-}
-
-function stopWatchingPotentialAdoptedStyleNodes() {
-    potentialAdoptedStyleFrameId && cancelAnimationFrame(potentialAdoptedStyleFrameId);
-    potentialAdoptedStyleNodes.clear();
-    if (isFirefox) {
-        document.dispatchEvent(new CustomEvent('__darkreader__stopAdoptedStyleSheetsWatcher'));
+            newManger.render(theme!, ignoredImageAnalysisSelectors);
+        });
     }
 }
 
@@ -520,8 +485,6 @@ function watchForUpdates() {
         createShadowStaticStyleOverrides(shadowRoot);
         handleAdoptedStyleSheets(shadowRoot);
     });
-
-    watchPotentialAdoptedStyleNodes();
 
     watchForInlineStyles((element) => {
         overrideInlineStyle(element, theme!, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
@@ -705,7 +668,6 @@ export function removeDynamicTheme(): void {
     adoptedStyleManagers.splice(0);
     adoptedStyleFallbacks.forEach((fallback) => fallback.destroy());
     adoptedStyleFallbacks.clear();
-    stopWatchingPotentialAdoptedStyleNodes();
 
     metaObserver && metaObserver.disconnect();
 

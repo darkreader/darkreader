@@ -158,6 +158,7 @@ function createStaticStyleOverrides() {
 
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
     const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
+    document.dispatchEvent(new CustomEvent('__darkreader__cleanUp'));
     if (__CHROMIUM_MV3__) {
         injectProxyScriptMV3(enableStyleSheetsProxy, enableCustomElementRegistryProxy);
         // Notify the dedicated injector of the data.

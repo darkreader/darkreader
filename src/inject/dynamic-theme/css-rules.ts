@@ -99,7 +99,8 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
             const sourceCSSText = parentRule.parentStyleSheet?.ownerNode?.textContent;
             if (sourceCSSText) {
                 let escapedSelector = escapeRegExpSpecialChars(parentRule.selectorText);
-                escapedSelector = escapedSelector.replaceAll(/\s+/g, '\\s*');
+                escapedSelector = escapedSelector.replaceAll(/\s+/g, '\\s*'); // Space count can differ
+                escapedSelector = escapedSelector.replaceAll(/::/g, '::?'); // ::before can be :before
                 const regexp = new RegExp(`${escapedSelector}\\s*{[^}]*?background:\\s*(var[^;}]+)`);
                 const match = sourceCSSText.match(regexp);
                 if (match) {

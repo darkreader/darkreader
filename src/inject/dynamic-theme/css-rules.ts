@@ -1,8 +1,6 @@
 import {forEach} from '../../utils/array';
-import {formatParsedCSS} from '../../utils/css-text/format-css';
-import {isParsedStyleRule, parseCSS} from '../../utils/css-text/parse-css';
-import type {ParsedCSS} from '../../utils/css-text/parse-css';
 import {isSafari} from '../../utils/platform';
+import {escapeRegExpSpecialChars} from '../../utils/text';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
 
@@ -86,6 +84,28 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
                     iterate(prop, val);
                 }
             });
+        }
+    }
+
+    // `rule.cssText` fails when the rule has both
+    // `background: var()` and `background-*`.
+    // This fix retrieves the source value from CSS text,
+    // but will only work for <style> elements and
+    // there is a chance of multiple matches.
+    // https://issues.chromium.org/issues/40252592
+    if (cssText.includes('background-color: ;') && !style.getPropertyValue('background')) {
+        const parentRule = style.parentRule;
+        if (isStyleRule(parentRule)) {
+            const sourceCSSText = parentRule.parentStyleSheet?.ownerNode?.textContent;
+            if (sourceCSSText) {
+                let escapedSelector = escapeRegExpSpecialChars(parentRule.selectorText);
+                escapedSelector = escapedSelector.replaceAll(/\s+/g, '\\s*');
+                const regexp = new RegExp(`${escapedSelector}\\s*{[^}]*?background:\\s*(var[^;}]+)`);
+                const match = sourceCSSText.match(regexp);
+                if (match) {
+                    iterate('background', match[1]);
+                }
+            }
         }
     }
 }
@@ -215,65 +235,4 @@ export function isLayerRule(rule: CSSRule | null): rule is CSSLayerBlockRule {
         return true;
     }
     return false;
-}
-
-// `rule.cssText` fails when the rule has both
-// `background: var()` and `background-*`.
-// This fix moves `background: var()` declarations
-// into separate rules with the same selector.
-// https://issues.chromium.org/issues/40252592
-export function fixShorthandVarProps<T extends CSSRuleList | CSSRule[]>(rules: T): T {
-    if (!(rules instanceof CSSRuleList) || rules.length === 0 || !rules[0].parentStyleSheet) {
-        return rules;
-    }
-
-    const sheet = rules[0].parentStyleSheet;
-    const owner = sheet && sheet.ownerNode;
-    if (!owner || !(owner instanceof HTMLStyleElement)) {
-        return rules;
-    }
-
-    const cssText = owner.textContent;
-    if (!cssText?.includes('var(') || !cssText.match(/background:\s*var\(/)) {
-        return rules;
-    }
-
-    try {
-        const sheet = new CSSStyleSheet();
-        const parsed = parseCSS(cssText);
-        splitShorthandParsedProps(parsed);
-        const fixedCSSText = formatParsedCSS(parsed);
-        sheet.replaceSync(fixedCSSText);
-        if (sheet.cssRules) {
-            return sheet.cssRules as T;
-        }
-    } catch (err) {
-        logWarn(err);
-    }
-    return rules;
-}
-
-function splitShorthandParsedProps(parsed: ParsedCSS) {
-    for (let i = parsed.length - 1; i >= 0; i--) {
-        const rule = parsed[i];
-        if (!isParsedStyleRule(rule)) {
-            splitShorthandParsedProps(rule.rules);
-            continue;
-        }
-        const backgroundIndex = rule.declarations.findIndex((d) => d.property === 'background' && d.value.startsWith('var('));
-        if (backgroundIndex < 0) {
-            continue;
-        }
-        const hasOtherBackground = rule.declarations.some((d) => d.property.startsWith('background-'));
-        if (!hasOtherBackground) {
-            continue;
-        }
-        parsed.splice(i, 0, {
-            selectors: rule.selectors,
-            declarations: [
-                rule.declarations[backgroundIndex],
-            ],
-        });
-        rule.declarations.splice(backgroundIndex, 1);
-    }
 }

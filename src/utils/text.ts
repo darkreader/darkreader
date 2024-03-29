@@ -66,6 +66,10 @@ export function getStringSize(value: string): number {
     return value.length * 2;
 }
 
+export function escapeRegExpSpecialChars(input: string): string {
+    return input.replaceAll(/[\^$.*+?\(\)\[\]{}|\-\\]/g, '\\$&');
+}
+
 export function getParenthesesRange(input: string, searchStartIndex = 0): TextRange | null {
     return getOpenCloseRange(input, searchStartIndex, '(', ')', []);
 }

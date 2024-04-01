@@ -68,7 +68,19 @@ export function getModifiableCSSDeclaration(
         property === 'stroke' ||
         property === 'stop-color'
     ) {
-        modifier = getColorModifier(property, value, rule);
+        if (property.startsWith('border') && value === 'initial') {
+            const borderSideProp = property.substring(0, property.length - 6);
+            const borderSideVal = rule.style.getPropertyValue(borderSideProp);
+            const borderVal = rule.style.getPropertyValue('border');
+            if (borderSideVal.startsWith('0px') && !borderVal.startsWith('0px')) {
+                property = borderSideProp;
+                modifier = borderSideVal;
+            } else {
+                modifier = value;
+            }
+        } else {
+            modifier = getColorModifier(property, value, rule);
+        }
     } else if (property === 'background-image' || property === 'list-style-image') {
         modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
     } else if (property.includes('shadow')) {

@@ -87,25 +87,32 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
     }
 
-    // `rule.cssText` fails when the rule has both
-    // `background: var()` and `background-*`.
-    // This fix retrieves the source value from CSS text,
-    // but will only work for <style> elements and
-    // there is a chance of multiple matches.
-    // https://issues.chromium.org/issues/40252592
     if (cssText.includes('background-color: ;') && !style.getPropertyValue('background')) {
-        const parentRule = style.parentRule;
-        if (isStyleRule(parentRule)) {
-            const sourceCSSText = parentRule.parentStyleSheet?.ownerNode?.textContent;
-            if (sourceCSSText) {
-                let escapedSelector = escapeRegExpSpecialChars(parentRule.selectorText);
-                escapedSelector = escapedSelector.replaceAll(/\s+/g, '\\s*'); // Space count can differ
-                escapedSelector = escapedSelector.replaceAll(/::/g, '::?'); // ::before can be :before
-                const regexp = new RegExp(`${escapedSelector}\\s*{[^}]*?background:\\s*([^;}]+)`);
-                const match = sourceCSSText.match(regexp);
-                if (match) {
-                    iterate('background', match[1]);
-                }
+        handleEmptyShorthand('background', style, iterate);
+    }
+    if (cssText.includes('border-') && cssText.includes('-color: ;') && !style.getPropertyValue('border')) {
+        handleEmptyShorthand('border', style, iterate);
+    }
+}
+
+// `rule.cssText` fails when the rule has both
+// `background: var()` and `background-*`.
+// This fix retrieves the source value from CSS text,
+// but will only work for <style> elements and
+// there is a chance of multiple matches.
+// https://issues.chromium.org/issues/40252592
+function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {
+    const parentRule = style.parentRule;
+    if (isStyleRule(parentRule)) {
+        const sourceCSSText = parentRule.parentStyleSheet?.ownerNode?.textContent;
+        if (sourceCSSText) {
+            let escapedSelector = escapeRegExpSpecialChars(parentRule.selectorText);
+            escapedSelector = escapedSelector.replaceAll(/\s+/g, '\\s*'); // Space count can differ
+            escapedSelector = escapedSelector.replaceAll(/::/g, '::?'); // ::before can be :before
+            const regexp = new RegExp(`${escapedSelector}\\s*{[^}]*?${shorthand}:\\s*([^;}]+)`);
+            const match = sourceCSSText.match(regexp);
+            if (match) {
+                iterate(shorthand, match[1]);
             }
         }
     }

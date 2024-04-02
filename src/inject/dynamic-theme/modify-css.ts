@@ -68,11 +68,10 @@ export function getModifiableCSSDeclaration(
         property === 'stroke' ||
         property === 'stop-color'
     ) {
-        if (property.startsWith('border') && value === 'initial') {
+        if (property.startsWith('border') && property !== 'border-color' && value === 'initial') {
             const borderSideProp = property.substring(0, property.length - 6);
             const borderSideVal = rule.style.getPropertyValue(borderSideProp);
-            const borderVal = rule.style.getPropertyValue('border');
-            if (borderSideVal.startsWith('0px') && !borderVal.startsWith('0px')) {
+            if (borderSideVal.startsWith('0px') || borderSideVal === 'none') {
                 property = borderSideProp;
                 modifier = borderSideVal;
             } else {

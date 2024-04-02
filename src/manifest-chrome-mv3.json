@@ -1,4 +1,9 @@
-{
+{{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "target": "ES2020"
+    }
+}
     "manifest_version": 3,
     "minimum_chrome_version": "106.0.0.0",
     "action": {

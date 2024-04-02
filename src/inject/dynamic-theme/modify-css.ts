@@ -105,7 +105,9 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    if (__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) {
+    // color-scheme can change the background of an iframe
+    // that is supposed to be transparent
+    if ((__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) && !isIFrame) {
         lines.push('html {');
         lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
         lines.push('}');

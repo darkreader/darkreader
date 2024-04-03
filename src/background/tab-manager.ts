@@ -171,7 +171,10 @@ export default class TabManager {
                 }
 
                 case MessageTypeCStoBG.DARK_THEME_DETECTED:
-                    TabManager.tabs[sender.tab!.id!][sender.frameId!].darkThemeDetected = true;
+                    const frames = TabManager.tabs[sender.tab!.id!];
+                    for (const frame of Object.values(frames)) {
+                        frame.darkThemeDetected = true;
+                    }
                     break;
 
                 case MessageTypeCStoBG.FETCH: {

@@ -110,6 +110,9 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push('html {');
         lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
         lines.push('}');
+        lines.push('iframe {');
+        lines.push(`    color-scheme: initial;`);
+        lines.push('}');
     }
     const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button, dialog' : '');
     if (bgSelectors) {

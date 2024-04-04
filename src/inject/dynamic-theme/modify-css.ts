@@ -106,9 +106,9 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     }
     // color-scheme can change the background of an iframe
     // that is supposed to be transparent
-    if ((__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) && !isIFrame) {
+    if ((__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) && !isIFrame && theme.mode === 1) {
         lines.push('html {');
-        lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
+        lines.push(`    color-scheme: dark !important;`);
         lines.push('}');
         lines.push('iframe {');
         lines.push(`    color-scheme: initial;`);

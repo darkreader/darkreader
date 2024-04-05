@@ -1,3 +1,9 @@
+# 4.9.82 (April 5, 2024)
+
+- Fixed performance issue when detecting @layer and @supports rules.
+- Improved border colors with CSS variables.
+- Leave iframes unchanged when dark theme is detected on a web page.
+
 ## 4.9.81 (March 29, 2024)
 
 - Fixed performance degradation when computer wakes up from sleep mode.

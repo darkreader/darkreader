@@ -221,7 +221,7 @@ export function isSupportsRule(rule: CSSRule | null): rule is CSSSupportsRule {
     if (supportsRules.has(rule)) {
         return true;
     }
-    if (rule.cssText.startsWith('@supports')) {
+    if (rule instanceof CSSSupportsRule) {
         supportsRules.add(rule);
         return true;
     }
@@ -238,7 +238,7 @@ export function isLayerRule(rule: CSSRule | null): rule is CSSLayerBlockRule {
     if (layerRules.has(rule)) {
         return true;
     }
-    if (rule.cssText.startsWith('@layer') && (rule as CSSLayerBlockRule).cssRules) {
+    if (rule instanceof CSSLayerBlockRule) {
         layerRules.add(rule);
         return true;
     }

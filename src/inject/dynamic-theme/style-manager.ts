@@ -553,6 +553,11 @@ async function loadText(url: string) {
     if (url.startsWith('data:')) {
         return await (await fetch(url)).text();
     }
+    const parsedURL = new URL(url);
+    if (parsedURL.origin === location.origin) {
+        const response = await fetch(url);
+        return await response.text();
+    }
     return await bgFetch({url, responseType: 'text', mimeType: 'text/css', origin: window.location.origin});
 }
 

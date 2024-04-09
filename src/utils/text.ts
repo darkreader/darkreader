@@ -66,6 +66,17 @@ export function getStringSize(value: string): number {
     return value.length * 2;
 }
 
+export function getHashCode(text: string): number {
+    const len = text.length;
+    let hash = 0;
+    for (let i = 0; i < len; i++) {
+        const code = text.charCodeAt(i);
+        hash = (hash << 5) - hash + code;
+        hash |= 0;
+    }
+    return hash;
+}
+
 export function escapeRegExpSpecialChars(input: string): string {
     return input.replaceAll(/[\^$.*+?\(\)\[\]{}|\-\\]/g, '\\$&');
 }

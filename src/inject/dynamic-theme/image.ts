@@ -3,6 +3,7 @@ import {bgFetch} from './network';
 import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
 import {getSRGBLightness} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
+import {getHashCode} from '../../utils/text';
 import type {Theme} from '../../definitions';
 import {logInfo, logWarn} from '../utils/log';
 import AsyncQueue from '../../utils/async-queue';
@@ -279,7 +280,7 @@ function escapeXML(str: string): string {
     return str.replace(/[<>&'"]/g, (c: string) => xmlEscapeChars[c] ?? c);
 }
 
-const dataURLBlobURLs = new Map<string, string>();
+const dataURLBlobURLs = new Map<number, string>();
 
 function tryConvertDataURLToBlobSync(dataURL: string): Blob | null {
     const colonIndex = dataURL.indexOf(':');
@@ -306,7 +307,8 @@ export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<strin
     if (!isBlobURLSupported) {
         return null;
     }
-    let blobURL = dataURLBlobURLs.get(dataURL);
+    const hash = getHashCode(dataURL);
+    let blobURL = dataURLBlobURLs.get(hash);
     if (blobURL) {
         return blobURL;
     }
@@ -318,7 +320,7 @@ export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<strin
     }
 
     blobURL = URL.createObjectURL(blob);
-    dataURLBlobURLs.set(dataURL, blobURL);
+    dataURLBlobURLs.set(hash, blobURL);
     return blobURL;
 }
 

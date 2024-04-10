@@ -9,7 +9,6 @@ import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {
     src: string;
-    blob: Blob;
     dataURL: string;
     width: number;
     height: number;
@@ -36,7 +35,6 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                 const analysis = analyzeImage(image);
                 resolve({
                     src: url,
-                    blob,
                     dataURL: analysis.isLarge ? '' : dataURL,
                     width: image.width,
                     height: image.height,

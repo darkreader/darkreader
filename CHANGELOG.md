@@ -1,3 +1,9 @@
+# 4.9.83 (April 10, 2024)
+
+- Reduced memory consumption.
+- Fixed iframes background colors.
+- Optimized CSS @import loading.
+
 # 4.9.82 (April 5, 2024)
 
 - Fixed performance issue when detecting @layer and @supports rules.

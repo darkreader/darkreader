@@ -37,7 +37,7 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                 resolve({
                     src: url,
                     blob,
-                    dataURL,
+                    dataURL: analysis.isLarge ? '' : dataURL,
                     width: image.width,
                     height: image.height,
                     ...analysis,

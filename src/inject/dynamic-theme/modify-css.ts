@@ -465,7 +465,7 @@ export function getBgImageModifier(
             const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string | null;
             const logSrc = imageDetails.src.startsWith('data:') ? 'data:' : imageDetails.src;
-            if (isLarge) {
+            if (isLarge || !imageDetails.dataURL) {
                 logInfo(`Not modifying too large image ${logSrc}`);
                 result = null;
             } else if (isDark && isTransparent && theme.mode === 1 && width > 2) {

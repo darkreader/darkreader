@@ -106,7 +106,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     }
     // color-scheme can change the background of an iframe
     // that is supposed to be transparent
-    if ((__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) && !isIFrame && theme.mode === 1) {
+    if ((__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) && theme.mode === 1) {
         lines.push('html {');
         lines.push(`    color-scheme: dark !important;`);
         lines.push('}');
@@ -465,7 +465,7 @@ export function getBgImageModifier(
             const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string | null;
             const logSrc = imageDetails.src.startsWith('data:') ? 'data:' : imageDetails.src;
-            if (isLarge || !imageDetails.dataURL) {
+            if (isLarge) {
                 logInfo(`Not modifying too large image ${logSrc}`);
                 result = null;
             } else if (isDark && isTransparent && theme.mode === 1 && width > 2) {

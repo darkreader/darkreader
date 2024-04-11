@@ -1,5 +1,5 @@
 import {forEach} from '../../utils/array';
-import {isSafari} from '../../utils/platform';
+import {isLayerRuleSupported, isSafari} from '../../utils/platform';
 import {escapeRegExpSpecialChars} from '../../utils/text';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
@@ -238,7 +238,7 @@ export function isLayerRule(rule: CSSRule | null): rule is CSSLayerBlockRule {
     if (layerRules.has(rule)) {
         return true;
     }
-    if (rule instanceof CSSLayerBlockRule) {
+    if (isLayerRuleSupported && rule instanceof CSSLayerBlockRule) {
         layerRules.add(rule);
         return true;
     }

@@ -235,7 +235,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
             }
             const style = getComputedStyle(element);
             if (style[cssAttributeName] !== expectedValue) {
-                return `Got ${style[cssAttributeName]}`;
+                return `Expected ${selector_.join(' ')} '${cssAttributeName}' to be '${expectedValue}', but got '${style[cssAttributeName]}'`;
             }
         };
 
@@ -245,7 +245,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
             for (let i = 0; i < expectations.length; i++) {
                 const error = checkOne(expectations[i]);
                 if (error) {
-                    errors.push([i, error]);
+                    errors.push(error);
                 }
             }
             return errors;
@@ -290,7 +290,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 expectations = [expectations];
             }
             const errors = await page.evaluate(this.checkPageStylesInBrowserContext, expectations);
-            expect(errors.length).toBe(0);
+            expect(errors.join('\n')).toBe('');
         };
 
         global.emulateColorScheme = async (colorScheme) => {

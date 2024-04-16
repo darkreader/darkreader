@@ -164,7 +164,7 @@ async function createHashes(signatureVersion, version, order, manifest) {
 /**
  * This utility function is written with readability in mind
  * It is a naiive implementation which does not take advantage of data streaming
- * and trivial parrallelism of the task.
+ * and trivial parallelism of the task.
  */
 async function signature({platforms, debug, version}) {
     if (!platforms[PLATFORM.FIREFOX_MV2] || debug) {

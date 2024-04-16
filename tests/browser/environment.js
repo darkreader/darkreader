@@ -66,9 +66,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
     async launchBrowser() {
         let browser;
         if (this.global.product === 'chrome') {
-            browser = await this.launchChrome(true);
+            browser = await this.launchChrome({manifestVersion: 2});
         } else if (this.global.product === 'chrome-mv3') {
-            browser = await this.launchChrome(false);
+            browser = await this.launchChrome({manifestVersion: 3});
         } else if (this.global.product === 'firefox') {
             browser = await this.launchFirefox();
         }
@@ -78,10 +78,11 @@ export default class CustomJestEnvironment extends TestEnvironment {
     }
 
     /**
+     * @param {{manifestVersion: number}} options
      * @returns {Promise<Browser>}
      */
-    async launchChrome(mv2) {
-        const extensionDir = mv2 ? chromeExtensionDebugDir : chromeMV3ExtensionDebugDir;
+    async launchChrome({manifestVersion}) {
+        const extensionDir = manifestVersion === 3 ? chromeMV3ExtensionDebugDir : chromeExtensionDebugDir;
         let executablePath;
         try {
             executablePath = await getChromePath();
@@ -105,15 +106,16 @@ export default class CustomJestEnvironment extends TestEnvironment {
      * @returns {Promise<Browser>}
      */
     async launchFirefoxPuppeteer() {
-        const retries = 100;
-        const retryIntervalInMs = 100;
+        const retries = 10;
+        const retryIntervalInMs = 500;
         for (let i = 0; i < retries; i++) {
+            await new Promise((resolve) => setTimeout(resolve, retryIntervalInMs));
             try {
                 return await connect({
                     browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
                 });
-            } catch (e) {
-                await new Promise((resolve) => setTimeout(resolve, retryIntervalInMs));
+            } catch (err) {
+                console.log(`Firefox connection attempt ${i + 1} failed:`, e);
             }
         }
         throw new Error('Failed to connect to Puppeteer');

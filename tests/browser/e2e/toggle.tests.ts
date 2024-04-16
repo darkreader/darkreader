@@ -209,6 +209,8 @@ describe('Toggling the extension', () => {
             waitUntil: 'domcontentloaded',
         });
 
+        await awaitForEvent('ready-/');
+
         await emulateColorScheme('dark');
         await expectStyles(darkPageExpectations);
 

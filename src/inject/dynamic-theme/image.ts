@@ -5,7 +5,7 @@ import {getSRGBLightness} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
 import {getHashCode} from '../../utils/text';
 import type {Theme} from '../../definitions';
-import {logInfo, logWarn} from '../utils/log';
+import {logWarn} from '../utils/log';
 import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {
@@ -124,19 +124,10 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
             isLight: false,
             isTransparent: false,
             isLarge: false,
-            isTooLarge: false,
         };
     }
 
-    if (sw * sh > LARGE_IMAGE_PIXELS_COUNT) {
-        logInfo('Skipped large image analysis');
-        return {
-            isDark: false,
-            isLight: false,
-            isTransparent: false,
-            isLarge: true,
-        };
-    }
+    const isLarge = sw * sh > LARGE_IMAGE_PIXELS_COUNT;
 
     const sourcePixelsCount = sw * sh;
     const k = Math.min(1, Math.sqrt(MAX_ANALYSIS_PIXELS_COUNT / sourcePixelsCount));
@@ -192,7 +183,7 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
         isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
         isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
         isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
-        isLarge: false,
+        isLarge,
     };
 }
 

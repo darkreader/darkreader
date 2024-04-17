@@ -154,13 +154,10 @@ describe('IMAGE ANALYSIS', () => {
         expect(details.isLarge).toBe(false);
     });
 
-    it('should analyze large image', async () => {
+    it('should not analyze large image', async () => {
         const details = await getImageDetails(svgToDataURL(images.largeDarkImage));
         expect(details.width).toBe(1024);
         expect(details.height).toBe(1024);
-        expect(details.isDark).toBe(true);
-        expect(details.isLight).toBe(false);
-        expect(details.isTransparent).toBe(false);
         expect(details.isLarge).toBe(true);
     });
 
@@ -251,7 +248,7 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4="), linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
 
     it('should handle background-image with non-base64 data URL', async () => {
@@ -263,7 +260,7 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNiIgaGVpZ2h0PSIzIj48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMjQ5IC0wLjYxNCAtMC42NzIgMC4wMDAgMS4wMzUgLTAuNjQ2IDAuMjg4IC0wLjY2NCAwLjAwMCAxLjAyMCAtMC42MzYgLTAuNjA5IDAuMjUwIDAuMDAwIDAuOTk0IDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjYiIGhlaWdodD0iMyIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sLCZsdDtzdmcgeG1sbnM9JnF1b3Q7aHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcmcXVvdDsgd2lkdGg9JnF1b3Q7NiZxdW90OyBoZWlnaHQ9JnF1b3Q7MyZxdW90OyZndDslM0NwYXRoJTIwZCUzRCUyMm0wJTIwMi41JTIwbDIlMjAtMS41JTIwbDElMjAwJTIwbDIlMjAxLjUlMjBsMSUyMDAlMjIlMjBzdHJva2UlM0QlMjIlMjNkMTElMjIlMjBmaWxsJTNEJTIybm9uZSUyMiUyMHN0cm9rZS13aWR0aCUzRCUyMi43JTIyJTJGJTNFJmx0Oy9zdmcmZ3Q7IiAvPjwvc3ZnPg==")');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
     });
 
     it('should handle background-image with URL and gradient (revered)', async () => {
@@ -276,7 +273,7 @@ describe('IMAGE ANALYSIS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         await timeout(500);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0)), url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4=")');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\), url\("blob:.*"\)$/);
     });
 
     it('should handle background-image with empty URLs', async () => {
@@ -288,7 +285,10 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage.startsWith(isFirefox ? 'url("about:invalid"), url("about:invalid")' : 'url("http://localhost')).toBeTrue();
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage.endsWith('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGdvPSIgLz48L3N2Zz4=")')).toBeTrue();
+        if (isFirefox) {
+            expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\("about:invalid"\), url\("about:invalid"\), url\("blob:.*"\)$/);
+        } else {
+            expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\(""\), url\(""\), url\("blob:.*"\)$/);
+        }
     });
 });

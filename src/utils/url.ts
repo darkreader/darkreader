@@ -1,6 +1,5 @@
 import type {UserSettings, TabInfo} from '../definitions';
 import {cachedFactory} from './cache';
-import {isIPV6, compareIPV6} from './ipv6';
 
 declare const __THUNDERBIRD__: boolean;
 
@@ -104,17 +103,11 @@ export function isURLInList(url: string, list: string[]): boolean {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    const isFirstIPV6 = isIPV6(url);
-    const isSecondIPV6 = isIPV6(urlTemplate);
     if (isRegExp(urlTemplate)) {
         const regexp = createRegExp(urlTemplate);
         return regexp ? regexp.test(url) : false;
-    } else if (isFirstIPV6 && isSecondIPV6) {
-        return compareIPV6(url, urlTemplate);
-    } else if (!isFirstIPV6 && !isSecondIPV6) {
-        return matchURLPattern(url, urlTemplate);
     }
-    return false;
+    return matchURLPattern(url, urlTemplate);
 }
 
 const URL_CACHE_SIZE = 32;

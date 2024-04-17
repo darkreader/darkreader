@@ -158,11 +158,29 @@ const preparePattern = cachedFactory((pattern: string) => {
     const host = slashIndex < 0 ? pattern : pattern.substring(0, slashIndex);
 
     let hostName = host;
+
+    let isIPv6 = false;
+    let ipV6End = -1;
+    if (host.startsWith('[')) {
+        ipV6End = host.indexOf(']');
+        if (ipV6End > 0) {
+            isIPv6 = true;
+        }
+    }
+
     let port = '*';
     const portIndex = host.lastIndexOf(':');
-    if (portIndex >= 0 && (!host.startsWith('[') || host.indexOf(']') < portIndex)) {
+    if (portIndex >= 0 && (!isIPv6 || ipV6End < portIndex)) {
         hostName = host.substring(0, portIndex);
         port = host.substring(portIndex + 1);
+    }
+
+    if (isIPv6) {
+        try {
+            const ipV6URL = new URL(`http://${hostName}`);
+            hostName = ipV6URL.hostname;
+        } catch (err) {
+        }
     }
 
     const hostParts = hostName.split('.').reverse();

@@ -166,8 +166,8 @@ const preparePattern = cachedFactory((pattern: string) => {
 
     let hostName = host;
     let port = '*';
-    const portIndex = host.indexOf(':');
-    if (portIndex >= 0) {
+    const portIndex = host.lastIndexOf(':');
+    if (portIndex >= 0 && (!host.startsWith('[') || host.indexOf(']') < portIndex)) {
         hostName = host.substring(0, portIndex);
         port = host.substring(portIndex + 1);
     }

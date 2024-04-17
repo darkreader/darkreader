@@ -4,7 +4,6 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/injec
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
-import {isFirefox} from '../../../src/utils/platform';
 
 const theme = {
     ...DEFAULT_THEME,

@@ -285,10 +285,6 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        if (isFirefox) {
-            expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\("about:invalid"\), url\("about:invalid"\), url\("blob:.*"\)$/);
-        } else {
-            expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\(""\), url\(""\), url\("blob:.*"\)$/);
-        }
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\(""\), url\(""\), url\("blob:.*"\)$/);
     });
 });

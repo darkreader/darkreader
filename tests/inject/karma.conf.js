@@ -34,10 +34,11 @@ export function configureKarma(config, env) {
         plugins: [
             'karma-chrome-launcher',
             'karma-firefox-launcher',
+            process.platform === 'darwin' ? 'karma-safari-launcher' : null,
             'karma-rollup-preprocessor',
             'karma-jasmine',
             'karma-spec-reporter',
-        ],
+        ].filter(Boolean),
         preprocessors: {
             '**/*.+(ts|tsx)': ['rollup'],
         },
@@ -52,7 +53,7 @@ export function configureKarma(config, env) {
                     preventAssignment: true,
                     __DEBUG__: false,
                     __FIREFOX_MV2__: false,
-                    __CHROMIUM_MV2__: true,
+                    __CHROMIUM_MV2__: false,
                     __CHROMIUM_MV3__: false,
                     __THUNDERBIRD__: false,
                     __PORT__: '-1',

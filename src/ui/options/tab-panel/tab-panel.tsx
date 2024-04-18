@@ -72,7 +72,7 @@ function Tab(props: TabProps, ...children: Malevic.Child[]) {
                 'settings-tab-panel__tab--active': props.isActive,
             }}
         >
-            {...children}
+            {props.isActive ? children : null}
         </div>
     );
 }

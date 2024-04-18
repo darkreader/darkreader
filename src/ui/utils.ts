@@ -202,7 +202,7 @@ export async function openExtensionPage(page: ExtensionPage): Promise<void> {
             chrome.windows.create({
                 type: 'popup',
                 url,
-                width: 600,
+                width: 800,
                 height: 600,
             });
             window.close();

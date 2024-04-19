@@ -9,7 +9,7 @@ import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, request
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {Theme} from '../../definitions';
-import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
+import {isFirefox, isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
 
@@ -144,6 +144,10 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     }
     if (theme.selectionColor) {
         lines.push(getModifiedSelectionStyle(theme));
+    }
+    if (isLayerRuleSupported) {
+        lines.unshift('@layer {');
+        lines.push('}');
     }
     return lines.join('\n');
 }

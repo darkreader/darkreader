@@ -7,10 +7,12 @@ import TabPanel from '../../options/tab-panel/tab-panel';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isMobile} from '../../../utils/platform';
 import {ConfigEditor} from './config-editor';
+import {DynamicModeEditor} from './dynamic-mode-editor';
 
 type BodyProps = ExtWrapper & {devtools: DevToolsData};
 
-export default function Body({data, actions, devtools}: BodyProps): Malevic.Child {
+export default function Body(props: BodyProps): Malevic.Child {
+    const {data, actions, devtools} = props;
     const context = getContext();
     const {theme} = getCurrentThemePreset({data, actions});
     const defaultTabId: string = {
@@ -40,12 +42,7 @@ export default function Body({data, actions, devtools}: BodyProps): Malevic.Chil
             </header>
             <TabPanel activeTabId={store.activeTabId} onTabChange={onTabChange}>
                 <TabPanel.Tab id="dynamic-editor" label="Dynamic Theme Editor">
-                    <ConfigEditor
-                        header="Dynamic Theme Editor"
-                        text={devtools.dynamicFixesText}
-                        apply={actions.applyDevDynamicThemeFixes}
-                        reset={actions.resetDevDynamicThemeFixes}
-                    />
+                    <DynamicModeEditor {...props} />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="static-editor" label="Static Theme Editor">
                     <ConfigEditor

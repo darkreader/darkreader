@@ -56,6 +56,22 @@
             display: block;
         }
     }
+
+    &--vertical {
+        flex-direction: column;
+    }
+
+    &--vertical &__buttons {
+        column-gap: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: 16rem;
+    }
+
+    &--vertical &__button__icon {
+        display: none;
+    }
 }
 
 @media screen and (max-width: 30rem) {

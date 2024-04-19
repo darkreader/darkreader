@@ -2,12 +2,9 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import TabPanel from '../../options/tab-panel/tab-panel';
 import {ConfigEditor} from './config-editor';
+import type {ExtWrapper, DevToolsData} from '../../../definitions';
 
-interface DynamicModeEditorProps {
-    text: string;
-    apply: (text: string) => Promise<void>;
-    reset: () => void;
-}
+type DynamicModeEditorProps = ExtWrapper & {devtools: DevToolsData};
 
 export function DynamicModeEditor(props: DynamicModeEditorProps): Malevic.Child {
     const context = getContext();
@@ -19,17 +16,16 @@ export function DynamicModeEditor(props: DynamicModeEditorProps): Malevic.Child 
     }
 
     return (
-        <TabPanel activeTabId={store.activeTabId} onTabChange={onTabChange}>
+        <TabPanel isVertical activeTabId={store.activeTabId} onTabChange={onTabChange}>
             <TabPanel.Tab id="full-editor" label="Full Editor">
                 <ConfigEditor
-                    header="Dynamic Theme Editor"
-                    text={props.text}
-                    apply={props.apply}
-                    reset={props.reset}
+                    text={props.devtools.dynamicFixesText}
+                    apply={props.actions.applyDevDynamicThemeFixes}
+                    reset={props.actions.resetDevDynamicThemeFixes}
                 />
             </TabPanel.Tab>
             <TabPanel.Tab id="per-site-editor" label="Per Site Editor">
-                Per Site Editor
+                In progress
             </TabPanel.Tab>
         </TabPanel>
     );

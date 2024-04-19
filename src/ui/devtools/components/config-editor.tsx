@@ -5,7 +5,7 @@ import {isFirefox} from '../../../utils/platform';
 import {Button, MessageBox} from '../../controls';
 
 interface ConfigEditorProps {
-    header: string;
+    header?: string;
     text: string;
     apply: (text: string) => Promise<void>;
     reset: () => void;
@@ -83,7 +83,7 @@ export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
 
     return (
         <div class="config-editor">
-            <h3 class="sub-title">{props.header}</h3>
+            {props.header ? <h3 class="sub-title">{props.header}</h3> : null}
             <textarea
                 class="editor"
                 onrender={onTextRender}

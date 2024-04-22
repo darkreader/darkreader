@@ -116,7 +116,6 @@ header {
     flex: none;
     flex-direction: row;
     justify-content: flex-start;
-    margin-bottom: @indent-large;
     margin-top: @indent-small;
     width: 100%;
 
@@ -133,7 +132,7 @@ header {
 
 .description {
     flex: none;
-    margin: 0 0 @indent-large 0;
+    margin: @indent-large 0 0 0;
     text-align: left;
     white-space: wrap;
 
@@ -157,10 +156,6 @@ header {
     .sub-title {
         margin-top: @indent-small;
     }
-
-    .buttons {
-        margin-bottom: @indent-small;
-    }
 }
 
 .message-box {
@@ -172,6 +167,8 @@ header {
 }
 
 .settings-tab-panel {
+    height: 100%;
+    overflow: hidden;
     width: 100%;
 
     &__tab {
@@ -184,5 +181,53 @@ header {
 
     &--vertical {
         gap: 0;
+    }
+}
+
+.dynamic-mode-editor {
+    height: 100%;
+}
+
+.dynamic-per-site {
+    display: grid;
+    gap: 0.5rem;
+    grid: "search editor" @size-control-inner + 2 * @size-border
+          "list   editor" auto
+          / 10rem auto;
+    height: 100%;
+    overflow: hidden;
+
+    &__search-wrapper {
+        grid-area: search;
+    }
+
+    &__search-input {
+        width: calc(100% - 2 * @size-border);
+    }
+
+    &__urls {
+        grid-area: list;
+        overflow: auto;
+
+        li {
+            list-style-type: none;
+        }
+    }
+
+    &__url {
+        border: none;
+        color: @color-fore;
+        height: @size-control-inner;
+        text-align: left;
+        width: 100%;
+
+        &--active {
+            color: @color-heading;
+            font-weight: bold;
+        }
+    }
+
+    .config-editor {
+        grid-area: editor;
     }
 }

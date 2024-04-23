@@ -84,6 +84,13 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
                     reset={() => {
                         props.actions.resetDevDynamicThemeFixes();
                     }}
+                    delete={async () => {
+                        const index = store.fixes.indexOf(store.currentFix!);
+                        store.fixes.splice(index, 1);
+                        store.currentFix = null;
+                        const config = formatDynamicThemeFixes(store.fixes);
+                        await props.actions.applyDevDynamicThemeFixes(config);
+                    }}
                 />
             ) : null}
         </div>

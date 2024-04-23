@@ -23,6 +23,19 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
         store.fixesLength = fixesText.length;
     }
 
+    if (store.currentFix && !store.fixes.includes(store.currentFix)) {
+        const u1 = store.currentFix.url;
+        const sameURLFix = store.fixes.find((f) => {
+            const u2 = f.url;
+            return u1.length === u2.length && u1.every((u, i) => u === u2[i]);
+        });
+        if (sameURLFix) {
+            store.currentFix = sameURLFix;
+        } else {
+            store.currentFix = null;
+        }
+    }
+
     function onSearchInput(e: Event) {
         const element = e.target as HTMLInputElement;
         store.search = element.value;
@@ -40,7 +53,7 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
             </div>
             <list class="dynamic-per-site__urls">
                 {filteredFixes.map((fix) => {
-                    const text = fix.url.join(', ');
+                    const text = fix.url.join(' ');
                     return <li>
                         <Button
                             class={{

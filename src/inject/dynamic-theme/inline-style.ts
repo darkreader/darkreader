@@ -258,6 +258,7 @@ function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
     const shouldAnalyze = Boolean(
         svg && (
             svg.role === 'img' ||
+            svg.parentElement?.role === 'img' ||
             svg.getAttribute('class')?.includes('logo') ||
             svg.parentElement?.getAttribute('class')?.includes('logo')
         )
@@ -368,8 +369,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
     }
 
     const isSVGElement = element instanceof SVGElement;
-    if (isSVGElement && theme.mode === 1 && element.ownerSVGElement) {
-        const svg = element.ownerSVGElement;
+    const svg = isSVGElement ? element.ownerSVGElement ?? (element instanceof SVGSVGElement ? element : null) : null;
+    if (isSVGElement && theme.mode === 1 && svg) {
         if (svgInversionCache.has(svg)) {
             return;
         }

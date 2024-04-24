@@ -248,16 +248,22 @@ export function stopWatchingForInlineStyles(): void {
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
 const svgInversionCache = new WeakSet<SVGSVGElement>();
+const svgAnalysisConditionCache = new WeakMap<SVGSVGElement, boolean>();
 const themeProps: Array<keyof Theme> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
 function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
-    return (
+    if (svgAnalysisConditionCache.has(svg)) {
+        return svgAnalysisConditionCache.get(svg);
+    }
+    const shouldAnalyze = Boolean(
         svg && (
             svg.role === 'img' ||
             svg.getAttribute('class')?.includes('logo') ||
             svg.parentElement?.getAttribute('class')?.includes('logo')
         )
     );
+    svgAnalysisConditionCache.set(svg, shouldAnalyze);
+    return shouldAnalyze;
 }
 
 function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {

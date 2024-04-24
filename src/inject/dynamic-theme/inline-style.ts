@@ -250,6 +250,16 @@ const inlineStyleCache = new WeakMap<HTMLElement, string>();
 const svgInversionCache = new WeakSet<SVGSVGElement>();
 const themeProps: Array<keyof Theme> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
+function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
+    return (
+        svg && (
+            svg.role === 'img' ||
+            svg.getAttribute('class')?.includes('logo') ||
+            svg.parentElement?.getAttribute('class')?.includes('logo')
+        )
+    );
+}
+
 function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {
     return INLINE_STYLE_ATTRS
         .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
@@ -352,31 +362,33 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
     }
 
     const isSVGElement = element instanceof SVGElement;
-    if (isSVGElement && theme.mode === 1 && element.ownerSVGElement?.role === 'img') {
+    if (isSVGElement && theme.mode === 1 && element.ownerSVGElement) {
         const svg = element.ownerSVGElement;
         if (svgInversionCache.has(svg)) {
             return;
         }
-        svgInversionCache.add(svg);
-        const handleSVGRoot = () => {
-            let svgString = svg.outerHTML;
-            svgString = svgString.replaceAll('<style class="darkreader darkreader--sync" media="screen"></style>', '');
-            const dataURL = `data:image/svg+xml;base64,${btoa(svgString)}`;
-            getImageDetails(dataURL).then((details) => {
-                if (
-                    (details.isDark && details.isTransparent) ||
-                    (details.isLarge && details.isLight && !details.isTransparent)
-                ) {
-                    svg.setAttribute('data-darkreader-inline-invert', '');
-                }
-            });
-        };
-        if (isReadyStateComplete()) {
-            handleSVGRoot();
-        } else {
-            addReadyStateCompleteListener(handleSVGRoot);
+        if (shouldAnalyzeSVGAsImage(svg)) {
+            svgInversionCache.add(svg);
+            const handleSVGRoot = () => {
+                let svgString = svg.outerHTML;
+                svgString = svgString.replaceAll('<style class="darkreader darkreader--sync" media="screen"></style>', '');
+                const dataURL = `data:image/svg+xml;base64,${btoa(svgString)}`;
+                getImageDetails(dataURL).then((details) => {
+                    if (
+                        (details.isDark && details.isTransparent) ||
+                        (details.isLarge && details.isLight && !details.isTransparent)
+                    ) {
+                        svg.setAttribute('data-darkreader-inline-invert', '');
+                    }
+                });
+            };
+            if (isReadyStateComplete()) {
+                handleSVGRoot();
+            } else {
+                addReadyStateCompleteListener(handleSVGRoot);
+            }
+            return;
         }
-        return;
     }
 
     if (element.hasAttribute('bgcolor')) {

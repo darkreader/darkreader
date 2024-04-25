@@ -419,8 +419,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
 
             async function applyDevtoolsConfig(type, fixes) {
                 const promise = awaitForEvent('darkreader-dynamic-theme-ready');
-                await sendToDevTools(type, fixes);
-                await promise;
+                await Promise.all([
+                    sendToDevTools(type, fixes),
+                    promise,
+                ]);
             }
 
             this.global.popupUtils = {
@@ -430,6 +432,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
             };
 
             this.global.devtoolsUtils = {
+                click: async (selector) => await sendToDevTools('devtools-click', selector),
                 exists: async (selector) => await sendToDevTools('devtools-exists', selector),
                 paste: async (fixes) => await applyDevtoolsConfig('devtools-paste', fixes),
                 reset: async () => await applyDevtoolsConfig('devtools-reset'),

@@ -147,7 +147,7 @@ Step 1: change Dark Reader's settings.
 - Click on the Dark Reader icon.
 - Click on the `Dev tools` button (in the bottom-right corner).
 - Click on the `Preview new design button`.
-- Enable the `Enable on restricted pages` setting under `Settings` -> `Site list`.
+- Enable the `Enable on restricted pages` setting under `Settings` -> `Advanced`.
 
 Step 2: change Firefox's settings.
 

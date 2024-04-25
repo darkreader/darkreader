@@ -472,14 +472,9 @@ export function getBgImageModifier(
             const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string | null;
             const logSrc = imageDetails.src.startsWith('data:') ? 'data:' : imageDetails.src;
-            if (isLarge) {
-                if (isDark) {
-                    logInfo(`Not modifying too large dark image ${logSrc}`);
-                    result = null;
-                } else {
-                    logInfo(`Hiding large light image ${logSrc}`);
-                    result = 'none';
-                }
+            if (isLarge && isLight && !isTransparent && theme.mode === 1) {
+                logInfo(`Hiding large light image ${logSrc}`);
+                result = 'none';
             } else if (isDark && isTransparent && theme.mode === 1 && width > 2) {
                 logInfo(`Inverting dark image ${logSrc}`);
                 const inverted = getFilteredImageURL(imageDetails, {...theme, sepia: clamp(theme.sepia + 10, 0, 100)});

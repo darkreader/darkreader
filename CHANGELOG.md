@@ -1,3 +1,12 @@
+# 4.9.84 (April 25, 2024)
+
+- Improved Dev Tools (per site editor).
+- Improved SVG logos analysis.
+- Improved large background image analysis.
+- Fixed IPv6 URL support.
+- Fixed Mark elements' colors.
+- Check for CSS @layer support.
+
 # 4.9.83 (April 10, 2024)
 
 - Reduced memory consumption.

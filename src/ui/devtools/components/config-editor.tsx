@@ -7,13 +7,18 @@ import {Button, MessageBox} from '../../controls';
 interface ConfigEditorProps {
     header?: string;
     text: string;
-    apply: (text: string) => Promise<void>;
-    reset: () => void;
+    apply?: (text: string) => Promise<void>;
+    reset?: () => void;
+    delete?: () => void;
 }
 
 export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
     const context = getContext();
-    const store = context.getStore({errorText: '', isDialogVisible: false});
+    const store = context.getStore({
+        dialogMessage: '',
+        dialogAction: null as (() => void) | null,
+        errorText: '',
+    });
 
     let textNode: HTMLTextAreaElement;
 
@@ -48,7 +53,7 @@ export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
     async function apply(): Promise<void> {
         const text = textNode.value;
         try {
-            await props.apply(text);
+            await props.apply!(text);
             store.errorText = '';
         } catch (err) {
             store.errorText = String(err);
@@ -56,30 +61,47 @@ export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
         context.refresh();
     }
 
-    function showDialog(): void {
-        store.isDialogVisible = true;
+    function showDialog(message: string, action: () => void): void {
+        store.dialogMessage = message;
+        store.dialogAction = action;
         context.refresh();
+    }
+
+    function reset(): void {
+        store.dialogMessage = '';
+        store.dialogAction = null;
+        store.errorText = '';
+        props.reset!();
+        context.refresh();
+    }
+
+    function showResetDialog() {
+        showDialog(
+            'Are you sure you want to remove the current changes? You cannot restore them later.',
+            reset,
+        );
+    }
+
+    function showDeleteDialog() {
+        showDialog(
+            'Are you sure you want to delete the fix?',
+            props.delete!,
+        );
     }
 
     function hideDialog(): void {
-        store.isDialogVisible = false;
+        store.dialogMessage = '';
+        store.dialogAction = null;
         context.refresh();
     }
 
-    const dialog = store.isDialogVisible ? (
+    const dialog = store.dialogMessage && store.dialogAction ? (
         <MessageBox
-            caption="Are you sure you want to remove the current changes? You cannot restore them later."
-            onOK={reset}
+            caption={store.dialogMessage}
+            onOK={store.dialogAction}
             onCancel={hideDialog}
         />
     ) : null;
-
-    function reset(): void {
-        store.isDialogVisible = false;
-        store.errorText = '';
-        props.reset();
-        context.refresh();
-    }
 
     return (
         <div class="config-editor">
@@ -94,17 +116,16 @@ export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
             />
             <label class="error-text">{store.errorText}</label>
             <div class="buttons">
-                <Button onclick={showDialog}>
-                    Reset changes
-                    {dialog}
-                </Button>
-                <Button onclick={apply}>Apply</Button>
+                {props.delete ? <Button onclick={showDeleteDialog}>Delete</Button> : null}
+                {props.reset ? <Button onclick={showResetDialog}>Reset changes</Button> : null}
+                {props.apply ? <Button onclick={apply}>Apply</Button> : null}
             </div>
             <p class="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.
                 If a <strong>popular</strong> website looks incorrect
                 e-mail to <strong>support@darkreader.org</strong>
             </p>
+            {dialog}
         </div>
     );
 }

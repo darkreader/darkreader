@@ -2,16 +2,14 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {Button, Overlay} from '../../controls';
 import {ThemeEngine} from '../../../generators/theme-engines';
-import type {DevToolsData, ExtWrapper} from '../../../definitions';
 import TabPanel from '../../options/tab-panel/tab-panel';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isMobile} from '../../../utils/platform';
 import {ConfigEditor} from './config-editor';
 import {DynamicModeEditor} from './dynamic-mode-editor';
+import type {DevtoolsProps} from '../types';
 
-type BodyProps = ExtWrapper & {devtools: DevToolsData};
-
-export default function Body(props: BodyProps): Malevic.Child {
+export default function Body(props: DevtoolsProps): Malevic.Child {
     const {data, actions, devtools} = props;
     const context = getContext();
     const {theme} = getCurrentThemePreset({data, actions});

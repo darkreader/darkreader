@@ -9,6 +9,7 @@
     "code-style": "npm run lint",
     "debug": "node --max-old-space-size=3072 tasks/cli.js build --debug",
     "debug:watch": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --chrome --firefox",
+    "debug:watch:mv3": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --chrome-mv3",
     "dependencies:upgrade": "node tasks/dependencies.js",
     "lint": "eslint --ignore-pattern '!.eslint-plugin-local.js' -- 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/[!coverage]**/*.js' 'tests/**/*.ts' '.eslintrc.js' 'index.d.ts'",
     "lint:bundle": "(node ./tasks/check-exists.js ./build/debug/chrome || node tasks/build.js --debug --api --chrome) && eslint -- 'build/debug/chrome/**/*.js' 'darkreader.js'",

@@ -257,8 +257,6 @@ function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
     }
     const shouldAnalyze = Boolean(
         svg && (
-            svg.role === 'img' ||
-            svg.parentElement?.role === 'img' ||
             svg.getAttribute('class')?.includes('logo') ||
             svg.parentElement?.getAttribute('class')?.includes('logo')
         )

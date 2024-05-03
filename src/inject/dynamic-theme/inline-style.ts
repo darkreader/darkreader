@@ -1,5 +1,5 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener, addDOMReadyListener} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import type {CSSVariableModifier, ModifiedVarDeclaration} from './variables';
@@ -376,24 +376,17 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         }
         if (shouldAnalyzeSVGAsImage(svg)) {
             svgInversionCache.add(svg);
-            const handleSVGRoot = () => {
-                let svgString = svg.outerHTML;
-                svgString = svgString.replaceAll('<style class="darkreader darkreader--sync" media="screen"></style>', '');
-                const dataURL = `data:image/svg+xml;base64,${btoa(svgString)}`;
-                getImageDetails(dataURL).then((details) => {
-                    if (
-                        (details.isDark && details.isTransparent) ||
-                        (details.isLarge && details.isLight && !details.isTransparent)
-                    ) {
-                        svg.setAttribute('data-darkreader-inline-invert', '');
-                    }
-                });
-            };
-            if (isReadyStateComplete()) {
-                handleSVGRoot();
-            } else {
-                addReadyStateCompleteListener(handleSVGRoot);
-            }
+            let svgString = svg.outerHTML;
+            svgString = svgString.replaceAll('<style class="darkreader darkreader--sync" media="screen"></style>', '');
+            const dataURL = `data:image/svg+xml;base64,${btoa(svgString)}`;
+            getImageDetails(dataURL).then((details) => {
+                if (
+                    (details.isDark && details.isTransparent) ||
+                    (details.isLarge && details.isLight && !details.isTransparent)
+                ) {
+                    svg.setAttribute('data-darkreader-inline-invert', '');
+                }
+            });
             return;
         }
     }

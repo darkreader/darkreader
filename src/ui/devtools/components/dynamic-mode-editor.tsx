@@ -20,8 +20,8 @@ export function DynamicModeEditor(props: DevtoolsProps): Malevic.Child {
                 <TabPanel.Tab id="full-editor" label="Full Editor">
                     <ConfigEditor
                         text={props.devtools.dynamicFixesText}
-                        apply={props.actions.applyDevDynamicThemeFixes}
-                        reset={props.actions.resetDevDynamicThemeFixes}
+                        apply={(text) => props.actions.applyDevDynamicThemeFixes(text)}
+                        reset={() => props.actions.resetDevDynamicThemeFixes()}
                     />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="per-site-editor" label="Per Site Editor">

@@ -15,6 +15,7 @@ declare global {
         saveFile: (name: string, content: string) => Promise<void>;
     };
     const devtoolsUtils: {
+        click: (selector: string) => Promise<void>;
         exists: (selector: string) => Promise<void>;
         paste: (fixes: string) => Promise<void>;
         reset: () => Promise<void>;

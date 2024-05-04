@@ -1,5 +1,5 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener, addDOMReadyListener, isDOMReady} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import type {CSSVariableModifier, ModifiedVarDeclaration} from './variables';
@@ -9,6 +9,7 @@ import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../../utils/throttle';
 import {getAbsoluteURL} from '../../utils/url';
+import {getImageDetails} from './image';
 
 interface Overrides {
     [cssProp: string]: {
@@ -109,7 +110,11 @@ export function getInlineOverrideStyle(): string {
             `  ${cssProp}: var(${customProp}) !important;`,
             '}',
         ].join('\n');
-    }).join('\n');
+    }).concat([
+        '[data-darkreader-inline-invert] {',
+        '    filter: invert(100%) hue-rotate(180deg);',
+        '}',
+    ]).join('\n');
 }
 
 function getInlineStyleElements(root: Node) {
@@ -242,7 +247,23 @@ export function stopWatchingForInlineStyles(): void {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
+const svgInversionCache = new WeakSet<SVGSVGElement>();
+const svgAnalysisConditionCache = new WeakMap<SVGSVGElement, boolean>();
 const themeProps: Array<keyof Theme> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+
+function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
+    if (svgAnalysisConditionCache.has(svg)) {
+        return svgAnalysisConditionCache.get(svg);
+    }
+    const shouldAnalyze = Boolean(
+        svg && (
+            svg.getAttribute('class')?.includes('logo') ||
+            svg.parentElement?.getAttribute('class')?.includes('logo')
+        )
+    );
+    svgAnalysisConditionCache.set(svg, shouldAnalyze);
+    return shouldAnalyze;
+}
 
 function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {
     return INLINE_STYLE_ATTRS
@@ -345,6 +366,37 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         }
     }
 
+    const isSVGElement = element instanceof SVGElement;
+    const svg = isSVGElement ? element.ownerSVGElement ?? (element instanceof SVGSVGElement ? element : null) : null;
+    if (isSVGElement && theme.mode === 1 && svg) {
+        if (svgInversionCache.has(svg)) {
+            return;
+        }
+        if (shouldAnalyzeSVGAsImage(svg)) {
+            svgInversionCache.add(svg);
+            const analyzeSVGAsImage = () => {
+                let svgString = svg.outerHTML;
+                svgString = svgString.replaceAll('<style class="darkreader darkreader--sync" media="screen"></style>', '');
+                const dataURL = `data:image/svg+xml;base64,${btoa(svgString)}`;
+                getImageDetails(dataURL).then((details) => {
+                    if (
+                        (details.isDark && details.isTransparent) ||
+                        (details.isLarge && details.isLight && !details.isTransparent)
+                    ) {
+                        svg.setAttribute('data-darkreader-inline-invert', '');
+                    } else {
+                        svg.removeAttribute('data-darkreader-inline-invert');
+                    }
+                });
+            };
+            analyzeSVGAsImage();
+            if (!isDOMReady()) {
+                addDOMReadyListener(analyzeSVGAsImage);
+            }
+            return;
+        }
+    }
+
     if (element.hasAttribute('bgcolor')) {
         let value = element.getAttribute('bgcolor')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
@@ -369,7 +421,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         }
         setCustomProp('color', 'color', value);
     }
-    if (element instanceof SVGElement) {
+
+    if (isSVGElement) {
         if (element.hasAttribute('fill')) {
             const SMALL_SVG_LIMIT = 32;
             const value = element.getAttribute('fill')!;
@@ -399,10 +452,12 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
             setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color')!);
         }
     }
+
     if (element.hasAttribute('stroke')) {
         const value = element.getAttribute('stroke')!;
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
+
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
         // Temporarily ignore background images due to the possible performance
         // issues and complexity of handling async requests.
@@ -427,6 +482,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
             }
         }
     });
+
     if (element.style && element instanceof SVGTextElement && element.style.fill) {
         setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
     }

@@ -673,7 +673,7 @@ function isVarDependant(value: string) {
 function isConstructedColorVar(value: string) {
     return (
         value.match(/^\s*(rgb|hsl)a?\(/) ||
-        value.match(/^var\([\-_A-Za-z0-9]+\),?\s*var\([\-_A-Za-z0-9]+\),?\s*var\([\-_A-Za-z0-9]+\)$/)
+        value.match(/^(\d{1,3}|(var\([\-_A-Za-z0-9]+\)),?\s*){3}$/)
     );
 }
 

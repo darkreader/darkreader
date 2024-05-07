@@ -226,13 +226,9 @@ export class VariablesStore {
     }
 
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
-        // TODO(gusted): This condition is incorrect, as the sourceValue still contains a variable.
-        // Simply replacing it with some definition is incorrect as variables are element-independent.
-        // Fully handling this requires having a function that gives the variable's value given an
-        // element's position in the DOM, but that's quite computationally hard to facilitate. We'll
-        // probably just handle edge-cases like `rgb(22 163 74/var(--tb-bg-opacity)` and hope that
-        // lowering the opacity is enough.
-        if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
+        const isConstructedColor = sourceValue.match(/^\s*(rgb|hsl)a?\(/);
+        const isSimpleConstructedColor = sourceValue.match(/^(rgb|hsl)a?\(var\(--[\-_A-Za-z0-9]+\)\)$/);
+        if (isConstructedColor && !isSimpleConstructedColor) {
             const isBg = property.startsWith('background');
             const isText = isTextColorProperty(property);
             return (theme) => {

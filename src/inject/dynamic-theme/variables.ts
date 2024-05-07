@@ -579,7 +579,7 @@ function getVariablesMatches(input: string): VariableMatch[] {
     return ranges;
 }
 
-function replaceVariablesMatches(input: string, replacer: (match: string) => string | null) {
+function replaceVariablesMatches(input: string, replacer: (match: string, count: number) => string | null) {
     const matches = getVariablesMatches(input);
     const matchesCount = matches.length;
     if (matchesCount === 0) {
@@ -587,7 +587,7 @@ function replaceVariablesMatches(input: string, replacer: (match: string) => str
     }
 
     const inputLength = input.length;
-    const replacements = matches.map((m) => replacer(m.value));
+    const replacements = matches.map((m) => replacer(m.value, matches.length));
     const parts: Array<string | null> = [];
     parts.push(input.substring(0, matches[0].start));
     for (let i = 0; i < matchesCount; i++) {
@@ -671,7 +671,10 @@ function isVarDependant(value: string) {
 }
 
 function isConstructedColorVar(value: string) {
-    return value.match(/^\s*(rgb|hsl)a?\(/);
+    return (
+        value.match(/^\s*(rgb|hsl)a?\(/) ||
+        value.match(/^var\([\-_A-Za-z0-9]+\),?\s*var\([\-_A-Za-z0-9]+\),?\s*var\([\-_A-Za-z0-9]+\)$/)
+    );
 }
 
 function isTextColorProperty(property: string) {
@@ -723,10 +726,11 @@ function tryModifyBorderColor(color: string, theme: Theme) {
     return handleRawColorValue(color, theme, modifyBorderColor);
 }
 
-function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>()) {
+function insertVarValues(source: string, varValues: Map<string, string>, fullStack = new Set<string>()) {
     let containsUnresolvedVar = false;
-    const matchReplacer = (match: string) => {
+    const matchReplacer = (match: string, count: number) => {
         const {name, fallback} = getVariableNameAndFallback(match);
+        const stack = count > 1 ? new Set(fullStack) : fullStack;
         if (stack.has(name)) {
             containsUnresolvedVar = true;
             return null;

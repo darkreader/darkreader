@@ -240,7 +240,7 @@ export class VariablesStore {
                 return modifier(value, theme);
             };
         }
-        if (property === 'background-color') {
+        if (property === 'background-color' || (isSimpleConstructedColor && property === 'background')) {
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,

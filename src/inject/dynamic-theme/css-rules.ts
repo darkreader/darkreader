@@ -109,7 +109,7 @@ function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, ite
             let escapedSelector = escapeRegExpSpecialChars(parentRule.selectorText);
             escapedSelector = escapedSelector.replaceAll(/\s+/g, '\\s*'); // Space count can differ
             escapedSelector = escapedSelector.replaceAll(/::/g, '::?'); // ::before can be :before
-            const regexp = new RegExp(`${escapedSelector}\\s*{[^}]*?${shorthand}:\\s*([^;}]+)`);
+            const regexp = new RegExp(`${escapedSelector}\\s*{[^}}]*${shorthand}:\\s*([^;}]+)`);
             const match = sourceCSSText.match(regexp);
             if (match) {
                 iterate(shorthand, match[1]);

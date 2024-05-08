@@ -10,7 +10,7 @@ export function createTextStyle(config: Theme): string {
         '[class*="icon"]', '[class*="Icon"]',
         '[class*="symbol"]', '[class*="Symbol"]',
         // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden#description
-        '[aria-hidden="true"]', 
+        '[aria-hidden="true"]',
         // vendor: font awesome
         '.fa', '.fab', '.fas', '.far', '[class*="fa-"]',
         // vendor: material design
@@ -22,12 +22,12 @@ export function createTextStyle(config: Theme): string {
         // vendor: typicons
         '.typcn',
         // vendor: mui?
-        'mu', '[class*="mu-"]'
+        'mu', '[class*="mu-"]',
     ].join(', ');
 
     const lines: string[] = [];
     lines.push(`*:not(${ blacklistedSelectors }) {`);
-    
+
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...
         lines.push(`  font-family: ${config.fontFamily} !important;`);

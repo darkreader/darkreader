@@ -242,19 +242,23 @@ export class VariablesStore {
         }
         if (property === 'background-color' || (isSimpleConstructedColor && property === 'background')) {
             return (theme) => {
+                const defaultFallback = tryModifyBgColor(isConstructedColor ? '255, 255, 255' : '#ffffff', theme);
                 return replaceCSSVariablesNames(
                     sourceValue,
                     (v) => wrapBgColorVariableName(v),
                     (fallback) => tryModifyBgColor(fallback, theme),
+                    defaultFallback,
                 );
             };
         }
         if (isTextColorProperty(property)) {
             return (theme) => {
+                const defaultFallback = tryModifyTextColor(isConstructedColor ? '0, 0, 0' : '#000000', theme);
                 return replaceCSSVariablesNames(
                     sourceValue,
                     (v) => wrapTextColorVariableName(v),
                     (fallback) => tryModifyTextColor(fallback, theme),
+                    defaultFallback,
                 );
             };
         }
@@ -617,11 +621,15 @@ export function replaceCSSVariablesNames(
     value: string,
     nameReplacer: (varName: string) => string,
     fallbackReplacer?: (fallbackValue: string) => string,
+    finalFallback?: string,
 ): string {
     const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
         const newName = nameReplacer(name);
         if (!fallback) {
+            if (finalFallback) {
+                return `var(${newName}, ${finalFallback})`;
+            }
             return `var(${newName})`;
         }
 

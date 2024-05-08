@@ -114,6 +114,8 @@ function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, ite
             if (match) {
                 iterate(shorthand, match[1]);
             }
+        } else if (shorthand === 'background') {
+            iterate('background-color', '#ffffff');
         }
     }
 }

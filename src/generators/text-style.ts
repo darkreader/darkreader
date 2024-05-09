@@ -1,37 +1,40 @@
 import type {Theme} from '../definitions';
 
-export function createTextStyle(config: Theme): string {
-    // Blacklist for common code elements and icon/symbol fonts
-    const blacklistedSelectors = [
-        // common html code elements
-        'pre', 'pre *', 'code',
-        // generic matches for icon/symbol fonts
-        '.icofont', '[style*="font-"]',
-        '[class*="icon"]', '[class*="Icon"]',
-        '[class*="symbol"]', '[class*="Symbol"]',
-        // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden#description
-        '[aria-hidden="true"]',
-        // vendor: font awesome
-        '[class*="fa-"]',
-        // see: https://docs.fontawesome.com/web/add-icons/how-to#families--styles
-        '.fa', '.fab', '.fad', '.fal', '.far', '.fas', '.fass', '.fasr', '.fat',
-        // vendor: material design
-        '[class*="material-symbol"]', '[class*="material-icon"]',
-        // vendor: glyph icons
-        '.glyphicon',
-        // vendor: videojs font
-        '[class*="vjs-"]',
-        // vendor: typicons
-        '.typcn',
-        // vendor: mui?
-        'mu', '[class*="mu-"]',
-    ].join(', ');
+// Exclude font libraries to preserve icons
+const excludedSelectors = [
+    'pre', 'pre *', 'code',
+    '[aria-hidden="true"]',
 
+    // Font Awesome
+    '[class*="fa-"]',
+    '.fa', '.fab', '.fad', '.fal', '.far', '.fas', '.fass', '.fasr', '.fat',
+
+    // Generic matches for icon/symbol fonts
+    '.icofont', '[style*="font-"]',
+    '[class*="icon"]', '[class*="Icon"]',
+    '[class*="symbol"]', '[class*="Symbol"]',
+
+    // Glyph Icons
+    '.glyphicon',
+
+    // Material Design
+    '[class*="material-symbol"]', '[class*="material-icon"]',
+
+    // MUI
+    'mu', '[class*="mu-"]',
+
+    // Typicons
+    '.typcn',
+
+    // Videojs font
+    '[class*="vjs-"]',
+];
+
+export function createTextStyle(config: Theme): string {
     const lines: string[] = [];
-    lines.push(`*:not(${ blacklistedSelectors }) {`);
+    lines.push(`*:not(${excludedSelectors.join(', ')}) {`);
 
     if (config.useFont && config.fontFamily) {
-        // TODO: Validate...
         lines.push(`  font-family: ${config.fontFamily} !important;`);
     }
 

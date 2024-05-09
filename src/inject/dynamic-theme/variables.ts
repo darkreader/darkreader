@@ -227,7 +227,7 @@ export class VariablesStore {
 
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
         const isConstructedColor = sourceValue.match(/^\s*(rgb|hsl)a?\(/);
-        const isSimpleConstructedColor = sourceValue.match(/^(rgb|hsl)a?\(var\(--[\-_A-Za-z0-9]+\)\)$/);
+        const isSimpleConstructedColor = sourceValue.match(/^(rgb|hsl)a?\(var\(--[\-_A-Za-z0-9]+\)(\s*,?\/?\s*0?\.\d+)?\)$/);
         if (isConstructedColor && !isSimpleConstructedColor) {
             const isBg = property.startsWith('background');
             const isText = isTextColorProperty(property);

@@ -12,7 +12,9 @@ export function createTextStyle(config: Theme): string {
         // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden#description
         '[aria-hidden="true"]',
         // vendor: font awesome
-        '.fa', '.fab', '.fas', '.far', '[class*="fa-"]',
+        '[class*="fa-"]',
+        // see: https://docs.fontawesome.com/web/add-icons/how-to#families--styles
+        '.fa', '.fab', '.fad', '.fal', '.far', '.fas', '.fass', '.fasr', '.fat',
         // vendor: material design
         '[class*="material-symbol"]', '[class*="material-icon"]',
         // vendor: glyph icons

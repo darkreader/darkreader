@@ -1,3 +1,12 @@
+# 4.9.85 (May 14, 2024)
+
+- Bulgarian translation.
+- Improved color variables support.
+- Fixed handling styles with embedded SVGs.
+- Fixed Inversion Dev Tools.
+- Fixed inline SVG image analysis.
+- Fixed overriding icon fonts.
+
 # 4.9.84 (April 25, 2024)
 
 - Improved Dev Tools (per site editor).

@@ -2,10 +2,10 @@
 import fs from 'node:fs';
 import {exec} from 'node:child_process';
 import yazl from 'yazl';
-import paths from './paths.js';
+import {getDestDir} from './paths.js';
+import {PLATFORM} from './platform.js';
 import {createTask} from './task.js';
 import {getPaths} from './utils.js';
-const {getDestDir, PLATFORM} = paths;
 
 /**
  * @param {object} details

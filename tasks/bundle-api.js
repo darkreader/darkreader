@@ -8,8 +8,7 @@ import typescript from 'typescript';
 import fs from 'node:fs';
 import os from 'node:os';
 import {createTask} from './task.js';
-import paths from './paths.js';
-const {rootDir, rootPath} = paths;
+import {rootDir, rootPath} from './paths.js';
 
 async function getVersion() {
     const file = await fs.promises.readFile(new URL('../package.json', import.meta.url), 'utf8');

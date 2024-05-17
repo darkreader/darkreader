@@ -1,11 +1,11 @@
 // @ts-check
 import less from 'less';
 import path from 'node:path';
-import paths from './paths.js';
+import {getDestDir, rootPath} from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readFile, writeFile} from './utils.js';
-const {getDestDir, PLATFORM, rootPath} = paths;
 
 /** @typedef {import('./types').CSSEntry} CSSEntry */
 

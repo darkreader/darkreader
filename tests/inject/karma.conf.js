@@ -9,8 +9,7 @@ import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 
 import {createEchoServer} from './support/echo-server.js';
-import paths from '../../tasks/paths.js';
-const {rootPath} = paths;
+import {rootPath} from '../../tasks/paths.js';
 
 /**
  * @param {Partial<LocalConfig>} config

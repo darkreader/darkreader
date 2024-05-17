@@ -1,9 +1,9 @@
 // @ts-check
-import paths_ from './paths.js';
+import {getDestDir} from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {pathExists, copyFile, getPaths} from './utils.js';
-const {getDestDir, PLATFORM} = paths_;
 
 const srcDir = 'src';
 

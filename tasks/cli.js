@@ -18,8 +18,7 @@ import {runTasks} from './task.js';
 import zip from './zip.js';
 import signature from './bundle-signature.js';
 
-import paths from './paths.js';
-const {PLATFORM} = paths;
+import {PLATFORM} from './platform.js';
 
 const __filename = join(fileURLToPath(import.meta.url), '../build.js');
 

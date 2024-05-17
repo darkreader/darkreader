@@ -1,9 +1,10 @@
 // @ts-check
-import paths from './paths.js';
+import {readFile} from 'node:fs/promises';
+import {getDestDir} from './paths.js';
+import {PLATFORM} from './platform.js';
 import {createTask} from './task.js';
-import {copyFile, getPaths, readJSON, readFile, writeFile, fileExists} from './utils.js';
+import {copyFile, getPaths, readJSON, writeFile, fileExists} from './utils.js';
 import {createHash} from 'node:crypto';
-const {getDestDir, PLATFORM} = paths;
 
 function serializeHashManifest(entries) {
     const lines = [];

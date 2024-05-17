@@ -1,9 +1,9 @@
 // @ts-check
-import path from './paths.js';
+import {getDestDir, rootPath} from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readJSON, writeJSON} from './utils.js';
-const {PLATFORM, getDestDir, rootPath} = path;
 
 async function patchManifest(platform, debug, watch, test) {
     const manifest = await readJSON(rootPath('src/manifest.json'));

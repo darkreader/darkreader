@@ -1,9 +1,9 @@
 // @ts-check
 import prettier from 'prettier';
-import paths from './paths.js';
+import {getDestDir} from './paths.js';
+import {PLATFORM} from './platform.js';
 import {createTask} from './task.js';
 import {readFile, writeFile, getPaths} from './utils.js';
-const {getDestDir, PLATFORM} = paths;
 
 /** @type {import('prettier').Options} */
 const options = {

@@ -7,12 +7,11 @@ import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
-import paths from './paths.js';
+import {getDestDir, rootDir, rootPath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 const {PORT} = reload;
 import {createTask} from './task.js';
-const {getDestDir, rootDir, rootPath} = paths;
 
 /** @typedef {import('./types').JSEntry} JSEntry */
 

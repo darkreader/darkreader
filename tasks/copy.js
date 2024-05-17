@@ -7,35 +7,30 @@ const {getDestDir, PLATFORM} = paths_;
 
 const srcDir = 'src';
 
-/**
- * @typedef copyEntry
- * @property {string} src
- * @property {string} reloadType
- * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
- */
+/** @typedef {import('./types').CopyEntry} CopyEntry */
 
-/** @type {copyEntry[]} */
+/** @type {CopyEntry[]} */
 const copyEntries = [
     {
-        src: 'config/**/*.{config,drconf}',
+        path: 'config/**/*.{config,drconf}',
         reloadType: reload.FULL,
     },
     {
-        src: 'icons/**/*.*',
+        path: 'icons/**/*.*',
         reloadType: reload.FULL,
     },
     {
-        src: 'ui/assets/**/*.*',
+        path: 'ui/assets/**/*.*',
         reloadType: reload.UI,
     },
     {
-        src: 'ui/popup/compatibility.js',
+        path: 'ui/popup/compatibility.js',
         reloadType: reload.UI,
         platforms: [PLATFORM.CHROMIUM_MV2],
     },
 ];
 
-const paths = copyEntries.map((entry) => entry.src).map((path) => `${srcDir}/${path}`);
+const paths = copyEntries.map((entry) => entry.path).map((path) => `${srcDir}/${path}`);
 
 function getCwdPath(/** @type {string} */srcPath) {
     return srcPath.substring(srcDir.length + 1);
@@ -56,7 +51,7 @@ async function copy({platforms, debug}) {
         if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
             continue;
         }
-        const files = await getPaths(`${srcDir}/${entry.src}`);
+        const files = await getPaths(`${srcDir}/${entry.path}`);
         for (const file of files) {
             for (const platform of enabledPlatforms) {
                 if (entry.platforms === undefined || entry.platforms.includes(platform)) {

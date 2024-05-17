@@ -1,15 +1,7 @@
 import {log} from './utils.js';
 import watch from './watch.js';
 
-/**
- * @typedef TaskOptions
- * @property {object} platforms
- * @property {boolean} debug
- * @property {boolean} watch
- * @property {boolean} test
- * @property {string | false} log
- * @property {string | null} version
- */
+/** @typedef {import('./types').TaskOptions} TaskOptions */
 
 class Task {
     /**

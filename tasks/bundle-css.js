@@ -7,12 +7,7 @@ import {createTask} from './task.js';
 import {readFile, writeFile} from './utils.js';
 const {getDestDir, PLATFORM, rootPath} = paths;
 
-/**
- * @typedef CSSEntry
- * @property {string} src
- * @property {string} dest
- * @property {string[]} [watchFiles]
- */
+/** @typedef {import('./types').CSSEntry} CSSEntry */
 
 /** @type {CSSEntry[]} */
 const cssEntries = [

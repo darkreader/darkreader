@@ -8,19 +8,13 @@ import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 import paths from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 const {PORT} = reload;
 import {createTask} from './task.js';
-const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
+const {getDestDir, rootDir, rootPath} = paths;
 
-/**
- * @typedef JSEntry
- * @property {string} src
- * @property {string | ((platform: string) => string)} dest
- * @property {string} reloadType
- * @property {string[]} [watchFiles]
- * @property {(typeof PLATFORM.CHROMIUM_MV3) | undefined} [platform]
- */
+/** @typedef {import('./types').JSEntry} JSEntry */
 
 /** @type {JSEntry[]} */
 const jsEntries = [

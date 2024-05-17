@@ -15,8 +15,7 @@ import zip from './zip.js';
 import {runTasks} from './task.js';
 import {log} from './utils.js';
 import process from 'node:process';
-import paths from './paths.js';
-const {PLATFORM} = paths;
+import {PLATFORM} from './platform.js';
 
 const standardTask = [
     clean,

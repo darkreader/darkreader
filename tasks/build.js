@@ -70,7 +70,7 @@ async function api(debug, watch) {
         if (!debug) {
             tasks.push(codeStyle);
         }
-        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: null, log: false, test: false});
+        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: false, log: false, test: false});
         if (watch) {
             bundleAPI.watch();
             log.ok('Watching...');

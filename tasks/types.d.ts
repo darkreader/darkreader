@@ -33,10 +33,10 @@ export interface CopyEntry {
 }
 
 export interface TaskOptions {
-    platforms: PartialRecord<PlatformId, boolean>;
+    platforms: Partial<Record<PlatformId, boolean>>;
     debug: boolean;
     watch: boolean;
     test: boolean;
-    log: string | false;
-    version: string | null;
+    log?: string | false;
+    version: string | false;
 }

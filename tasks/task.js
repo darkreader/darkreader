@@ -24,11 +24,11 @@ class Task {
     }
 
     /**
-     * @param {Promise<void>} promise
+     * @param {() => void | Promise<void>} fn
      */
-    async _measureTime(promise) {
+    async _measureTime(fn) {
         const start = Date.now();
-        await promise;
+        await fn();
         const end = Date.now();
         log(`${this.name} (${(end - start).toFixed(0)}ms)`);
     }
@@ -38,7 +38,7 @@ class Task {
      */
     async run(options) {
         await this._measureTime(
-            this._run(options)
+            () => this._run(options)
         );
     }
 
@@ -53,7 +53,7 @@ class Task {
                 this._watchFiles,
             onChange: async (files) => {
                 await this._measureTime(
-                    this._onChange(files, watcher, platforms)
+                    () => this._onChange(files, watcher, platforms)
                 );
             },
         });

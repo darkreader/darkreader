@@ -13,7 +13,9 @@ import * as reload from './reload.js';
 const {PORT} = reload;
 import {createTask} from './task.js';
 
+/** @typedef {import('chokidar').FSWatcher} FSWatcher */
 /** @typedef {import('./types').JSEntry} JSEntry */
+/** @typedef {import('./types').TaskOptions} TaskOptions */
 
 /** @type {JSEntry[]} */
 const jsEntries = [
@@ -196,33 +198,32 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     });
 }
 
-function getWatchFiles() {
-    const watchFiles = new Set();
-    jsEntries.forEach((entry) => {
-        entry.watchFiles?.forEach((file) => watchFiles.add(file));
-    });
-    return Array.from(watchFiles);
-}
+export function createBundleJSTask(jsEntries) {
+    /** @type {string[]} */
+    let currentWatchFiles;
 
-/** @type {string[]} */
-let watchFiles;
+    const getRelevantWatchFiles = () => {
+        const watchFiles = new Set();
+        jsEntries.forEach((entry) => {
+            entry.watchFiles?.forEach((file) => watchFiles.add(file));
+        });
+        return Array.from(watchFiles);
+    };
 
-const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, log, test) =>
-    entries.map((entry) =>
-        (entry.platform ? [entry.platform] : Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API))
-            .filter((platform) => platforms[platform])
-            .map((platform) => bundleJS(entry, platform, debug, watch, log, test))
-    ).flat();
+    /** @type {(options: Partial<TaskOptions>) => Promise<void>} */
+    const bundleEachPlatform = async ({platforms, debug, watch, log, test}) => {
+        const allPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API);
+        for (const entry of jsEntries) {
+            const possiblePlatforms = entry.platform ? [entry.platform] : allPlatforms;
+            const targetPlatforms = possiblePlatforms.filter((platform) => platforms[platform]);
+            for (const platform of targetPlatforms) {
+                await bundleJS(entry, platform, debug, watch, log, test);
+            }
+        }
+    };
 
-const bundleJSTask = createTask(
-    'bundle-js',
-    async ({platforms, debug, watch, log, test}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch, log, test)),
-).addWatcher(
-    () => {
-        watchFiles = getWatchFiles();
-        return watchFiles;
-    },
-    async (changedFiles, watcher) => {
+    /** @type {(changedFiles: string[], watcher: FSWatcher) => Promise<void>} */
+    const onChange = async (changedFiles, watcher) => {
         const platforms = reload
             .getConnectedBrowsers()
             .reduce((obj, platform) => {
@@ -234,21 +235,32 @@ const bundleJSTask = createTask(
                 return entry.watchFiles?.includes(changed);
             });
         });
-        await Promise.all(hydrateTask(entries, platforms, true, true));
+        await bundleEachPlatform({platforms, debug: true, watch: true});
 
-        const newWatchFiles = getWatchFiles();
+        const newWatchFiles = getRelevantWatchFiles();
         watcher.unwatch(
-            watchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
+            currentWatchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
         );
         watcher.add(
-            newWatchFiles.filter((newFile) => watchFiles.includes(newFile))
+            newWatchFiles.filter((newFile) => currentWatchFiles.includes(newFile))
         );
 
         const isUIOnly = entries.every((entry) => entry.reloadType === reload.UI);
         reload.reload({
             type: isUIOnly ? reload.UI : reload.FULL,
         });
-    },
-);
+    };
 
-export default bundleJSTask;
+    return createTask(
+        'bundle-js',
+        bundleEachPlatform,
+    ).addWatcher(
+        () => {
+            currentWatchFiles = getRelevantWatchFiles();
+            return currentWatchFiles;
+        },
+        onChange,
+    );
+}
+
+export default createBundleJSTask(jsEntries);

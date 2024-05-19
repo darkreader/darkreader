@@ -1,7 +1,7 @@
 // @ts-check
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {getDestDir, rootPath} from './paths.js';
+import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
@@ -31,7 +31,7 @@ async function bundleLocale(/** @type {string} */filePath) {
 }
 
 async function bundleLocales({platforms, debug}) {
-    const localesSrcDir = rootPath('src/_locales');
+    const localesSrcDir = absolutePath('src/_locales');
     const list = await fs.readdir(localesSrcDir);
     for (const name of list) {
         if (!name.endsWith('.config')) {
@@ -59,7 +59,7 @@ const bundleLocalesTask = createTask(
 ).addWatcher(
     ['src/_locales/**/*.config'],
     async (changedFiles, _, platforms) => {
-        const localesSrcDir = rootPath('src/_locales');
+        const localesSrcDir = absolutePath('src/_locales');
         for (const file of changedFiles) {
             const fileName = file.substring(file.lastIndexOf(path.sep) + 1);
             const locale = await bundleLocale(`${localesSrcDir}/${fileName}`);

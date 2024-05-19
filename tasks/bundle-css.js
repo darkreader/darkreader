@@ -1,7 +1,7 @@
 // @ts-check
 import less from 'less';
 import path from 'node:path';
-import {getDestDir, rootPath} from './paths.js';
+import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
@@ -33,7 +33,7 @@ const cssEntries = [
 let watchFiles;
 
 async function bundleCSSEntry(entry) {
-    const src = rootPath(entry.src);
+    const src = absolutePath(entry.src);
     const srcDir = path.dirname(src);
     const input = await readFile(src);
     const output = await less.render(input, {paths: [srcDir], math: 'always'});
@@ -61,7 +61,7 @@ async function bundleCSS({platforms, debug}) {
  * @returns {string}
  */
 function getEntryFile(entry) {
-    return rootPath(entry.src);
+    return absolutePath(entry.src);
 }
 
 function getWatchFiles() {

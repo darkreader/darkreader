@@ -7,7 +7,7 @@ import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
-import {getDestDir, rootDir, rootPath} from './paths.js';
+import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 const {PORT} = reload;
@@ -127,7 +127,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
 
     const bundle = await rollup.rollup({
-        input: rootPath(src),
+        input: absolutePath(src),
         onwarn: (error) => {
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
             if (error.code === 'EVAL' && !mustRemoveEval) {
@@ -152,9 +152,9 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
             getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
                 rollupPluginTypescript({
-                    rootDir,
+                    rootDir: absolutePath('.'),
                     typescript,
-                    tsconfig: rootPath('src/tsconfig.json'),
+                    tsconfig: absolutePath('src/tsconfig.json'),
                     compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
                         target: 'ES2022',
                     } : undefined,

@@ -8,7 +8,6 @@ let rootDir = dirname(createRequire(import.meta.url).resolve('../package.json'))
  * @returns {string}
  */
 export const absolutePath = (path) => {
-    console.log('absolutePath', join(rootDir, path));
     return join(rootDir, path);
 };
 
@@ -16,7 +15,6 @@ export const absolutePath = (path) => {
  * @param {string} dir
  */
 export function setRootDir(dir) {
-    console.log('setRootDir', rootDir, dir);
     rootDir = dir;
 }
 

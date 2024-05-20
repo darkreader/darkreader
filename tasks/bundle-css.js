@@ -7,6 +7,7 @@ import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readFile, writeFile} from './utils.js';
 
+/** @typedef {import('chokidar').FSWatcher} FSWatcher */
 /** @typedef {import('./types').CSSEntry} CSSEntry */
 
 /** @type {CSSEntry[]} */
@@ -29,9 +30,6 @@ const cssEntries = [
     },
 ];
 
-/** @type {string[]} */
-let watchFiles;
-
 async function bundleCSSEntry(entry) {
     const src = absolutePath(entry.src);
     const srcDir = path.dirname(src);
@@ -49,13 +47,6 @@ async function writeFiles(dest, platforms, debug, css) {
     }
 }
 
-async function bundleCSS({platforms, debug}) {
-    for (const entry of cssEntries) {
-        const css = await bundleCSSEntry(entry);
-        await writeFiles(entry.dest, platforms, debug, css);
-    }
-}
-
 /**
  * @param {CSSEntry} entry
  * @returns {string}
@@ -64,27 +55,36 @@ function getEntryFile(entry) {
     return absolutePath(entry.src);
 }
 
-function getWatchFiles() {
-    const watchFiles = new Set();
-    cssEntries.forEach((entry) => {
-        entry.watchFiles?.forEach((file) => watchFiles.add(file));
-        const entryFile = getEntryFile(entry);
-        if (!watchFiles.has(entryFile)) {
-            watchFiles.add(entryFile);
-        }
-    });
-    return Array.from(watchFiles);
-}
+/**
+ * @param {CSSEntry[]} cssEntries
+ * @returns {ReturnType<typeof createTask>}
+ */
+export function createBundleCSSTask(cssEntries) {
+    /** @type {string[]} */
+    let currentWatchFiles;
 
-const bundleCSSTask = createTask(
-    'bundle-css',
-    bundleCSS,
-).addWatcher(
-    () => {
-        watchFiles = getWatchFiles();
-        return watchFiles;
-    },
-    async (changedFiles, watcher, platforms) => {
+    const getWatchFiles = () => {
+        const watchFiles = new Set();
+        cssEntries.forEach((entry) => {
+            entry.watchFiles?.forEach((file) => watchFiles.add(file));
+            const entryFile = getEntryFile(entry);
+            if (!watchFiles.has(entryFile)) {
+                watchFiles.add(entryFile);
+            }
+        });
+        currentWatchFiles = Array.from(watchFiles);
+        return currentWatchFiles;
+    };
+
+    const bundleCSS = async ({platforms, debug}) => {
+        for (const entry of cssEntries) {
+            const css = await bundleCSSEntry(entry);
+            await writeFiles(entry.dest, platforms, debug, css);
+        }
+    };
+
+    /** @type {(changedFiles: string[], watcher: FSWatcher, platforms: any) => Promise<void>} */
+    const onChange = async (changedFiles, watcher, platforms) => {
         const entries = cssEntries.filter((entry) => {
             const entryFile = getEntryFile(entry);
             return changedFiles.some((changed) => {
@@ -98,14 +98,25 @@ const bundleCSSTask = createTask(
 
         const newWatchFiles = getWatchFiles();
         watcher.unwatch(
-            watchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
+            currentWatchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
         );
         watcher.add(
-            newWatchFiles.filter((newFile) => watchFiles.includes(newFile))
+            newWatchFiles.filter((newFile) => currentWatchFiles.includes(newFile))
         );
 
         reload.reload({type: reload.CSS});
-    },
-);
+    };
 
-export default bundleCSSTask;
+    return createTask(
+        'bundle-css',
+        bundleCSS,
+    ).addWatcher(
+        () => {
+            currentWatchFiles = getWatchFiles();
+            return currentWatchFiles;
+        },
+        onChange,
+    );
+}
+
+export default createBundleCSSTask(cssEntries);

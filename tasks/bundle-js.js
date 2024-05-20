@@ -198,6 +198,10 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     });
 }
 
+/**
+ * @param {JSEntry[]} jsEntries
+ * @returns {ReturnType<typeof createTask>}
+ */
 export function createBundleJSTask(jsEntries) {
     /** @type {string[]} */
     let currentWatchFiles;

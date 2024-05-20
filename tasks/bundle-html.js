@@ -92,25 +92,31 @@ async function writeEntry({path, title, hasLoader, hasStyleSheet, hasCompatibili
     await writeFile(d, html(platform, title, hasLoader, hasStyleSheet, hasCompatibilityCheck));
 }
 
-async function bundleHTML({platforms, debug}) {
-    const promises = [];
-    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
-    for (const entry of htmlEntries) {
-        if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
-            continue;
-        }
-        for (const platform of enabledPlatforms) {
-            if (entry.platforms === undefined || entry.platforms.includes(platform)) {
-                promises.push(writeEntry(entry, {debug, platform}));
+/**
+ * @param {HTMLEntry[]} htmlEntries
+ * @returns {ReturnType<typeof createTask>}
+ */
+export function createBundleHTMLTask(htmlEntries) {
+    const bundleHTML = async ({platforms, debug}) => {
+        const promises = [];
+        const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
+        for (const entry of htmlEntries) {
+            if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
+                continue;
+            }
+            for (const platform of enabledPlatforms) {
+                if (entry.platforms === undefined || entry.platforms.includes(platform)) {
+                    promises.push(writeEntry(entry, {debug, platform}));
+                }
             }
         }
-    }
-    await Promise.all(promises);
+        await Promise.all(promises);
+    };
+
+    return createTask(
+        'bundle-html',
+        bundleHTML,
+    );
 }
 
-const bundleHTMLTask = createTask(
-    'bundle-html',
-    bundleHTML,
-);
-
-export default bundleHTMLTask;
+export default createBundleHTMLTask(htmlEntries);

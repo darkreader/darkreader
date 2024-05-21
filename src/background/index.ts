@@ -84,7 +84,7 @@ if (__CHROMIUM_MV3__) {
                     allFrames: true,
                     persistAcrossSessions: true,
                     world: 'MAIN',
-                }], () => logInfo('Registerd direct CSS proxy injector.'));
+                }], () => logInfo('Registered direct CSS proxy injector.'));
             });
         } catch (e) {
             logInfo('Failed to register direct CSS proxy injector, falling back to other injection methods.');

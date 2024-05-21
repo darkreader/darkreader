@@ -25,7 +25,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         return new Promise<string | null>((resolve) => {
             chrome.storage.local.get(key, (result) => {
                 // If cache received a new value (from call to set())
-                // before we retreived the old value from storage,
+                // before we retrieved the old value from storage,
                 // return the new value.
                 if (key in this.cache) {
                     logInfo(`Key ${key} was written to during read operation.`);

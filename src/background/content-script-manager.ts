@@ -11,8 +11,8 @@ enum ContentScriptManagerState {
 
 export default class ContentScriptManager {
     /**
-     * TODO: migrate to using promisses directly instead of wrapping callbacks.
-     * Docs say that Promisses are not suported yet, but in practice they appear
+     * TODO: migrate to using promises directly instead of wrapping callbacks.
+     * Docs say that Promises are not supported yet, but in practice they appear
      * to be supported already...
      */
 
@@ -44,7 +44,7 @@ export default class ContentScriptManager {
                         // Note: This API does not support registering injections into about:blank.
                         // That is, there is no alternative to InjectDetails.matchAboutBlank
                         // or static manifest declaration 'match_about_blank'.
-                        // Therefore we need to also specify these scripts in manifes.json
+                        // Therefore we need to also specify these scripts in manifest.json
                         // just for about:blank.
                         chrome.scripting.registerContentScripts([
                             {

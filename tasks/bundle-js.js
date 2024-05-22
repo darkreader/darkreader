@@ -226,14 +226,21 @@ export function createBundleJSTask(jsEntries) {
         }
     };
 
-    /** @type {(changedFiles: string[], watcher: FSWatcher) => Promise<void>} */
-    const onChange = async (changedFiles, watcher) => {
-        const platforms = reload
-            .getConnectedBrowsers()
-            .reduce((obj, platform) => {
-                obj[platform] = true;
-                return obj;
-            }, {});
+    /** @type {(changedFiles: string[], watcher: FSWatcher, platforms: any) => Promise<void>} */
+    const onChange = async (changedFiles, watcher, initialPlatforms) => {
+        let platforms = {};
+        const connectedBrowsers = reload.getConnectedBrowsers();
+        if (connectedBrowsers.includes('chrome')) {
+            platforms.chrome = initialPlatforms.chrome;
+            platforms['chrome-mv3'] = initialPlatforms['chrome-mv3'];
+        }
+        if (connectedBrowsers.includes('firefox')) {
+            platforms.firefox = true;
+        }
+        if (connectedBrowsers.length === 0) {
+            platforms = initialPlatforms;
+        }
+
         const entries = jsEntries.filter((entry) => {
             return changedFiles.some((changed) => {
                 return entry.watchFiles?.includes(changed);

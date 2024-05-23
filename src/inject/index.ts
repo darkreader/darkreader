@@ -239,7 +239,7 @@ if (__TEST__) {
         }, {passive: true});
 
         // Wait for DOM to be complete
-        // Note that here we wait only for DOM parsing and not for subresource load
+        // Note that here we wait only for DOM parsing and not for sub-resource load
         await awaitDOMContentLoaded();
         await awaitDarkReaderReady();
         socket.send(JSON.stringify({

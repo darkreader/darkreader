@@ -4,7 +4,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ColorScheme, DebugMessageBGtoCS, DebugMessageBGtoUI, DebugMessageCStoBG, ExtensionData, News, UserSettings} from '../definitions';
 import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import {ASSERT, logInfo} from './utils/log';
+import {ASSERT} from './utils/log';
 import {sendLog} from './utils/sendLog';
 import {isFirefox} from '../utils/platform';
 import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query';
@@ -70,25 +70,7 @@ declare const __FIREFOX_MV2__: boolean;
 
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
-        try {
-            chrome.scripting.unregisterContentScripts(() => {
-                chrome.scripting.registerContentScripts([{
-                    id: 'proxy',
-                    matches: [
-                        '<all_urls>',
-                    ],
-                    js: [
-                        'inject/proxy.js',
-                    ],
-                    runAt: 'document_start',
-                    allFrames: true,
-                    persistAcrossSessions: true,
-                    world: 'MAIN',
-                }], () => logInfo('Registered direct CSS proxy injector.'));
-            });
-        } catch (e) {
-            logInfo('Failed to register direct CSS proxy injector, falling back to other injection methods.');
-        }
+        Extension.isFirstLoad = true;
     });
 }
 

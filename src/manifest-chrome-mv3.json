@@ -21,7 +21,19 @@
     "content_scripts": [
         {
             "matches": [
-                "https://example.com/doesNotExist"
+                "<all_urls>"
+            ],
+            "js": [
+                "inject/proxy.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "match_about_blank": true,
+            "world": "MAIN"
+        },
+        {
+            "matches": [
+                "<all_urls>"
             ],
             "js": [
                 "inject/fallback.js",
@@ -29,18 +41,20 @@
             ],
             "run_at": "document_start",
             "all_frames": true,
-            "match_about_blank": true
+            "match_about_blank": true,
+            "world": "ISOLATED"
         },
         {
             "matches": [
-                "*://*/*"
+                "<all_urls>"
             ],
             "js": [
                 "inject/color-scheme-watcher.js"
             ],
             "run_at": "document_idle",
             "all_frames": false,
-            "match_about_blank": false
+            "match_about_blank": false,
+            "world": "ISOLATED"
         }
     ],
     "permissions": [

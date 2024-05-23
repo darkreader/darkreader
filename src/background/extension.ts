@@ -24,7 +24,6 @@ import {logInfo, logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
-import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
 import UIHighlights from './ui-highlights';
 import {getActiveTab} from '../utils/tabs';
@@ -67,6 +66,8 @@ export class Extension {
 
     // Record whether Extension.init() already ran since the last GB start
     private static initialized = false;
+
+    static isFirstLoad = false;
 
     // This sync initializer needs to run on every BG restart before anything else can happen
     private static init() {
@@ -252,7 +253,7 @@ export class Extension {
 
         if (__THUNDERBIRD__) {
             TabManager.registerMailDisplayScript();
-        } else {
+        } else if (!__CHROMIUM_MV3__ || Extension.isFirstLoad) {
             TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
@@ -616,14 +617,8 @@ export class Extension {
 
     private static onAppToggle() {
         if (Extension.isExtensionSwitchedOn()) {
-            if (__CHROMIUM_MV3__) {
-                ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
-            }
             IconManager.setActive();
         } else {
-            if (__CHROMIUM_MV3__) {
-                ContentScriptManager.unregisterScripts();
-            }
             IconManager.setInactive();
         }
 

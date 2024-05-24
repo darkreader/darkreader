@@ -72,6 +72,9 @@ if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
         Extension.isFirstLoad = true;
     });
+    const keepHopeAlive = () => setInterval(chrome.runtime.getPlatformInfo, 10000);
+    chrome.runtime.onStartup.addListener(keepHopeAlive);
+    keepHopeAlive();
 }
 
 if (__WATCH__) {

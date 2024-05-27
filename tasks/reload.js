@@ -40,7 +40,11 @@ function createServer() {
                     log.ok('Extension reloading...');
                 }
             });
-            ws.on('close', () => sockets.delete(ws));
+            ws.on('close', () => {
+                const userAgent = userAgents.get(ws);
+                log.warn(`Extension disconnected: ${userAgent}`);
+                sockets.delete(ws);
+            });
             if (connectionAwaiter !== null) {
                 connectionAwaiter();
             }

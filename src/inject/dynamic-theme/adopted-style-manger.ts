@@ -47,7 +47,6 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             const sheet = newSheets[i];
             if (overrides.has(sheet)) {
                 newSheets.splice(i, 1);
-                overrides.delete(sheet);
             }
         }
         if (node.adoptedStyleSheets.length !== newSheets.length) {

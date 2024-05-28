@@ -659,6 +659,7 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
 
         const headObserver = new MutationObserver(() => {
             if (document.head) {
+                headObserver.disconnect();
                 ready();
             }
         });

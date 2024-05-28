@@ -4,7 +4,7 @@ import {escapeRegExpSpecialChars} from '../../utils/text';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList | CSSRule[], iterate: (rule: CSSStyleRule) => void, onImportError?: () => void): void {
+export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, iterate: (rule: CSSStyleRule) => void, onImportError?: () => void): void {
     forEach(rules, (rule) => {
         if (isStyleRule(rule)) {
             iterate(rule);

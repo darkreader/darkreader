@@ -27,7 +27,7 @@ const VAR_TYPE_BGIMG = 1 << 3;
 
 export class VariablesStore {
     private varTypes = new Map<string, number>();
-    private rulesQueue: CSSRuleList[] = [];
+    private rulesQueue = new Set<CSSRule>();
     private inlineStyleQueue: CSSStyleDeclaration[] = [];
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
@@ -42,7 +42,7 @@ export class VariablesStore {
 
     clear(): void {
         this.varTypes.clear();
-        this.rulesQueue.splice(0);
+        this.rulesQueue.clear();
         this.inlineStyleQueue.splice(0);
         this.definedVars.clear();
         this.varRefs.clear();
@@ -63,7 +63,9 @@ export class VariablesStore {
     }
 
     addRulesForMatching(rules: CSSRuleList): void {
-        this.rulesQueue.push(rules);
+        for (const rule of rules) {
+            this.rulesQueue.add(rule);
+        }
     }
 
     addInlineStyleForMatching(style: CSSStyleDeclaration): void {
@@ -71,7 +73,7 @@ export class VariablesStore {
     }
 
     matchVariablesAndDependents(): void {
-        if (this.rulesQueue.length === 0 && this.inlineStyleQueue.length === 0) {
+        if (this.rulesQueue.size === 0 && this.inlineStyleQueue.length === 0) {
             return;
         }
         this.changedTypeVars.clear();
@@ -343,17 +345,15 @@ export class VariablesStore {
     }
 
     private collectVariablesAndVarDep() {
-        this.rulesQueue.forEach((rules) => {
-            iterateCSSRules(rules, (rule) => {
-                if (rule.style) {
-                    this.collectVarsFromCSSDeclarations(rule.style);
-                }
-            });
+        iterateCSSRules(this.rulesQueue, (rule) => {
+            if (rule.style) {
+                this.collectVarsFromCSSDeclarations(rule.style);
+            }
         });
         this.inlineStyleQueue.forEach((style) => {
             this.collectVarsFromCSSDeclarations(style);
         });
-        this.rulesQueue.splice(0);
+        this.rulesQueue.clear();
         this.inlineStyleQueue.splice(0);
     }
 
@@ -370,7 +370,7 @@ export class VariablesStore {
 
     private shouldProcessRootVariables() {
         return (
-            this.rulesQueue.length > 0 &&
+            this.rulesQueue.size > 0 &&
             document.documentElement.getAttribute('style')?.includes('--')
         );
     }

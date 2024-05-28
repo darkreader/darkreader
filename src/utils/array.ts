@@ -4,7 +4,7 @@ function isArrayLike<T>(items: Iterable<T> | ArrayLike<T>): items is ArrayLike<T
 
 // NOTE: Iterating Array-like items using `for .. of` is 3x slower in Firefox
 // https://jsben.ch/kidOp
-export function forEach<T>(items: Iterable<T> | ArrayLike<T>, iterator: (item: T) => void): void {
+export function forEach<T>(items: Iterable<T> | ArrayLike<T> | Set<T>, iterator: (item: T) => void): void {
     if (isArrayLike(items)) {
         for (let i = 0, len = items.length; i < len; i++) {
             iterator(items[i]);

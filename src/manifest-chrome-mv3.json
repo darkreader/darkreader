@@ -65,11 +65,5 @@
     ],
     "host_permissions": [
         "*://*/*"
-    ],
-    "web_accessible_resources": [
-        {
-            "matches": ["*://*/*"],
-            "resources": ["inject/proxy.js"]
-        }
     ]
 }

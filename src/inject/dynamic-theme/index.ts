@@ -553,6 +553,30 @@ function isAnotherDarkReaderInstanceActive() {
     return false;
 }
 
+// Give them a second chance,
+// but never a third
+let interceptorAttempts = 2;
+
+function interceptOldScript({success, failure}: {success: () => void; failure: () => void}) {
+    if (--interceptorAttempts <= 0) {
+        failure();
+        return;
+    }
+
+    const oldMeta = document.head.querySelector('meta[name="darkreader"]') as HTMLMetaElement | null;
+    if (!oldMeta || oldMeta.content === INSTANCE_ID) {
+        return;
+    }
+
+    const lock = document.createElement('meta');
+    lock.name = 'darkreader-lock';
+    document.head.append(lock);
+    queueMicrotask(() => {
+        lock.remove();
+        success();
+    });
+}
+
 function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix | null {
     if (!fixes) {
         return null;
@@ -602,14 +626,30 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
     }
 
     isIFrame = iframe;
-    if (document.head) {
-        if (isAnotherDarkReaderInstanceActive()) {
+
+    const ready = () => {
+        const success = () => {
+            document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
+            document.documentElement.setAttribute('data-darkreader-scheme', theme!.mode ? 'dark' : 'dimmed');
+            createThemeAndWatchForUpdates();
+        };
+
+        const failure = () => {
             removeDynamicTheme();
-            return;
+        };
+
+        if (isAnotherDarkReaderInstanceActive()) {
+            interceptOldScript({
+                success,
+                failure,
+            });
+        } else {
+            success();
         }
-        document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
-        document.documentElement.setAttribute('data-darkreader-scheme', theme.mode ? 'dark' : 'dimmed');
-        createThemeAndWatchForUpdates();
+    };
+
+    if (document.head) {
+        ready();
     } else {
         if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
@@ -619,12 +659,7 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
 
         const headObserver = new MutationObserver(() => {
             if (document.head) {
-                headObserver.disconnect();
-                if (isAnotherDarkReaderInstanceActive()) {
-                    removeDynamicTheme();
-                    return;
-                }
-                createThemeAndWatchForUpdates();
+                ready();
             }
         });
         headObserver.observe(document, {childList: true, subtree: true});

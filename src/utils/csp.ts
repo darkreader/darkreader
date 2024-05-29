@@ -31,7 +31,6 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
                 `${HOMEPAGE_URL}/*`,
                 DEVTOOLS_DOCS_URL,
                 GITHUB_URL,
-                DONATE_URL,
                 TWITTER_URL,
             ],
             'media-src': [CSP.NONE],

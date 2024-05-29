@@ -27,7 +27,7 @@ const VAR_TYPE_BGIMG = 1 << 3;
 
 export class VariablesStore {
     private varTypes = new Map<string, number>();
-    private rulesQueue = new Set<CSSRule>();
+    private rulesQueue = new Set<CSSRuleList>();
     private inlineStyleQueue: CSSStyleDeclaration[] = [];
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
@@ -63,9 +63,7 @@ export class VariablesStore {
     }
 
     addRulesForMatching(rules: CSSRuleList): void {
-        for (const rule of rules) {
-            this.rulesQueue.add(rule);
-        }
+        this.rulesQueue.add(rules);
     }
 
     addInlineStyleForMatching(style: CSSStyleDeclaration): void {
@@ -345,10 +343,12 @@ export class VariablesStore {
     }
 
     private collectVariablesAndVarDep() {
-        iterateCSSRules(this.rulesQueue, (rule) => {
-            if (rule.style) {
-                this.collectVarsFromCSSDeclarations(rule.style);
-            }
+        this.rulesQueue.forEach((rules) => {
+            iterateCSSRules(rules, (rule) => {
+                if (rule.style) {
+                    this.collectVarsFromCSSDeclarations(rule.style);
+                }
+            });
         });
         this.inlineStyleQueue.forEach((style) => {
             this.collectVarsFromCSSDeclarations(style);

@@ -212,7 +212,7 @@ export function createBundleJSTask(jsEntries) {
         return Array.from(watchFiles);
     };
 
-    /** @type {(options: Partial<TaskOptions>) => Promise<void>} */
+    /** @type {(options: Partial<TaskOptions> & {platforms: TaskOptions['platforms']}) => Promise<void>} */
     const bundleEachPlatform = async ({platforms, debug, watch, log, test}) => {
         const allPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API);
         for (const entry of jsEntries) {

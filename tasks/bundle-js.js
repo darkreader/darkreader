@@ -21,8 +21,7 @@ import {createTask} from './task.js';
 const jsEntries = [
     {
         src: 'src/background/index.ts',
-        // Prior to Chrome 93, background service worker had to be in top-level directory
-        dest: (platform) => platform === PLATFORM.CHROMIUM_MV3 ? 'background.js' : 'background/index.js',
+        dest: 'background/index.js',
         reloadType: reload.FULL,
     },
     {
@@ -100,7 +99,6 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
-    const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};
     switch (platform) {
         case PLATFORM.FIREFOX_MV2:
@@ -191,7 +189,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug, platform})}/${destination}`,
+        file: `${getDestDir({debug, platform})}/${dest}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,

@@ -4,7 +4,7 @@ import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
-import {Header, MoreSiteSettings, MoreToggleSettings, MoreNewHighlight} from './header';
+import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
@@ -187,9 +187,6 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 isExpanded={state.moreToggleSettingsOpen}
                 onClose={toggleMoreToggleSettings}
             />
-            {props.data.uiHighlights.includes('new-toggle-menus') && !state.newToggleMenusHighlightHidden
-                ? <MoreNewHighlight />
-                : null}
         </body>
     );
 }

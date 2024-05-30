@@ -1,6 +1,6 @@
 import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
-import {canInjectScript} from '../background/utils/extension-api';
+import {canInjectScript, keepListeningToEvents} from '../background/utils/extension-api';
 import type {ColorScheme, DebugMessageBGtoCS, DebugMessageBGtoUI, DebugMessageCStoBG, ExtensionData, News, UserSettings} from '../definitions';
 import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
@@ -72,9 +72,7 @@ if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
         Extension.isFirstLoad = true;
     });
-    const keepHopeAlive = () => setInterval(chrome.runtime.getPlatformInfo, 10000);
-    chrome.runtime.onStartup.addListener(keepHopeAlive);
-    keepHopeAlive();
+    keepListeningToEvents();
 }
 
 if (__WATCH__) {

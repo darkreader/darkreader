@@ -1,3 +1,9 @@
+# 4.9.86 (May 30, 2024)
+
+- CSS variables performance optimizations.
+- Fixed Manifest V3 bugs.
+- Fixed loosing control over tabs after update.
+
 # 4.9.85 (May 14, 2024)
 
 - Bulgarian translation.

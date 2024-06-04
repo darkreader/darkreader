@@ -1,4 +1,4 @@
-import {getParenthesesRange} from './text';
+import {getParenthesesRange} from '../text';
 
 const gradientLength = 'gradient'.length;
 const conicGradient = 'conic-';
@@ -6,7 +6,7 @@ const conicGradientLength = conicGradient.length;
 const radialGradient = 'radial-';
 const linearGradient = 'linear-';
 
-export interface parsedGradient {
+export interface ParsedGradient {
     typeGradient: string;
     match: string;
     hasComma: boolean;
@@ -14,15 +14,15 @@ export interface parsedGradient {
     offset: number;
 }
 
-// Parse the value according to the specifiction.
+// Parse the value according to the specification.
 //
 // Specification: https://drafts.csswg.org/css-images-4/#gradients
-export function parseGradient(value: string): parsedGradient[] {
-    const result: parsedGradient[] = [];
+export function parseGradient(value: string): ParsedGradient[] {
+    const result: ParsedGradient[] = [];
 
     // Loop trough the value until we find the first `gradient` keyword.
     // We will be using the indexOf to find the keyword. From their on
-    // we will check which specific graidient we are dealing with.
+    // we will check which specific gradient we are dealing with.
     // Then we will try to parse the rest of the value as a gradient.
     let index = 0;
     let startIndex = conicGradient.length;

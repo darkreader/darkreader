@@ -7,27 +7,21 @@ import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
-import paths from './paths.js';
+import {getDestDir, absolutePath} from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 const {PORT} = reload;
 import {createTask} from './task.js';
-const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
 
-/**
- * @typedef JSEntry
- * @property {string} src
- * @property {string | ((platform: string) => string)} dest
- * @property {string} reloadType
- * @property {string[]} [watchFiles]
- * @property {(typeof PLATFORM.CHROMIUM_MV3) | undefined} [platform]
- */
+/** @typedef {import('chokidar').FSWatcher} FSWatcher */
+/** @typedef {import('./types').JSEntry} JSEntry */
+/** @typedef {import('./types').TaskOptions} TaskOptions */
 
 /** @type {JSEntry[]} */
 const jsEntries = [
     {
         src: 'src/background/index.ts',
-        // Prior to Chrome 93, background service worker had to be in top-level directory
-        dest: (platform) => platform === PLATFORM.CHROMIUM_MV3 ? 'background.js' : 'background/index.js',
+        dest: 'background/index.js',
         reloadType: reload.FULL,
     },
     {
@@ -105,7 +99,6 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
-    const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};
     switch (platform) {
         case PLATFORM.FIREFOX_MV2:
@@ -132,7 +125,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
 
     const bundle = await rollup.rollup({
-        input: rootPath(src),
+        input: absolutePath(src),
         onwarn: (error) => {
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
             if (error.code === 'EVAL' && !mustRemoveEval) {
@@ -145,8 +138,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
             // so we have to manually polyfill it via regular eval().
             // This plugin is necessary to avoid (benign) warnings in the console during builds, it just replaces
-            // literally one occurence of eval() in our code even before TypeSctipt even encounters it.
-            // With this plugin, warning apprears only on Firefox test builds.
+            // literally one occurrence of eval() in our code even before TypeSctipt even encounters it.
+            // With this plugin, warning appears only on Firefox test builds.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
             getRollupPluginInstance('removeEval', '', () => mustRemoveEval &&
                 rollupPluginReplace({
@@ -157,9 +150,9 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
             getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
                 rollupPluginTypescript({
-                    rootDir,
+                    rootDir: absolutePath('.'),
                     typescript,
-                    tsconfig: rootPath('src/tsconfig.json'),
+                    tsconfig: absolutePath('src/tsconfig.json'),
                     compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
                         target: 'ES2022',
                     } : undefined,
@@ -196,66 +189,87 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug, platform})}/${destination}`,
+        file: `${getDestDir({debug, platform})}/${dest}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,
     });
 }
 
-function getWatchFiles() {
-    const watchFiles = new Set();
-    jsEntries.forEach((entry) => {
-        entry.watchFiles?.forEach((file) => watchFiles.add(file));
-    });
-    return Array.from(watchFiles);
-}
+/**
+ * @param {JSEntry[]} jsEntries
+ * @returns {ReturnType<typeof createTask>}
+ */
+export function createBundleJSTask(jsEntries) {
+    /** @type {string[]} */
+    let currentWatchFiles;
 
-/** @type {string[]} */
-let watchFiles;
+    const getRelevantWatchFiles = () => {
+        const watchFiles = new Set();
+        jsEntries.forEach((entry) => {
+            entry.watchFiles?.forEach((file) => watchFiles.add(file));
+        });
+        return Array.from(watchFiles);
+    };
 
-const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, log, test) =>
-    entries.map((entry) =>
-        (entry.platform ? [entry.platform] : Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API))
-            .filter((platform) => platforms[platform])
-            .map((platform) => bundleJS(entry, platform, debug, watch, log, test))
-    ).flat();
+    /** @type {(options: Partial<TaskOptions> & {platforms: TaskOptions['platforms']}) => Promise<void>} */
+    const bundleEachPlatform = async ({platforms, debug, watch, log, test}) => {
+        const allPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API);
+        for (const entry of jsEntries) {
+            const possiblePlatforms = entry.platform ? [entry.platform] : allPlatforms;
+            const targetPlatforms = possiblePlatforms.filter((platform) => platforms[platform]);
+            for (const platform of targetPlatforms) {
+                await bundleJS(entry, platform, debug, watch, log, test);
+            }
+        }
+    };
 
-const bundleJSTask = createTask(
-    'bundle-js',
-    async ({platforms, debug, watch, log, test}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch, log, test)),
-).addWatcher(
-    () => {
-        watchFiles = getWatchFiles();
-        return watchFiles;
-    },
-    async (changedFiles, watcher) => {
-        const platforms = reload
-            .getConnectedBrowsers()
-            .reduce((obj, platform) => {
-                obj[platform] = true;
-                return obj;
-            }, {});
+    /** @type {(changedFiles: string[], watcher: FSWatcher, platforms: any) => Promise<void>} */
+    const onChange = async (changedFiles, watcher, initialPlatforms) => {
+        let platforms = {};
+        const connectedBrowsers = reload.getConnectedBrowsers();
+        if (connectedBrowsers.includes('chrome')) {
+            platforms.chrome = initialPlatforms.chrome;
+            platforms['chrome-mv3'] = initialPlatforms['chrome-mv3'];
+        }
+        if (connectedBrowsers.includes('firefox')) {
+            platforms.firefox = true;
+        }
+        if (connectedBrowsers.length === 0) {
+            platforms = initialPlatforms;
+        }
+
         const entries = jsEntries.filter((entry) => {
             return changedFiles.some((changed) => {
                 return entry.watchFiles?.includes(changed);
             });
         });
-        await Promise.all(hydrateTask(entries, platforms, true, true));
+        await bundleEachPlatform({platforms, debug: true, watch: true});
 
-        const newWatchFiles = getWatchFiles();
+        const newWatchFiles = getRelevantWatchFiles();
         watcher.unwatch(
-            watchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
+            currentWatchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
         );
         watcher.add(
-            newWatchFiles.filter((newFile) => watchFiles.includes(newFile))
+            newWatchFiles.filter((newFile) => currentWatchFiles.includes(newFile))
         );
 
         const isUIOnly = entries.every((entry) => entry.reloadType === reload.UI);
         reload.reload({
             type: isUIOnly ? reload.UI : reload.FULL,
         });
-    },
-);
+    };
 
-export default bundleJSTask;
+    return createTask(
+        'bundle-js',
+        bundleEachPlatform,
+    ).addWatcher(
+        () => {
+            currentWatchFiles = getRelevantWatchFiles();
+            return currentWatchFiles;
+        },
+        onChange,
+    );
+}
+
+export default createBundleJSTask(jsEntries);

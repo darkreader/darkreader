@@ -1,7 +1,8 @@
 import type {Theme} from '../../definitions';
 import {isChromium} from '../../utils/platform';
+import {getHashCode} from '../../utils/text';
 import {createAsyncTasksQueue} from '../../utils/throttle';
-import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
@@ -54,8 +55,17 @@ export interface CSSBuilder {
 
 export function createStyleSheetModifier(): StyleSheetModifier {
     let renderId = 0;
-    const rulesTextCache = new Set<string>();
-    const rulesModCache = new Map<string, ModifiableCSSRule>();
+
+    function getStyleRuleHash(rule: CSSStyleRule) {
+        let cssText = rule.cssText;
+        if (isMediaRule(rule.parentRule)) {
+            cssText = `${rule.parentRule.media.mediaText} { ${cssText} }`;
+        }
+        return getHashCode(cssText);
+    }
+
+    const rulesTextCache = new Set<number>();
+    const rulesModCache = new Map<number, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string | null = null;
     let hasNonLoadedLink = false;
@@ -79,22 +89,19 @@ export function createStyleSheetModifier(): StyleSheetModifier {
 
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            let cssText = rule.cssText;
+            const hash = getStyleRuleHash(rule);
             let textDiffersFromPrev = false;
 
-            notFoundCacheKeys.delete(cssText);
-            if (rule.parentRule instanceof CSSMediaRule) {
-                cssText += `;${(rule.parentRule as CSSMediaRule).media.mediaText}`;
-            }
-            if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.add(cssText);
+            notFoundCacheKeys.delete(hash);
+            if (!rulesTextCache.has(hash)) {
+                rulesTextCache.add(hash);
                 textDiffersFromPrev = true;
             }
 
             if (textDiffersFromPrev) {
                 rulesChanged = true;
             } else {
-                modRules.push(rulesModCache.get(cssText)!);
+                modRules.push(rulesModCache.get(hash)!);
                 return;
             }
 
@@ -119,7 +126,7 @@ export function createStyleSheetModifier(): StyleSheetModifier {
                 modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
                 modRules.push(modRule);
             }
-            rulesModCache.set(cssText, modRule!);
+            rulesModCache.set(hash, modRule!);
         }, () => {
             hasNonLoadedLink = true;
         });
@@ -161,19 +168,16 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             const {selector, declarations} = rule;
 
             let selectorText = selector;
-            if (
-                isChromium &&
-                selector.startsWith(':is(') && (
-                    selector.includes(':is()') ||
-                    selector.includes(':where()') || (
-                        selector.includes(':where(') &&
-                        selector.includes(':-moz')
-                    )
-                )
-            ) {
-                // Empty :is() and :where() selectors or
-                // selectors like :is(:where(:-unknown))
-                // break Chrome 119 when calling deleteRule()
+            // Empty :is() and :where() selectors or
+            // selectors like :is(:where(:-unknown))
+            // break Chrome 119 when calling deleteRule()
+            const emptyIsWhereSelector = isChromium && selector.startsWith(':is(') && (
+                selector.includes(':is()') ||
+                selector.includes(':where()') ||
+                (selector.includes(':where(') && selector.includes(':-moz'))
+            );
+            const viewTransitionSelector = selector.includes('::view-transition-');
+            if (emptyIsWhereSelector || viewTransitionSelector) {
                 selectorText = '.darkreader-unsupported-selector';
             }
 
@@ -306,10 +310,16 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         function buildStyleSheet() {
             function createTarget(group: ReadyGroup, parent: CSSBuilder): CSSBuilder {
                 const {rule} = group;
-                if (rule instanceof CSSMediaRule) {
+                if (isMediaRule(rule)) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
                     parent.insertRule(`@media ${media.mediaText} {}`, index);
+                    return parent.cssRules[index] as CSSBuilder;
+                }
+                if (isLayerRule(rule)) {
+                    const {name} = rule;
+                    const index = parent.cssRules.length;
+                    parent.insertRule(`@layer ${name} {}`, index);
                     return parent.cssRules[index] as CSSBuilder;
                 }
                 return parent;

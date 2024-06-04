@@ -1,6 +1,7 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig, getSitesFixesFor, getDomain} from './utils/parse';
 import type {SitePropsIndex} from './utils/parse';
+import {formatCSS} from '../utils/css-text/format-css';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';
@@ -36,7 +37,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]): s
         getPropCommandName: (prop) => Object.entries(dynamicThemeFixesCommands).find(([, p]) => p === prop)![0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return (value as string).trim().replace(/\n+/g, '\n');
+                return formatCSS(value as string);
             }
             return formatArray(value as string[]).trim();
         },

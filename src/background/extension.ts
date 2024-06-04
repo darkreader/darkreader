@@ -16,7 +16,7 @@ import {getDetectorHintsFor} from '../generators/detector-hints';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
+import type {ExtensionData, Theme, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
 import {MessageTypeBGtoCS} from '../utils/message';
@@ -24,7 +24,6 @@ import {logInfo, logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
-import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
 import UIHighlights from './ui-highlights';
 import {getActiveTab} from '../utils/tabs';
@@ -67,6 +66,8 @@ export class Extension {
 
     // Record whether Extension.init() already ran since the last GB start
     private static initialized = false;
+
+    static isFirstLoad = false;
 
     // This sync initializer needs to run on every BG restart before anything else can happen
     private static init() {
@@ -225,7 +226,7 @@ export class Extension {
         }, WAKE_CHECK_INTERVAL);
     }
 
-    public static async start(): Promise<void> {
+    static async start(): Promise<void> {
         Extension.init();
         await Promise.all([
             ConfigManager.load({local: true}),
@@ -252,7 +253,7 @@ export class Extension {
 
         if (__THUNDERBIRD__) {
             TabManager.registerMailDisplayScript();
-        } else {
+        } else if (!__CHROMIUM_MV3__ || Extension.isFirstLoad) {
             TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
@@ -294,7 +295,7 @@ export class Extension {
                 logInfo('Toggle command entered');
                 Extension.changeSettings({
                     enabled: !Extension.isExtensionSwitchedOn(),
-                    automation: {...UserStorage.settings.automation, ...{enable: false}},
+                    automation: {...UserStorage.settings.automation, ...{enabled: false}},
                 });
                 break;
             case 'addSite': {
@@ -316,7 +317,7 @@ export class Extension {
                         return (await chrome.scripting.executeScript({
                             target: {tabId, frameIds: [frameId]},
                             func: detectPDF,
-                        }))[0].result;
+                        }))[0].result || false;
                     } else if (__CHROMIUM_MV2__) {
                         return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
                             frameId,
@@ -390,7 +391,7 @@ export class Extension {
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name!]: cmd.shortcut}), {} as Shortcuts);
     }
 
-    public static async collectData(): Promise<ExtensionData> {
+    static async collectData(): Promise<ExtensionData> {
         await Extension.loadData();
         const [
             news,
@@ -419,7 +420,7 @@ export class Extension {
         };
     }
 
-    public static async collectDevToolsData(): Promise<DevToolsData> {
+    static async collectDevToolsData(): Promise<DevToolsData> {
         const [
             dynamicFixesText,
             filterFixesText,
@@ -459,9 +460,9 @@ export class Extension {
         };
     }
 
-    private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean) {
+    private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) {
         await Extension.loadData();
-        return Extension.getTabMessage(tabURL, url, isTopFrame);
+        return Extension.getTabMessage(tabURL, url, isTopFrame, topFrameHasDarkTheme);
     }
 
     private static async loadData() {
@@ -474,7 +475,7 @@ export class Extension {
 
     private static onColorSchemeChange = async (isDark: boolean) => {
         if (Extension.wasLastColorSchemeDark === isDark) {
-            // If color scheme was already correct, we do not need to do anyhting
+            // If color scheme was already correct, we do not need to do anything
             return;
         }
         Extension.wasLastColorSchemeDark = isDark;
@@ -504,7 +505,7 @@ export class Extension {
         }
     };
 
-    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
+    static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
         const promises = [];
         const prev = {...UserStorage.settings};
 
@@ -550,7 +551,7 @@ export class Extension {
         await Promise.all(promises);
     }
 
-    private static setTheme($theme: Partial<FilterConfig>) {
+    private static setTheme($theme: Partial<Theme>) {
         UserStorage.set({theme: {...UserStorage.settings.theme, ...$theme}});
 
         if (Extension.isExtensionSwitchedOn() && UserStorage.settings.changeBrowserTheme) {
@@ -616,14 +617,8 @@ export class Extension {
 
     private static onAppToggle() {
         if (Extension.isExtensionSwitchedOn()) {
-            if (__CHROMIUM_MV3__) {
-                ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
-            }
             IconManager.setActive();
         } else {
-            if (__CHROMIUM_MV3__) {
-                ContentScriptManager.unregisterScripts();
-            }
             IconManager.setInactive();
         }
 
@@ -660,10 +655,10 @@ export class Extension {
         };
     }
 
-    private static getTabMessage = (tabURL: string, url: string, isTopFrame: boolean): TabData => {
+    private static getTabMessage = (tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean): TabData => {
         const settings = UserStorage.settings;
         const tabInfo = Extension.getTabInfo(tabURL);
-        if (Extension.isExtensionSwitchedOn() && isURLEnabled(tabURL, settings, tabInfo)) {
+        if (Extension.isExtensionSwitchedOn() && isURLEnabled(tabURL, settings, tabInfo) && !topFrameHasDarkTheme) {
             const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURL, urlList));
             const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURL, urls));
             let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;

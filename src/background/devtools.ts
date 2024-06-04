@@ -6,7 +6,7 @@ import ConfigManager from './config-manager';
 import {isFirefox} from '../utils/platform';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
-// TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
+// TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separately.
 interface DevToolsStorage {
     get(key: string): Promise<string | null>;
     set(key: string, value: string): Promise<void> | void;
@@ -18,14 +18,14 @@ class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.
     private cache: {[key: string]: string | null} = {};
 
-    public async get(key: string) {
+    async get(key: string) {
         if (key in this.cache) {
             return this.cache[key];
         }
         return new Promise<string | null>((resolve) => {
             chrome.storage.local.get(key, (result) => {
                 // If cache received a new value (from call to set())
-                // before we retreived the old value from storage,
+                // before we retrieved the old value from storage,
                 // return the new value.
                 if (key in this.cache) {
                     logInfo(`Key ${key} was written to during read operation.`);
@@ -45,7 +45,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         });
     }
 
-    public async set(key: string, value: string) {
+    async set(key: string, value: string) {
         this.cache[key] = value;
         return new Promise<void>((resolve) => chrome.storage.local.set({[key]: value}, () => {
             if (chrome.runtime.lastError) {
@@ -56,7 +56,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         }));
     }
 
-    public async remove(key: string) {
+    async remove(key: string) {
         this.cache[key] = null;
         return new Promise<void>((resolve) => chrome.storage.local.remove(key, () => {
             if (chrome.runtime.lastError) {
@@ -67,7 +67,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         }));
     }
 
-    public async has(key: string) {
+    async has(key: string) {
         return Boolean(await this.get(key));
     }
 }
@@ -75,19 +75,19 @@ class PersistentStorageWrapper implements DevToolsStorage {
 class TempStorage implements DevToolsStorage {
     private map = new Map<string, string>();
 
-    public async get(key: string) {
+    async get(key: string) {
         return this.map.get(key) || null;
     }
 
-    public set(key: string, value: string) {
+    set(key: string, value: string) {
         this.map.set(key, value);
     }
 
-    public remove(key: string) {
+    remove(key: string) {
         this.map.delete(key);
     }
 
-    public async has(key: string) {
+    async has(key: string) {
         return this.map.has(key);
     }
 }
@@ -96,7 +96,7 @@ export default class DevTools {
     private static onChange: () => void;
     private static store: DevToolsStorage;
 
-    public static init(onChange: () => void): void {
+    static init(onChange: () => void): void {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
         if (!isFirefox && typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
@@ -135,7 +135,7 @@ export default class DevTools {
         DevTools.store.set(DevTools.KEY_DYNAMIC, text);
     }
 
-    public static async getDynamicThemeFixesText(): Promise<string> {
+    static async getDynamicThemeFixesText(): Promise<string> {
         let rawFixes = await DevTools.getSavedDynamicThemeFixes();
         if (!rawFixes) {
             await ConfigManager.load();
@@ -145,7 +145,7 @@ export default class DevTools {
         return formatDynamicThemeFixes(fixes);
     }
 
-    public static resetDynamicThemeFixes(): void {
+    static resetDynamicThemeFixes(): void {
         DevTools.store.remove(DevTools.KEY_DYNAMIC);
         ConfigManager.overrides.dynamicThemeFixes = null;
         ConfigManager.handleDynamicThemeFixes();
@@ -153,7 +153,7 @@ export default class DevTools {
     }
 
     // TODO(Anton): remove any
-    public static applyDynamicThemeFixes(text: string): any {
+    static applyDynamicThemeFixes(text: string): any {
         try {
             const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
             ConfigManager.overrides.dynamicThemeFixes = formatted;
@@ -174,7 +174,7 @@ export default class DevTools {
         this.store.set(DevTools.KEY_FILTER, text);
     }
 
-    public static async getInversionFixesText(): Promise<string> {
+    static async getInversionFixesText(): Promise<string> {
         let rawFixes = await DevTools.getSavedInversionFixes();
         if (!rawFixes) {
             await ConfigManager.load();
@@ -184,7 +184,7 @@ export default class DevTools {
         return formatInversionFixes(fixes);
     }
 
-    public static resetInversionFixes(): void {
+    static resetInversionFixes(): void {
         DevTools.store.remove(DevTools.KEY_FILTER);
         ConfigManager.overrides.inversionFixes = null;
         ConfigManager.handleInversionFixes();
@@ -192,7 +192,7 @@ export default class DevTools {
     }
 
     // TODO(Anton): remove any
-    public static applyInversionFixes(text: string): any {
+    static applyInversionFixes(text: string): any {
         try {
             const formatted = formatInversionFixes(parseInversionFixes(text));
             ConfigManager.overrides.inversionFixes = formatted;
@@ -213,7 +213,7 @@ export default class DevTools {
         DevTools.store.set(DevTools.KEY_STATIC, text);
     }
 
-    public static async getStaticThemesText(): Promise<string> {
+    static async getStaticThemesText(): Promise<string> {
         let rawThemes = await DevTools.getSavedStaticThemes();
         if (!rawThemes) {
             await ConfigManager.load();
@@ -223,7 +223,7 @@ export default class DevTools {
         return formatStaticThemes(themes);
     }
 
-    public static resetStaticThemes(): void {
+    static resetStaticThemes(): void {
         DevTools.store.remove(DevTools.KEY_STATIC);
         ConfigManager.overrides.staticThemes = null;
         ConfigManager.handleStaticThemes();
@@ -231,7 +231,7 @@ export default class DevTools {
     }
 
     // TODO(Anton): remove any
-    public static applyStaticThemes(text: string): any {
+    static applyStaticThemes(text: string): any {
         try {
             const formatted = formatStaticThemes(parseStaticThemes(text));
             ConfigManager.overrides.staticThemes = formatted;

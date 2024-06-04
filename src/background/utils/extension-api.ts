@@ -1,3 +1,4 @@
+import {getDuration} from '../../utils/time';
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
@@ -165,4 +166,18 @@ export async function getCommands(): Promise<chrome.commands.Command[]> {
             }
         });
     });
+}
+
+export function keepListeningToEvents(): () => void {
+    let intervalId = 0;
+    const keepHopeAlive = () => {
+        intervalId = setInterval(chrome.runtime.getPlatformInfo, getDuration({seconds: 10}));
+    };
+    chrome.runtime.onStartup.addListener(keepHopeAlive);
+    keepHopeAlive();
+    const stopListening = () => {
+        clearInterval(intervalId);
+        chrome.runtime.onStartup.removeListener(keepHopeAlive);
+    };
+    return stopListening;
 }

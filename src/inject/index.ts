@@ -71,7 +71,7 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
          * Regular message passing errors are returned via rejected promise or runtime.lastError.
          */
         if (error.message === 'Extension context invalidated.') {
-            console.log('Dark Reader: instance of old CS detected, clening up.');
+            console.log('Dark Reader: instance of old CS detected, cleaning up.');
             cleanup();
         } else {
             console.log('Dark Reader: unexpected error during message passing.');
@@ -239,7 +239,7 @@ if (__TEST__) {
         }, {passive: true});
 
         // Wait for DOM to be complete
-        // Note that here we wait only for DOM parsing and not for subresource load
+        // Note that here we wait only for DOM parsing and not for sub-resource load
         await awaitDOMContentLoaded();
         await awaitDarkReaderReady();
         socket.send(JSON.stringify({
@@ -310,7 +310,7 @@ if (__TEST__) {
                 }
                 case 'firefox-expectPageStyles': {
                     // Styles may not have been applied to the document yet,
-                    // so we check once immediatelly and then on an interval.
+                    // so we check once immediately and then on an interval.
                     function checkPageStylesNow() {
                         const errors = expectPageStyles(data);
                         if (errors.length === 0) {

@@ -1,14 +1,14 @@
 import {parseColorWithCache} from '../../utils/color';
 import {modifyBackgroundColor} from '../../generators/modify-colors';
 import {logWarn} from '../utils/log';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 
 const metaThemeColorName = 'theme-color';
 const metaThemeColorSelector = `meta[name="${metaThemeColorName}"]`;
 let srcMetaThemeColor: string | null = null;
 let observer: MutationObserver | null = null;
 
-function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
+function changeMetaThemeColor(meta: HTMLMetaElement, theme: Theme) {
     srcMetaThemeColor = srcMetaThemeColor || meta.content;
     const color = parseColorWithCache(srcMetaThemeColor);
     if (!color) {
@@ -18,7 +18,7 @@ function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
     meta.content = modifyBackgroundColor(color, theme);
 }
 
-export function changeMetaThemeColorWhenAvailable(theme: FilterConfig): void {
+export function changeMetaThemeColorWhenAvailable(theme: Theme): void {
     const meta: HTMLMetaElement = document.querySelector(metaThemeColorSelector)!;
     if (meta) {
         changeMetaThemeColor(meta, theme);

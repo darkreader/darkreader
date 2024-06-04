@@ -15,8 +15,7 @@ import zip from './zip.js';
 import {runTasks} from './task.js';
 import {log} from './utils.js';
 import process from 'node:process';
-import paths from './paths.js';
-const {PLATFORM} = paths;
+import {PLATFORM} from './platform.js';
 
 const standardTask = [
     clean,
@@ -71,7 +70,7 @@ async function api(debug, watch) {
         if (!debug) {
             tasks.push(codeStyle);
         }
-        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: null, log: false, test: false});
+        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: false, log: false, test: false});
         if (watch) {
             bundleAPI.watch();
             log.ok('Watching...');

@@ -1,13 +1,13 @@
 // @ts-check
-import path from './paths.js';
+import {getDestDir, absolutePath} from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readJSON, writeJSON} from './utils.js';
-const {PLATFORM, getDestDir, rootPath} = path;
 
 async function patchManifest(platform, debug, watch, test) {
-    const manifest = await readJSON(rootPath('src/manifest.json'));
-    const manifestPatch = platform === PLATFORM.CHROMIUM_MV2 ? {} : await readJSON(rootPath(`src/manifest-${platform}.json`));
+    const manifest = await readJSON(absolutePath('src/manifest.json'));
+    const manifestPatch = platform === PLATFORM.CHROMIUM_MV2 ? {} : await readJSON(absolutePath(`src/manifest-${platform}.json`));
     const patched = {...manifest, ...manifestPatch};
     if (debug && platform === PLATFORM.CHROMIUM_MV3) {
         patched.name = 'Dark Reader MV3';

@@ -18,8 +18,7 @@ import {runTasks} from './task.js';
 import zip from './zip.js';
 import signature from './bundle-signature.js';
 
-import paths from './paths.js';
-const {PLATFORM} = paths;
+import {PLATFORM} from './platform.js';
 
 const __filename = join(fileURLToPath(import.meta.url), '../build.js');
 
@@ -135,7 +134,7 @@ function validateArguments(args) {
 
     if (args.some((arg) => arg.startsWith('--version='))) {
         if (!args.includes('--firefox') || !args.includes('--release') || args.length !== 3) {
-            validaionErrors.push('Only Firefox build currenly supports signed builds');
+            validaionErrors.push('Only Firefox build currently supports signed builds');
         }
     }
     return validaionErrors;

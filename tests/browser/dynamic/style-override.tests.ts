@@ -235,7 +235,7 @@ describe('Style override', () => {
 
         pageUtils.evaluateScript(async () => {
             class CustomElement extends HTMLElement {
-                public constructor() {
+                constructor() {
                     super();
                     const shadowRoot = this.attachShadow({mode: 'open'});
                     const style = document.createElement('style');

@@ -1,6 +1,5 @@
 import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
 import type {UserSettings} from '../../../src/definitions';
-import {isIPV6} from '../../../src/utils/ipv6';
 
 it('URL is enabled', () => {
     function fillUserSettings(settings: Partial<UserSettings>): UserSettings {
@@ -31,10 +30,20 @@ it('URL is enabled', () => {
 
     // Not invert listed
     expect(isURLEnabled(
-        'https://mail.google.com/mail/u/0/',
+        'https://www.google.com/',
+        fillUserSettings({disabledFor: [], enabledFor: [], enabledByDefault: true}),
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://www.google.com/',
         fillUserSettings({disabledFor: ['google.com'], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
+    expect(isURLEnabled(
+        'https://mail.google.com/mail/u/0/',
+        fillUserSettings({disabledFor: ['google.com'], enabledFor: [], enabledByDefault: true}),
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
         fillUserSettings({disabledFor: ['mail.google.com'], enabledFor: [], enabledByDefault: true}),
@@ -64,12 +73,12 @@ it('URL is enabled', () => {
     // Invert listed only
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        fillUserSettings({disabledFor: ['google.com'], enabledFor: [], enabledByDefault: false}),
+        fillUserSettings({disabledFor: [], enabledFor: ['google.com'], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
-    )).toBe(true);
+    )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        fillUserSettings({disabledFor: ['google.*/mail'], enabledFor: [], enabledByDefault: false}),
+        fillUserSettings({disabledFor: [], enabledFor: ['mail.google.*/mail'], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
@@ -79,7 +88,7 @@ it('URL is enabled', () => {
     )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        fillUserSettings({disabledFor: ['google.com/maps'], enabledFor: [], enabledByDefault: false}),
+        fillUserSettings({disabledFor: [], enabledFor: ['*.google.com/maps'], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
 
@@ -91,7 +100,7 @@ it('URL is enabled', () => {
     )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        fillUserSettings({disabledFor: ['chrome.google.com'], enabledFor: [], enabledByDefault: false, enableForProtectedPages: true}),
+        fillUserSettings({disabledFor: [], enabledFor: ['chrome.google.com'], enabledByDefault: false, enableForProtectedPages: true}),
         {isProtected: true, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
@@ -111,7 +120,7 @@ it('URL is enabled', () => {
     )).toBe(false);
     expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
-        fillUserSettings({disabledFor: ['microsoftedge.microsoft.com'], enabledFor: [], enabledByDefault: false, enableForProtectedPages: true}),
+        fillUserSettings({disabledFor: [], enabledFor: ['microsoftedge.microsoft.com'], enabledByDefault: false, enableForProtectedPages: true}),
         {isProtected: true, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
@@ -126,37 +135,37 @@ it('URL is enabled', () => {
     )).toBe(false);
     expect(isURLEnabled(
         'https://darkreader.org/',
-        fillUserSettings({disabledFor: ['darkreader.org'], enabledFor: [], enabledByDefault: false}),
+        fillUserSettings({disabledFor: [], enabledFor: ['darkreader.org'], enabledByDefault: false}),
         {isProtected: false, isInDarkList: true},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
-        fillUserSettings({enableForPDF: true, disabledFor: ['darkreader.org'], enabledFor: [], enabledByDefault: true}),
+        fillUserSettings({enableForPDF: true, disabledFor: [], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
-        fillUserSettings({enableForPDF: true, disabledFor: ['darkreader.org'], enabledFor: [], enabledByDefault: false}),
+        fillUserSettings({enableForPDF: true, disabledFor: [], enabledFor: [], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
-        fillUserSettings({enableForPDF: false, disabledFor: ['darkreader.org'], enabledFor: [], enabledByDefault: true}),
+        fillUserSettings({enableForPDF: false, disabledFor: [], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf/resource',
-        fillUserSettings({enableForPDF: true, disabledFor: ['darkreader.org'], enabledFor: [], enabledByDefault: false}),
+        fillUserSettings({enableForPDF: true, disabledFor: [], enabledFor: [], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf/resource',
-        fillUserSettings({enableForPDF: true, disabledFor: ['darkreader.org'], enabledFor: [], enabledByDefault: true}),
+        fillUserSettings({enableForPDF: true, disabledFor: [], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf',
-        fillUserSettings({enableForPDF: true, disabledFor: ['https://www.google.com/very/good/hidden/folder/pdf#file.pdf'], enabledFor: [], enabledByDefault: true}),
+        fillUserSettings({enableForPDF: true, disabledFor: ['https://www.google.com/very/good/hidden/folder/pdf'], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
@@ -220,42 +229,42 @@ it('URL is enabled', () => {
 
     // IPV6 Testing
     expect(isURLEnabled(
-        '[::1]:1337',
+        'https://[::1]:1337',
         fillUserSettings({disabledFor: ['google.com'], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
-        '[::1]:8080',
+        'https://[::1]:8080',
         fillUserSettings({disabledFor: ['[::1]:8080'], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(false);
     expect(isURLEnabled(
-        '[::1]:8080',
+        'https://[::1]:8080',
         fillUserSettings({disabledFor: ['[::1]:8081'], enabledFor: [], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(false);
     expect(isURLEnabled(
-        '[::1]:8080',
+        'https://[::1]:8080',
         fillUserSettings({disabledFor: ['[::1]:8081'], enabledFor: [], enabledByDefault: true}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(true);
     expect(isURLEnabled(
-        '[::1]:17',
+        'https://[::1]:17',
         fillUserSettings({disabledFor: ['[::1]'], enabledFor: [], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(false);
     expect(isURLEnabled(
-        '[2001:4860:4860::8888]',
-        fillUserSettings({disabledFor: ['[2001:4860:4860::8888]'], enabledFor: [], enabledByDefault: false}),
+        'https://[2001:4860:4860::8888]',
+        fillUserSettings({disabledFor: [], enabledFor: ['[2001:4860:4860::8888]'], enabledByDefault: false}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(true);
     expect(isURLEnabled(
-        '[2001:4860:4860::8844]',
-        fillUserSettings({disabledFor: ['[2001:4860:4860::8844]'], enabledFor: [], enabledByDefault: false}),
+        'https://[2001:4860:4860::8844]',
+        fillUserSettings({disabledFor: [], enabledFor: ['[2001:4860:4860::8844]'], enabledByDefault: false}),
         {isProtected: false, isInDarkList: true},
     )).toEqual(true);
     expect(isURLEnabled(
-        '[2001:4860:4860::8844]',
+        'https://[2001:4860:4860::8844]',
         fillUserSettings({disabledFor: [], enabledFor: [], enabledByDefault: false}),
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
@@ -271,97 +280,59 @@ it('URL is enabled', () => {
     expect(isURLMatched('kiwi://settings', '*')).toEqual(true);
     expect(isURLMatched('about:blank', '*')).toEqual(true);
     expect(isURLMatched('about:preferences', '*')).toEqual(true);
-    // TODO: fix isURLMatched and uncomment me
-    // expect(isURLMatched('[::1]', '*')).toEqual(true);
-    // expect(isURLMatched('[::1]:80', '*')).toEqual(true);
-    expect(isURLMatched('127.0.0.1', '*')).toEqual(true);
-    expect(isURLMatched('127.0.0.1:80', '*')).toEqual(true);
-    expect(isURLMatched('localhost', '*')).toEqual(true);
+    expect(isURLMatched('http://[::1]', '*')).toEqual(true);
+    expect(isURLMatched('http://[::1]:80', '*')).toEqual(true);
+    expect(isURLMatched('http://127.0.0.1', '*')).toEqual(true);
+    expect(isURLMatched('http://127.0.0.1:80', '*')).toEqual(true);
+    expect(isURLMatched('http://localhost', '*')).toEqual(true);
 
     // No wildcard
     expect(isURLMatched('https://example.com/abc', 'example.com')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abc', 'example.com')).toEqual(true);
+    expect(isURLMatched('https://www.example.com/abc', 'example.com')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.com')).toEqual(false);
     expect(isURLMatched('https://example.com/abc', 'a.example.com')).toEqual(false);
     expect(isURLMatched('https://a.example.com/abc', 'b.example.com')).toEqual(false);
 
     // Single wildcard with unbound non-extended left math
-    // expect(isURLMatched('https://example.com/abc', 'example.com/abc/*')).toEqual(false);
-    // expect(isURLMatched('https://example.com/abcd', 'example.com/abc/*')).toEqual(false);
-    // expect(isURLMatched('https://example.com/abc/def', 'example.com/*/def')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.com/abc/*')).toEqual(false);
+    expect(isURLMatched('https://example.com/abcd', 'example.com/abc/*')).toEqual(false);
+    expect(isURLMatched('https://example.com/abc/def', 'example.com/*/def')).toEqual(true);
     expect(isURLMatched('https://example.com/abcd/ef', 'example.com/*/def')).toEqual(false);
-    expect(isURLMatched('https://example.com/abc', 'example.com/*abc')).toEqual(true);
-    // expect(isURLMatched('https://example.com/aabc', 'example.com/*abc')).toEqual(true);
-    expect(isURLMatched('https://example.com/abcd', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.com/*')).toEqual(true);
     expect(isURLMatched('https://example.com/abc', 'example.*/abc')).toEqual(true);
     expect(isURLMatched('https://example.com/abc', 'example.*')).toEqual(true);
-    // expect(isURLMatched('https://example.com/abc', 'example.*abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.*abc')).toEqual(false);
 
     // Single wildcard with unbound extended left math
-    expect(isURLMatched('https://a.example.com/abc', 'example.com')).toEqual(true);
-    // expect(isURLMatched('https://a.example.com/abc', 'example.com/abc/*')).toEqual(false);
-    // expect(isURLMatched('https://a.example.com/abcd', 'example.com/abc/*')).toEqual(false);
-    // expect(isURLMatched('https://a.example.com/abc/def', 'example.com/*/def')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abcd/ef', 'example.com/*/def')).toEqual(false);
-    expect(isURLMatched('https://a.example.com/abc', 'example.com/*abc')).toEqual(true);
-    // expect(isURLMatched('https://a.example.com/aabc', 'example.com/*abc')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abcd', 'example.com/*abc')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abc', 'example.*/abc')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abc', 'example.*')).toEqual(true);
-    // expect(isURLMatched('https://a.example.com/abc', 'example.*abc')).toEqual(true);
-
-    // Multiple wildcards with unbound non-extended left math
-    // expect(isURLMatched('https://example.com/abc', 'example.com/*bc/*')).toEqual(true);
-    expect(isURLMatched('https://example.com/abcd', 'example.com/*bc/*')).toEqual(false);
-    // expect(isURLMatched('https://example.com/abc/def', 'example.com/*/d*f')).toEqual(true);
-    expect(isURLMatched('https://example.com/abcd/ef', 'example.com/*/d*f')).toEqual(false);
-    // expect(isURLMatched('https://example.com/abc', 'example.com/*a*c')).toEqual(true);
-    // expect(isURLMatched('https://example.com/aabc', 'example.com/*a*c')).toEqual(true);
-    // expect(isURLMatched('https://example.com/abcd', 'example.com/*a*c')).toEqual(true);
-    // expect(isURLMatched('https://example.com/abc', 'example.*/a*c')).toEqual(true);
-    // expect(isURLMatched('https://example.com/abc', 'ex*mple.*')).toEqual(true);
-    expect(isURLMatched('https://example.com/abc', 'example.*a*c')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', '*.example.com')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', '*.example.com/abc/*')).toEqual(false);
 
     // Multiple wildcards with unbound extended left math
-    // expect(isURLMatched('https://a.example.com/abc', 'example.com/*bc/*')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abcd', 'example.com/*bc/*')).toEqual(false);
-    // expect(isURLMatched('https://a.example.com/abc/def', 'example.com/*/d*f')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abcd/ef', 'example.com/*/d*f')).toEqual(false);
-    // expect(isURLMatched('https://a.example.com/abc', 'example.com/*a*c')).toEqual(true);
-    // expect(isURLMatched('https://a.example.com/aabc', 'example.com/*a*c')).toEqual(true);
-    // expect(isURLMatched('https://a.example.com/abcd', 'example.com/*a*c')).toEqual(true);
-    // expect(isURLMatched('https://a.example.com/abc', 'example.*/a*c')).toEqual(true);
-    // expect(isURLMatched('https://a.example.com/abc', 'ex*mple.*')).toEqual(true);
-    expect(isURLMatched('https://a.example.com/abc', 'example.*a*c')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc/def/ghi', 'a.example.com/*/def/*')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc/def/ghi', 'a.example.com/*/abc/*')).toEqual(false);
 
     // Escapes
-    expect(isURLMatched('https://example.com/*', 'example.com/\*')).toEqual(true);
-    // expect(isURLMatched('https://example.com/*', 'example.com/a\*')).toEqual(false);
-    expect(isURLMatched('https://example.com/?q=*', 'example.com/?q=\*')).toEqual(true);
-    expect(isURLMatched('https://example.com/?q=*', 'example.com/abc?q=\*')).toEqual(false);
-    expect(isURLMatched('https://example.com/abc?q=*', 'example.com/*?q=\*')).toEqual(true);
-    // expect(isURLMatched('https://example.com/abc?q=*', 'example.com/b*?q=\*')).toEqual(false);
+    expect(isURLMatched('https://example.com/*', '/example\\.com\\/\\*/')).toEqual(true);
+    expect(isURLMatched('https://example.com/?q=*', '/example\\.com\\/\\?q\\=\\*/')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc?q=*', '/example\\.com\\/abc\\?q\\=\\*/')).toEqual(true);
 
     // Some URLs can have unescaped [] in query
     expect(isURLMatched(
-        'google.co.uk/order.php?bar=[foo]',
+        'https://google.co.uk/order.php?bar=[foo]',
         'google.co.uk',
     )).toEqual(true);
     expect(isURLMatched(
-        '[2001:4860:4860::8844]/order.php?bar=foo',
+        'https://[2001:4860:4860::8844]/order.php?bar=foo',
         '[2001:4860:4860::8844]',
     )).toEqual(true);
     expect(isURLMatched(
-        '[2001:4860:4860::8844]/order.php?bar=[foo]',
+        'https://[2001:4860:4860::8844]/order.php?bar=[foo]',
         '[2001:4860:4860::8844]',
     )).toEqual(true);
     expect(isURLMatched(
-        'google.co.uk/order.php?bar=[foo]',
+        'https://google.co.uk/order.php?bar=[foo]',
         '[2001:4860:4860::8844]',
     )).toEqual(false);
-    expect(isIPV6('file:///C:/[/test.html')).toEqual(false);
-    expect(isIPV6('file:///C:/[/test.html]')).toEqual(false);
-    expect(isIPV6('[2001:4860:4860::8844]')).toEqual(true);
-    expect(isIPV6('cplusplus.com/reference/vector/vector/operator[]/')).toEqual(false);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

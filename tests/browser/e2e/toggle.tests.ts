@@ -209,6 +209,8 @@ describe('Toggling the extension', () => {
             waitUntil: 'domcontentloaded',
         });
 
+        await awaitForEvent('ready-/');
+
         await emulateColorScheme('dark');
         await expectStyles(darkPageExpectations);
 
@@ -240,6 +242,7 @@ describe('Toggling the extension', () => {
     });
 
     it('should have new design button on desktop', async () => {
+        await devtoolsUtils.click('.settings-tab-panel__button:nth-child(4)');
         expect(await devtoolsUtils.exists('.preview-design-button'));
     });
 

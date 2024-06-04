@@ -47,14 +47,31 @@
 
     &__tabs {
         flex: auto;
+        overflow: hidden;
     }
 
     &__tab {
         display: none;
 
         &--active {
-            display: initial;
+            display: block;
         }
+    }
+
+    &--vertical {
+        flex-direction: column;
+    }
+
+    &--vertical &__buttons {
+        column-gap: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: 16rem;
+    }
+
+    &--vertical &__button__icon {
+        display: none;
     }
 }
 

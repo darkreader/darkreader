@@ -43,7 +43,7 @@ Please note that if you encounter error `Too many open files (os error 24)`, the
 
 ### Bundling with official Firefox store signatures (experimental)
 
-Prior to publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that extension bundle did not get corrupted or bit-rotted) and that extension store preformed very basic extension validation.
+Prior to publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that extension bundle did not get corrupted or bit-rotted) and that extension store performed very basic extension validation.
 
 Dark Reader repository contains these digital signatures and you can add them to the extension bundle. The following will build Dark Reader for Firefox version 4.9.63:
 ```
@@ -147,7 +147,7 @@ Step 1: change Dark Reader's settings.
 - Click on the Dark Reader icon.
 - Click on the `Dev tools` button (in the bottom-right corner).
 - Click on the `Preview new design button`.
-- Enable the `Enable on restricted pages` setting under `Settings` -> `Site list`.
+- Enable the `Enable on restricted pages` setting under `Settings` -> `Advanced`.
 
 Step 2: change Firefox's settings.
 
@@ -155,7 +155,6 @@ Step 2: change Firefox's settings.
 A warning page may appear. Click `Accept the Risk and Continue` to proceed.
 - Search for and set `extensions.webextensions.restrictedDomains` to an empty value.
 - Create `extensions.webextensions.addons-restricted-domains@mozilla.com.disabled` with `boolean` as type and set its value to `true`.
-- Set `extensions.quarantinedDomains.enabled` to `false`.
 - Set `privacy.resistFingerprinting.block_mozAddonManager` to `true`.
 - Restart Firefox.
 

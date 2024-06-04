@@ -5,7 +5,7 @@ import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
 import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
-import type {FilterConfig, StaticTheme} from '../definitions';
+import type {Theme, StaticTheme} from '../definitions';
 
 interface ThemeColors {
     [prop: string]: number[];
@@ -58,7 +58,7 @@ function mix(color1: number[], color2: number[], t: number): number[] {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: FilterConfig, url: string, isTopFrame: boolean, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): string {
+export default function createStaticStylesheet(config: Theme, url: string, isTopFrame: boolean, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): string {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         const [r, g, b, a] = color;

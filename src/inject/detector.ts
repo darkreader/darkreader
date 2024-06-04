@@ -85,6 +85,15 @@ function hasSomeStyle() {
 let observer: MutationObserver | null;
 let readyStateListener: (() => void) | null;
 
+function canCheckForStyle() {
+    return (
+        document.body &&
+        document.body.scrollHeight > 0 &&
+        document.body.clientHeight > 0 &&
+        hasSomeStyle()
+    );
+}
+
 export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void, hints: DetectorHint[]): void {
     stopDarkThemeDetector();
     if (hints && hints.length > 0) {
@@ -101,13 +110,13 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void, 
         return;
     }
 
-    if (document.body && hasSomeStyle()) {
+    if (canCheckForStyle()) {
         runCheck(callback);
         return;
     }
 
     observer = new MutationObserver(() => {
-        if (document.body && hasSomeStyle()) {
+        if (canCheckForStyle()) {
             stopDarkThemeDetector();
             runCheck(callback);
         }

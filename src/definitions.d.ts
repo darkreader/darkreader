@@ -6,13 +6,6 @@ import type {ThemeEngine} from './generators/theme-engines';
 
 export type ColorScheme = 'dark' | 'light';
 
-// ContextId is a number on Firefox and documentId is a string in Chromium,
-// let's use string for simplicity
-export type documentId = string;
-export type scriptId = string;
-export type tabId = number;
-export type frameId = number;
-
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
@@ -39,7 +32,7 @@ export interface TabData {
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
-    setTheme(theme: Partial<FilterConfig>): void;
+    setTheme(theme: Partial<Theme>): void;
     setShortcut(command: string, shortcut: string): Promise<string | null>;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
@@ -86,11 +79,9 @@ export interface Theme {
     immediateModify: boolean;
 }
 
-export type FilterConfig = Theme;
-
 export interface CustomSiteConfig {
     url: string[];
-    theme: FilterConfig;
+    theme: Theme;
 }
 
 export interface ThemePreset {
@@ -110,7 +101,7 @@ export interface UserSettings {
     schemeVersion: number;
     enabled: boolean;
     fetchNews: boolean;
-    theme: FilterConfig;
+    theme: Theme;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
     enabledByDefault: boolean;
@@ -141,8 +132,8 @@ export interface LocationSettings {
 
 export interface TabInfo {
     url: string;
-    id: tabId | null;
-    documentId: documentId | null;
+    id: number | null;
+    documentId: string | null;
     isProtected: boolean;
     isInjected: boolean | null;
     isInDarkList: boolean;
@@ -151,7 +142,7 @@ export interface TabInfo {
 
 export interface MessageCStoBG {
     id?: string;
-    scriptId?: scriptId;
+    scriptId?: string;
     type: MessageTypeCStoBG;
     data?: any;
 }
@@ -167,7 +158,7 @@ export interface MessageCStoUI {
 
 export interface MessageBGtoCS {
     id?: string;
-    scriptId?: scriptId;
+    scriptId?: string;
     type: MessageTypeBGtoCS;
     data?: any;
     error?: any;

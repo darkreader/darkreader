@@ -12,10 +12,10 @@ import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
-import type {FilterConfig, DynamicThemeFix} from '../../definitions';
+import type {Theme, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, hasAdoptedStyleSheets} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
@@ -34,7 +34,7 @@ const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
 const adoptedStyleFallbacks = new Map<Document | ShadowRoot, AdoptedStyleSheetFallback>();
 const adoptedStyleNodeIds = new WeakMap<Document | ShadowRoot, number>();
 const adoptedStyleChangeTokens = new WeakMap<Document | ShadowRoot, symbol>();
-let filter: FilterConfig | null = null;
+let theme: Theme | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
 let ignoredImageAnalysisSelectors: string[] = [];
@@ -65,18 +65,6 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
     return element;
 }
 
-/**
- * Note: This function is used only with MV3.
- * The string passed as the src parameter must be included in the web_accessible_resources manifest key.
- */
-function injectProxyScriptMV3(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {
-    logInfo('MV3 proxy injector: regular path attempts to inject...');
-    const element = document.createElement('script');
-    element.src = chrome.runtime.getURL('inject/proxy.js');
-    element.dataset.arg = JSON.stringify({enableStyleSheetsProxy, enableCustomElementRegistryProxy});
-    document.head.prepend(element);
-}
-
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
 function setupNodePositionWatcher(node: Node, alias: string) {
@@ -91,18 +79,18 @@ function stopStylePositionWatchers() {
 
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
-    fallbackStyle.textContent = getModifiedFallbackStyle(filter!, {strict: true});
+    fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: true});
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
     setupNodePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter!, isIFrame!, filter!.styleSystemControls);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(theme!, isIFrame!, theme!.styleSystemControls);
     document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupNodePositionWatcher(userAgentStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
-    if (filter!.useFont || filter!.textStroke > 0) {
-        textStyle.textContent = createTextStyle(filter!);
+    if (theme!.useFont || theme!.textStroke > 0) {
+        textStyle.textContent = createTextStyle(theme!);
     } else {
         textStyle.textContent = '';
     }
@@ -114,8 +102,8 @@ function createStaticStyleOverrides() {
         invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
             `    filter: ${getCSSFilterValue({
-                ...filter!,
-                contrast: filter!.mode === 0 ? filter!.contrast : clamp(filter!.contrast - 10, 0, 100),
+                ...theme!,
+                contrast: theme!.mode === 0 ? theme!.contrast : clamp(theme!.contrast - 10, 0, 100),
             })} !important;`,
             '}',
         ].join('\n');
@@ -136,12 +124,12 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(overrideStyle, 'override');
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
-    const selectionColors = getSelectionColor(filter!);
-    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode} = filter!;
+    const selectionColors = getSelectionColor(theme!);
+    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode} = theme!;
     let schemeBackgroundColor = mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor;
     let schemeTextColor = mode === 0 ? lightSchemeTextColor : darkSchemeTextColor;
-    schemeBackgroundColor = modifyBackgroundColor(parseColorWithCache(schemeBackgroundColor)!, filter!);
-    schemeTextColor = modifyForegroundColor(parseColorWithCache(schemeTextColor)!, filter!);
+    schemeBackgroundColor = modifyBackgroundColor(parseColorWithCache(schemeBackgroundColor)!, theme!);
+    schemeTextColor = modifyForegroundColor(parseColorWithCache(schemeTextColor)!, theme!);
     variableStyle.textContent = [
         `:root {`,
         `   --darkreader-neutral-background: ${schemeBackgroundColor};`,
@@ -158,8 +146,8 @@ function createStaticStyleOverrides() {
 
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
     const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
+    document.dispatchEvent(new CustomEvent('__darkreader__cleanUp'));
     if (__CHROMIUM_MV3__) {
-        injectProxyScriptMV3(enableStyleSheetsProxy, enableCustomElementRegistryProxy);
         // Notify the dedicated injector of the data.
         document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: {enableStyleSheetsProxy, enableCustomElementRegistryProxy}}));
     } else {
@@ -185,8 +173,8 @@ function createShadowStaticStyleOverridesInner(root: ShadowRoot) {
         invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
             `    filter: ${getCSSFilterValue({
-                ...filter!,
-                contrast: filter!.mode === 0 ? filter!.contrast : clamp(filter!.contrast - 10, 0, 100),
+                ...theme!,
+                contrast: theme!.mode === 0 ? theme!.contrast : clamp(theme!.contrast - 10, 0, 100),
             })} !important;`,
             '}',
         ].join('\n');
@@ -199,7 +187,7 @@ function createShadowStaticStyleOverridesInner(root: ShadowRoot) {
 
 function delayedCreateShadowStaticStyleOverrides(root: ShadowRoot): void {
     const observer = new MutationObserver((mutations, observer) => {
-        // Disconnect observer immediatelly before making any other changes
+        // Disconnect observer immediately before making any other changes
         observer.disconnect();
 
         // Do not make any changes unless Dark Reader's fixes have been removed
@@ -221,9 +209,9 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     // The shadow DOM may not be populated yet and the custom element implementation
     // may assume that unpopulated shadow root is empty and inadvertently remove
     // Dark Reader's overrides
-    const uninit = root.firstChild === null;
+    const delayed = root.firstChild === null;
     createShadowStaticStyleOverridesInner(root);
-    if (uninit) {
+    if (delayed) {
         delayedCreateShadowStaticStyleOverrides(root);
     }
 }
@@ -232,7 +220,7 @@ function replaceCSSTemplates($cssText: string) {
     return $cssText.replace(/\${(.+?)}/g, (_, $color) => {
         const color = parseColorWithCache($color);
         if (color) {
-            return modifyColor(color, filter!);
+            return modifyColor(color, theme!);
         }
         logWarn("Couldn't parse CSSTemplate's color.");
         return $color;
@@ -264,12 +252,12 @@ function createDynamicStyleOverrides() {
     variablesStore.matchVariablesAndDependents();
     variablesStore.setOnRootVariableChange(() => {
         const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-        variablesStore.putRootVars(rootVarsStyle, filter!);
+        variablesStore.putRootVars(rootVarsStyle, theme!);
     });
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-    variablesStore.putRootVars(rootVarsStyle, filter!);
+    variablesStore.putRootVars(rootVarsStyle, theme!);
 
-    styleManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors!));
+    styleManagers.forEach((manager) => manager.render(theme!, ignoredImageAnalysisSelectors!));
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
     }
@@ -283,7 +271,7 @@ function createDynamicStyleOverrides() {
             push(inlineStyleElements, elements);
         }
     });
-    inlineStyleElements.forEach((el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
+    inlineStyleElements.forEach((el: HTMLElement) => overrideInlineStyle(el, theme!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
     handleAdoptedStyleSheets(document);
     variablesStore.matchVariablesAndDependents();
 
@@ -330,7 +318,7 @@ function createManager(element: StyleElement) {
 
             const fallbackStyle = document.querySelector('.darkreader--fallback')!;
             if (!fallbackStyle.textContent) {
-                fallbackStyle.textContent = getModifiedFallbackStyle(filter!, {strict: false});
+                fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: false});
             }
         }
     }
@@ -351,7 +339,7 @@ function createManager(element: StyleElement) {
         }
         variablesStore.addRulesForMatching(details.rules);
         variablesStore.matchVariablesAndDependents();
-        manager.render(filter!, ignoredImageAnalysisSelectors);
+        manager.render(theme!, ignoredImageAnalysisSelectors);
         if (__TEST__) {
             document.dispatchEvent(new CustomEvent('__darkreader__test__dynamicUpdateComplete'));
         }
@@ -372,8 +360,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors));
+    styleManagers.forEach((manager) => manager.render(theme!, ignoredImageAnalysisSelectors));
+    adoptedStyleManagers.forEach((manager) => manager.render(theme!, ignoredImageAnalysisSelectors));
     callback && callback();
 });
 
@@ -397,73 +385,36 @@ function runDynamicStyle() {
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
 
-    if (!documentIsVisible() && !filter!.immediateModify) {
+    if (!documentIsVisible() && !theme!.immediateModify) {
         setDocumentVisibilityListener(runDynamicStyle);
     } else {
         runDynamicStyle();
     }
 
-    changeMetaThemeColorWhenAvailable(filter!);
+    changeMetaThemeColorWhenAvailable(theme!);
 }
 
-let pendingAdoptedVarMatch = false;
-
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    const theme = filter!;
-
     if (isFirefox) {
         const fallback = getAdoptedStyleSheetFallback(node);
-        fallback.render(theme, ignoredImageAnalysisSelectors);
+        fallback.render(theme!, ignoredImageAnalysisSelectors);
         return;
     }
 
-    if (hasAdoptedStyleSheets(node)) {
+    if (canHaveAdoptedStyleSheets(node)) {
         node.adoptedStyleSheets.forEach((s) => {
             variablesStore.addRulesForMatching(s.cssRules);
         });
         const newManger = createAdoptedStyleSheetOverride(node);
         adoptedStyleManagers.push(newManger);
-        newManger.render(theme, ignoredImageAnalysisSelectors);
+        newManger.render(theme!, ignoredImageAnalysisSelectors);
         newManger.watch((sheets) => {
             sheets.forEach((s) => {
                 variablesStore.addRulesForMatching(s.cssRules);
             });
-            newManger.render(theme, ignoredImageAnalysisSelectors);
-            pendingAdoptedVarMatch = true;
-        });
-        potentialAdoptedStyleNodes.delete(node);
-    } else if (!potentialAdoptedStyleNodes.has(node)) {
-        potentialAdoptedStyleNodes.add(node);
-    }
-}
-
-const potentialAdoptedStyleNodes = new Set<ShadowRoot | Document>();
-let potentialAdoptedStyleFrameId: number | null = null;
-
-function watchPotentialAdoptedStyleNodes() {
-    potentialAdoptedStyleFrameId = requestAnimationFrame(() => {
-        let changed = false;
-        potentialAdoptedStyleNodes.forEach((node) => {
-            if (node.isConnected) {
-                handleAdoptedStyleSheets(node);
-                changed = true;
-            } else {
-                potentialAdoptedStyleNodes.delete(node);
-            }
-        });
-        if (changed || pendingAdoptedVarMatch) {
             variablesStore.matchVariablesAndDependents();
-            pendingAdoptedVarMatch = false;
-        }
-        watchPotentialAdoptedStyleNodes();
-    });
-}
-
-function stopWatchingPotentialAdoptedStyleNodes() {
-    potentialAdoptedStyleFrameId && cancelAnimationFrame(potentialAdoptedStyleFrameId);
-    potentialAdoptedStyleNodes.clear();
-    if (isFirefox) {
-        document.dispatchEvent(new CustomEvent('__darkreader__stopAdoptedStyleSheetsWatcher'));
+            newManger.render(theme!, ignoredImageAnalysisSelectors);
+        });
     }
 }
 
@@ -482,8 +433,11 @@ function getAdoptedStyleSheetFallback(node: Document | ShadowRoot) {
         fallback = createAdoptedStyleSheetFallback(() => {
             const token = getAdoptedStyleChangeToken(node);
             requestAnimationFrameOnce(token, () => {
-                const id = adoptedStyleNodeIds.get(node)!;
+                const id = adoptedStyleNodeIds.get(node);
                 const commands = fallback?.commands();
+                if (!id || !commands) {
+                    return;
+                }
                 const data = {id, commands};
                 document.dispatchEvent(new CustomEvent('__darkreader__adoptedStyleSheetCommands', {detail: JSON.stringify(data)}));
             });
@@ -512,7 +466,7 @@ function watchForUpdates() {
                 variablesStore.addRulesForMatching(detail!.rules);
             });
         variablesStore.matchVariablesAndDependents();
-        newManagers.forEach((manager) => manager.render(filter!, ignoredImageAnalysisSelectors));
+        newManagers.forEach((manager) => manager.render(theme!, ignoredImageAnalysisSelectors));
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style)!.restore());
     }, (shadowRoot) => {
@@ -520,23 +474,21 @@ function watchForUpdates() {
         handleAdoptedStyleSheets(shadowRoot);
     });
 
-    watchPotentialAdoptedStyleNodes();
-
     watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
+        overrideInlineStyle(element, theme!, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
         if (element === document.documentElement) {
             const styleAttr = element.getAttribute('style') || '';
             if (styleAttr.includes('--')) {
                 variablesStore.matchVariablesAndDependents();
                 const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-                variablesStore.putRootVars(rootVarsStyle, filter!);
+                variablesStore.putRootVars(rootVarsStyle, theme!);
             }
         }
     }, (root) => {
         createShadowStaticStyleOverrides(root);
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
-            forEach(inlineStyleElements, (el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
+            forEach(inlineStyleElements, (el: HTMLElement) => overrideInlineStyle(el, theme!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
         }
     });
 
@@ -588,6 +540,30 @@ function isAnotherDarkReaderInstanceActive() {
     return false;
 }
 
+// Give them a second chance,
+// but never a third
+let interceptorAttempts = 2;
+
+function interceptOldScript({success, failure}: {success: () => void; failure: () => void}) {
+    if (--interceptorAttempts <= 0) {
+        failure();
+        return;
+    }
+
+    const oldMeta = document.head.querySelector('meta[name="darkreader"]') as HTMLMetaElement | null;
+    if (!oldMeta || oldMeta.content === INSTANCE_ID) {
+        return;
+    }
+
+    const lock = document.createElement('meta');
+    lock.name = 'darkreader-lock';
+    document.head.append(lock);
+    queueMicrotask(() => {
+        lock.remove();
+        success();
+    });
+}
+
 function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix | null {
     if (!fixes) {
         return null;
@@ -604,14 +580,14 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
 /**
  * TODO: expose this function to API builds via src/api function enable()
  */
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean): void {
+export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean): void {
     const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
 
     // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
-    // and very few will have multple site-specific fixes
+    // and very few will have multiple site-specific fixes
     // TODO: add a navigation listener here for this case
 
-    createOrUpdateDynamicThemeInternal(filterConfig, dynamicThemeFix, iframe);
+    createOrUpdateDynamicThemeInternal(theme, dynamicThemeFix, iframe);
 }
 
 /**
@@ -619,8 +595,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
  * only for use in src/api/enable() for backwards compatibility,
  * extension should use only createOrUpdateDynamicTheme()
  */
-export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
-    filter = filterConfig;
+export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
+    theme = themeConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
@@ -630,36 +606,48 @@ export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, d
         ignoredInlineSelectors = [];
     }
 
-    if (filter.immediateModify) {
+    if (theme.immediateModify) {
         setIsDOMReady(() => {
             return true;
         });
     }
 
     isIFrame = iframe;
-    if (document.head) {
-        if (isAnotherDarkReaderInstanceActive()) {
+
+    const ready = () => {
+        const success = () => {
+            document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
+            document.documentElement.setAttribute('data-darkreader-scheme', theme!.mode ? 'dark' : 'dimmed');
+            createThemeAndWatchForUpdates();
+        };
+
+        const failure = () => {
             removeDynamicTheme();
-            return;
+        };
+
+        if (isAnotherDarkReaderInstanceActive()) {
+            interceptOldScript({
+                success,
+                failure,
+            });
+        } else {
+            success();
         }
-        document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
-        document.documentElement.setAttribute('data-darkreader-scheme', filter.mode ? 'dark' : 'dimmed');
-        createThemeAndWatchForUpdates();
+    };
+
+    if (document.head) {
+        ready();
     } else {
         if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
-            fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
+            fallbackStyle.textContent = getModifiedFallbackStyle(theme, {strict: true});
         }
 
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                if (isAnotherDarkReaderInstanceActive()) {
-                    removeDynamicTheme();
-                    return;
-                }
-                createThemeAndWatchForUpdates();
+                ready();
             }
         });
         headObserver.observe(document, {childList: true, subtree: true});
@@ -704,7 +692,6 @@ export function removeDynamicTheme(): void {
     adoptedStyleManagers.splice(0);
     adoptedStyleFallbacks.forEach((fallback) => fallback.destroy());
     adoptedStyleFallbacks.clear();
-    stopWatchingPotentialAdoptedStyleNodes();
 
     metaObserver && metaObserver.disconnect();
 

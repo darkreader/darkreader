@@ -329,6 +329,9 @@ export default class TabManager {
                     func: () => window.location.href,
                 }))[0].result || 'about:blank';
             } catch (e) {
+                if (String(e).includes('chrome://')) {
+                    return 'chrome://protected';
+                }
                 return 'about:blank';
             }
         }

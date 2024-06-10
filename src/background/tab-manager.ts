@@ -318,9 +318,6 @@ export default class TabManager {
                 return 'about:blank';
             }
             try {
-                if (TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0]) {
-                    return TabManager.tabs[tab.id!][0].url || 'about:blank';
-                }
                 return (await chrome.scripting.executeScript({
                     target: {
                         tabId: tab.id!,

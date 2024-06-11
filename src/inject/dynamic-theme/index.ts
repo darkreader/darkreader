@@ -564,6 +564,29 @@ function interceptOldScript({success, failure}: {success: () => void; failure: (
     });
 }
 
+function disableConflictingPlugins() {
+    if (document.documentElement.hasAttribute('data-wp-dark-mode-preset')) {
+        const disableWPDarkMode = () => {
+            document.dispatchEvent(new CustomEvent('__darkreader__disableConflictingPlugins'));
+            document.documentElement.classList.remove('wp-dark-mode-active');
+            document.documentElement.removeAttribute('data-wp-dark-mode-active');
+        };
+        disableWPDarkMode();
+        const observer = new MutationObserver(() => {
+            if (
+                document.documentElement.classList.contains('wp-dark-mode-active') ||
+                document.documentElement.hasAttribute('data-wp-dark-mode-active')
+            ) {
+                disableWPDarkMode();
+            }
+        });
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class', 'data-wp-dark-mode-active'],
+        });
+    }
+}
+
 function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix | null {
     if (!fixes) {
         return null;
@@ -616,6 +639,7 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
 
     const ready = () => {
         const success = () => {
+            disableConflictingPlugins();
             document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
             document.documentElement.setAttribute('data-darkreader-scheme', theme!.mode ? 'dark' : 'dimmed');
             createThemeAndWatchForUpdates();

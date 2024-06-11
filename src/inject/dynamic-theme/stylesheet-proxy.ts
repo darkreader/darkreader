@@ -18,7 +18,17 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         cleaners.push(() => document.removeEventListener(type, listener));
     }
 
+    function disableConflictingPlugins() {
+        const disableWPDarkMode = () => {
+            if ((window as any)?.WPDarkMode?.deactivate) {
+                (window as any).WPDarkMode.deactivate();
+            }
+        };
+        disableWPDarkMode();
+    }
+
     documentEventListener('__darkreader__cleanUp', cleanUp);
+    documentEventListener('__darkreader__disableConflictingPlugins', disableConflictingPlugins);
 
     function overrideProperty<T, P extends keyof T>(cls: {prototype: T}, prop: P, overrides: Record<string, OverrideFactory<T, P>>) {
         const proto = cls.prototype;

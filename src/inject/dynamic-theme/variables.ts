@@ -295,7 +295,7 @@ export class VariablesStore {
                 if (unknownVars.size > 0) {
                     // web.dev and voice.google.com issue where the variable is never defined, but the fallback is.
                     // TODO: Return a fallback value along with a way to subscribe for a change.
-                    const isFallbackResolved = modified.match(/^var\(.*?, (var\(--darkreader-bg--.*\))|(#[0-9A-Fa-f]+)|(rgba?\(.+\))|(hsla?\(.+\))\)$/);
+                    const isFallbackResolved = modified.match(/^var\(.*?, (var\(--darkreader-bg--.*\))|(#[0-9A-Fa-f]+)|([a-z]+)|(rgba?\(.+\))|(hsla?\(.+\))\)$/);
                     if (isFallbackResolved) {
                         return modified;
                     }

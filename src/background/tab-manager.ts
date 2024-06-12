@@ -318,9 +318,6 @@ export default class TabManager {
                 return 'about:blank';
             }
             try {
-                if (TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0]) {
-                    return TabManager.tabs[tab.id!][0].url || 'about:blank';
-                }
                 return (await chrome.scripting.executeScript({
                     target: {
                         tabId: tab.id!,
@@ -329,6 +326,14 @@ export default class TabManager {
                     func: () => window.location.href,
                 }))[0].result || 'about:blank';
             } catch (e) {
+                const errMessage = String(e);
+                if (
+                    errMessage.includes('chrome://') ||
+                    errMessage.includes('chrome-extension://') ||
+                    errMessage.includes('gallery')
+                ) {
+                    return 'chrome://protected';
+                }
                 return 'about:blank';
             }
         }

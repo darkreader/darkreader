@@ -318,23 +318,29 @@ export default class TabManager {
                 return 'about:blank';
             }
             try {
-                return (await chrome.scripting.executeScript({
-                    target: {
-                        tabId: tab.id!,
-                        frameIds: [0],
-                    },
-                    func: () => window.location.href,
-                }))[0].result || 'about:blank';
+                return (await chrome.tabs.get(tab.id!)).url || 'about:blank';
             } catch (e) {
-                const errMessage = String(e);
-                if (
-                    errMessage.includes('chrome://') ||
-                    errMessage.includes('chrome-extension://') ||
-                    errMessage.includes('gallery')
-                ) {
-                    return 'chrome://protected';
+                try {
+                    return (await chrome.scripting.executeScript({
+                        target: {
+                            tabId: tab.id!,
+                            frameIds: [0],
+                        },
+                        world: 'MAIN',
+                        injectImmediately: true,
+                        func: () => window.location.href,
+                    }))[0].result || 'about:blank';
+                } catch (e) {
+                    const errMessage = String(e);
+                    if (
+                        errMessage.includes('chrome://') ||
+                        errMessage.includes('chrome-extension://') ||
+                        errMessage.includes('gallery')
+                    ) {
+                        return 'chrome://protected';
+                    }
+                    return 'about:blank';
                 }
-                return 'about:blank';
             }
         }
         // It can happen in cases whereby the tab.url is empty.

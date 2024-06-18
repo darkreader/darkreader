@@ -523,11 +523,11 @@ function createDarkReaderInstanceMarker() {
     document.head.appendChild(metaElement);
 }
 
-function isAnotherDarkReaderInstanceActive() {
-    if (document.querySelector('meta[name="darkreader-lock"]')) {
-        return true;
-    }
+function isDRLocked() {
+    return document.querySelector('meta[name="darkreader-lock"]') != null;
+}
 
+function isAnotherDarkReaderInstanceActive() {
     const meta: HTMLMetaElement | null = document.querySelector('meta[name="darkreader"]');
     if (meta) {
         if (meta.content !== INSTANCE_ID) {
@@ -649,7 +649,9 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
             removeDynamicTheme();
         };
 
-        if (isAnotherDarkReaderInstanceActive()) {
+        if (isDRLocked()) {
+            removeNode(document.querySelector('.darkreader--fallback'));
+        } else if (isAnotherDarkReaderInstanceActive()) {
             interceptOldScript({
                 success,
                 failure,

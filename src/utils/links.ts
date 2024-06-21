@@ -21,6 +21,7 @@ const helpLocales = [
     'es',
     'fr',
     'it',
+    'ja',
     'nl',
     'pt',
     'ru',

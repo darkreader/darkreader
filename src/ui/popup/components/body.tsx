@@ -11,7 +11,7 @@ import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {getDuration} from '../../../utils/time';
-import {DONATE_URL, GITHUB_URL, MOBILE_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
+import {DONATE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose, openExtensionPage} from '../../utils';
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';

@@ -101,7 +101,7 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                 </p>
                 <div class="header__more-settings__donate">
                     <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
+                        <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
                     </a>
                     <p class="header__more-settings__description">
                         {getLocalMessage('support_out_work')}

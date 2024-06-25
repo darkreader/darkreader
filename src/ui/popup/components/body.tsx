@@ -105,6 +105,20 @@ function Body(props: BodyProps & {fonts: string[]}) {
         }
     }
 
+    const filterTab = <FilterSettings data={props.data} actions={props.actions}>
+        <div class="birthday-container">
+            <i class="birthday-icon">🎉</i>
+            <span class="birthday-message">
+                {getLocalMessage('we_celebrate_10_years')}
+            </span>
+            <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
+            </a>
+        </div>
+    </FilterSettings>;
+
+    const moreTab = <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />;
+
     return (
         <body class={{'ext-disabled': !props.data.isEnabled}}>
             <Loader complete />
@@ -120,22 +134,14 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={__THUNDERBIRD__ ? {
-                    'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} />
-                    ),
-                    'More': (
-                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />
-                    ),
+                    'Filter': filterTab,
+                    'More': moreTab,
                 } : {
-                    'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} />
-                    ),
+                    'Filter': filterTab,
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
-                    'More': (
-                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />
-                    ),
+                    'More': moreTab,
                 }}
                 tabLabels={{
                     'Filter': getLocalMessage('filter'),
@@ -153,16 +159,8 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 </a>
             </div>
             <footer>
-                <div class="footer-links">
-                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>
-                    <a class="footer-links__link" href={TWITTER_URL} target="_blank" rel="noopener noreferrer">Twitter</a>
-                    <a class="footer-links__link" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
-                    <a class="footer-links__link footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
-                </div>
                 <div class="footer-buttons">
-                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
-                    </a>
+                    <a class="footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
                     <Button onclick={openDevTools} class="dev-tools-button">
                         🛠 {getLocalMessage('open_dev_tools')}

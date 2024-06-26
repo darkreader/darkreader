@@ -11,7 +11,7 @@ import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {getDuration} from '../../../utils/time';
-import {DONATE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
+import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose, openExtensionPage} from '../../utils';
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
@@ -105,11 +105,31 @@ function Body(props: BodyProps & {fonts: string[]}) {
         }
     }
 
+    const birthdayMessage = getLocalMessage('we_celebrate_10_years');
+    let birthdayMessageSpec = <span>{birthdayMessage}</span>;
+    try {
+        const index10 = birthdayMessage.indexOf('10');
+        const indexDot = birthdayMessage.indexOf('.', index10);
+        if (index10 >= 0 && indexDot > index10) {
+            birthdayMessageSpec = (
+                <span>
+                    {birthdayMessage.substring(0, index10)}
+                    <a href={`${HOMEPAGE_URL}/timeline/`} target="_blank" rel="noopener noreferrer">
+                        {birthdayMessage.substring(index10, indexDot)}
+                    </a>
+                    {birthdayMessage.substring(indexDot)}
+                </span>
+            );
+        }
+    } catch (err) {
+        console.error(err);
+    }
+
     const filterTab = <FilterSettings data={props.data} actions={props.actions}>
         <div class="birthday-container">
             <i class="birthday-icon">🎉</i>
             <span class="birthday-message">
-                {getLocalMessage('we_celebrate_10_years')}
+                {birthdayMessageSpec}
             </span>
             <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
                 <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>

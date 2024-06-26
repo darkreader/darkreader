@@ -207,7 +207,7 @@ footer {
     grid:
         "icon message" auto
         "button button" @size-control-inner + 2 * @size-border
-        / auto auto;
+        e('/') 2rem auto;
     width: @popup-content-width;
 
     .birthday-icon {
@@ -234,6 +234,11 @@ footer {
         height: 3rem;
         line-height: 1rem;
         justify-content: center;
+        text-align: left;
+
+        a {
+            color: @color-control-fore;
+        }
     }
 
     .donate-link {

@@ -2,12 +2,18 @@ import {m} from 'malevic';
 import CustomSettingsToggle from '../custom-settings-toggle';
 import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
-import {Toggle} from '../../../controls';
+import {Button, Toggle} from '../../../controls';
 import {isURLInList} from '../../../../utils/url';
 import {compileMarkdown} from '../../utils/markdown';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {ExtWrapper, Theme} from '../../../../definitions';
 import {isFirefox} from '../../../../utils/platform';
+import {openExtensionPage} from '../../../utils';
+import {SettingsIcon} from '../../../icons';
+
+async function openSettings() {
+    await openExtensionPage('options');
+}
 
 export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts: string[]}) {
     const tab = data.activeTab;
@@ -63,6 +69,18 @@ export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts
                     </p>
                 </div>
             ) : null}
+            <div class="more-settings__section">
+                <Button onclick={openSettings} class="more-settings__settings-button">
+                    <span class="more-settings__settings-button__wrapper">
+                        <span class="more-settings__settings-button__icon">
+                            <SettingsIcon />
+                        </span>
+                        <span class="more-settings__settings-button__text">
+                            {getLocalMessage('all_settings')}
+                        </span>
+                    </span>
+                </Button>
+            </div>
         </section>
     );
 }

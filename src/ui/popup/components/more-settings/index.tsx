@@ -4,7 +4,6 @@ import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
 import {Button, Toggle} from '../../../controls';
 import {isURLInList} from '../../../../utils/url';
-import {compileMarkdown} from '../../utils/markdown';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {ExtWrapper, Theme} from '../../../../definitions';
 import {isFirefox} from '../../../../utils/platform';
@@ -35,9 +34,6 @@ export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts
                 <FontSettings config={theme} fonts={fonts} onChange={setConfig} />
             </div>
             <div class="more-settings__section">
-                {isFirefox ? null : <p class="more-settings__description">
-                    {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
-                </p>}
                 <EngineSwitch engine={theme.engine} onChange={(engine) => setConfig({engine})} />
             </div>
             <div class="more-settings__section">

@@ -6,7 +6,6 @@
     width: 100%;
 
     &__description {
-        display: none;
         font-size: @size-text-small;
         line-height: @size-text-small-height;
         margin: 0 0 @size-border 0;
@@ -40,6 +39,7 @@
             align-items: center;
             display: inline-flex;
             flex-direction: row;
+            flex-wrap: nowrap;
             gap: 0.25rem;
             justify-content: center;
         }
@@ -52,6 +52,7 @@
 
         &__text {
             display: inline-block;
+            white-space: nowrap;
         }
     }
 }

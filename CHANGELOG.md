@@ -1,3 +1,13 @@
+# 4.9.87 (June 27, 2024)
+
+- Added link to Settings page.
+- Fixed CSS editor layout.
+- Fixed delay when opening settings.
+- Fixed warnings for protected pages.
+- Fixed conflicts with Dark Reader based scripts.
+- Improved fallback color support in CSS variables.
+- Japanese Help page translation.
+
 # 4.9.86 (May 30, 2024)
 
 - CSS variables performance optimizations.

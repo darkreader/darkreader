@@ -22,6 +22,7 @@ export function canInjectScript(url: string | null | undefined): boolean {
             && !url.startsWith('devtools')
             && !url.startsWith('edge')
             && !url.startsWith('https://chrome.google.com/webstore')
+            && !url.startsWith('https://chromewebstore.google.com/')
             && !url.startsWith('https://microsoftedge.microsoft.com/addons')
             && !url.startsWith('view-source')
         );
@@ -29,6 +30,7 @@ export function canInjectScript(url: string | null | undefined): boolean {
     return Boolean(url
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
+        && !url.startsWith('https://chromewebstore.google.com/')
         && !url.startsWith('data')
         && !url.startsWith('devtools')
         && !url.startsWith('view-source')

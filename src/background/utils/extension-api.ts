@@ -3,6 +3,9 @@ import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
 export function canInjectScript(url: string | null | undefined): boolean {
+    if (url === 'about:blank') {
+        return false;
+    }
     if (isFirefox) {
         return Boolean(url
             && !url.startsWith('about:')

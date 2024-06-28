@@ -165,6 +165,26 @@ To reset them, click on the reset (or delete icon, if present) icon at the most-
 - `extensions.quarantinedDomains.enabled`
 - `extensions.quarantinedDomains.list`
 
+### Clarification about quarantined domains ("Run on sites with restrictions" option)
+<details><summary>Quarantined domains and Dark Reader — an explanation</summary>
+
+The option "Run on sites with restrictions", present in some extensions, is only related to quarantined domains, and is not needed for Dark Reader to work on restricted websites.
+
+More information about quarantined domains: [Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)
+
+For Dark Reader, the option is not shown because Dark Reader is a [Recommended](https://support.mozilla.org/en-US/kb/recommended-extensions-program) extension by Mozilla.
+
+Due to it being a Recommended extension, it means it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to security, and because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains**.
+
+[From Firefox's source code](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938):
+
+```
+// Privileged extensions and any extensions with a recommendation state are
+// exempt from the quarantined domains.
+```
+
+</details>
+
 <h2 align="center">Contributors</h2>
 <br/>
 <h3 align="center"><strong>Thank you to all our contributors! Dark Reader exists thanks to you.</strong></h3>

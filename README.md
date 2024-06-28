@@ -176,7 +176,7 @@ For Dark Reader, the option is not shown because Dark Reader is a [Recommended](
 
 Due to it being a Recommended extension, it means it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to security, and because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains**.
 
-[From Firefox's source code](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938):
+[From Firefox's source code:](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938)
 
 ```
 // Privileged extensions and any extensions with a recommendation state are

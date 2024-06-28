@@ -132,19 +132,20 @@ To force a synchronization of the sites fixes (when the corresponding setting is
 - Click on the `Dev tools` button (in the bottom-right corner).
 - Click on the `Reset` button. This will remove any custom site fixes you may have.
 
-## Enable Dark Reader for restricted websites on Firefox
+## Enable Dark Reader for restricted websites on Mozilla Firefox
 
 By default, Dark Reader does not work on some websites due to **security restrictions** enforced by Mozilla.
 
-The following instructions will guide you on how to bypass those restrictions.
+The following instructions will guide you on how to disable those restrictions.
 
 **Proceed with caution. This exposes you to a security risk if you do not know what you are doing.**
+**Be sure that you do not have any suspicious or malicious-looking extension installed before proceeding.**
 
 **These settings will apply to all extensions, and not just Dark Reader.**
 
 Step 1: change Dark Reader's settings.
 
-- Click on the Dark Reader icon.
+- Click on the Dark Reader extension icon.
 - Click on the `Dev tools` button (in the bottom-right corner).
 - Click on the `Preview new design button`.
 - Enable the `Enable on restricted pages` setting under `Settings` -> `Advanced`.
@@ -152,11 +153,37 @@ Step 1: change Dark Reader's settings.
 Step 2: change Firefox's settings.
 
 - Type `about:config` in the address bar and press Enter.
-A warning page may appear. Click `Accept the Risk and Continue` to proceed.
-- Search for and set `extensions.webextensions.restrictedDomains` to an empty value.
-- Create `extensions.webextensions.addons-restricted-domains@mozilla.com.disabled` with `boolean` as type and set its value to `true`.
-- Set `privacy.resistFingerprinting.block_mozAddonManager` to `true`.
-- Restart Firefox.
+  - A warning page may appear. Click `Accept the Risk and Continue` to proceed.
+- Search for and set `extensions.webextensions.restrictedDomains` to an empty value (if the preference does not exist, create with it `String` as the type).
+- Set `privacy.resistFingerprinting.block_mozAddonManager` to `true` (if the preference does not exist, create with it `Boolean` as the type).
+
+After changing the necessary settings for both Dark Reader and Firefox, reload the desired page(s).
+
+**If you had previously changed any of the following preferences, please reset them to their default values as they are only related to security and are not necessary for Dark Reader to work on restricted websites.**
+To reset them, click on the reset (or delete icon, if present) icon at the most-right corner of the preference line in `about:config`.
+- `extensions.webextensions.addons-restricted-domains@mozilla.com.disabled`
+- `extensions.quarantinedDomains.enabled`
+- `extensions.quarantinedDomains.list`
+
+### Clarification about quarantined domains ("Run on sites with restrictions" option)
+<details><summary>Quarantined domains and Dark Reader — an explanation</summary>
+
+The option "Run on sites with restrictions", present in some extensions, is only related to quarantined domains, and is not needed for Dark Reader to work on restricted websites.
+
+More information about quarantined domains: [Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)
+
+For Dark Reader, the option is not shown because Dark Reader is a [Recommended](https://support.mozilla.org/en-US/kb/recommended-extensions-program) extension by Mozilla.
+
+Due to it being a Recommended extension, it means it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to security, and because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains**.
+
+[From Firefox's source code:](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938)
+
+```
+// Privileged extensions and any extensions with a recommendation state are
+// exempt from the quarantined domains.
+```
+
+</details>
 
 <h2 align="center">Contributors</h2>
 <br/>

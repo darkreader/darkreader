@@ -4,6 +4,7 @@ import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readJSON, writeJSON} from './utils.js';
+import {copyFile} from 'node:fs/promises';
 
 async function patchManifest(platform, debug, watch, test) {
     const manifest = await readJSON(absolutePath('src/manifest.json'));
@@ -38,6 +39,7 @@ async function manifests({platforms, debug, watch, test}) {
         const manifest = await patchManifest(platform, debug, watch, test);
         const destDir = getDestDir({debug, platform});
         await writeJSON(`${destDir}/manifest.json`, manifest);
+        await copyFile(absolutePath('src/managed-storage.json'), `${destDir}/managed-storage.json`);
     }
 }
 
@@ -45,7 +47,7 @@ const bundleManifestTask = createTask(
     'bundle-manifest',
     manifests,
 ).addWatcher(
-    ['src/manifest*.json'],
+    ['src/manifest*.json', 'managed-storage.json'],
     async (changedFiles, _, buildPlatforms) => {
         const chrome = changedFiles.some((file) => file.endsWith('manifest.json'));
         const platforms = {};

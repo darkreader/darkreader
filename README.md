@@ -117,22 +117,23 @@ Be aware that Dark Reader will add the `chrome` object onto the `window` object.
 
 ## Site fixes
 
-Automatically syncing the site fixes to every Dark Reader user was disabled because the GitHub team does not allow using GitHub as a CDN. The storage of these files would be expensive, and making requests to other resources would look suspicious. Each new release of Dark Reader will include these changes.
+Automatically syncing the site fixes for every Dark Reader user was disabled because the GitHub team does not allow using GitHub as a content delivery network (CDN). The storage of these files would be expensive, and making requests to other resources would look suspicious. Each new release of Dark Reader will include the new changes.
 
-However, this can be enabled using the following steps:
+However, this can be manually enabled using the following steps:
 
-- Click on the Dark Reader icon.
-- Click on the `Dev tools` button (in the bottom-right corner).
-- Click on the `Preview new design` button.
-- Enable the `Synchronize site fixes` setting under `Settings` -> `Manage settings`.
+1. Click on the Dark Reader extension icon.
+2. Click on the `Dev tools` button (in the bottom-right corner).
+3. Go to `Advanced` and click on the `Preview new design` button.
+4. Close the developer tools window and click on the Dark Reader extension icon again.
+5. Go to `Settings` -> `Advanced` and enable the `Synchronize sites fixes` setting.
 
 To force a synchronization of the sites fixes (when the corresponding setting is enabled), perform the following steps:
 
-- Click on the Dark Reader icon.
-- Click on the `Dev tools` button (in the bottom-right corner).
-- Click on the `Reset` button. This will remove any custom site fixes you may have.
-
-## Enable Dark Reader for restricted websites on Mozilla Firefox
+1. Click on the Dark Reader extension icon.
+2. Go to `Settings` -> `Advanced` -> `Dev tools`.
+3. For each "Editor" section, click on `Reset changes`, confirm with `OK`, and then click on `Apply`. Afterwards, close the developer tools window and reload the desired page(s).
+ 
+## Enable Dark Reader on restricted pages on Mozilla Firefox
 
 By default, Dark Reader does not work on some websites due to **security restrictions** enforced by Mozilla.
 
@@ -146,10 +147,11 @@ The following instructions will guide you on how to disable those restrictions.
 
 Step 1: change Dark Reader's settings.
 
-- Click on the Dark Reader extension icon.
-- Click on the `Dev tools` button (in the bottom-right corner).
-- Click on the `Preview new design button`.
-- Enable the `Enable on restricted pages` setting under `Settings` -> `Advanced`.
+1. Click on the Dark Reader extension icon.
+2. Click on the `Dev tools` button (in the bottom-right corner).
+3. Go to `Advanced` and click on the `Preview new design` button.
+4. Close the developer tools window and click on the Dark Reader extension icon again.
+5. Go to `Settings` -> `Advanced` and enable the `Enable on restricted pages` setting.
 
 Step 2: change Firefox's settings.
 

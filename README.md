@@ -132,7 +132,7 @@ To force a synchronization of the sites fixes (when the corresponding setting is
 1. Click on the Dark Reader extension icon.
 2. Go to `Settings` -> `Advanced` -> `Dev tools`.
 3. For each "Editor" section, click on `Reset changes`, confirm with `OK`, and then click on `Apply`. Afterwards, close the developer tools window and reload the desired page(s).
- 
+
 ## Enable Dark Reader on restricted pages on Mozilla Firefox
 
 By default, Dark Reader does not work on some websites due to **security restrictions** enforced by Mozilla.

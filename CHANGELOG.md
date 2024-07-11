@@ -1,3 +1,7 @@
+# 4.9.88 (July 11, 2024)
+
+- Fixed breaking browser panels.
+
 # 4.9.87 (June 27, 2024)
 
 - Added link to Settings page.

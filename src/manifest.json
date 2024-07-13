@@ -46,9 +46,6 @@
     "optional_permissions": [
         "contextMenus"
     ],
-    "storage": {
-        "managed_schema": "managed-storage.json"
-    },
     "commands": {
         "toggle": {
             "suggested_key": {

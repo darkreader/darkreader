@@ -139,6 +139,7 @@ By default, Dark Reader does not work on some websites due to **security restric
 The following instructions will guide you on how to disable those restrictions.
 
 **Proceed with caution. This exposes you to a security risk if you do not know what you are doing.**
+
 **Be sure that you do not have any suspicious or malicious-looking extension installed before proceeding.**
 
 **These settings will apply to all extensions, and not just Dark Reader.**

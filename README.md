@@ -52,7 +52,7 @@ npm run build -- --firefox --version=4.9.63
 
 Please note that only Firefox Add-ons store signatures are present in the repositiry right now. Also, due to NodeJS and TypeScript version compatibility, one might have to first check out the old revision (commit), then build the extension files, then check out the recent commit and create the bundle (by running only `signature` and `zip` steps).
 
-## Using Dark Reader for a website
+## Using Dark Reader on a website
 
 You can use Dark Reader to enable dark mode on your website!
 
@@ -119,7 +119,7 @@ Be aware that Dark Reader will add the `chrome` object onto the `window` object.
 
 Automatically syncing the site fixes for every Dark Reader user was disabled because the GitHub team does not allow using GitHub as a content delivery network (CDN). The storage of these files would be expensive, and making requests to other resources would look suspicious. Each new release of Dark Reader will include the new changes.
 
-However, this can be manually enabled using the following steps:
+However, this can be manually enabled with the following steps:
 
 1. Click on the Dark Reader extension icon.
 2. Click on the `Dev tools` button (in the bottom-right corner).

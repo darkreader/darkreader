@@ -126,6 +126,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
 
     const bundle = await rollup.rollup({
         input: absolutePath(src),
+        preserveSymlinks: true,
         onwarn: (error) => {
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
             if (error.code === 'EVAL' && !mustRemoveEval) {
@@ -174,6 +175,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
                     __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
                     __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
+                    __PLUS__: platform === PLATFORM.CHROMIUM_MV2_PLUS,
                     __PORT__: watch ? String(PORT) : '-1',
                     __TEST__: test,
                     __WATCH__: watch,
@@ -231,6 +233,7 @@ export function createBundleJSTask(jsEntries) {
         if (connectedBrowsers.includes('chrome')) {
             platforms.chrome = initialPlatforms.chrome;
             platforms['chrome-mv3'] = initialPlatforms['chrome-mv3'];
+            platforms['chrome-plus'] = initialPlatforms['chrome-plus'];
         }
         if (connectedBrowsers.includes('firefox')) {
             platforms.firefox = true;

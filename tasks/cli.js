@@ -128,7 +128,7 @@ async function checkoutHead() {
 function validateArguments(args) {
     const validaionErrors = [];
 
-    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--plus', '--log-info', '--log-warn', '--test'];
     const invalidFlags = args.filter((flag) => !validFlags.includes(flag) && !flag.startsWith('--version='));
     invalidFlags.forEach((flag) => validaionErrors.push(`Invalid flag ${flag}`));
 
@@ -153,9 +153,9 @@ async function run() {
         process.exit(0);
     }
 
-    const validaionErrors = validateArguments(args);
-    if (validaionErrors.length > 0) {
-        validaionErrors.forEach(log.error);
+    const validationErrors = validateArguments(args);
+    if (validationErrors.length > 0) {
+        validationErrors.forEach(log.error);
         printHelp();
         process.exit(130);
     }

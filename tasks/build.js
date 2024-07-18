@@ -109,6 +109,7 @@ function getParams(args) {
     };
     const platforms = {
         [PLATFORM.CHROMIUM_MV2]: false,
+        [PLATFORM.CHROMIUM_MV2_PLUS]: false,
         [PLATFORM.CHROMIUM_MV3]: false,
         [PLATFORM.FIREFOX_MV2]: false,
         [PLATFORM.THUNDERBIRD]: false,
@@ -119,6 +120,9 @@ function getParams(args) {
             platforms[argMap[arg]] = true;
             allPlatforms = false;
         }
+    }
+    if ((args.includes('--chrome') || args.includes('--chrome-mv2')) && args.includes('--plus')) {
+        platforms[PLATFORM.CHROMIUM_MV2_PLUS] = true;
     }
     if (allPlatforms) {
         Object.keys(platforms).forEach((platform) => platforms[platform] = true);

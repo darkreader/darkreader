@@ -122,6 +122,7 @@ function getParams(args) {
         }
     }
     if ((args.includes('--chrome') || args.includes('--chrome-mv2')) && args.includes('--plus')) {
+        platforms[PLATFORM.CHROMIUM_MV2] = false;
         platforms[PLATFORM.CHROMIUM_MV2_PLUS] = true;
     }
     if (allPlatforms) {

@@ -68,36 +68,11 @@ const jsEntries = [
     },
 ];
 
-const rollupPluginCache = {};
-
-function getRollupPluginInstance(name, key, create) {
-    if (!rollupPluginCache[name]) {
-        rollupPluginCache[name] = {};
-    }
-    if (!rollupPluginCache[name][key]) {
-        rollupPluginCache[name][key] = {};
-    }
-    if (!rollupPluginCache[name][key].instance) {
-        rollupPluginCache[name][key].count = 0;
-        rollupPluginCache[name][key].instance = create();
-    }
-    rollupPluginCache[name][key].count++;
-    return rollupPluginCache[name][key].instance;
-}
-
-function freeRollupPluginInstance(name, key) {
-    if (rollupPluginCache[name] && rollupPluginCache[name][key]) {
-        rollupPluginCache[name][key].count--;
-        if (rollupPluginCache[name][key].count === 0) {
-            rollupPluginCache[name][key] = null;
-        }
-    }
-}
+/** @type {Record<string, any>} */
+const rollupCache = {};
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypeScriptInstanceKey = `${platform}-${debug}`;
-    const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     let replace = {};
     switch (platform) {
@@ -124,6 +99,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
     const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
 
+    const cacheId = `${entry.src}-${platform}-${debug}-${watch}-${log}-${test}`;
+
     const bundle = await rollup.rollup({
         input: absolutePath(src),
         preserveSymlinks: true,
@@ -142,58 +119,49 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             // literally one occurrence of eval() in our code even before TypeScript even encounters it.
             // With this plugin, warning appears only on Firefox test builds.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-            getRollupPluginInstance('removeEval', '', () => mustRemoveEval &&
-                rollupPluginReplace({
-                    preventAssignment: true,
-                    'eval(': 'void(',
-                })
-            ),
-            getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typescript', rollupPluginTypeScriptInstanceKey, () =>
-                rollupPluginTypescript({
-                    rootDir: absolutePath('.'),
-                    typescript,
-                    tsconfig: absolutePath('src/tsconfig.json'),
-                    compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
-                        target: 'ES2022',
-                    } : undefined,
-                    noImplicitAny: debug ? false : true,
-                    noUnusedLocals: debug ? false : true,
-                    strictNullChecks: debug ? false : true,
-                    removeComments: debug ? false : true,
-                    sourceMap: debug ? true : false,
-                    inlineSources: debug ? true : false,
-                    noEmitOnError: watch ? false : true,
-                    paths: platform === PLATFORM.CHROMIUM_MV2_PLUS ? {
-                        '@plus/*': ['./plus/*'],
-                    } : {
-                        '@plus/*': ['./stubs/*'],
-                    },
-                })
-            ),
-            getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
-                rollupPluginReplace({
-                    preventAssignment: true,
-                    ...replace,
-                    __DEBUG__: debug,
-                    __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2,
-                    __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
-                    __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
-                    __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
-                    __PLUS__: platform === PLATFORM.CHROMIUM_MV2_PLUS,
-                    __PORT__: watch ? String(PORT) : '-1',
-                    __TEST__: test,
-                    __WATCH__: watch,
-                    __LOG__: log ? `"${log}"` : false,
-                })
-            ),
+            rollupPluginReplace({
+                preventAssignment: true,
+                'eval(': 'void(',
+            }),
+            rollupPluginNodeResolve(),
+            rollupPluginTypescript({
+                rootDir: absolutePath('.'),
+                typescript,
+                tsconfig: absolutePath('src/tsconfig.json'),
+                compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
+                    target: 'ES2022',
+                } : undefined,
+                noImplicitAny: debug ? false : true,
+                noUnusedLocals: debug ? false : true,
+                strictNullChecks: debug ? false : true,
+                removeComments: debug ? false : true,
+                sourceMap: debug ? true : false,
+                inlineSources: debug ? true : false,
+                noEmitOnError: watch ? false : true,
+                paths: platform === PLATFORM.CHROMIUM_MV2_PLUS ? {
+                    '@plus/*': ['./plus/*'],
+                } : {
+                    '@plus/*': ['./stubs/*'],
+                },
+            }),
+            rollupPluginReplace({
+                preventAssignment: true,
+                ...replace,
+                __DEBUG__: debug,
+                __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV2_PLUS,
+                __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
+                __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
+                __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
+                __PLUS__: platform === PLATFORM.CHROMIUM_MV2_PLUS,
+                __PORT__: watch ? String(PORT) : '-1',
+                __TEST__: test,
+                __WATCH__: watch,
+                __LOG__: log ? `"${log}"` : false,
+            }),
         ].filter(Boolean),
+        cache: rollupCache[cacheId],
     });
-    // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-    freeRollupPluginInstance('removeEval', '');
-    freeRollupPluginInstance('nodeResolve', '');
-    freeRollupPluginInstance('typescript', rollupPluginTypeScriptInstanceKey);
-    freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);
+    rollupCache[cacheId] = bundle.cache;
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
         file: `${getDestDir({debug, platform})}/${dest}`,
@@ -219,10 +187,10 @@ export function createBundleJSTask(jsEntries) {
         return Array.from(watchFiles);
     };
 
-    /** @type {(options: Partial<TaskOptions> & {platforms: TaskOptions['platforms']}) => Promise<void>} */
-    const bundleEachPlatform = async ({platforms, debug, watch, log, test}) => {
+    /** @type {(options: Partial<TaskOptions> & {platforms: TaskOptions['platforms']}, entries?: JSEntry[]) => Promise<void>} */
+    const bundleEachPlatform = async ({platforms, debug, watch, log, test}, entries) => {
         const allPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API);
-        for (const entry of jsEntries) {
+        for (const entry of (entries || jsEntries)) {
             const possiblePlatforms = entry.platform ? [entry.platform] : allPlatforms;
             const targetPlatforms = possiblePlatforms.filter((platform) => platforms[platform]);
             for (const platform of targetPlatforms) {
@@ -252,7 +220,7 @@ export function createBundleJSTask(jsEntries) {
                 return entry.watchFiles?.includes(changed);
             });
         });
-        await bundleEachPlatform({platforms, debug: true, watch: true});
+        await bundleEachPlatform({platforms, debug: true, watch: true}, entries);
 
         const newWatchFiles = getRelevantWatchFiles();
         watcher.unwatch(

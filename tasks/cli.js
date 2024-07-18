@@ -51,7 +51,7 @@ function printHelp() {
         '',
         'To specify type of build:',
         '  --release      Release bundle for signing prior to publication',
-        '  --version=*    Released bundle complete with digial signature (Firefox only)',
+        '  --version=*    Released bundle complete with digital signature (Firefox only)',
         '  --debug        Build for development',
         '  --watch        Incremental build for development',
         '',
@@ -126,18 +126,18 @@ async function checkoutHead() {
 }
 
 function validateArguments(args) {
-    const validaionErrors = [];
+    const validationErrors = [];
 
     const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--plus', '--log-info', '--log-warn', '--test'];
     const invalidFlags = args.filter((flag) => !validFlags.includes(flag) && !flag.startsWith('--version='));
-    invalidFlags.forEach((flag) => validaionErrors.push(`Invalid flag ${flag}`));
+    invalidFlags.forEach((flag) => validationErrors.push(`Invalid flag ${flag}`));
 
     if (args.some((arg) => arg.startsWith('--version='))) {
         if (!args.includes('--firefox') || !args.includes('--release') || args.length !== 3) {
-            validaionErrors.push('Only Firefox build currently supports signed builds');
+            validationErrors.push('Only Firefox build currently supports signed builds');
         }
     }
-    return validaionErrors;
+    return validationErrors;
 }
 
 function parseArguments(args) {

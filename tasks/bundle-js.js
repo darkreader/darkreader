@@ -96,7 +96,7 @@ function freeRollupPluginInstance(name, key) {
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
+    const rollupPluginTypeScriptInstanceKey = `${platform}-${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     let replace = {};
@@ -139,7 +139,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
             // so we have to manually polyfill it via regular eval().
             // This plugin is necessary to avoid (benign) warnings in the console during builds, it just replaces
-            // literally one occurrence of eval() in our code even before TypeSctipt even encounters it.
+            // literally one occurrence of eval() in our code even before TypeScript even encounters it.
             // With this plugin, warning appears only on Firefox test builds.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
             getRollupPluginInstance('removeEval', '', () => mustRemoveEval &&
@@ -149,7 +149,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                 })
             ),
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
+            getRollupPluginInstance('typescript', rollupPluginTypeScriptInstanceKey, () =>
                 rollupPluginTypescript({
                     rootDir: absolutePath('.'),
                     typescript,
@@ -164,6 +164,11 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
+                    paths: platform === PLATFORM.CHROMIUM_MV2_PLUS ? {
+                        '@plus/*': ['./plus/*'],
+                    } : {
+                        '@plus/*': ['./stubs/*'],
+                    },
                 })
             ),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
@@ -187,7 +192,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
     freeRollupPluginInstance('removeEval', '');
     freeRollupPluginInstance('nodeResolve', '');
-    freeRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey);
+    freeRollupPluginInstance('typescript', rollupPluginTypeScriptInstanceKey);
     freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({

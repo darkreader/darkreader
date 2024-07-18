@@ -14,7 +14,7 @@ import {getDuration} from '../../../utils/time';
 import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose, openExtensionPage} from '../../utils';
-import {PlusBody} from '../../../plus/popup/plus-body';
+import {PlusBody} from '@plus/popup/plus-body'; // eslint-disable-line
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
 import {isMobile} from '../../../utils/platform';
 

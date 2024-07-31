@@ -50,7 +50,7 @@ Dark Reader repository contains these digital signatures and you can add them to
 npm run build -- --firefox --version=4.9.63
 ```
 
-Please note that only Firefox Add-ons store signatures are present in the repositiry right now. Also, due to NodeJS and TypeScript version compatibility, one might have to first check out the old revision (commit), then build the extension files, then check out the recent commit and create the bundle (by running only `signature` and `zip` steps).
+Please note that only Firefox Add-ons store signatures are present in the repository right now. Also, due to NodeJS and TypeScript version compatibility, one might have to first check out the old revision (commit), then build the extension files, then check out the recent commit and create the bundle (by running only `signature` and `zip` steps).
 
 ## Using Dark Reader on a website
 

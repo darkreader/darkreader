@@ -6,7 +6,8 @@ import type {ExtWrapper} from '../../../../definitions';
 
 declare const __THUNDERBIRD__: boolean;
 
-export default function SiteToggleButton({data, actions}: ExtWrapper) {
+export function getSiteToggleData(props: ExtWrapper) {
+    const {data, actions} = props;
     const tab = data.activeTab;
 
     function onSiteToggleClick() {
@@ -26,12 +27,18 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
     const isSiteEnabled: boolean = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && Boolean(tab.isInjected);
     const host = getURLHostOrProtocol(tab.url);
 
-    const urlText = host
+    const urlText = pdf ? 'PDF' : host
         .split('.')
         .reduce<string[]>((elements, part, i) => elements.concat(
-            <wbr />,
+            i > 0 ? <wbr /> : null,
             `${i > 0 ? '.' : ''}${part}`
         ), []);
+
+    return {urlText, onSiteToggleClick, toggleHasEffect, isSiteEnabled};
+}
+
+export default function SiteToggleButton(props: ExtWrapper) {
+    const {urlText, onSiteToggleClick, toggleHasEffect, isSiteEnabled} = getSiteToggleData(props);
 
     return (
         <Button
@@ -44,7 +51,7 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
         >
             <span class="site-toggle__mark"><CheckmarkIcon isChecked={isSiteEnabled} /></span>
             {' '}
-            <span class="site-toggle__url" >{pdf ? 'PDF' : urlText}</span>
+            <span class="site-toggle__url" >{urlText}</span>
         </Button>
     );
 }

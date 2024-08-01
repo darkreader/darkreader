@@ -1,9 +1,9 @@
 import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
+import {ContextMenus} from './context-menus';
 import {DevTools} from './devtools';
 import {EnableForProtectedPages} from './enable-for-protected-pages';
 import {ExportSettings} from './export-settings';
-import {FetchNews} from './fetch-news';
 import {ImportSettings} from './import-settings';
 import {ResetSettings} from './reset-settings';
 import {SyncConfig} from './sync-config';
@@ -14,7 +14,7 @@ export function AdvancedTab(props: ViewProps): Malevic.Child {
         <SyncSettings {...props} />
         <SyncConfig {...props} />
         <EnableForProtectedPages {...props} />
-        <FetchNews {...props} />
+        <ContextMenus {...props} />
         <ImportSettings {...props} />
         <ExportSettings {...props} />
         <ResetSettings {...props} />

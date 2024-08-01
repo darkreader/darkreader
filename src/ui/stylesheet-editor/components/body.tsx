@@ -69,9 +69,9 @@ export default function Body({data, actions}: ExtWrapper) {
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
                 <h1 id="title">CSS Editor</h1>
             </header>
-            <h3 id="sub-title">{custom ? host : 'All websites'}</h3>
+            <h3 class="sub-title">{custom ? host : 'All websites'}</h3>
             <textarea
-                id="editor"
+                class="editor"
                 native
                 placeholder={placeholderText}
                 onrender={onTextRender}
@@ -80,7 +80,7 @@ export default function Body({data, actions}: ExtWrapper) {
                 autocomplete="off"
                 autocapitalize="off"
             />
-            <div id="buttons">
+            <div class="buttons">
                 <Button onclick={showDialog}>
                     Reset changes
                     {dialog}

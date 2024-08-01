@@ -65,18 +65,6 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
     return element;
 }
 
-/**
- * Note: This function is used only with MV3.
- * The string passed as the src parameter must be included in the web_accessible_resources manifest key.
- */
-function injectProxyScriptMV3(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {
-    logInfo('MV3 proxy injector: regular path attempts to inject...');
-    const element = document.createElement('script');
-    element.src = chrome.runtime.getURL('inject/proxy.js');
-    element.dataset.arg = JSON.stringify({enableStyleSheetsProxy, enableCustomElementRegistryProxy});
-    document.head.prepend(element);
-}
-
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
 function setupNodePositionWatcher(node: Node, alias: string) {
@@ -160,7 +148,6 @@ function createStaticStyleOverrides() {
     const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
     document.dispatchEvent(new CustomEvent('__darkreader__cleanUp'));
     if (__CHROMIUM_MV3__) {
-        injectProxyScriptMV3(enableStyleSheetsProxy, enableCustomElementRegistryProxy);
         // Notify the dedicated injector of the data.
         document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: {enableStyleSheetsProxy, enableCustomElementRegistryProxy}}));
     } else {
@@ -536,11 +523,11 @@ function createDarkReaderInstanceMarker() {
     document.head.appendChild(metaElement);
 }
 
-function isAnotherDarkReaderInstanceActive() {
-    if (document.querySelector('meta[name="darkreader-lock"]')) {
-        return true;
-    }
+function isDRLocked() {
+    return document.querySelector('meta[name="darkreader-lock"]') != null;
+}
 
+function isAnotherDarkReaderInstanceActive() {
     const meta: HTMLMetaElement | null = document.querySelector('meta[name="darkreader"]');
     if (meta) {
         if (meta.content !== INSTANCE_ID) {
@@ -551,6 +538,53 @@ function isAnotherDarkReaderInstanceActive() {
     createDarkReaderInstanceMarker();
     addMetaListener();
     return false;
+}
+
+// Give them a second chance,
+// but never a third
+let interceptorAttempts = 2;
+
+function interceptOldScript({success, failure}: {success: () => void; failure: () => void}) {
+    if (--interceptorAttempts <= 0) {
+        failure();
+        return;
+    }
+
+    const oldMeta = document.head.querySelector('meta[name="darkreader"]') as HTMLMetaElement | null;
+    if (!oldMeta || oldMeta.content === INSTANCE_ID) {
+        return;
+    }
+
+    const lock = document.createElement('meta');
+    lock.name = 'darkreader-lock';
+    document.head.append(lock);
+    queueMicrotask(() => {
+        lock.remove();
+        success();
+    });
+}
+
+function disableConflictingPlugins() {
+    if (document.documentElement.hasAttribute('data-wp-dark-mode-preset')) {
+        const disableWPDarkMode = () => {
+            document.dispatchEvent(new CustomEvent('__darkreader__disableConflictingPlugins'));
+            document.documentElement.classList.remove('wp-dark-mode-active');
+            document.documentElement.removeAttribute('data-wp-dark-mode-active');
+        };
+        disableWPDarkMode();
+        const observer = new MutationObserver(() => {
+            if (
+                document.documentElement.classList.contains('wp-dark-mode-active') ||
+                document.documentElement.hasAttribute('data-wp-dark-mode-active')
+            ) {
+                disableWPDarkMode();
+            }
+        });
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class', 'data-wp-dark-mode-active'],
+        });
+    }
 }
 
 function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix | null {
@@ -602,14 +636,33 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
     }
 
     isIFrame = iframe;
-    if (document.head) {
-        if (isAnotherDarkReaderInstanceActive()) {
+
+    const ready = () => {
+        const success = () => {
+            disableConflictingPlugins();
+            document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
+            document.documentElement.setAttribute('data-darkreader-scheme', theme!.mode ? 'dark' : 'dimmed');
+            createThemeAndWatchForUpdates();
+        };
+
+        const failure = () => {
             removeDynamicTheme();
-            return;
+        };
+
+        if (isDRLocked()) {
+            removeNode(document.querySelector('.darkreader--fallback'));
+        } else if (isAnotherDarkReaderInstanceActive()) {
+            interceptOldScript({
+                success,
+                failure,
+            });
+        } else {
+            success();
         }
-        document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
-        document.documentElement.setAttribute('data-darkreader-scheme', theme.mode ? 'dark' : 'dimmed');
-        createThemeAndWatchForUpdates();
+    };
+
+    if (document.head) {
+        ready();
     } else {
         if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
@@ -620,11 +673,7 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                if (isAnotherDarkReaderInstanceActive()) {
-                    removeDynamicTheme();
-                    return;
-                }
-                createThemeAndWatchForUpdates();
+                ready();
             }
         });
         headObserver.observe(document, {childList: true, subtree: true});

@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+import {getLocalMessage} from '../../../utils/locales';
 
 let appVersion: string;
 
@@ -7,6 +8,6 @@ export function AppVersion(): Malevic.Child {
         appVersion = chrome.runtime.getManifest().version;
     }
     return (
-        <label class="darkreader-version">Version 5 Preview ({appVersion})</label>
+        <label class="darkreader-version">{getLocalMessage('version')} {appVersion}</label>
     );
 }

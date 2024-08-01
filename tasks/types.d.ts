@@ -4,7 +4,7 @@ type PlatformId = (typeof PLATFORM)[keyof (typeof PLATFORM)];
 
 export interface JSEntry {
     src: string;
-    dest: string | ((platform: string) => string);
+    dest: string;
     reloadType: string;
     watchFiles?: string[];
     platform?: PlatformId;

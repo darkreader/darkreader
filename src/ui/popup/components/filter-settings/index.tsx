@@ -6,7 +6,7 @@ import {getLocalMessage} from '../../../../utils/locales';
 import {isURLInList} from '../../../../utils/url';
 import type {ExtWrapper, Theme} from '../../../../definitions';
 
-export default function FilterSettings({data, actions}: ExtWrapper) {
+export default function FilterSettings({data, actions}: ExtWrapper, ...children: Malevic.Child[]) {
     const custom = data.settings.customThemes.find(({url}) => isURLInList(data.activeTab.url, url));
     const theme = custom ? custom.theme : data.settings.theme;
 
@@ -75,6 +75,9 @@ export default function FilterSettings({data, actions}: ExtWrapper) {
             {sepia}
             {grayscale}
             <CustomSettingsToggle data={data} actions={actions} />
+            <div class="filter-settings__content">
+                {...children}
+            </div>
         </section>
     );
 }

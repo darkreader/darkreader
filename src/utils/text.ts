@@ -49,7 +49,7 @@ export function parseArray(text: string): string[] {
         .filter((s) => s);
 }
 
-export function formatArray(arr: Readonly<string[]>): string {
+export function formatArray(arr: readonly string[]): string {
     return arr.concat('').join('\n');
 }
 

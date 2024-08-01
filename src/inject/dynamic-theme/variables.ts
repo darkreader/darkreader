@@ -27,7 +27,7 @@ const VAR_TYPE_BGIMG = 1 << 3;
 
 export class VariablesStore {
     private varTypes = new Map<string, number>();
-    private rulesQueue: CSSRuleList[] = [];
+    private rulesQueue = new Set<CSSRuleList>();
     private inlineStyleQueue: CSSStyleDeclaration[] = [];
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
@@ -42,7 +42,7 @@ export class VariablesStore {
 
     clear(): void {
         this.varTypes.clear();
-        this.rulesQueue.splice(0);
+        this.rulesQueue.clear();
         this.inlineStyleQueue.splice(0);
         this.definedVars.clear();
         this.varRefs.clear();
@@ -63,7 +63,7 @@ export class VariablesStore {
     }
 
     addRulesForMatching(rules: CSSRuleList): void {
-        this.rulesQueue.push(rules);
+        this.rulesQueue.add(rules);
     }
 
     addInlineStyleForMatching(style: CSSStyleDeclaration): void {
@@ -71,7 +71,7 @@ export class VariablesStore {
     }
 
     matchVariablesAndDependents(): void {
-        if (this.rulesQueue.length === 0 && this.inlineStyleQueue.length === 0) {
+        if (this.rulesQueue.size === 0 && this.inlineStyleQueue.length === 0) {
             return;
         }
         this.changedTypeVars.clear();
@@ -293,9 +293,9 @@ export class VariablesStore {
 
                 const modified = modify();
                 if (unknownVars.size > 0) {
-                    // web.dev issue where the variable is never defined, but the fallback is.
+                    // web.dev and voice.google.com issue where the variable is never defined, but the fallback is.
                     // TODO: Return a fallback value along with a way to subscribe for a change.
-                    const isFallbackResolved = modified.match(/^var\(.*?, var\(--darkreader-bg--.*\)\)$/);
+                    const isFallbackResolved = modified.match(/^var\(.*?, (var\(--darkreader-bg--.*\))|(#[0-9A-Fa-f]+)|([a-z]+)|(rgba?\(.+\))|(hsla?\(.+\))\)$/);
                     if (isFallbackResolved) {
                         return modified;
                     }
@@ -353,7 +353,7 @@ export class VariablesStore {
         this.inlineStyleQueue.forEach((style) => {
             this.collectVarsFromCSSDeclarations(style);
         });
-        this.rulesQueue.splice(0);
+        this.rulesQueue.clear();
         this.inlineStyleQueue.splice(0);
     }
 
@@ -370,7 +370,7 @@ export class VariablesStore {
 
     private shouldProcessRootVariables() {
         return (
-            this.rulesQueue.length > 0 &&
+            this.rulesQueue.size > 0 &&
             document.documentElement.getAttribute('style')?.includes('--')
         );
     }

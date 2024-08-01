@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {Button} from '../../../ui/controls';
+import {Button} from '../../controls';
 
 interface TabPanelProps {
     activeTabId: string;

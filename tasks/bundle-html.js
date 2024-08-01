@@ -50,7 +50,7 @@ const htmlEntries = [
         hasStyleSheet: false,
         hasCompatibilityCheck: false,
         reloadType: reload.FULL,
-        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
+        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.CHROMIUM_MV2_PLUS, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
     },
     {
         title: 'Dark Reader settings',

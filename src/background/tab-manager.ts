@@ -76,6 +76,12 @@ export default class TabManager {
             }
             switch (message.type) {
                 case MessageTypeCStoBG.DOCUMENT_CONNECT: {
+                    if (__CHROMIUM_MV3__ && isPanel(sender)) {
+                        sendResponse({
+                            type: MessageTypeBGtoCS.UNSUPPORTED_SENDER,
+                        });
+                        return;
+                    }
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) => {
@@ -318,18 +324,29 @@ export default class TabManager {
                 return 'about:blank';
             }
             try {
-                if (TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0]) {
-                    return TabManager.tabs[tab.id!][0].url || 'about:blank';
-                }
-                return (await chrome.scripting.executeScript({
-                    target: {
-                        tabId: tab.id!,
-                        frameIds: [0],
-                    },
-                    func: () => window.location.href,
-                }))[0].result || 'about:blank';
+                return (await chrome.tabs.get(tab.id!)).url || 'about:blank';
             } catch (e) {
-                return 'about:blank';
+                try {
+                    return (await chrome.scripting.executeScript({
+                        target: {
+                            tabId: tab.id!,
+                            frameIds: [0],
+                        },
+                        world: 'MAIN',
+                        injectImmediately: true,
+                        func: () => window.location.href,
+                    }))[0].result || 'about:blank';
+                } catch (e) {
+                    const errMessage = String(e);
+                    if (
+                        errMessage.includes('chrome://') ||
+                        errMessage.includes('chrome-extension://') ||
+                        errMessage.includes('gallery')
+                    ) {
+                        return 'chrome://protected';
+                    }
+                    return 'about:blank';
+                }
             }
         }
         // It can happen in cases whereby the tab.url is empty.

@@ -13,8 +13,8 @@ export function EnableForProtectedPages(props: ViewProps): Malevic.Child {
             onChange={onEnableForProtectedPages}
             label={'Enable on restricted pages'}
             description={props.data.settings.enableForProtectedPages ?
-                'You should enable it in browser flags too' :
-                'Disabled for web store and other pages'}
+                'See the README file on GitHub for details' :
+                'Disabled for the Web Store and other pages'}
         />
     );
 }

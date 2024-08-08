@@ -26,8 +26,9 @@ export function getSiteToggleData(props: ExtWrapper) {
     );
     const isSiteEnabled: boolean = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && Boolean(tab.isInjected);
     const host = getURLHostOrProtocol(tab.url);
+    const displayHost = host.startsWith('www.') ? host.substring(4) : host;
 
-    const urlText = pdf ? 'PDF' : host
+    const urlText = pdf ? 'PDF' : displayHost
         .split('.')
         .reduce<string[]>((elements, part, i) => elements.concat(
             i > 0 ? <wbr /> : null,

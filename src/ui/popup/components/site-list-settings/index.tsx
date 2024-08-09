@@ -17,8 +17,8 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
             <Toggle
                 class="site-list-settings__toggle"
                 checked={!data.settings.enabledByDefault}
-                labelOn={getLocalMessage('invert_listed_only')}
-                labelOff={getLocalMessage('not_invert_listed')}
+                labelOn={getLocalMessage('Sites to Keep in Dark Mode')}
+                labelOff={getLocalMessage('Sites to Keep in Light Mode')}
                 onChange={(value) => actions.changeSettings({enabledByDefault: !value})}
             />
             <TextList

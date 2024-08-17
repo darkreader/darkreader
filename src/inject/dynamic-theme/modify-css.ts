@@ -348,7 +348,7 @@ export function getBgImageModifier(
 ): string | CSSValueModifier | null {
     try {
         if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
-            return null;
+            return value;
         }
 
         const gradients = parseGradient(value);

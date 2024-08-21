@@ -225,6 +225,9 @@ export default function Slider(props: SliderProps) {
                     </span>
                 </span>
             </span>
+            <span class="slider__value">
+                {formattedValue}
+            </span>
         </span>
     );
 }

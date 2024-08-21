@@ -347,6 +347,10 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier | null {
     try {
+        if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
+            return value;
+        }
+
         const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
 
@@ -405,9 +409,6 @@ export function getBgImageModifier(
         };
 
         const getURLModifier = (urlValue: string) => {
-            if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
-                return null;
-            }
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;

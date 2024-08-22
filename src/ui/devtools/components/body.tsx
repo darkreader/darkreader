@@ -9,6 +9,8 @@ import {ConfigEditor} from './config-editor';
 import {DynamicModeEditor} from './dynamic-mode-editor';
 import type {DevtoolsProps} from '../types';
 
+declare const __PLUS__: boolean;
+
 export default function Body(props: DevtoolsProps): Malevic.Child {
     const {data, actions, devtools} = props;
     const context = getContext();
@@ -27,9 +29,14 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
     }
 
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
+    const previewNewestButtonText = data.settings.previewNewestDesign ? 'Switch to old design' : 'Preview newest design';
 
     function toggleDesign(): void {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
+    }
+
+    function toggleNewestDesign(): void {
+        actions.changeSettings({previewNewestDesign: !data.settings.previewNewestDesign});
     }
 
     return (
@@ -59,7 +66,10 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                     />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
-                    {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
+                    <div class="buttons">
+                        {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
+                        {__PLUS__ ? <Button class="preview-design-button" onclick={toggleNewestDesign}>{previewNewestButtonText}</Button> : null}
+                    </div>
                 </TabPanel.Tab>
             </TabPanel>
             <Overlay />

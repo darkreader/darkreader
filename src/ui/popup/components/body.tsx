@@ -58,7 +58,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
         );
     }
 
-    if (!props.data.settings.previewNewDesign && __PLUS__) {
+    if (props.data.settings.previewNewestDesign && __PLUS__) {
         return <PlusBody {...props} fonts={props.fonts} />;
     }
 

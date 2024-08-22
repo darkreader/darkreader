@@ -32,11 +32,11 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
     const previewNewestButtonText = data.settings.previewNewestDesign ? 'Switch to old design' : 'Preview newest design';
 
     function toggleDesign(): void {
-        actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
+        actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign, previewNewestDesign: false});
     }
 
     function toggleNewestDesign(): void {
-        actions.changeSettings({previewNewestDesign: !data.settings.previewNewestDesign});
+        actions.changeSettings({previewNewestDesign: !data.settings.previewNewestDesign, previewNewDesign: false});
     }
 
     return (

@@ -10,7 +10,7 @@ import {logInfo, logWarn} from '../utils/log';
 import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
-import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
+import {modifyBackgroundColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import type {Theme, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
@@ -18,7 +18,7 @@ import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopte
 import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import {clearColorCache, parseColorWithCache} from '../../utils/color';
+import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
@@ -217,7 +217,11 @@ function replaceCSSTemplates($cssText: string) {
     return $cssText.replace(/\${(.+?)}/g, (_, $color) => {
         const color = parseColorWithCache($color);
         if (color) {
-            return modifyColor(color, theme!);
+            const lightness = getSRGBLightness(color.r, color.g, color.b);
+            if (lightness > 0.5) {
+                return modifyBackgroundColor(color, theme!);
+            }
+            return modifyForegroundColor(color, theme!);
         }
         logWarn("Couldn't parse CSSTemplate's color.");
         return $color;

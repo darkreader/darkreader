@@ -13,7 +13,7 @@ import * as reload from './reload.js';
 import codeStyle from './code-style.js';
 import zip from './zip.js';
 import {runTasks} from './task.js';
-import {log} from './utils.js';
+import {log, pathExistsSync} from './utils.js';
 import process from 'node:process';
 import {PLATFORM} from './platform.js';
 
@@ -133,6 +133,10 @@ function getParams(args) {
     if (platforms[PLATFORM.FIREFOX_MV3]) {
         platforms[PLATFORM.FIREFOX_MV3] = false;
         console.log('Firefox MV3 build is not supported yet');
+    }
+
+    if (!pathExistsSync('./src/plus/')) {
+        platforms[PLATFORM.CHROMIUM_MV2_PLUS] = false;
     }
 
     const versionArg = args.find((a) => a.startsWith('--version='));

@@ -6,6 +6,7 @@
     "api": "node --max-old-space-size=3072 tasks/cli.js build --api",
     "build": "node --max-old-space-size=3072 tasks/cli.js build --release",
     "build:all": "node --max-old-space-size=3072 tasks/cli.js build --debug --release --api",
+    "build:firefox": "node --max-old-space-size=3072 tasks/cli.js build --release --firefox",
     "build:plus": "node --max-old-space-size=3072 tasks/cli.js build --plus --release",
     "code-style": "npm run lint",
     "debug": "node --max-old-space-size=3072 tasks/cli.js build --debug",

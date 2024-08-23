@@ -1,3 +1,10 @@
+# 4.9.89 (August 23, 2024)
+
+- Removed www part from website URLs.
+- Enabled automation and dark theme detection by default for mobile version.
+- Fixed colors for static site fixes.
+- Apply ignored image selectors for gradients.
+
 # 4.9.88 (July 11, 2024)
 
 - Fixed breaking browser panels.

@@ -32,7 +32,8 @@ const excludedSelectors = [
 
 export function createTextStyle(config: Theme): string {
     const lines: string[] = [];
-    lines.push(`*:not(${excludedSelectors.join(', ')}) {`);
+    lines.push(`*:not(${excludedSelectors.join(', ')}),`);
+    lines.push(`[style*="font-family"] {`);
 
     if (config.useFont && config.fontFamily) {
         lines.push(`  font-family: ${config.fontFamily} !important;`);

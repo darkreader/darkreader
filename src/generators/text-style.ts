@@ -10,7 +10,7 @@ const excludedSelectors = [
     '.fa', '.fab', '.fad', '.fal', '.far', '.fas', '.fass', '.fasr', '.fat',
 
     // Generic matches for icon/symbol fonts
-    '.icofont', '[style*="font-"]',
+    '.icofont',
     '[class*="icon"]', '[class*="Icon"]',
     '[class*="symbol"]', '[class*="Symbol"]',
 
@@ -32,8 +32,8 @@ const excludedSelectors = [
 
 export function createTextStyle(config: Theme): string {
     const lines: string[] = [];
-    lines.push(`*:not(${excludedSelectors.join(', ')}),`);
-    lines.push(`[style*="font-family"] {`);
+    lines.push(`*:not(${excludedSelectors.join(', ')}, '[style*="font-"]'),`);
+    lines.push(`[style*="font-family"]:not(${excludedSelectors.join(', ')}) {`);
 
     if (config.useFont && config.fontFamily) {
         lines.push(`  font-family: ${config.fontFamily} !important;`);

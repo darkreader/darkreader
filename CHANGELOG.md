@@ -1,3 +1,7 @@
+# 4.9.90 (September 1, 2024)
+
+- Fixed "Aw, Snap" in Google Search (Chrome and Edge on Windows).
+
 # 4.9.89 (August 23, 2024)
 
 - Removed www part from website URLs.

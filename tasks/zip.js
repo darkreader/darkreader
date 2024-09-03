@@ -55,7 +55,7 @@ async function zip({platforms, debug, version}) {
     const promises = [];
     const date = await getLastCommitTime();
     /** @type {Array<import('./types.js').PlatformId>} */
-    const chromePlatforms = [PLATFORM.CHROMIUM_MV2, PLATFORM.CHROMIUM_MV3];
+    const chromePlatforms = [PLATFORM.CHROMIUM_MV2, PLATFORM.CHROMIUM_MV3, PLATFORM.CHROMIUM_MV2_PLUS];
     const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const platform of enabledPlatforms) {
         const format = chromePlatforms.includes(platform) ? 'zip' : 'xpi';

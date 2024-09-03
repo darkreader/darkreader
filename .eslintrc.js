@@ -95,7 +95,11 @@ config.overrides.push({
         'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
             ignore: [
+                '^generators\/',
                 '^malevic\/',
+                '^plus\/',
+                '^ui\/',
+                '^utils\/',
             ],
         }],
         'import/no-restricted-paths': ['error', {
@@ -175,6 +179,7 @@ config.overrides.push({
             files: [
                 'src/ui/controls/**/*.tsx',
                 'src/ui/popup/**/*.tsx',
+                'src/plus/**/*.tsx',
                 'src/ui/stylesheet-editor/components/body.tsx',
             ],
             rules: {

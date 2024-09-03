@@ -27,6 +27,11 @@ const copyEntries = [
         reloadType: reload.UI,
         platforms: [PLATFORM.CHROMIUM_MV2],
     },
+    {
+        path: 'plus/assets/**/*.*',
+        reloadType: reload.UI,
+        platforms: [PLATFORM.CHROMIUM_MV2_PLUS],
+    },
 ];
 
 /**

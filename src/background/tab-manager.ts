@@ -76,6 +76,12 @@ export default class TabManager {
             }
             switch (message.type) {
                 case MessageTypeCStoBG.DOCUMENT_CONNECT: {
+                    if (__CHROMIUM_MV3__ && isPanel(sender)) {
+                        sendResponse({
+                            type: MessageTypeBGtoCS.UNSUPPORTED_SENDER,
+                        });
+                        return;
+                    }
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) => {

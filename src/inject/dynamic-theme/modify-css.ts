@@ -142,7 +142,9 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (theme.scrollbarColor) {
+    // Disable scrollbar modification in Chrome and Edge
+    // https://issues.chromium.org/issues/363544341
+    if (theme.scrollbarColor && isFirefox) {
         lines.push(getModifiedScrollbarStyle(theme));
     }
     if (theme.selectionColor) {
@@ -347,6 +349,10 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier | null {
     try {
+        if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
+            return value;
+        }
+
         const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
 
@@ -405,9 +411,6 @@ export function getBgImageModifier(
         };
 
         const getURLModifier = (urlValue: string) => {
-            if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
-                return null;
-            }
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;

@@ -38,13 +38,13 @@ function sendMessageForTesting(uuid: string) {
     document.dispatchEvent(new CustomEvent('test-message', {detail: uuid}));
 }
 
-function sendMessage(message: MessageCStoBG | MessageCStoUI) {
+function sendMessage(message: MessageCStoBG | MessageCStoUI): true | undefined {
     if (unloaded) {
         return;
     }
     const responseHandler = (response: MessageBGtoCS | 'unsupportedSender' | undefined) => {
         // Vivaldi bug workaround. See TabManager for details.
-        if (response === 'unsupportedSender') {
+        if (response === 'unsupportedSender' || response?.type === MessageTypeBGtoCS.UNSUPPORTED_SENDER) {
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();

@@ -114,6 +114,7 @@ export interface UserSettings {
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
+    previewNewestDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
     enableContextMenus: boolean;

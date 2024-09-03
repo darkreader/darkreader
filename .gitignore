@@ -3,6 +3,7 @@
 build/
 darkreader.js
 debug.log
+src/plus
 
 # Node.js modules
 #-----------------------------------

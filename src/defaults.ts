@@ -1,7 +1,7 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import {ThemeEngine} from './generators/theme-engines';
-import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
+import {isMacOS, isWindows, isCSSColorSchemePropSupported, isEdge, isMobile} from './utils/platform';
 import {AutomationMode} from './utils/automation';
 
 declare const __CHROMIUM_MV3__: boolean;
@@ -32,7 +32,7 @@ export const DEFAULT_THEME: Theme = {
     darkSchemeTextColor: DEFAULT_COLORS.darkScheme.text,
     lightSchemeBackgroundColor: DEFAULT_COLORS.lightScheme.background,
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
-    scrollbarColor: isMacOS ? '' : 'auto',
+    scrollbarColor: '',
     selectionColor: 'auto',
     styleSystemControls: __CHROMIUM_MV3__ ? false : !isCSSColorSchemePropSupported,
     lightColorScheme: 'Default',
@@ -69,8 +69,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
     syncSettings: true,
     syncSitesFixes: false,
     automation: {
-        enabled: false,
-        mode: AutomationMode.NONE,
+        enabled: isEdge && isMobile ? true : false,
+        mode: isEdge && isMobile ? AutomationMode.SYSTEM : AutomationMode.NONE,
         behavior: 'OnOff',
     },
     time: {
@@ -82,8 +82,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
         longitude: null,
     },
     previewNewDesign: false,
+    previewNewestDesign: false,
     enableForPDF: true,
     enableForProtectedPages: false,
     enableContextMenus: false,
-    detectDarkTheme: false,
+    detectDarkTheme: isEdge && isMobile ? true : false,
 };

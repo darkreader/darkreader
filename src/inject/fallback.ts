@@ -1,7 +1,8 @@
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
-    !document.querySelector('.darkreader--fallback')
+    !document.querySelector('.darkreader--fallback') &&
+    !document.querySelector('.darkreader')
 ) {
     const css = [
         'html, body, body :not(iframe) {',

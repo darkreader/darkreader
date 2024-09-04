@@ -207,7 +207,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
         `* {`,
         `    scrollbar-color: ${colorThumb} ${colorTrack};`,
         `}`,
-    ].join('\n'),
+    ].join('\n');
 }
 
 export function getModifiedFallbackStyle(theme: Theme, {strict}: {strict: boolean}): string {

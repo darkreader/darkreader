@@ -142,9 +142,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    // Disable scrollbar modification in Chrome and Edge
-    // https://issues.chromium.org/issues/363544341
-    if (theme.scrollbarColor && isFirefox) {
+    if (theme.scrollbarColor) {
         lines.push(getModifiedScrollbarStyle(theme));
     }
     if (theme.selectionColor) {

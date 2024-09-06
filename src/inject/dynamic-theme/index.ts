@@ -124,15 +124,15 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(overrideStyle, 'override');
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
-    const selectionColors = getSelectionColor(theme!);
+    const selectionColors = theme?.selectionColor ? getSelectionColor(theme) : null;
     const neutralBackgroundColor = modifyBackgroundColor(parseColorWithCache('#ffffff')!, theme!);
     const neutralTextColor = modifyForegroundColor(parseColorWithCache('#000000')!, theme!);
     variableStyle.textContent = [
         `:root {`,
         `   --darkreader-neutral-background: ${neutralBackgroundColor};`,
         `   --darkreader-neutral-text: ${neutralTextColor};`,
-        `   --darkreader-selection-background: ${selectionColors.backgroundColorSelection};`,
-        `   --darkreader-selection-text: ${selectionColors.foregroundColorSelection};`,
+        `   --darkreader-selection-background: ${selectionColors?.backgroundColorSelection ?? 'initial'};`,
+        `   --darkreader-selection-text: ${selectionColors?.foregroundColorSelection ?? 'initial'};`,
         `}`,
     ].join('\n');
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);

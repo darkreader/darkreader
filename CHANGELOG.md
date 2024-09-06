@@ -1,3 +1,8 @@
+# 4.9.91 (September 6, 2024)
+
+- Restore scrollbar colors.
+- Fixed breaking on default selection color.
+
 # 4.9.90 (September 1, 2024)
 
 - Fixed "Aw, Snap" in Google Search (Chrome and Edge on Windows).

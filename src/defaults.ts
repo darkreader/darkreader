@@ -55,13 +55,26 @@ export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
     },
 };
 
+const filterModeSites = [
+    '*.officeapps.live.com',
+    '*.sharepoint.com',
+    'docs.google.com',
+    'onedrive.live.com',
+];
+
 export const DEFAULT_SETTINGS: UserSettings = {
     schemeVersion: 0,
     enabled: true,
     fetchNews: true,
     theme: DEFAULT_THEME,
     presets: [],
-    customThemes: [],
+    customThemes: filterModeSites.map((url) => {
+        return {
+            url: [url],
+            theme: {...DEFAULT_THEME, engine: ThemeEngine.cssFilter},
+            builtIn: true,
+        };
+    }),
     enabledByDefault: true,
     enabledFor: [],
     disabledFor: [],

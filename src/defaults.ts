@@ -1,7 +1,7 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import {ThemeEngine} from './generators/theme-engines';
-import {isMacOS, isWindows, isCSSColorSchemePropSupported, isEdge, isMobile} from './utils/platform';
+import {isMacOS, isWindows, isCSSColorSchemePropSupported, isEdge, isMobile, isChromium} from './utils/platform';
 import {AutomationMode} from './utils/automation';
 
 declare const __CHROMIUM_MV3__: boolean;
@@ -69,9 +69,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
     theme: DEFAULT_THEME,
     presets: [],
     customThemes: filterModeSites.map((url) => {
+        const engine: ThemeEngine = isChromium ? ThemeEngine.svgFilter : ThemeEngine.cssFilter;
         return {
             url: [url],
-            theme: {...DEFAULT_THEME, engine: ThemeEngine.cssFilter},
+            theme: {...DEFAULT_THEME, engine},
             builtIn: true,
         };
     }),

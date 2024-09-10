@@ -1,6 +1,8 @@
-# 4.9.91 (September 6, 2024)
+# 4.9.92 (September 10, 2024)
 
-- Restore scrollbar colors.
+- Detect website's dark theme by default.
+- Use Filter mode for particular websites by default (Google Docs, Microsoft Office).
+- Restored scrollbar colors.
 - Fixed breaking on default selection color.
 
 # 4.9.90 (September 1, 2024)

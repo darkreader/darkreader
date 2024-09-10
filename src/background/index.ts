@@ -251,3 +251,16 @@ if (__DEBUG__ && __LOG__) {
 }
 
 makeChromiumHappy();
+
+chrome.runtime.onInstalled.addListener((details) => {
+    chrome.storage.sync.get({installation: {version: ''}}, (data) => {
+        if (data?.version) {
+            return;
+        }
+        chrome.storage.sync.set({installation: {
+            date: Date.now(),
+            reason: details.reason,
+            version: details.previousVersion ?? chrome.runtime.getManifest().version,
+        }});
+    });
+});

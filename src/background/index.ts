@@ -269,8 +269,6 @@ function writeInstallationVersion(
 }
 
 chrome.runtime.onInstalled.addListener((details) => {
-    setTimeout(() => {
-        writeInstallationVersion(chrome.storage.local, details);
-        writeInstallationVersion(chrome.storage.sync, details);
-    }, 1000);
+    writeInstallationVersion(chrome.storage.local, details);
+    writeInstallationVersion(chrome.storage.sync, details);
 });

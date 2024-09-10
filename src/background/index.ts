@@ -257,7 +257,7 @@ function writeInstallationVersion(
     details: chrome.runtime.InstalledDetails,
 ) {
     storage.get({installation: {version: ''}}, (data) => {
-        if (data?.version) {
+        if (data?.installation?.version) {
             return;
         }
         storage.set({installation: {

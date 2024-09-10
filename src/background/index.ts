@@ -252,15 +252,25 @@ if (__DEBUG__ && __LOG__) {
 
 makeChromiumHappy();
 
-chrome.runtime.onInstalled.addListener((details) => {
-    chrome.storage.sync.get({installation: {version: ''}}, (data) => {
+function writeInstallationVersion(
+    storage: chrome.storage.SyncStorageArea | chrome.storage.LocalStorageArea,
+    details: chrome.runtime.InstalledDetails,
+) {
+    storage.get({installation: {version: ''}}, (data) => {
         if (data?.version) {
             return;
         }
-        chrome.storage.sync.set({installation: {
+        storage.set({installation: {
             date: Date.now(),
             reason: details.reason,
             version: details.previousVersion ?? chrome.runtime.getManifest().version,
         }});
     });
+}
+
+chrome.runtime.onInstalled.addListener((details) => {
+    setTimeout(() => {
+        writeInstallationVersion(chrome.storage.local, details);
+        writeInstallationVersion(chrome.storage.sync, details);
+    }, 1000);
 });

@@ -4,20 +4,22 @@ import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
-import {Header, MoreSiteSettings, MoreToggleSettings, MoreNewHighlight} from './header';
+import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {getDuration} from '../../../utils/time';
-import {DONATE_URL, GITHUB_URL, MOBILE_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
+import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose, openExtensionPage} from '../../utils';
+import {PlusBody} from '@plus/popup/plus-body'; // eslint-disable-line
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
 import {isMobile} from '../../../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
+declare const __PLUS__: boolean;
 
 interface BodyProps {
     data: ExtensionData;
@@ -54,6 +56,10 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 <Loader complete={false} />
             </body>
         );
+    }
+
+    if (props.data.settings.previewNewestDesign && __PLUS__) {
+        return <PlusBody {...props} fonts={props.fonts} />;
     }
 
     if (isMobile || props.data.settings.previewNewDesign) {
@@ -105,6 +111,40 @@ function Body(props: BodyProps & {fonts: string[]}) {
         }
     }
 
+    const birthdayMessage = getLocalMessage('we_celebrate_10_years');
+    let birthdayMessageSpec = <span>{birthdayMessage}</span>;
+    try {
+        const index10 = birthdayMessage.indexOf('10');
+        const indexDot = birthdayMessage.indexOf('.', index10);
+        if (index10 >= 0 && indexDot > index10) {
+            birthdayMessageSpec = (
+                <span>
+                    {birthdayMessage.substring(0, index10)}
+                    <a href={`${HOMEPAGE_URL}/timeline/`} target="_blank" rel="noopener noreferrer">
+                        {birthdayMessage.substring(index10, indexDot)}
+                    </a>
+                    {birthdayMessage.substring(indexDot)}
+                </span>
+            );
+        }
+    } catch (err) {
+        console.error(err);
+    }
+
+    const filterTab = <FilterSettings data={props.data} actions={props.actions}>
+        <div class="birthday-container">
+            <i class="birthday-icon">🎉</i>
+            <span class="birthday-message">
+                {birthdayMessageSpec}
+            </span>
+            <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
+            </a>
+        </div>
+    </FilterSettings>;
+
+    const moreTab = <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />;
+
     return (
         <body class={{'ext-disabled': !props.data.isEnabled}}>
             <Loader complete />
@@ -120,22 +160,14 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={__THUNDERBIRD__ ? {
-                    'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} />
-                    ),
-                    'More': (
-                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />
-                    ),
+                    'Filter': filterTab,
+                    'More': moreTab,
                 } : {
-                    'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} />
-                    ),
+                    'Filter': filterTab,
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
-                    'More': (
-                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />
-                    ),
+                    'More': moreTab,
                 }}
                 tabLabels={{
                     'Filter': getLocalMessage('filter'),
@@ -153,16 +185,8 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 </a>
             </div>
             <footer>
-                <div class="footer-links">
-                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>
-                    <a class="footer-links__link" href={TWITTER_URL} target="_blank" rel="noopener noreferrer">Twitter</a>
-                    <a class="footer-links__link" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
-                    <a class="footer-links__link footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
-                </div>
                 <div class="footer-buttons">
-                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
-                    </a>
+                    <a class="footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
                     <Button onclick={openDevTools} class="dev-tools-button">
                         🛠 {getLocalMessage('open_dev_tools')}
@@ -187,9 +211,6 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 isExpanded={state.moreToggleSettingsOpen}
                 onClose={toggleMoreToggleSettings}
             />
-            {props.data.uiHighlights.includes('new-toggle-menus') && !state.newToggleMenusHighlightHidden
-                ? <MoreNewHighlight />
-                : null}
         </body>
     );
 }

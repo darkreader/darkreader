@@ -1,29 +1,34 @@
 @import "../theme";
 @import "../shared";
+@import "../options/tab-panel/tab-panel.less";
 
 @editor-active-back: mix(@color-input-back, @color-input-active, 75%);
 @editor-active-fore: mix(@color-input-fore, @color-input-fore-active, 75%);
 
 html {
     height: 100%;
+    margin: 0;
 }
 
 body {
-    align-items: center;
+    align-items: flex-start;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
     height: 100%;
-    margin: 0 auto;
+    margin: 0;
+    padding: 1rem;
 }
 
 header {
     align-items: stretch;
+    box-sizing: content-box;
     display: flex;
     flex: none;
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: center;
-    margin-top: @indent-large;
+    justify-content: flex-start;
 }
 
 #logo {
@@ -46,14 +51,21 @@ header {
     transform: translateY(-0.0625rem);
 }
 
-#sub-title {
+.config-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sub-title {
+    flex: none;
     font-size: @size-text-normal;
     font-weight: normal;
-    margin: @indent-large 0 0 0;
+    margin: 0.3rem 0 @indent-large 0;
     text-transform: uppercase;
 }
 
-#editor {
+.editor {
     background-color: @color-input-back;
     border: @size-border solid @color-border;
     box-sizing: border-box;
@@ -92,18 +104,18 @@ header {
     }
 }
 
-#error-text {
+.error-text {
     color: @color-error;
+    flex: none;
     font-family: monospace;
     white-space: pre;
 }
 
-#buttons {
+.buttons {
     display: flex;
     flex: none;
     flex-direction: row;
-    justify-content: center;
-    margin-bottom: @indent-large;
+    justify-content: flex-start;
     margin-top: @indent-small;
     width: 100%;
 
@@ -116,16 +128,12 @@ header {
         max-width: 6rem;
         width: 100%;
     }
-
-    .preview-design-button {
-        border-color: gray;
-        max-width: 8rem;
-    }
 }
 
-#description {
-    margin: 0 0 @indent-large 0;
-    text-align: center;
+.description {
+    flex: none;
+    margin: @indent-large 0 0 0;
+    text-align: left;
     white-space: wrap;
 
     a {
@@ -133,7 +141,7 @@ header {
     }
 }
 
-@media screen and (max-width: 33rem) {
+@media screen and (max-width: 36rem) {
     #title {
         display: none;
     }
@@ -141,19 +149,95 @@ header {
 
 @media screen and (max-height: 33rem) {
     header,
-    #description {
+    .description {
         display: none;
     }
 
-    #sub-title {
+    .sub-title {
         margin-top: @indent-small;
-    }
-
-    #buttons {
-        margin-bottom: @indent-small;
     }
 }
 
 .message-box {
     border: @size-border solid @color-border;
+}
+
+.preview-design-button {
+    padding: 0 0.5rem;
+}
+
+.settings-tab-panel {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+
+    &__tab {
+        height: 100%;
+    }
+
+    &__button__icon {
+        display: none;
+    }
+
+    &--vertical {
+        gap: 0;
+    }
+}
+
+.dynamic-mode-editor {
+    height: 100%;
+}
+
+.dynamic-per-site {
+    display: grid;
+    gap: 0.5rem;
+    grid: "search editor" @size-control-inner + 2 * @size-border
+          "list   editor" auto
+          / 10rem auto;
+    height: 100%;
+    overflow: hidden;
+
+    &__search-wrapper {
+        grid-area: search;
+    }
+
+    &__search-input {
+        width: calc(100% - 2 * @size-border);
+    }
+
+    &__urls {
+        grid-area: list;
+        overflow: auto;
+
+        li {
+            list-style-type: none;
+        }
+    }
+
+    &__url {
+        border: none;
+        color: @color-fore;
+        height: @size-control-inner;
+        text-align: left;
+        width: 100%;
+
+        &--active {
+            color: @color-heading;
+            font-weight: bold;
+        }
+    }
+
+    .config-editor {
+        grid-area: editor;
+    }
+
+    &__add-fix {
+        &__button {
+            padding: 0 0.5rem;
+        }
+
+        &__description {
+            margin: 0.5rem 0 0 0;
+        }
+    }
 }

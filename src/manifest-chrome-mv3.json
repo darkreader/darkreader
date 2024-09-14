@@ -13,15 +13,27 @@
         "page": "ui/popup/index.html"
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background/index.js"
     },
     "content_security_policy": {
-        "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src * data:; connect-src *; navigate-to 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://opencollective.com/darkreader/donate https://twitter.com/darkreaderapp; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
+        "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src * data:; connect-src *; navigate-to 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://twitter.com/darkreaderapp; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
     },
     "content_scripts": [
         {
             "matches": [
-                "https://example.com/doesNotExist"
+                "<all_urls>"
+            ],
+            "js": [
+                "inject/proxy.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "match_about_blank": true,
+            "world": "MAIN"
+        },
+        {
+            "matches": [
+                "<all_urls>"
             ],
             "js": [
                 "inject/fallback.js",
@@ -29,34 +41,29 @@
             ],
             "run_at": "document_start",
             "all_frames": true,
-            "match_about_blank": true
+            "match_about_blank": true,
+            "world": "ISOLATED"
         },
         {
             "matches": [
-                "*://*/*"
+                "<all_urls>"
             ],
             "js": [
                 "inject/color-scheme-watcher.js"
             ],
             "run_at": "document_idle",
             "all_frames": false,
-            "match_about_blank": false
+            "match_about_blank": false,
+            "world": "ISOLATED"
         }
     ],
     "permissions": [
         "alarms",
         "fontSettings",
         "scripting",
-        "storage",
-        "unlimitedStorage"
+        "storage"
     ],
     "host_permissions": [
         "*://*/*"
-    ],
-    "web_accessible_resources": [
-        {
-            "matches": ["*://*/*"],
-            "resources": ["inject/proxy.js"]
-        }
     ]
 }

@@ -1,0 +1,27 @@
+.hotkeys {
+    &__control {
+        align-items: center;
+        border: @size-border solid @color-border;
+        display: inline-flex;
+        flex-direction: row;
+        font-size: @size-text-normal;
+        height: @size-control-inner;
+        justify-content: center;
+        text-decoration: none;
+        transition: background-color @time-fast;
+        width: calc(100% - 2 * @size-border);
+
+        &.shortcut--set {
+            color: @color-control-fore;
+        }
+
+        &:hover {
+            background-color: @color-control-hover;
+            text-decoration: none;
+
+            &:not(.shortcut--edit)::before {
+                display: none;
+            }
+        }
+    }
+}

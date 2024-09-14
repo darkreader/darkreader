@@ -27,7 +27,7 @@ on:
       node_version:
         description: 'NodeJS version'
         required: true
-        default: '16.x'
+        default: '18.x'
 
 jobs:
   test-browser:
@@ -57,7 +57,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Chrome
         if: ${{ matrix.chrome }}
@@ -83,9 +83,9 @@ jobs:
           { echo FIREFOX_BIN="$(which firefox)"; echo FIREFOX_TEST=1; } | tee -a "$GITHUB_ENV"
 
       - name: Node setup
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version || '16.x' }}
+          node-version: ${{ inputs.node_version || '18.x' }}
           cache: npm
 
       - name: Install NPM dependencies
@@ -116,7 +116,7 @@ jobs:
           run: npm run test:firefox -- --json --outputFile=test-results-firefox-mv2.json
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-chrome-${{ matrix.chrome }}-firefox-${{ matrix.firefox }}-coverage-${{ matrix.coverage }}
           path: test-results-*

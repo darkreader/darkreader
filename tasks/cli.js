@@ -11,16 +11,20 @@ import process from 'node:process';
 
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
-import {rm} from 'node:fs/promises';
+import {rm, stat} from 'node:fs/promises';
+import assert from 'node:assert/strict';
 
 import {runTasks} from './task.js';
 import zip from './zip.js';
 import signature from './bundle-signature.js';
 
-import paths from './paths.js';
-const {PLATFORM} = paths;
+import {PLATFORM} from './platform.js';
 
 const __filename = join(fileURLToPath(import.meta.url), '../build.js');
+
+function getSignatureDir(version) {
+    return join(fileURLToPath(import.meta.url), `../../integrity/firefox/`, version);
+}
 
 async function executeChildProcess(args) {
     const child = fork(__filename, args);
@@ -47,7 +51,7 @@ function printHelp() {
         '',
         'To specify type of build:',
         '  --release      Release bundle for signing prior to publication',
-        '  --version=*    Released bundle complete with digial signature (Firefox only)',
+        '  --version=*    Released bundle complete with digital signature (Firefox only)',
         '  --debug        Build for development',
         '  --watch        Incremental build for development',
         '',
@@ -96,7 +100,7 @@ async function checkoutVersion(version, fixVulnerabilities) {
     log.ok(`Checking out version ${version}`);
     // Use -- to disambiguate the tag (release version) and file paths
     await rm('src', {force: true, recursive: true});
-    await execute(`git checkout v${version} -- package.json package-lock.json src/ tasks/`);
+    await execute(`git restore --source v${version} -- package.json package-lock.json src/ tasks/`);
     log.ok(`Installing dependencies`);
     await execute('npm install --ignore-scripts');
     if (!fixVulnerabilities) {
@@ -114,23 +118,26 @@ async function checkoutVersion(version, fixVulnerabilities) {
 }
 
 async function checkoutHead() {
-    await execute('git checkout HEAD -- package.json package-lock.json src/ tasks/');
+    // Restore current files
+    await execute('git restore --source HEAD -- package.json package-lock.json src/ tasks/');
+    // Clean up files which existed earlier but were deleted
+    await execute('git clean -f -- package.json package-lock.json src/ tasks/');
     await execute('npm install --ignore-scripts');
 }
 
 function validateArguments(args) {
-    const validaionErrors = [];
+    const validationErrors = [];
 
-    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--plus', '--log-info', '--log-warn', '--test'];
     const invalidFlags = args.filter((flag) => !validFlags.includes(flag) && !flag.startsWith('--version='));
-    invalidFlags.forEach((flag) => validaionErrors.push(`Invalid flag ${flag}`));
+    invalidFlags.forEach((flag) => validationErrors.push(`Invalid flag ${flag}`));
 
     if (args.some((arg) => arg.startsWith('--version='))) {
         if (!args.includes('--firefox') || !args.includes('--release') || args.length !== 3) {
-            validaionErrors.push('Only Firefox build currenly supports signed builds');
+            validationErrors.push('Only Firefox build currently supports signed builds');
         }
     }
-    return validaionErrors;
+    return validationErrors;
 }
 
 function parseArguments(args) {
@@ -146,15 +153,28 @@ async function run() {
         process.exit(0);
     }
 
-    const validaionErrors = validateArguments(args);
-    if (validaionErrors.length > 0) {
-        validaionErrors.forEach(log.error);
+    const validationErrors = validateArguments(args);
+    if (validationErrors.length > 0) {
+        validationErrors.forEach(log.error);
         printHelp();
         process.exit(130);
     }
 
-    // We need to install new deps prior to forking for them to be loaded properly
     const version = getVersion(args);
+
+    // If building signed build, check that required signature files exist
+    if (version) {
+        try {
+            const signatureDir = getSignatureDir(version);
+            const stats = await stat(signatureDir);
+            assert(stats.isDirectory());
+        } catch (e) {
+            console.log(`Could not find signature files for version ${version}`);
+            return;
+        }
+    }
+
+    // We need to install new deps prior to forking for them to be loaded properly
     if (version) {
         try {
             await ensureGitClean();

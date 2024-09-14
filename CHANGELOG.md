@@ -1,3 +1,158 @@
+# 4.9.92 (September 10, 2024)
+
+- Detect website's dark theme by default.
+- Use Filter mode for particular websites by default (Google Docs, Microsoft Office).
+- Restored scrollbar colors.
+- Fixed breaking on default selection color.
+
+# 4.9.90 (September 1, 2024)
+
+- Fixed "Aw, Snap" in Google Search (Chrome and Edge on Windows).
+
+# 4.9.89 (August 23, 2024)
+
+- Removed www part from website URLs.
+- Enabled automation and dark theme detection by default for mobile version.
+- Fixed colors for static site fixes.
+- Apply ignored image selectors for gradients.
+
+# 4.9.88 (July 11, 2024)
+
+- Fixed breaking browser panels.
+
+# 4.9.87 (June 27, 2024)
+
+- Added link to Settings page.
+- Fixed CSS editor layout.
+- Fixed delay when opening settings.
+- Fixed warnings for protected pages.
+- Fixed conflicts with Dark Reader based scripts.
+- Improved fallback color support in CSS variables.
+- Japanese Help page translation.
+
+# 4.9.86 (May 30, 2024)
+
+- CSS variables performance optimizations.
+- Fixed Manifest V3 bugs.
+- Fixed loosing control over tabs after update.
+
+# 4.9.85 (May 14, 2024)
+
+- Bulgarian translation.
+- Improved color variables support.
+- Fixed handling styles with embedded SVGs.
+- Fixed Inversion Dev Tools.
+- Fixed inline SVG image analysis.
+- Fixed overriding icon fonts.
+
+# 4.9.84 (April 25, 2024)
+
+- Improved Dev Tools (per site editor).
+- Improved SVG logos analysis.
+- Improved large background image analysis.
+- Fixed IPv6 URL support.
+- Fixed Mark elements' colors.
+- Check for CSS @layer support.
+
+# 4.9.83 (April 10, 2024)
+
+- Reduced memory consumption.
+- Fixed iframes background colors.
+- Optimized CSS @import loading.
+
+# 4.9.82 (April 5, 2024)
+
+- Fixed performance issue when detecting @layer and @supports rules.
+- Improved border colors with CSS variables.
+- Leave iframes unchanged when dark theme is detected on a web page.
+
+## 4.9.81 (March 29, 2024)
+
+- Fixed performance degradation when computer wakes up from sleep mode.
+- Improved dark theme detection.
+- Support for CSS layers.
+- Support for color mixing functions.
+- Override author's scrollbar colors.
+- Override color-scheme CSS property.
+- Fixes for backgrounds with variable colors.
+- Dynamic mode bug fixes and performance optimizations.
+
+## 4.9.80 (March 13, 2024)
+
+- Analyze inline background images for root elements.
+- Support for "background" attribute.
+- Fixed performance for asynchronously resolved inline styles.
+- Fixed freezes and incorrect work on several websites.
+- Dev Tools: Formatting of CSS fixes.
+
+## 4.9.79 (February 29, 2024)
+
+- Use ES2020 for API bundle.
+
+## 4.9.78 (February 29, 2024)
+
+- Optimized Adopted Style Sheets changes handling.
+- Fixed watching for style/link element position changes.
+- Fixed processing large style elements loaded by chunks.
+- Fixed enabling the extension with a hotkey after it was disabled automatically.
+- Fixed sliders in mobile UI.
+
+## 4.9.77 (February 7, 2024)
+
+- Firefox: Fixed errors when Adopted Style Sheets were not present.
+- Fixed breaking on ::view-transition selectors (Airbnb issue).
+
+## 4.9.76 (January 17, 2024)
+
+- Improved dark theme detection.
+- Dynamic mode bug fixes.
+
+## 4.9.75 (January 12, 2024)
+
+- Fixed CSS variables processing in inline styles.
+- Chrome: Improved Adopted Style Sheets support (Bing AI and Copilot issues).
+- Firefox: Adopted Style Sheets support.
+- Firefox: Fixed issues with Filter+ mode.
+- Improved Constructed Style Sheets changes handling.
+
+## 4.9.74 (January 3, 2024)
+
+- Improved image analysis performance.
+- Improved dark theme detection.
+- Fixed 404 errors when loading images with relative paths.
+- v5 Preview: Moved settings into a separate page.
+
+## 4.9.73 (December 6, 2023)
+
+- Fixed URL subdomain handling.
+
+## 4.9.72 (December 5, 2023)
+
+- Fixed Salesforce and Excel Online issues.
+
+## 4.9.71 (December 5, 2023)
+
+- Improved subdomain handling in Site List.
+- Improved dark theme detection.
+- Fixed page crashes (Slack issue).
+- Fixed Site List migration.
+- Reduced image analysis memory usage.
+
+## 4.9.70 (November 22, 2023)
+
+- Fixed clearing site lists when synchronization is disabled.
+
+## 4.9.69 (November 21, 2023)
+
+- Separated Enabled and Disabled site lists.
+- Regular expressions support in Site List.
+- Fixed automation after computer waking up.
+
+## 4.9.68 (November 13, 2023)
+
+- Fixed incorrect CSS comment handling (Reddit issue #11583).
+- Fixed working on domains containing `constructor` part (#11877).
+
 ## 4.9.67 (October 1, 2023)
 
 - Fixed Site List when there is any URL with port.

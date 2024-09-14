@@ -1,15 +1,7 @@
 import {log} from './utils.js';
 import watch from './watch.js';
 
-/**
- * @typedef TaskOptions
- * @property {object} platforms
- * @property {boolean} debug
- * @property {boolean} watch
- * @property {boolean} test
- * @property {string | false} log
- * @property {string | null} version
- */
+/** @typedef {import('./types').TaskOptions} TaskOptions */
 
 class Task {
     /**
@@ -23,7 +15,7 @@ class Task {
 
     /**
      * @param {string[] | (() => string[])} files
-     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher) => void | Promise<void>, platforms: object} onChange
+     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher, platforms: object) => void | Promise<void>} onChange
      */
     addWatcher(files, onChange) {
         this._watchFiles = files;
@@ -32,11 +24,11 @@ class Task {
     }
 
     /**
-     * @param {Promise<void>} promise
+     * @param {() => void | Promise<void>} fn
      */
-    async _measureTime(promise) {
+    async _measureTime(fn) {
         const start = Date.now();
-        await promise;
+        await fn();
         const end = Date.now();
         log(`${this.name} (${(end - start).toFixed(0)}ms)`);
     }
@@ -46,7 +38,7 @@ class Task {
      */
     async run(options) {
         await this._measureTime(
-            this._run(options)
+            () => this._run(options)
         );
     }
 
@@ -61,7 +53,7 @@ class Task {
                 this._watchFiles,
             onChange: async (files) => {
                 await this._measureTime(
-                    this._onChange(files, watcher, platforms)
+                    () => this._onChange(files, watcher, platforms)
                 );
             },
         });

@@ -13,6 +13,9 @@ const resolvers = new Map<string, (data: string) => void>();
 const rejectors = new Map<string, (reason?: any) => void>();
 
 export async function bgFetch(request: FetchRequest): Promise<string> {
+    if ((window as any).DarkReader?.Plugins?.fetch) {
+        return (window as any).DarkReader.Plugins.fetch(request);
+    }
     return new Promise<string>((resolve, reject) => {
         const id = generateUID();
         resolvers.set(id, resolve);

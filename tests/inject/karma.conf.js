@@ -9,8 +9,7 @@ import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 
 import {createEchoServer} from './support/echo-server.js';
-import paths from '../../tasks/paths.js';
-const {rootPath} = paths;
+import {absolutePath} from '../../tasks/paths.js';
 
 /**
  * @param {Partial<LocalConfig>} config
@@ -34,10 +33,11 @@ export function configureKarma(config, env) {
         plugins: [
             'karma-chrome-launcher',
             'karma-firefox-launcher',
+            process.platform === 'darwin' ? 'karma-safari-launcher' : null,
             'karma-rollup-preprocessor',
             'karma-jasmine',
             'karma-spec-reporter',
-        ],
+        ].filter(Boolean),
         preprocessors: {
             '**/*.+(ts|tsx)': ['rollup'],
         },
@@ -45,14 +45,14 @@ export function configureKarma(config, env) {
             plugins: [
                 rollupPluginTypescript({
                     typescript,
-                    tsconfig: rootPath('tests/inject/tsconfig.json'),
+                    tsconfig: absolutePath('tests/inject/tsconfig.json'),
                     cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),
                 rollupPluginReplace({
                     preventAssignment: true,
                     __DEBUG__: false,
                     __FIREFOX_MV2__: false,
-                    __CHROMIUM_MV2__: true,
+                    __CHROMIUM_MV2__: false,
                     __CHROMIUM_MV3__: false,
                     __THUNDERBIRD__: false,
                     __PORT__: '-1',

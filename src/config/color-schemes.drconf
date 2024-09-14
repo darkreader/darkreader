@@ -22,11 +22,35 @@ text: #4c4f69
 
 ================================
 
+Deep Ocean
+
+DARK
+background: #00222b
+text: #a9b4b4
+
+LIGHT
+background: #cac5b6
+text: #cdd4d6
+
+================================
+
 Dracula
 
 DARK
 background: #282b36
 text: #e8e6e3
+
+================================
+
+Everforest
+
+DARK
+background: #2b3339
+text: #d1c4a9
+
+LIGHT
+background: #fdf9ed
+text: #5b6971
 
 ================================
 
@@ -66,6 +90,30 @@ text: #3b4252
 
 ================================
 
+One Dark
+
+DARK
+background: #282c34
+text: #abb2bf
+
+LIGHT
+background: #fafafa
+text: #383a42
+
+================================
+
+Oxocarbon
+
+DARK
+background: #161616
+text: #f2f4f8
+
+LIGHT
+background: #f2f4f8
+text: #393939
+
+================================
+
 Rosé Pine
 
 DARK
@@ -75,6 +123,18 @@ text: #e0def4
 LIGHT
 background: #faf4ed
 text: #575279
+
+================================
+
+Selenized
+
+DARK
+background: #103c48
+text: #adbcbc
+
+LIGHT
+background: #fbf3db
+text: #53676d
 
 ================================
 

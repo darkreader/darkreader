@@ -1,27 +1,20 @@
 // @ts-check
-import paths_ from './paths.js';
+import {getDestDir} from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {writeFile} from './utils.js';
-const {getDestDir, PLATFORM} = paths_;
 
-/**
- * @typedef copyEntry
- * @property {string} title
- * @property {string} dest
- * @property {boolean[]} args
- * @property {string} reloadType
- * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
- */
+/** @typedef {import('./types').HTMLEntry} HTMLEntry */
 
-function html(platform, title, loader, stylesheet, compatibility) {
+function html(platform, title, hasLoader, hasStyleSheet, compatibility) {
     return [
         '<!DOCTYPE html>',
         '<html>',
         '    <head>',
         '        <meta charset="utf-8" />',
         `        <title>${title}</title>`,
-        !stylesheet ? null : [
+        hasStyleSheet ? [
             '        <meta name="theme-color" content="#0B2228" />',
             '        <meta name="viewport" content="width=device-width, initial-scale=1" />',
             '        <link rel="stylesheet" type="text/css" href="style.css" />',
@@ -29,12 +22,12 @@ function html(platform, title, loader, stylesheet, compatibility) {
             '            rel="shortcut icon"',
             '            href="../assets/images/darkreader-icon-256x256.png"',
             '        />',
-        ],
+        ] : null,
         '        <script src="index.js" defer></script>',
         (compatibility && platform === PLATFORM.CHROMIUM_MV2) ? '        <script src="compatibility.js" defer></script>' : null,
         '    </head>',
         '',
-        loader ? [
+        hasLoader ? [
             '    <body>',
             '        <div class="loader">',
             '            <label class="loader__message">Loading, please wait</label>',
@@ -48,60 +41,82 @@ function html(platform, title, loader, stylesheet, compatibility) {
     ].filter((s) => s !== null).flat().join('\r\n');
 }
 
-/** @type {copyEntry[]} */
-const copyEntries = [
+/** @type {HTMLEntry[]} */
+const htmlEntries = [
     {
         title: 'Dark Reader background',
-        dest: 'background/index.html',
-        args: [false, false, false],
+        path: 'background/index.html',
+        hasLoader: false,
+        hasStyleSheet: false,
+        hasCompatibilityCheck: false,
         reloadType: reload.FULL,
-        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
+        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.CHROMIUM_MV2_PLUS, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
     },
     {
         title: 'Dark Reader settings',
-        dest: 'ui/popup/index.html',
-        args: [true, true, true],
+        path: 'ui/popup/index.html',
+        hasLoader: true,
+        hasStyleSheet: true,
+        hasCompatibilityCheck: true,
+        reloadType: reload.UI,
+    },
+    {
+        title: 'Dark Reader settings',
+        path: 'ui/options/index.html',
+        hasLoader: false,
+        hasStyleSheet: true,
+        hasCompatibilityCheck: false,
         reloadType: reload.UI,
     },
     {
         title: 'Dark Reader developer tools',
-        dest: 'ui/devtools/index.html',
-        args: [false, true, false],
+        path: 'ui/devtools/index.html',
+        hasLoader: false,
+        hasStyleSheet: true,
+        hasCompatibilityCheck: false,
         reloadType: reload.UI,
     },
     {
         title: 'Dark Reader CSS editor',
-        dest: 'ui/stylesheet-editor/index.html',
-        args: [false, true, false],
+        path: 'ui/stylesheet-editor/index.html',
+        hasLoader: false,
+        hasStyleSheet: true,
+        hasCompatibilityCheck: false,
         reloadType: reload.UI,
     },
 ];
 
-async function writeEntry({dest, title, args}, {debug, platform}) {
+async function writeEntry({path, title, hasLoader, hasStyleSheet, hasCompatibilityCheck}, {debug, platform}) {
     const destDir = getDestDir({debug, platform});
-    const d = `${destDir}/${dest}`;
-    await writeFile(d, html(platform, title, ...args));
+    const d = `${destDir}/${path}`;
+    await writeFile(d, html(platform, title, hasLoader, hasStyleSheet, hasCompatibilityCheck));
 }
 
-async function bundleHTML({platforms, debug}) {
-    const promises = [];
-    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
-    for (const entry of copyEntries) {
-        if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
-            continue;
-        }
-        for (const platform of enabledPlatforms) {
-            if (entry.platforms === undefined || entry.platforms.includes(platform)) {
-                promises.push(writeEntry(entry, {debug, platform}));
+/**
+ * @param {HTMLEntry[]} htmlEntries
+ * @returns {ReturnType<typeof createTask>}
+ */
+export function createBundleHTMLTask(htmlEntries) {
+    const bundleHTML = async ({platforms, debug}) => {
+        const promises = [];
+        const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
+        for (const entry of htmlEntries) {
+            if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
+                continue;
+            }
+            for (const platform of enabledPlatforms) {
+                if (entry.platforms === undefined || entry.platforms.includes(platform)) {
+                    promises.push(writeEntry(entry, {debug, platform}));
+                }
             }
         }
-    }
-    await Promise.all(promises);
+        await Promise.all(promises);
+    };
+
+    return createTask(
+        'bundle-html',
+        bundleHTML,
+    );
 }
 
-const bundleHTMLTask = createTask(
-    'bundle-html',
-    bundleHTML,
-);
-
-export default bundleHTMLTask;
+export default createBundleHTMLTask(htmlEntries);

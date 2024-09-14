@@ -1,10 +1,10 @@
 import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
-import {canInjectScript} from '../background/utils/extension-api';
+import {canInjectScript, keepListeningToEvents} from '../background/utils/extension-api';
 import type {ColorScheme, DebugMessageBGtoCS, DebugMessageBGtoUI, DebugMessageCStoBG, ExtensionData, News, UserSettings} from '../definitions';
 import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import {ASSERT, logInfo} from './utils/log';
+import {ASSERT} from './utils/log';
 import {sendLog} from './utils/sendLog';
 import {isFirefox} from '../utils/platform';
 import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query';
@@ -70,26 +70,9 @@ declare const __FIREFOX_MV2__: boolean;
 
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
-        try {
-            chrome.scripting.unregisterContentScripts(() => {
-                chrome.scripting.registerContentScripts([{
-                    id: 'proxy',
-                    matches: [
-                        '<all_urls>',
-                    ],
-                    js: [
-                        'inject/proxy.js',
-                    ],
-                    runAt: 'document_start',
-                    allFrames: true,
-                    persistAcrossSessions: true,
-                    world: 'MAIN',
-                }], () => logInfo('Registerd direct CSS proxy injector.'));
-            });
-        } catch (e) {
-            logInfo('Failed to register direct CSS proxy injector, falling back to other injection methods.');
-        }
+        Extension.isFirstLoad = true;
     });
+    keepListeningToEvents();
 }
 
 if (__WATCH__) {
@@ -268,3 +251,24 @@ if (__DEBUG__ && __LOG__) {
 }
 
 makeChromiumHappy();
+
+function writeInstallationVersion(
+    storage: chrome.storage.SyncStorageArea | chrome.storage.LocalStorageArea,
+    details: chrome.runtime.InstalledDetails,
+) {
+    storage.get({installation: {version: ''}}, (data) => {
+        if (data?.installation?.version) {
+            return;
+        }
+        storage.set({installation: {
+            date: Date.now(),
+            reason: details.reason,
+            version: details.previousVersion ?? chrome.runtime.getManifest().version,
+        }});
+    });
+}
+
+chrome.runtime.onInstalled.addListener((details) => {
+    writeInstallationVersion(chrome.storage.local, details);
+    writeInstallationVersion(chrome.storage.sync, details);
+});

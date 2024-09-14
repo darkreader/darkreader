@@ -325,7 +325,7 @@ function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOpe
 }
 
 interface OptimizedTreeObserverCallbacks {
-    onMinorMutations: (operations: ElementsTreeOperations) => void;
+    onMinorMutations: (root: Document | ShadowRoot, operations: ElementsTreeOperations) => void;
     onHugeMutations: (root: Document | ShadowRoot) => void;
 }
 
@@ -357,7 +357,7 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
                 hadHugeMutationsBefore = true;
             } else {
                 const elementsOperations = getElementsTreeOperations(mutations);
-                observerCallbacks.forEach(({onMinorMutations}) => onMinorMutations(elementsOperations));
+                observerCallbacks.forEach(({onMinorMutations}) => onMinorMutations(root, elementsOperations));
             }
         });
         observer.observe(root, {childList: true, subtree: true});

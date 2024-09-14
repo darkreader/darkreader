@@ -1,13 +1,15 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener, addDOMReadyListener, isDOMReady} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
-import type {CSSVariableModifier} from './variables';
+import type {CSSVariableModifier, ModifiedVarDeclaration} from './variables';
 import {variablesStore} from './variables';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../../utils/throttle';
+import {getAbsoluteURL} from '../../utils/url';
+import {getImageDetails} from './image';
 
 interface Overrides {
     [cssProp: string]: {
@@ -85,21 +87,34 @@ const overrides: Overrides = {
     },
 };
 
+const shorthandOverrides: Overrides = {
+    'background': {
+        customProp: '--darkreader-inline-bg',
+        cssProp: 'background',
+        dataAttr: 'data-darkreader-inline-bg',
+    },
+};
+
 const overridesList = Object.values(overrides);
-const normalizedPropList: { [key: string]: string } = {};
+const normalizedPropList: Record<string, string> = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
+const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color', 'background'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle(): string {
-    return overridesList.map(({dataAttr, customProp, cssProp}) => {
+    const allOverrides = overridesList.concat(Object.values(shorthandOverrides));
+    return allOverrides.map(({dataAttr, customProp, cssProp}) => {
         return [
             `[${dataAttr}] {`,
             `  ${cssProp}: var(${customProp}) !important;`,
             '}',
         ].join('\n');
-    }).join('\n');
+    }).concat([
+        '[data-darkreader-inline-invert] {',
+        '    filter: invert(100%) hue-rotate(180deg);',
+        '}',
+    ]).join('\n');
 }
 
 function getInlineStyleElements(root: Node) {
@@ -154,10 +169,11 @@ function deepWatchForInlineStyles(
             shadowRootDiscovered(n.shadowRoot!);
             deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });
+        variablesStore.matchVariablesAndDependents();
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
-        onMinorMutations: ({additions}) => {
+        onMinorMutations: (_root, {additions}) => {
             additions.forEach((added) => discoverNodes(added));
         },
         onHugeMutations: () => {
@@ -186,6 +202,7 @@ function deepWatchForInlineStyles(
                 elementStyleDidChange(target);
             }
         });
+        variablesStore.matchVariablesAndDependents();
     });
     const attrObserver = new MutationObserver((mutations) => {
         if (timeoutId) {
@@ -230,12 +247,28 @@ export function stopWatchingForInlineStyles(): void {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const svgInversionCache = new WeakSet<SVGSVGElement>();
+const svgAnalysisConditionCache = new WeakMap<SVGSVGElement, boolean>();
+const themeProps: Array<keyof Theme> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
-function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig): string {
+function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
+    if (svgAnalysisConditionCache.has(svg)) {
+        return svgAnalysisConditionCache.get(svg);
+    }
+    const shouldAnalyze = Boolean(
+        svg && (
+            svg.getAttribute('class')?.includes('logo') ||
+            svg.parentElement?.getAttribute('class')?.includes('logo')
+        )
+    );
+    svgAnalysisConditionCache.set(svg, shouldAnalyze);
+    return shouldAnalyze;
+}
+
+function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {
     return INLINE_STYLE_ATTRS
         .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
-        .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
+        .concat(themeProps.map((prop) => `${prop}="${theme[prop]}"`))
         .join(' ');
 }
 
@@ -249,7 +282,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boo
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -258,9 +291,6 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     const unsetProps = new Set(Object.keys(overrides));
 
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
-        const isPropertyVariable = targetCSSProp.startsWith('--');
-        const {customProp, dataAttr} = isPropertyVariable ? ({} as Overrides['']) : overrides[targetCSSProp];
-
         const mod = getModifiableCSSDeclaration(
             modifierCSSProp,
             cssVal,
@@ -272,28 +302,58 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (!mod) {
             return;
         }
-        let value = mod.value;
-        if (typeof value === 'function') {
-            value = value(theme) as string;
-        }
 
-        // typeof value === 'object' always evaluate to true when
-        // `isPropertyVariable` is true, but it serves as a type hint for typescript.
-        // Such that `as ReturnType<CSSVariableModifier>` won't error about the possible
-        // string type.
-        if (isPropertyVariable && typeof value === 'object') {
-            const typedValue: ReturnType<CSSVariableModifier> = value;
-            typedValue.declarations.forEach(({property, value}) => {
-                !(value instanceof Promise) && element.style.setProperty(property, value);
-            });
-
-            // TODO: add listener for `onTypeChange`.
-        } else {
+        function setStaticValue(value: string) {
+            const {customProp, dataAttr} = overrides[targetCSSProp] ?? shorthandOverrides[targetCSSProp];
             element.style.setProperty(customProp, value);
             if (!element.hasAttribute(dataAttr)) {
                 element.setAttribute(dataAttr, '');
             }
             unsetProps.delete(targetCSSProp);
+        }
+
+        function setVarDeclaration(mod: ReturnType<CSSVariableModifier>) {
+            let prevDeclarations: ModifiedVarDeclaration[] = [];
+
+            function setProps(declarations: ModifiedVarDeclaration[]) {
+                prevDeclarations.forEach(({property}) => {
+                    element.style.removeProperty(property);
+                });
+                declarations.forEach(({property, value}) => {
+                    if (!(value instanceof Promise)) {
+                        element.style.setProperty(property, value);
+                    }
+                });
+                prevDeclarations = declarations;
+            }
+
+            setProps(mod.declarations);
+            mod.onTypeChange.addListener(setProps);
+        }
+
+        function setAsyncValue(promise: Promise<string | null>, sourceValue: string) {
+            promise.then((value) => {
+                if (value && targetCSSProp === 'background' && value.startsWith('var(--darkreader-bg--')) {
+                    setStaticValue(value);
+                }
+                if (value && targetCSSProp === 'background-image') {
+                    if ((element === document.documentElement || element === document.body) && value === sourceValue) {
+                        // Remove big bright backgrounds from root or body
+                        value = 'none';
+                    }
+                    setStaticValue(value);
+                }
+                inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));
+            });
+        }
+
+        const value = typeof mod.value === 'function' ? mod.value(theme) : mod.value;
+        if (typeof value === 'string') {
+            setStaticValue(value);
+        } else if (value instanceof Promise) {
+            setAsyncValue(value, cssVal);
+        } else if (typeof value === 'object') {
+            setVarDeclaration(value);
         }
     }
 
@@ -306,12 +366,49 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
     }
 
+    const isSVGElement = element instanceof SVGElement;
+    const svg = isSVGElement ? element.ownerSVGElement ?? (element instanceof SVGSVGElement ? element : null) : null;
+    if (isSVGElement && theme.mode === 1 && svg) {
+        if (svgInversionCache.has(svg)) {
+            return;
+        }
+        if (shouldAnalyzeSVGAsImage(svg)) {
+            svgInversionCache.add(svg);
+            const analyzeSVGAsImage = () => {
+                let svgString = svg.outerHTML;
+                svgString = svgString.replaceAll('<style class="darkreader darkreader--sync" media="screen"></style>', '');
+                const dataURL = `data:image/svg+xml;base64,${btoa(svgString)}`;
+                getImageDetails(dataURL).then((details) => {
+                    if (
+                        (details.isDark && details.isTransparent) ||
+                        (details.isLarge && details.isLight && !details.isTransparent)
+                    ) {
+                        svg.setAttribute('data-darkreader-inline-invert', '');
+                    } else {
+                        svg.removeAttribute('data-darkreader-inline-invert');
+                    }
+                });
+            };
+            analyzeSVGAsImage();
+            if (!isDOMReady()) {
+                addDOMReadyListener(analyzeSVGAsImage);
+            }
+            return;
+        }
+    }
+
     if (element.hasAttribute('bgcolor')) {
         let value = element.getAttribute('bgcolor')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
         }
         setCustomProp('background-color', 'background-color', value);
+    }
+
+    if ((element === document.documentElement || element === document.body) && element.hasAttribute('background')) {
+        const url = getAbsoluteURL(location.href, element.getAttribute('background') ?? '');
+        const value = `url("${url}")`;
+        setCustomProp('background-image', 'background-image', value);
     }
 
     // We can catch some link elements here, that are from `<link rel="mask-icon" color="#000000">`.
@@ -324,7 +421,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
         setCustomProp('color', 'color', value);
     }
-    if (element instanceof SVGElement) {
+
+    if (isSVGElement) {
         if (element.hasAttribute('fill')) {
             const SMALL_SVG_LIMIT = 32;
             const value = element.getAttribute('fill')!;
@@ -354,31 +452,43 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color')!);
         }
     }
+
     if (element.hasAttribute('stroke')) {
         const value = element.getAttribute('stroke')!;
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
+
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
         // Temporarily ignore background images due to the possible performance
         // issues and complexity of handling async requests.
         if (property === 'background-image' && value.includes('url')) {
+            if (element === document.documentElement || element === document.body) {
+                setCustomProp(property, property, value);
+            }
             return;
         }
         if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {
             setCustomProp(property, property, value);
+        } else if (property === 'background' && value.includes('var(')) {
+            setCustomProp('background', 'background', value);
         } else {
-            const overridenProp = normalizedPropList[property];
-            if (overridenProp &&
-                (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp))) {
-                if (overridenProp === 'background-color' && element.hasAttribute('bgcolor')) {
+            const overriddenProp = normalizedPropList[property];
+            if (overriddenProp &&
+                (!element.style.getPropertyValue(overriddenProp) && !element.hasAttribute(overriddenProp))) {
+                if (overriddenProp === 'background-color' && element.hasAttribute('bgcolor')) {
                     return;
                 }
                 element.style.setProperty(property, '');
             }
         }
     });
+
     if (element.style && element instanceof SVGTextElement && element.style.fill) {
         setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
+    }
+
+    if (element.getAttribute('style')?.includes('--')) {
+        variablesStore.addInlineStyleForMatching(element.style);
     }
 
     forEach(unsetProps, (cssProp) => {

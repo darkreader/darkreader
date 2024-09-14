@@ -8,14 +8,15 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getCommands, canInjectScript} from './utils/extension-api';
-import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation} from '../utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation, getDuration} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import {ThemeEngine} from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
+import {getDetectorHintsFor} from '../generators/detector-hints';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
+import type {ExtensionData, Theme, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
 import {MessageTypeBGtoCS} from '../utils/message';
@@ -23,7 +24,6 @@ import {logInfo, logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
-import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
 import UIHighlights from './ui-highlights';
 import {getActiveTab} from '../utils/tabs';
@@ -66,6 +66,8 @@ export class Extension {
 
     // Record whether Extension.init() already ran since the last GB start
     private static initialized = false;
+
+    static isFirstLoad = false;
 
     // This sync initializer needs to run on every BG restart before anything else can happen
     private static init() {
@@ -205,7 +207,26 @@ export class Extension {
         }
     }
 
-    public static async start(): Promise<void> {
+    private static wakeInterval: number = -1;
+
+    private static runWakeDetector() {
+        const WAKE_CHECK_INTERVAL = getDuration({minutes: 1});
+        const WAKE_CHECK_INTERVAL_ERROR = getDuration({seconds: 10});
+        if (this.wakeInterval >= 0) {
+            clearInterval(this.wakeInterval);
+        }
+
+        let lastRun = Date.now();
+        this.wakeInterval = setInterval(() => {
+            const now = Date.now();
+            if (now - lastRun > WAKE_CHECK_INTERVAL + WAKE_CHECK_INTERVAL_ERROR) {
+                Extension.handleAutomationCheck();
+            }
+            lastRun = now;
+        }, WAKE_CHECK_INTERVAL);
+    }
+
+    static async start(): Promise<void> {
         Extension.init();
         await Promise.all([
             ConfigManager.load({local: true}),
@@ -226,12 +247,13 @@ export class Extension {
             await ConfigManager.load({local: false});
         }
         Extension.updateAutoState();
+        Extension.runWakeDetector();
         Extension.onAppToggle();
         logInfo('loaded', UserStorage.settings);
 
         if (__THUNDERBIRD__) {
             TabManager.registerMailDisplayScript();
-        } else {
+        } else if (!__CHROMIUM_MV3__ || Extension.isFirstLoad) {
             TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
@@ -273,7 +295,7 @@ export class Extension {
                 logInfo('Toggle command entered');
                 Extension.changeSettings({
                     enabled: !Extension.isExtensionSwitchedOn(),
-                    automation: {...UserStorage.settings.automation, ...{enable: false}},
+                    automation: {...UserStorage.settings.automation, ...{enabled: false}},
                 });
                 break;
             case 'addSite': {
@@ -295,7 +317,7 @@ export class Extension {
                         return (await chrome.scripting.executeScript({
                             target: {tabId, frameIds: [frameId]},
                             func: detectPDF,
-                        }))[0].result;
+                        }))[0].result || false;
                     } else if (__CHROMIUM_MV2__) {
                         return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
                             frameId,
@@ -369,7 +391,7 @@ export class Extension {
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name!]: cmd.shortcut}), {} as Shortcuts);
     }
 
-    public static async collectData(): Promise<ExtensionData> {
+    static async collectData(): Promise<ExtensionData> {
         await Extension.loadData();
         const [
             news,
@@ -398,7 +420,7 @@ export class Extension {
         };
     }
 
-    public static async collectDevToolsData(): Promise<DevToolsData> {
+    static async collectDevToolsData(): Promise<DevToolsData> {
         const [
             dynamicFixesText,
             filterFixesText,
@@ -438,9 +460,9 @@ export class Extension {
         };
     }
 
-    private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean) {
+    private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) {
         await Extension.loadData();
-        return Extension.getTabMessage(tabURL, url, isTopFrame);
+        return Extension.getTabMessage(tabURL, url, isTopFrame, topFrameHasDarkTheme);
     }
 
     private static async loadData() {
@@ -453,7 +475,7 @@ export class Extension {
 
     private static onColorSchemeChange = async (isDark: boolean) => {
         if (Extension.wasLastColorSchemeDark === isDark) {
-            // If color scheme was already correct, we do not need to do anyhting
+            // If color scheme was already correct, we do not need to do anything
             return;
         }
         Extension.wasLastColorSchemeDark = isDark;
@@ -483,7 +505,7 @@ export class Extension {
         }
     };
 
-    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
+    static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
         const promises = [];
         const prev = {...UserStorage.settings};
 
@@ -529,7 +551,7 @@ export class Extension {
         await Promise.all(promises);
     }
 
-    private static setTheme($theme: Partial<FilterConfig>) {
+    private static setTheme($theme: Partial<Theme>) {
         UserStorage.set({theme: {...UserStorage.settings.theme, ...$theme}});
 
         if (Extension.isExtensionSwitchedOn() && UserStorage.settings.changeBrowserTheme) {
@@ -556,7 +578,13 @@ export class Extension {
 
         function getToggledList(sourceList: string[]) {
             const list = sourceList.slice();
-            const index = list.indexOf(host);
+
+            let index = list.indexOf(host);
+            if (index < 0 && host.startsWith('www.')) {
+                const noWwwHost = host.substring(4);
+                index = list.indexOf(noWwwHost);
+            }
+
             if (index < 0) {
                 list.push(host);
             } else {
@@ -565,15 +593,21 @@ export class Extension {
             return list;
         }
 
-        const darkThemeDetected = !settings.applyToListedOnly && settings.detectDarkTheme && tab.isDarkThemeDetected;
-        if (isInDarkList || darkThemeDetected || settings.siteListEnabled.includes(host)) {
-            const toggledList = getToggledList(settings.siteListEnabled);
-            Extension.changeSettings({siteListEnabled: toggledList}, true);
+        const darkThemeDetected = settings.enabledByDefault && settings.detectDarkTheme && tab.isDarkThemeDetected;
+        if (!settings.enabledByDefault || isInDarkList || darkThemeDetected) {
+            const toggledList = getToggledList(settings.enabledFor);
+            Extension.changeSettings({enabledFor: toggledList}, true);
+            return;
+        }
+        if (settings.enabledByDefault && settings.enabledFor.includes(host)) {
+            const enabledFor = getToggledList(settings.enabledFor);
+            const disabledFor = getToggledList(settings.disabledFor);
+            Extension.changeSettings({enabledFor, disabledFor}, true);
             return;
         }
 
-        const toggledList = getToggledList(settings.siteList);
-        Extension.changeSettings({siteList: toggledList}, true);
+        const toggledList = getToggledList(settings.disabledFor);
+        Extension.changeSettings({disabledFor: toggledList}, true);
     }
 
     //------------------------------------
@@ -583,14 +617,8 @@ export class Extension {
 
     private static onAppToggle() {
         if (Extension.isExtensionSwitchedOn()) {
-            if (__CHROMIUM_MV3__) {
-                ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
-            }
             IconManager.setActive();
         } else {
-            if (__CHROMIUM_MV3__) {
-                ContentScriptManager.unregisterScripts();
-            }
             IconManager.setInactive();
         }
 
@@ -627,18 +655,19 @@ export class Extension {
         };
     }
 
-    private static getTabMessage = (tabURl: string, url: string, isTopFrame: boolean): TabData => {
+    private static getTabMessage = (tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean): TabData => {
         const settings = UserStorage.settings;
-        const tabInfo = Extension.getTabInfo(tabURl);
-        if (Extension.isExtensionSwitchedOn() && isURLEnabled(tabURl, settings, tabInfo)) {
-            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURl, urlList));
-            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURl, urls));
+        const tabInfo = Extension.getTabInfo(tabURL);
+        if (Extension.isExtensionSwitchedOn() && isURLEnabled(tabURL, settings, tabInfo) && !topFrameHasDarkTheme) {
+            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURL, urlList));
+            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURL, urls));
             let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;
             if (Extension.autoState === 'scheme-dark' || Extension.autoState === 'scheme-light') {
                 const mode = Extension.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
-            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURl, settings.siteListEnabled) && !isPDF(tabURl);
+            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURL, settings.enabledFor) && !isPDF(tabURL);
+            const detectorHints = detectDarkTheme ? getDetectorHintsFor(url, ConfigManager.DETECTOR_HINTS_RAW!, ConfigManager.DETECTOR_HINTS_INDEX!) : null;
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -650,6 +679,7 @@ export class Extension {
                         data: {
                             css: createCSSFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                             detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }
@@ -660,6 +690,7 @@ export class Extension {
                             data: {
                                 css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                                 detectDarkTheme,
+                                detectorHints,
                             },
                         };
                     }
@@ -670,6 +701,7 @@ export class Extension {
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                             detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }
@@ -681,6 +713,7 @@ export class Extension {
                                 theme.stylesheet :
                                 createStaticStylesheet(theme, url, isTopFrame, ConfigManager.STATIC_THEMES_RAW!, ConfigManager.STATIC_THEMES_INDEX!),
                             detectDarkTheme: settings.detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }
@@ -693,6 +726,7 @@ export class Extension {
                             fixes,
                             isIFrame: !isTopFrame,
                             detectDarkTheme,
+                            detectorHints,
                         },
                     };
                 }
@@ -701,7 +735,7 @@ export class Extension {
             }
         }
 
-        logInfo(`Site is not inverted: ${tabURl}`);
+        logInfo(`Site is not inverted: ${tabURL}`);
         return {
             type: MessageTypeBGtoCS.CLEAN_UP,
         };

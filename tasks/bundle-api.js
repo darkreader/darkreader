@@ -8,8 +8,7 @@ import typescript from 'typescript';
 import fs from 'node:fs';
 import os from 'node:os';
 import {createTask} from './task.js';
-import paths from './paths.js';
-const {rootDir, rootPath} = paths;
+import {absolutePath} from './paths.js';
 
 async function getVersion() {
     const file = await fs.promises.readFile(new URL('../package.json', import.meta.url), 'utf8');
@@ -20,7 +19,7 @@ async function getVersion() {
 let watchFiles = [];
 
 async function bundleAPI({debug, watch}) {
-    const src = rootPath('src/api/index.ts');
+    const src = absolutePath('src/api/index.ts');
     const dest = 'darkreader.js';
     const bundle = await rollup.rollup({
         input: src,
@@ -29,9 +28,9 @@ async function bundleAPI({debug, watch}) {
         },
         plugins: [
             rollupPluginTypescript({
-                rootDir,
+                rootDir: absolutePath('.'),
                 typescript,
-                tsconfig: rootPath('src/api/tsconfig.json'),
+                tsconfig: absolutePath('src/api/tsconfig.json'),
                 noImplicitAny: debug ? false : true,
                 noUnusedLocals: debug ? false : true,
                 strictNullChecks: debug ? false : true,

@@ -142,7 +142,7 @@ export async function getFontList(): Promise<string[]> {
     });
 }
 
-type page = 'devtools' | 'stylesheet-editor';
+type ExtensionPage = 'devtools' | 'options' | 'stylesheet-editor';
 
 // TODO(Anton): There must be a better way to do this
 // This function ping-pongs a message to possible DevTools popups.
@@ -182,9 +182,9 @@ async function getExtensionPageTab(url: string): Promise<chrome.tabs.Tab | null>
     });
 }
 
-export async function openExtensionPage(page: page): Promise<void> {
+export async function openExtensionPage(page: ExtensionPage): Promise<void> {
     const url = chrome.runtime.getURL(`/ui/${page}/index.html`);
-    if (isMobile) {
+    if (isMobile || page === 'options') {
         const extensionPageTab = await getExtensionPageTab(url);
         if (extensionPageTab !== null) {
             chrome.tabs.update(extensionPageTab.id!, {active: true});
@@ -202,7 +202,7 @@ export async function openExtensionPage(page: page): Promise<void> {
             chrome.windows.create({
                 type: 'popup',
                 url,
-                width: 600,
+                width: 800,
                 height: 600,
             });
             window.close();

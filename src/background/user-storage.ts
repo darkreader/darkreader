@@ -2,7 +2,7 @@ import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
+import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {validateSettings} from '../utils/validation';
@@ -12,9 +12,9 @@ const SAVE_TIMEOUT = 1000;
 export default class UserStorage {
     private static loadBarrier: PromiseBarrier<UserSettings, void>;
     private static saveStorageBarrier: PromiseBarrier<void, void> | null;
-    public static settings: Readonly<UserSettings>;
+    static settings: Readonly<UserSettings>;
 
-    public static async loadSettings(): Promise<void> {
+    static async loadSettings(): Promise<void> {
         if (!UserStorage.settings) {
             UserStorage.settings = await UserStorage.loadSettingsFromStorage();
         }
@@ -29,6 +29,9 @@ export default class UserStorage {
         settings.customThemes.forEach((site) => {
             site.theme = {...DEFAULT_THEME, ...site.theme};
         });
+        if (settings.customThemes.length === 0) {
+            settings.customThemes = DEFAULT_SETTINGS.customThemes;
+        }
     }
 
     // migrateAutomationSettings migrates old automation settings to the new interface.
@@ -37,7 +40,7 @@ export default class UserStorage {
     // Remove this over two years(mid-2024).
     // This won't always work, because browsers can decide to instead use the default settings
     // when they notice a different type being requested for automation, in that case it's a data-loss
-    // and not something we can encouter for, except for doing always two extra requests to explicitly
+    // and not something we can encounter for, except for doing always two extra requests to explicitly
     // check for this case which is inefficient usage of requesting storage.
     private static migrateAutomationSettings(settings: UserSettings): void {
         if (typeof settings.automation === 'string') {
@@ -60,13 +63,49 @@ export default class UserStorage {
         }
     }
 
+    private static migrateSiteListsV2(deprecated: any): Partial<UserSettings> {
+        const settings: Partial<UserSettings> = {};
+        settings.enabledByDefault = !deprecated.applyToListedOnly;
+        if (settings.enabledByDefault) {
+            settings.disabledFor = deprecated.siteList ?? [];
+            settings.enabledFor = deprecated.siteListEnabled ?? [];
+        } else {
+            settings.disabledFor = [];
+            settings.enabledFor = deprecated.siteList ?? [];
+        }
+        return settings;
+    }
+
     private static async loadSettingsFromStorage(): Promise<UserSettings> {
         if (UserStorage.loadBarrier) {
             return await UserStorage.loadBarrier.entry();
         }
         UserStorage.loadBarrier = new PromiseBarrier();
 
-        const local = await readLocalStorage(DEFAULT_SETTINGS);
+        let local = await readLocalStorage(DEFAULT_SETTINGS);
+
+        if (local.schemeVersion < 2) {
+            const sync = await readSyncStorage({schemeVersion: 0});
+            if (!sync || sync.schemeVersion < 2) {
+                const deprecatedDefaults = {
+                    siteList: [],
+                    siteListEnabled: [],
+                    applyToListedOnly: false,
+                };
+                const localDeprecated = await readLocalStorage(deprecatedDefaults);
+                const localTransformed = UserStorage.migrateSiteListsV2(localDeprecated);
+                await writeLocalStorage({schemeVersion: 2, ...localTransformed});
+                await removeLocalStorage(Object.keys(deprecatedDefaults));
+
+                const syncDeprecated = await readSyncStorage(deprecatedDefaults);
+                const syncTransformed = UserStorage.migrateSiteListsV2(syncDeprecated);
+                await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
+                await removeSyncStorage(Object.keys(deprecatedDefaults));
+
+                local = await readLocalStorage(DEFAULT_SETTINGS);
+            }
+        }
+
         const {errors: localCfgErrors} = validateSettings(local);
         localCfgErrors.forEach((err) => logWarn(err));
         if (local.syncSettings == null) {
@@ -99,17 +138,17 @@ export default class UserStorage {
         return $sync;
     }
 
-    public static async saveSettings(): Promise<void> {
+    static async saveSettings(): Promise<void> {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.saveSettings().
-            logWarn('Could not save setthings into storage because settings are missing.');
+            logWarn('Could not save settings into storage because the settings are missing.');
             return;
         }
         await UserStorage.saveSettingsIntoStorage();
     }
 
-    public static async saveSyncSetting(sync: boolean): Promise<void> {
+    static async saveSyncSetting(sync: boolean): Promise<void> {
         const obj = {syncSettings: sync};
         await writeLocalStorage(obj);
         try {
@@ -145,25 +184,26 @@ export default class UserStorage {
         UserStorage.saveStorageBarrier = null;
     });
 
-    public static set($settings: Partial<UserSettings>): void {
+    static set($settings: Partial<UserSettings>): void {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.set().
-            logWarn('Could not modify setthings because settings are missing.');
+            logWarn('Could not modify settings because the settings are missing.');
             return;
         }
-        if ($settings.siteList) {
-            if (!Array.isArray($settings.siteList)) {
+
+        const filterSiteList = (siteList: string[]) => {
+            if (!Array.isArray(siteList)) {
                 const list: string[] = [];
-                for (const key in ($settings.siteList as string[])) {
+                for (const key in (siteList as string[])) {
                     const index = Number(key);
                     if (!isNaN(index)) {
-                        list[index] = $settings.siteList[key];
+                        list[index] = siteList[key];
                     }
                 }
-                $settings.siteList = list;
+                siteList = list;
             }
-            const siteList = $settings.siteList.filter((pattern) => {
+            return siteList.filter((pattern) => {
                 let isOK = false;
                 try {
                     isURLMatched('https://google.com/', pattern);
@@ -174,8 +214,17 @@ export default class UserStorage {
                 }
                 return isOK && pattern !== '/';
             });
-            $settings = {...$settings, siteList};
+        };
+
+        const {enabledFor, disabledFor} = $settings;
+        const updatedSettings = {...UserStorage.settings, ...$settings};
+        if (enabledFor) {
+            updatedSettings.enabledFor = filterSiteList(enabledFor);
         }
-        UserStorage.settings = {...UserStorage.settings, ...$settings};
+        if (disabledFor) {
+            updatedSettings.disabledFor = filterSiteList(disabledFor);
+        }
+
+        UserStorage.settings = updatedSettings;
     }
 }

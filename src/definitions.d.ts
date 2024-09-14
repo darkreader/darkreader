@@ -6,13 +6,6 @@ import type {ThemeEngine} from './generators/theme-engines';
 
 export type ColorScheme = 'dark' | 'light';
 
-// ContextId is a number on Firefox and documentId is a string in Chromium,
-// let's use string for simplicity
-export type documentId = string;
-export type scriptId = string;
-export type tabId = number;
-export type frameId = number;
-
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
@@ -39,7 +32,7 @@ export interface TabData {
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
-    setTheme(theme: Partial<FilterConfig>): void;
+    setTheme(theme: Partial<Theme>): void;
     setShortcut(command: string, shortcut: string): Promise<string | null>;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
@@ -58,6 +51,10 @@ export interface ExtWrapper {
     data: ExtensionData;
     actions: ExtensionActions;
 }
+
+export type ViewProps = ExtWrapper & {
+    fonts?: string[];
+};
 
 export interface Theme {
     mode: FilterMode;
@@ -82,11 +79,10 @@ export interface Theme {
     immediateModify: boolean;
 }
 
-export type FilterConfig = Theme;
-
 export interface CustomSiteConfig {
     url: string[];
-    theme: FilterConfig;
+    theme: Theme;
+    builtIn?: boolean;
 }
 
 export interface ThemePreset {
@@ -103,14 +99,15 @@ export interface Automation {
 }
 
 export interface UserSettings {
+    schemeVersion: number;
     enabled: boolean;
     fetchNews: boolean;
-    theme: FilterConfig;
+    theme: Theme;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
-    siteList: string[];
-    siteListEnabled: string[];
-    applyToListedOnly: boolean;
+    enabledByDefault: boolean;
+    enabledFor: string[];
+    disabledFor: string[];
     changeBrowserTheme: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
@@ -118,6 +115,7 @@ export interface UserSettings {
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
+    previewNewestDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
     enableContextMenus: boolean;
@@ -136,8 +134,8 @@ export interface LocationSettings {
 
 export interface TabInfo {
     url: string;
-    id: tabId | null;
-    documentId: documentId | null;
+    id: number | null;
+    documentId: string | null;
     isProtected: boolean;
     isInjected: boolean | null;
     isInDarkList: boolean;
@@ -146,7 +144,7 @@ export interface TabInfo {
 
 export interface MessageCStoBG {
     id?: string;
-    scriptId?: scriptId;
+    scriptId?: string;
     type: MessageTypeCStoBG;
     data?: any;
 }
@@ -162,7 +160,7 @@ export interface MessageCStoUI {
 
 export interface MessageBGtoCS {
     id?: string;
-    scriptId?: scriptId;
+    scriptId?: string;
     type: MessageTypeBGtoCS;
     data?: any;
     error?: any;
@@ -212,6 +210,14 @@ export interface InversionFix {
     noinvert: string[];
     removebg: string[];
     css: string;
+}
+
+export interface DetectorHint {
+    url: string[];
+    target: string;
+    match: string[];
+    noDarkTheme: boolean;
+    systemTheme: boolean;
 }
 
 export interface StaticTheme {

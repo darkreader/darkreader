@@ -1,0 +1,100 @@
+.automation {
+    &__time-picker-control {
+        display: flex;
+        flex-direction: row;
+
+        .checkbox {
+            border-right: none;
+            flex: none;
+        }
+
+        .time-range-picker .time-range-picker__input--start {
+            border-left: @size-border-inner solid @color-border;
+        }
+    }
+
+    &__location-control {
+        display: flex;
+        flex-direction: row;
+
+        .checkbox {
+            border-right: none;
+            flex: none;
+        }
+
+        &__latitude,
+        &__longitude {
+            flex: auto;
+            text-align: center;
+            text-indent: 0;
+            width: 100%;
+        }
+
+        &__latitude {
+            border-left: @size-border-inner solid @color-border;
+            border-right: none;
+        }
+
+        &__longitude {
+            border-left: @size-border-inner solid @color-border;
+        }
+    }
+
+    &__system-control {
+        display: flex;
+        flex-direction: row;
+
+        &__checkbox {
+            flex: none;
+            border-right: none;
+        }
+
+        &__button {
+            border-left-width: @size-border-inner;
+            flex: auto;
+
+            &:not(&--active) {
+                color: @color-input-fore;
+            }
+        }
+
+        &:hover &__button,
+        &:hover &__checkbox {
+            background-color: @color-control-hover;
+        }
+    }
+
+    &__behavior {
+        .dropdown {
+            background-color: transparent;
+            box-shadow: inset 0 0 0 @size-border @color-border;
+            cursor: pointer;
+            height: @size-control-inner + 2 * @size-border;
+            width: 100%;
+    
+            &__selected {
+                background-color: transparent;
+                background-position: center right 0.25rem + @size-border;
+                height: @size-control-inner;
+                margin-left: @size-border;
+                margin-top: @size-border;
+                transition: background-color @time-fast;
+                width: calc(100% - 2 * @size-border);
+
+                &:hover {
+                    background-color: @color-control-hover;
+                }
+            }
+    
+            &--open .dropdown__list {
+                border: @size-border solid @color-border;
+                margin-top: 0;
+                padding-top: @size-border;
+            }
+    
+            &__list__item {
+                height: @size-control-inner;
+            }
+        }
+    }
+}

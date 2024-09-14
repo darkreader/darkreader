@@ -1,8 +1,8 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {getDuration} from '../../../utils/time';
-import type {News} from '../../../definitions';
-import type {ViewProps} from '../types';
+import type {News, ViewProps} from '../../../definitions';
+import {HOMEPAGE_URL} from '../../../utils/links';
 
 function isFresh(n: News) {
     try {
@@ -14,7 +14,7 @@ function isFresh(n: News) {
     }
 }
 
-function NewsLink(props: {news: News; isSmall?: boolean; onClick: () => void}) {
+function NewsLink(props: {news: News; isSmall?: boolean; onClick?: () => void}) {
     const {news} = props;
     return (
         <a
@@ -72,9 +72,19 @@ export default function NewsSection(props: ViewProps) {
         }
     });
 
+    const birthdayExpired = (new Date(2024, 7, 2)).getTime();
+    const birthdayNews = {
+        id: 'birthday',
+        date: '2024-07-07T00:00:00Z',
+        url: `${HOMEPAGE_URL}/timeline/`,
+        headline: 'On July 7th we celebrate 10 years!',
+        icon: '/ui/assets/images/birthday-icon.svg',
+    };
+    const birthdayLink = <NewsLink isSmall news={birthdayNews} />;
+
     return (
         <div class={{'news-section': true, 'news-section--expanded': expanded}}>
-            {latest ? <NewsLink isSmall news={latest} onClick={markLatestAsRead} /> : null}
+            {Date.now() < birthdayExpired ? birthdayLink : latest ? <NewsLink isSmall news={latest} onClick={markLatestAsRead} /> : null}
             <div class="news-section__popover">
                 <div class="news-section__popover__top">
                     <div class="news-section__title">

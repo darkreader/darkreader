@@ -5,7 +5,7 @@ import {DONATE_URL} from '../../../../utils/links';
 import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../../utils/platform';
-import KeyboardIcon from '../../main-page/keyboard-icon';
+import {KeyboardIcon} from '../../../icons';
 
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;
@@ -186,7 +186,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 </p>
                 <div class="header__more-settings__donate">
                     <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
+                        <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
                     </a>
                     <p class="header__more-settings__description">
                         {getLocalMessage('support_out_work')}

@@ -1,9 +1,29 @@
 import {m} from 'malevic';
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
-import type {Theme} from '../../../../definitions';
+import type {Theme, ViewProps} from '../../../../definitions';
 import type {ParsedColorSchemeConfig} from '../../../../utils/colorscheme-parser';
-import type {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls, ColorSchemeDropDown, ImmediateModify} from '../controls';
+import {isURLEnabled, isURLInList} from '../../../../utils/url';
+import {ThemeEngine} from '../../../../generators/theme-engines';
+import {
+    BackgroundColor,
+    Brightness,
+    ColorSchemeDropDown,
+    Contrast,
+    ExportTheme,
+    FontPicker,
+    Grayscale,
+    ImmediateModify,
+    Mode,
+    ResetButton,
+    Scheme,
+    Scrollbar,
+    SelectionColorEditor,
+    Sepia,
+    StyleSystemControls,
+    TextColor,
+    TextStroke,
+    UseFont,
+} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -104,9 +124,19 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
 
 interface FontGroupsProps extends ThemeGroupProps {
     fonts: string[];
+    viewProps: ViewProps;
 }
 
-function FontGroup({theme, fonts, change}: FontGroupsProps) {
+function FontGroup({theme, fonts, viewProps, change}: FontGroupsProps) {
+    const {settings, activeTab, isAllowedFileSchemeAccess} = viewProps.data;
+    const {isDarkThemeDetected, isInDarkList, isInjected, isProtected} = activeTab;
+
+    const custom = settings.customThemes.find((custom) => isURLInList(activeTab.url, custom.url));
+    const engine = custom ? custom.theme.engine : settings.theme.engine;
+    const canExportTheme = engine === ThemeEngine.dynamicTheme && activeTab.id
+        && !isDarkThemeDetected && !isInDarkList && !isProtected && isInjected !== false
+        && isURLEnabled(activeTab.url, settings, activeTab, isAllowedFileSchemeAccess);
+
     return (
         <Array>
             <UseFont
@@ -130,6 +160,7 @@ function FontGroup({theme, fonts, change}: FontGroupsProps) {
                 value={theme.immediateModify}
                 onChange={(immediateModify) => change({immediateModify})}
             />
+            {canExportTheme ? <ExportTheme {...viewProps} /> : null}
         </Array>
     );
 }
@@ -148,7 +179,7 @@ export default function ThemePage(props: ViewProps) {
                     <ColorsGroup theme={theme} change={change} colorSchemes={props.data.colorScheme} />
                 </Collapsible.Group>
                 <Collapsible.Group id="font" label="Font & more">
-                    <FontGroup theme={theme} fonts={props.fonts!} change={change} />
+                    <FontGroup theme={theme} fonts={props.fonts!} viewProps={props} change={change} />
                 </Collapsible.Group>
             </Collapsible>
             <ResetButton {...props} />

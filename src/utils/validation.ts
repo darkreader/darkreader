@@ -102,6 +102,8 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
         return themeErrors.length === 0;
     };
 
+    validateProperty(settings, 'schemeVersion', isNumber, DEFAULT_SETTINGS);
+
     validateProperty(settings, 'enabled', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'fetchNews', isBoolean, DEFAULT_SETTINGS);
 
@@ -133,12 +135,12 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
         return presetValidator.errors.length === 0;
     });
 
-    validateProperty(settings, 'siteList', isArray, DEFAULT_SETTINGS);
-    validateArray(settings, 'siteList', isNonEmptyString);
-    validateProperty(settings, 'siteListEnabled', isArray, DEFAULT_SETTINGS);
-    validateArray(settings, 'siteListEnabled', isNonEmptyString);
+    validateProperty(settings, 'enabledFor', isArray, DEFAULT_SETTINGS);
+    validateArray(settings, 'enabledFor', isNonEmptyString);
+    validateProperty(settings, 'disabledFor', isArray, DEFAULT_SETTINGS);
+    validateArray(settings, 'disabledFor', isNonEmptyString);
 
-    validateProperty(settings, 'applyToListedOnly', isBoolean, DEFAULT_SETTINGS);
+    validateProperty(settings, 'enabledByDefault', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'changeBrowserTheme', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSettings', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSitesFixes', isBoolean, DEFAULT_SETTINGS);
@@ -176,6 +178,7 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
     }, DEFAULT_SETTINGS);
 
     validateProperty(settings, 'previewNewDesign', isBoolean, DEFAULT_SETTINGS);
+    validateProperty(settings, 'previewNewestDesign', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'enableForPDF', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'enableForProtectedPages', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'enableContextMenus', isBoolean, DEFAULT_SETTINGS);

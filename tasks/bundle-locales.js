@@ -1,13 +1,16 @@
 // @ts-check
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import paths from './paths.js';
+import {getDestDir, absolutePath} from './paths.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readFile, writeFile} from './utils.js';
-const {getDestDir, PLATFORM, rootPath} = paths;
 
-async function bundleLocale(/** @type {string} */filePath) {
+const srcLocalesDir = 'src/_locales';
+
+/** @type {(filePath: string) => Promise<string>} */
+async function bundleLocale(filePath) {
     let file = await readFile(filePath);
     file = file.replace(/^#.*?$/gm, '');
 
@@ -30,14 +33,14 @@ async function bundleLocale(/** @type {string} */filePath) {
     return `${JSON.stringify(messages, null, 4)}\n`;
 }
 
-async function bundleLocales({platforms, debug}) {
-    const localesSrcDir = rootPath('src/_locales');
-    const list = await fs.readdir(localesSrcDir);
+async function bundleLocales(srcLocalesDir, {platforms, debug}) {
+    const absoluteSrcLocalesDir = absolutePath(srcLocalesDir);
+    const list = await fs.readdir(absoluteSrcLocalesDir);
     for (const name of list) {
         if (!name.endsWith('.config')) {
             continue;
         }
-        const locale = await bundleLocale(`${localesSrcDir}/${name}`);
+        const locale = await bundleLocale(`${absoluteSrcLocalesDir}/${name}`);
         const fileName = name.substring(name.lastIndexOf('/') + 1);
         await writeFiles(locale, fileName, {platforms, debug});
     }
@@ -53,20 +56,29 @@ async function writeFiles(data, fileName, {platforms, debug}){
     }
 }
 
-const bundleLocalesTask = createTask(
-    'bundle-locales',
-    bundleLocales,
-).addWatcher(
-    ['src/_locales/**/*.config'],
-    async (changedFiles, _, platforms) => {
-        const localesSrcDir = rootPath('src/_locales');
+/**
+ * @param {string} srcLocalesDir
+ * @returns {ReturnType<typeof createTask>}
+ */
+export function createBundleLocalesTask(srcLocalesDir) {
+    /** @type {(changedFiles: string[], watcher: any, platforms: any) => Promise<void>} */
+    const onChange = async (changedFiles, _, platforms) => {
+        const localesSrcDir = absolutePath(srcLocalesDir);
         for (const file of changedFiles) {
             const fileName = file.substring(file.lastIndexOf(path.sep) + 1);
             const locale = await bundleLocale(`${localesSrcDir}/${fileName}`);
             await writeFiles(locale, fileName, {platforms, debug: true});
         }
         reload.reload({type: reload.FULL});
-    },
-);
+    };
 
-export default bundleLocalesTask;
+    return createTask(
+        'bundle-locales',
+        (options) => bundleLocales(srcLocalesDir, options),
+    ).addWatcher(
+        [`${srcLocalesDir}/**/*.config`],
+        onChange,
+    );
+}
+
+export default createBundleLocalesTask(srcLocalesDir);

@@ -1,3 +1,4 @@
+// @ts-check
 import process from 'node:process';
 import {WebSocketServer} from 'ws';
 import {log} from './utils.js';
@@ -5,16 +6,18 @@ import {log} from './utils.js';
 export const PORT = 8890;
 const WAIT_FOR_CONNECTION = 2000;
 
-/** @type {import('ws').Server} */
+/** @type {import('ws').WebSocketServer | null} */
 let server = null;
 
-/** @type {Set<WebSocket>} */
+/** @type {Set<import('ws').WebSocket>} */
 const sockets = new Set();
-/** @type {WeakMap<WebSocket, number>} */
+/** @type {WeakMap<import('ws').WebSocket, number>} */
 const times = new WeakMap();
+/** @type {WeakMap<import('ws').WebSocket, string>} */
+const userAgents = new WeakMap();
 
 /**
- * @returns {Promise<import('ws').Server>}
+ * @returns {Promise<import('ws').WebSocketServer>}
  */
 function createServer() {
     return new Promise((resolve) => {
@@ -23,17 +26,25 @@ function createServer() {
             log.ok('Auto-reloader started');
             resolve(server);
         });
-        server.on('connection', (ws) => {
-            log.ok('Extension connected');
+        server.on('connection', (ws, request) => {
+            const userAgent = request.headers['user-agent'];
+            log.ok(`Extension connected: ${userAgent}`);
+
             sockets.add(ws);
             times.set(ws, Date.now());
+            userAgent && userAgents.set(ws, userAgent);
+
             ws.on('message', (data) => {
-                const message = JSON.parse(data);
+                const message = JSON.parse(data.toString());
                 if (message.type === 'reloading') {
                     log.ok('Extension reloading...');
                 }
             });
-            ws.on('close', () => sockets.delete(ws));
+            ws.on('close', () => {
+                const userAgent = userAgents.get(ws);
+                log.warn(`Extension disconnected: ${userAgent}`);
+                sockets.delete(ws);
+            });
             if (connectionAwaiter !== null) {
                 connectionAwaiter();
             }
@@ -51,7 +62,7 @@ function closeServer() {
 process.on('exit', closeServer);
 process.on('SIGINT', closeServer);
 
-/** @type {() => void} */
+/** @type {(() => void) | null} */
 let connectionAwaiter = null;
 
 function waitForConnection() {
@@ -64,13 +75,13 @@ function waitForConnection() {
         const timeoutId = setTimeout(() => {
             log.warn('Auto-reloader did not connect');
             connectionAwaiter = null;
-            resolve();
+            resolve(true);
         }, WAIT_FOR_CONNECTION);
     });
 }
 
 /**
- * @param {WebSocket} ws
+ * @param {import('ws').WebSocket} ws
  * @param {any} message
  */
 function send(ws, message) {
@@ -92,9 +103,24 @@ export async function reload({type}) {
     Array.from(sockets.values())
         .filter((ws) => {
             const created = times.get(ws);
-            return created < now;
+            return created && created < now;
         })
         .forEach((ws) => send(ws, {type}));
+}
+
+export function getConnectedBrowsers() {
+    /** @type {Set<string>} */
+    const browsers = new Set();
+    sockets.forEach((ws) => {
+        const userAgent = userAgents.get(ws);
+        if (userAgent?.includes('Chrome') || userAgent?.includes('Chromium')) {
+            browsers.add('chrome');
+        }
+        if (userAgent?.includes('Firefox')) {
+            browsers.add('firefox');
+        }
+    });
+    return Array.from(browsers);
 }
 
 export const CSS = 'reload:css';

@@ -21,7 +21,7 @@ on:
       node_version:
         description: 'NodeJS version'
         required: true
-        default: '16.x'
+        default: '18.x'
 
 jobs:
   test:
@@ -31,12 +31,12 @@ jobs:
     steps:
 
       - name: Clone repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Node setup
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version || '16.x' }}
+          node-version: ${{ inputs.node_version || '18.x' }}
           cache: npm
 
       - name: Install npm dependencies
@@ -46,7 +46,7 @@ jobs:
         run: npm run test:unit -- --json --outputFile=test-results-unit.json
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-unit
           path: test-results-unit.json

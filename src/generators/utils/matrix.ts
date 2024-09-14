@@ -1,9 +1,9 @@
 import {clamp, multiplyMatrices} from '../../utils/math';
 import type {matrix5x1, matrix5x5} from '../../utils/math';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 
 
-export function createFilterMatrix(config: FilterConfig): matrix5x5 {
+export function createFilterMatrix(config: Theme): matrix5x5 {
     let m: matrix5x5 = Matrix.identity();
     if (config.sepia !== 0) {
         m = multiplyMatrices(m, Matrix.sepia(config.sepia / 100));

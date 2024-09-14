@@ -1,3 +1,8 @@
+export interface TextRange {
+    start: number;
+    end: number;
+}
+
 export function getTextPositionMessage(text: string, index: number): string {
     if (!isFinite(index)) {
         throw new Error(`Wrong char index ${index}`);
@@ -44,7 +49,7 @@ export function parseArray(text: string): string[] {
         .filter((s) => s);
 }
 
-export function formatArray(arr: Readonly<string[]>): string {
+export function formatArray(arr: readonly string[]): string {
     return arr.concat('').join('\n');
 }
 
@@ -61,64 +66,44 @@ export function getStringSize(value: string): number {
     return value.length * 2;
 }
 
-export function formatCSS(text: string): string {
-    function trimLeft(text: string) {
-        return text.replace(/^\s+/, '');
+export function getHashCode(text: string): number {
+    const len = text.length;
+    let hash = 0;
+    for (let i = 0; i < len; i++) {
+        const c = text.charCodeAt(i);
+        hash = ((hash << 5) - hash + c) & 4294967295;
     }
-
-    function getIndent(depth: number) {
-        if (depth === 0) {
-            return '';
-        }
-        return ' '.repeat(4 * depth);
-    }
-
-    // Dont execute this kind of Regex on large CSS, as this isn't necessary.
-    // Maxium of 50K characters.
-    if (text.length < 50000) {
-        const emptyRuleRegexp = /[^{}]+{\s*}/;
-        while (emptyRuleRegexp.test(text)) {
-            text = text.replace(emptyRuleRegexp, '');
-        }
-    }
-    const css = (text
-        .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
-        .replace(/\{/g, '{\n') // {
-        .replace(/\}/g, '\n}\n') // }
-        .replace(/\;(?![^\(|\"]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
-        .replace(/\,(?![^\(|\"]*(\)|\"))/g, ',\n') // , and do not target between () and ""
-        .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
-        .split('\n'));
-
-    let depth = 0;
-    const formatted: string[] = [];
-
-    for (let x = 0, len = css.length; x < len; x++) {
-        const line = `${css[x] }\n`;
-        if (line.includes('{')) { // {
-            formatted.push(getIndent(depth++) + trimLeft(line));
-        } else if (line.includes('\}')) { // }
-            formatted.push(getIndent(--depth) + trimLeft(line));
-        } else { // CSS line
-            formatted.push(getIndent(depth) + trimLeft(line));
-        }
-    }
-
-    return formatted.join('').trim();
+    return hash;
 }
 
-interface ParenthesesRange {
-    start: number;
-    end: number;
+export function escapeRegExpSpecialChars(input: string): string {
+    return input.replaceAll(/[\^$.*+?\(\)\[\]{}|\-\\]/g, '\\$&');
 }
 
-export function getParenthesesRange(input: string, searchStartIndex = 0): ParenthesesRange | null {
-    const length = input.length;
+export function getParenthesesRange(input: string, searchStartIndex = 0): TextRange | null {
+    return getOpenCloseRange(input, searchStartIndex, '(', ')', []);
+}
+
+export function getOpenCloseRange(
+    input: string,
+    searchStartIndex: number,
+    openToken: string,
+    closeToken: string,
+    excludeRanges: TextRange[],
+): TextRange | null {
+    let indexOf: (token: string, pos: number) => number;
+    if (excludeRanges.length === 0) {
+        indexOf = (token: string, pos: number) => input.indexOf(token, pos);
+    } else {
+        indexOf = (token: string, pos: number) => indexOfExcluding(input, token, pos, excludeRanges);
+    }
+
+    const {length} = input;
     let depth = 0;
     let firstOpenIndex = -1;
     for (let i = searchStartIndex; i < length; i++) {
         if (depth === 0) {
-            const openIndex = input.indexOf('(', i);
+            const openIndex = indexOf(openToken, i);
             if (openIndex < 0) {
                 break;
             }
@@ -126,17 +111,17 @@ export function getParenthesesRange(input: string, searchStartIndex = 0): Parent
             depth++;
             i = openIndex;
         } else {
-            const closingIndex = input.indexOf(')', i);
-            if (closingIndex < 0) {
+            const closeIndex = indexOf(closeToken, i);
+            if (closeIndex < 0) {
                 break;
             }
-            const openIndex = input.indexOf('(', i);
-            if (openIndex < 0 || closingIndex < openIndex) {
+            const openIndex = indexOf(openToken, i);
+            if (openIndex < 0 || closeIndex <= openIndex) {
                 depth--;
                 if (depth === 0) {
-                    return {start: firstOpenIndex, end: closingIndex + 1};
+                    return {start: firstOpenIndex, end: closeIndex + 1};
                 }
-                i = closingIndex;
+                i = closeIndex;
             } else {
                 depth++;
                 i = openIndex;
@@ -144,4 +129,25 @@ export function getParenthesesRange(input: string, searchStartIndex = 0): Parent
         }
     }
     return null;
+}
+
+function indexOfExcluding(input: string, search: string, position: number, excludeRanges: TextRange[]) {
+    const i = input.indexOf(search, position);
+    const exclusion = excludeRanges.find((r) => i >= r.start && i < r.end);
+    if (exclusion) {
+        return indexOfExcluding(input, search, exclusion.end, excludeRanges);
+    }
+    return i;
+}
+
+export function splitExcluding(input: string, separator: string, excludeRanges: TextRange[]): string[] {
+    const parts: string[] = [];
+    let commaIndex = -1;
+    let currIndex = 0;
+    while ((commaIndex = indexOfExcluding(input, separator, currIndex, excludeRanges)) >= 0) {
+        parts.push(input.substring(currIndex, commaIndex).trim());
+        currIndex = commaIndex + 1;
+    }
+    parts.push(input.substring(currIndex).trim());
+    return parts;
 }

@@ -1,7 +1,7 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import {ThemeEngine} from './generators/theme-engines';
-import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
+import {isMacOS, isWindows, isCSSColorSchemePropSupported, isEdge, isMobile, isChromium} from './utils/platform';
 import {AutomationMode} from './utils/automation';
 
 declare const __CHROMIUM_MV3__: boolean;
@@ -32,7 +32,7 @@ export const DEFAULT_THEME: Theme = {
     darkSchemeTextColor: DEFAULT_COLORS.darkScheme.text,
     lightSchemeBackgroundColor: DEFAULT_COLORS.lightScheme.background,
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
-    scrollbarColor: isMacOS ? '' : 'auto',
+    scrollbarColor: '',
     selectionColor: 'auto',
     styleSystemControls: __CHROMIUM_MV3__ ? false : !isCSSColorSchemePropSupported,
     lightColorScheme: 'Default',
@@ -55,21 +55,36 @@ export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
     },
 };
 
+const filterModeSites = [
+    '*.officeapps.live.com',
+    '*.sharepoint.com',
+    'docs.google.com',
+    'onedrive.live.com',
+];
+
 export const DEFAULT_SETTINGS: UserSettings = {
+    schemeVersion: 0,
     enabled: true,
     fetchNews: true,
     theme: DEFAULT_THEME,
     presets: [],
-    customThemes: [],
-    siteList: [],
-    siteListEnabled: [],
-    applyToListedOnly: false,
+    customThemes: filterModeSites.map((url) => {
+        const engine: ThemeEngine = isChromium ? ThemeEngine.svgFilter : ThemeEngine.cssFilter;
+        return {
+            url: [url],
+            theme: {...DEFAULT_THEME, engine},
+            builtIn: true,
+        };
+    }),
+    enabledByDefault: true,
+    enabledFor: [],
+    disabledFor: [],
     changeBrowserTheme: false,
     syncSettings: true,
     syncSitesFixes: false,
     automation: {
-        enabled: false,
-        mode: AutomationMode.NONE,
+        enabled: isEdge && isMobile ? true : false,
+        mode: isEdge && isMobile ? AutomationMode.SYSTEM : AutomationMode.NONE,
         behavior: 'OnOff',
     },
     time: {
@@ -81,8 +96,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
         longitude: null,
     },
     previewNewDesign: false,
+    previewNewestDesign: false,
     enableForPDF: true,
     enableForProtectedPages: false,
     enableContextMenus: false,
-    detectDarkTheme: false,
+    detectDarkTheme: true,
 };

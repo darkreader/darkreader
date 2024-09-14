@@ -10,8 +10,7 @@
             "DOM.Iterable"
         ],
         "types": [
-            "chrome",
-            "offscreencanvas"
+            "chrome"
         ],
         "allowJs": true,
         "downlevelIteration": true,
@@ -21,6 +20,9 @@
         "strictNullChecks": true,
         "jsx": "react",
         "jsxFactory": "m",
-        "noEmit": true
+        "noEmit": true,
+        "paths": {
+            "@plus/*": ["./stubs/*"]
+        }
     }
 }

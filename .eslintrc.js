@@ -34,6 +34,7 @@ config.overrides.push({
         'no-else-return': 'error',
         'no-cond-assign': 'error',
         'no-lonely-if': 'error',
+        'no-multiple-empty-lines': 'error',
         'no-multi-spaces': 'error',
         'no-implicit-coercion': 'error',
         'no-redeclare': 'error',
@@ -42,6 +43,10 @@ config.overrides.push({
         'no-trailing-spaces': 'error',
         'no-whitespace-before-property': 'error',
         'padded-blocks': ['error', 'never'],
+        'padding-line-between-statements': [
+            'error',
+            {blankLine: 'always', prev: 'function', next: 'function'},
+        ],
         'prefer-exponentiation-operator': 'error',
         'prefer-regex-literals': 'error',
         'semi': 'error',
@@ -57,7 +62,6 @@ config.overrides.push({
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
-        'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/comma-dangle': ['error', {
             arrays: 'always-multiline',
@@ -72,7 +76,6 @@ config.overrides.push({
         }],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/func-call-spacing': ['error', 'never'],
         '@typescript-eslint/keyword-spacing': ['error', {
@@ -91,7 +94,13 @@ config.overrides.push({
         }],
         'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
-            ignore: ['^malevic\/'],
+            ignore: [
+                '^generators\/',
+                '^malevic\/',
+                '^plus\/',
+                '^ui\/',
+                '^utils\/',
+            ],
         }],
         'import/no-restricted-paths': ['error', {
             zones: [{
@@ -170,7 +179,8 @@ config.overrides.push({
             files: [
                 'src/ui/controls/**/*.tsx',
                 'src/ui/popup/**/*.tsx',
-                'src/ui/stylesheet-editor/components/body.tsx'
+                'src/plus/**/*.tsx',
+                'src/ui/stylesheet-editor/components/body.tsx',
             ],
             rules: {
                 '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -198,7 +208,7 @@ config.overrides.push({
             rules: {
                 '@typescript-eslint/no-implied-eval': 'error',
                 '@typescript-eslint/switch-exhaustiveness-check': 'error',
-            }
+            },
         },
     ],
 });
@@ -210,7 +220,7 @@ config.overrides.push({
     env: {browser: true},
     extends: ['plugin:compat/recommended'],
     parserOptions: {
-        ecmaVersion: 2019,
+        ecmaVersion: 2020,
         sourceType: 'module',
     },
     settings: {
@@ -230,7 +240,7 @@ config.overrides.push({
                 'compat/compat': ['error', [
                     '>0.5% and supports es5 and supports promises and supports url',
                     'not Explorer > 0',
-                ].join(', ')]
+                ].join(', ')],
             },
         },
 
@@ -249,14 +259,10 @@ config.overrides.push({
                     'not iOS > 0',
                     'not ChromeAndroid > 0',
                     'not OperaMini all',
-                ].join(', ')]
+                ].join(', ')],
             },
         },
     ],
 });
-
-// Ignore temporarily since it's taking forever.
-// It seems to be importing typescript or something.
-config.ignorePatterns = ['tests/project/tsconf.tests.ts'];
 
 module.exports = config;

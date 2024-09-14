@@ -1,0 +1,94 @@
+.settings-tab-panel {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    height: 100%;
+
+    &__buttons {
+        display: flex;
+        flex-direction: column;
+        flex: none;
+        min-width: 10rem;
+    }
+
+    &__button {
+        border: none;
+        box-shadow: none;
+        color: @color-fore;
+        height: @size-control-inner + 2 * @size-border;
+        text-align: left;
+
+        &--active {
+            color: @color-heading;
+            font-weight: bold;
+        }
+
+        &__icon {
+            align-items: center;
+            display: inline-flex;
+            height: 1rem;
+            justify-content: center;
+            margin-right: 0.5rem;
+            width: 1rem;
+
+            svg {
+                display: inline-block;
+                height: 100%;
+                width: 100%;
+            }
+        }
+
+        .button__wrapper {
+            align-items: center;
+            display: flex;
+            flex-direction: row;
+        }
+    }
+
+    &__tabs {
+        flex: auto;
+        overflow: hidden;
+    }
+
+    &__tab {
+        display: none;
+
+        &--active {
+            display: block;
+        }
+    }
+
+    &--vertical {
+        flex-direction: column;
+    }
+
+    &--vertical &__buttons {
+        column-gap: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: 16rem;
+    }
+
+    &--vertical &__button__icon {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 30rem) {
+    .settings-tab-panel {
+        flex-direction: column;
+    }
+
+    .settings-tab-panel__buttons {
+        column-gap: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: 16rem;
+    }
+
+    .settings-tab-panel__button__icon {
+        display: none;
+    }
+}

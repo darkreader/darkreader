@@ -69,3 +69,16 @@ export function createAsyncTasksQueue(): AsyncTaskQueue {
 
     return {add, cancel};
 }
+
+const delayTokens = new Set<symbol>;
+
+export function requestAnimationFrameOnce(token: symbol, callback: () => void): void {
+    if (delayTokens.has(token)) {
+        return;
+    }
+    delayTokens.add(token);
+    requestAnimationFrame(() => {
+        delayTokens.delete(token);
+        callback();
+    });
+}

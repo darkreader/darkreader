@@ -13,19 +13,19 @@ on:
       node_version:
         description: 'NodeJS version'
         required: true
-        default: '16.x'
+        default: '18.x'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version || '16.x' }}
+          node-version: ${{ inputs.node_version || '18.x' }}
           cache: npm
 
       - name: Install npm dependencies
@@ -35,14 +35,14 @@ jobs:
         run: npm run release
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             build/release/darkreader-*
 
       - name: Upload built artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: build/release/darkreader-*
           retention-days: ${{ inputs.retention_days }}

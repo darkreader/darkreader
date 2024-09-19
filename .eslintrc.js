@@ -95,7 +95,11 @@ config.overrides.push({
         'import/no-duplicates': 'error',
         'import/no-unresolved': ['error', {
             ignore: [
+                '^generators\/',
                 '^malevic\/',
+                '^plus\/',
+                '^ui\/',
+                '^utils\/',
             ],
         }],
         'import/no-restricted-paths': ['error', {

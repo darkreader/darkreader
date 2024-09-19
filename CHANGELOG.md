@@ -1,3 +1,21 @@
+# 4.9.92 (September 10, 2024)
+
+- Detect website's dark theme by default.
+- Use Filter mode for particular websites by default (Google Docs, Microsoft Office).
+- Restored scrollbar colors.
+- Fixed breaking on default selection color.
+
+# 4.9.90 (September 1, 2024)
+
+- Fixed "Aw, Snap" in Google Search (Chrome and Edge on Windows).
+
+# 4.9.89 (August 23, 2024)
+
+- Removed www part from website URLs.
+- Enabled automation and dark theme detection by default for mobile version.
+- Fixed colors for static site fixes.
+- Apply ignored image selectors for gradients.
+
 # 4.9.88 (July 11, 2024)
 
 - Fixed breaking browser panels.

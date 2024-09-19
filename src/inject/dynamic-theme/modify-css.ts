@@ -9,7 +9,7 @@ import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, request
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {Theme} from '../../definitions';
-import {isFirefox, isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
+import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
 
@@ -111,7 +111,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(`    color-scheme: dark !important;`);
         lines.push('}');
         lines.push('iframe {');
-        lines.push(`    color-scheme: initial;`);
+        lines.push(`    color-scheme: dark !important;`);
         lines.push('}');
     }
     const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button, dialog' : '');
@@ -189,55 +189,23 @@ function getModifiedSelectionStyle(theme: Theme) {
 }
 
 function getModifiedScrollbarStyle(theme: Theme) {
-    const lines: string[] = [];
     let colorTrack: string;
-    let colorIcons: string;
     let colorThumb: string;
-    let colorThumbHover: string;
-    let colorThumbActive: string;
-    let colorCorner: string;
     if (theme.scrollbarColor === 'auto') {
         colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, theme);
-        colorIcons = modifyForegroundColor({r: 96, g: 96, b: 96}, theme);
         colorThumb = modifyBackgroundColor({r: 176, g: 176, b: 176}, theme);
-        colorThumbHover = modifyBackgroundColor({r: 144, g: 144, b: 144}, theme);
-        colorThumbActive = modifyBackgroundColor({r: 96, g: 96, b: 96}, theme);
-        colorCorner = modifyBackgroundColor({r: 255, g: 255, b: 255}, theme);
     } else {
         const rgb = parseColorWithCache(theme.scrollbarColor)!;
         const hsl = rgbToHSL(rgb);
-        const isLight = hsl.l > 0.5;
-        const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
         const darken = (darker: number) => ({...hsl, l: clamp(hsl.l - darker, 0, 1)});
         colorTrack = hslToString(darken(0.4));
-        colorIcons = hslToString(isLight ? darken(0.4) : lighten(0.4));
         colorThumb = hslToString(hsl);
-        colorThumbHover = hslToString(lighten(0.1));
-        colorThumbActive = hslToString(lighten(0.2));
-        colorCorner = hslToString(darken(0.5));
     }
-    lines.push('::-webkit-scrollbar {');
-    lines.push(`    background-color: ${colorTrack};`);
-    lines.push(`    color: ${colorIcons};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb {');
-    lines.push(`    background-color: ${colorThumb};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:hover {');
-    lines.push(`    background-color: ${colorThumbHover};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:active {');
-    lines.push(`    background-color: ${colorThumbActive};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-corner {');
-    lines.push(`    background-color: ${colorCorner};`);
-    lines.push('}');
-    if (isFirefox) {
-        lines.push('* {');
-        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
-        lines.push('}');
-    }
-    return lines.join('\n');
+    return [
+        `* {`,
+        `    scrollbar-color: ${colorThumb} ${colorTrack};`,
+        `}`,
+    ].join('\n');
 }
 
 export function getModifiedFallbackStyle(theme: Theme, {strict}: {strict: boolean}): string {
@@ -347,6 +315,10 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier | null {
     try {
+        if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
+            return value;
+        }
+
         const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
 
@@ -405,9 +377,6 @@ export function getBgImageModifier(
         };
 
         const getURLModifier = (urlValue: string) => {
-            if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
-                return null;
-            }
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;

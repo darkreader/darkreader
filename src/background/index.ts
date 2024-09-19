@@ -251,3 +251,24 @@ if (__DEBUG__ && __LOG__) {
 }
 
 makeChromiumHappy();
+
+function writeInstallationVersion(
+    storage: chrome.storage.SyncStorageArea | chrome.storage.LocalStorageArea,
+    details: chrome.runtime.InstalledDetails,
+) {
+    storage.get({installation: {version: ''}}, (data) => {
+        if (data?.installation?.version) {
+            return;
+        }
+        storage.set({installation: {
+            date: Date.now(),
+            reason: details.reason,
+            version: details.previousVersion ?? chrome.runtime.getManifest().version,
+        }});
+    });
+}
+
+chrome.runtime.onInstalled.addListener((details) => {
+    writeInstallationVersion(chrome.storage.local, details);
+    writeInstallationVersion(chrome.storage.sync, details);
+});

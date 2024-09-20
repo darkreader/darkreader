@@ -41,6 +41,7 @@ export default function Slider(props: SliderProps) {
 
     function onRootCreate(rootNode: HTMLElement) {
         rootNode.addEventListener('touchstart', onPointerDown, {passive: true});
+        rootNode.addEventListener('wheel', onWheel, {passive: false});
     }
 
     function saveTrackNode(el: HTMLElement) {
@@ -198,7 +199,6 @@ export default function Slider(props: SliderProps) {
             class={{'slider': true, 'slider--active': store.isActive}}
             oncreate={onRootCreate}
             onmousedown={onPointerDown}
-            onwheel={onWheel}
         >
             <span
                 class="slider__track"

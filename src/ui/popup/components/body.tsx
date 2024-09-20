@@ -39,7 +39,7 @@ async function openDevTools() {
     await openExtensionPage('devtools');
 }
 
-function Body(props: BodyProps & {fonts: string[]}) {
+function Body(props: BodyProps & {fonts: string[]} & {installation: {date: number; version: string}}) {
     const context = getContext();
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
@@ -58,7 +58,14 @@ function Body(props: BodyProps & {fonts: string[]}) {
         );
     }
 
-    if (props.data.settings.previewNewestDesign && __PLUS__) {
+    const v = props.installation?.version?.split('.').map((p) => parseInt(p));
+    const n = v && v.length >= 3 ? (v[0] * 1e6 + v[1] * 1e3 + v[2]) : 0;
+
+    if (
+        __PLUS__ && (
+            props.data.settings.previewNewestDesign || (isMobile && n && n >= 4009093)
+        )
+    ) {
         return <PlusBody {...props} fonts={props.fonts} />;
     }
 

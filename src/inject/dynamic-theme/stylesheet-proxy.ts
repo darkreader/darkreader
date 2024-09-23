@@ -33,7 +33,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     function overrideProperty<T, P extends keyof T>(cls: {prototype: T}, prop: P, overrides: Record<string, OverrideFactory<T, P>>) {
         const proto = cls.prototype;
         const oldDescriptor = Object.getOwnPropertyDescriptor(proto, prop)!;
-        const newDescriptor: PropertyDescriptor = {...oldDescriptor};
+        const newDescriptor: PropertyDescriptor = oldDescriptor ? {...oldDescriptor} : {};
         Object.keys(overrides).forEach((key: keyof PropertyDescriptor) => {
             const factory = overrides[key];
             newDescriptor[key] = factory(oldDescriptor[key]);

@@ -67,7 +67,7 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
                     <div class="buttons">
-                        {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
+                        {isMobile || (__PLUS__ && !data.settings.previewNewDesign) ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
                         {__PLUS__ ? <Button class="preview-design-button" onclick={toggleNewestDesign}>{previewNewestButtonText}</Button> : null}
                     </div>
                 </TabPanel.Tab>

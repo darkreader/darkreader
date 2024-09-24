@@ -10,6 +10,7 @@ interface SliderProps {
     step: number;
     formatValue: (value: number) => string;
     onChange: (value: number | null) => void;
+    onPreview?: (value: number | null) => void;
 }
 
 interface SliderStore {
@@ -115,6 +116,9 @@ export default function Slider(props: SliderProps) {
             const value = getEventValue(e);
             store.activeValue = value;
             context.refresh();
+
+            const {onPreview} = store.activeProps;
+            onPreview?.(value);
         }
 
         function onPointerUp(e: MouseEvent | TouchEvent) {

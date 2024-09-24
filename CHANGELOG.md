@@ -1,3 +1,8 @@
+# 4.9.94 (September 24, 2024)
+
+- API: Fixed TypeScript builds.
+- Updated experimental design for Microsoft Edge for Android.
+
 # 4.9.93 (September 20, 2024)
 
 - Experimental design for Microsoft Edge for Android.

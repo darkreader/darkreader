@@ -101,4 +101,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     enableForProtectedPages: false,
     enableContextMenus: false,
     detectDarkTheme: true,
+    themeWithFirefox: false,
 };

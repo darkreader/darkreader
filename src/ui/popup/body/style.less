@@ -39,16 +39,23 @@
 
     .m-help-button {
         align-items: center;
-        background-image: @icon-right;
-        background-position: center right 0.25rem;
-        background-repeat: no-repeat;
-        background-size: 1rem;
         border: @size-border solid @color-border;
         display: inline-flex;
         justify-content: center;
         height: @size-control-inner;
         text-decoration: none;
         width: calc(100% - 2 * @size-border);
+        position: relative;
+
+        &::after {
+            background-image: @icon-right;
+            content: "";
+            position: absolute;
+            right: @size-control-inner * 0.125;
+            top: 0;
+            bottom: 0;
+            aspect-ratio: 1;
+        }
 
         &:hover {
             background-color: @color-control-hover;
@@ -125,12 +132,12 @@
                 top: 0.375rem;
                 width: 1rem;
             }
-    
+
             &::before {
                 background-color: @color-heading;
                 left: 0.375rem;
             }
-    
+
             &::after {
                 background-color: @color-fore;
                 left: 1rem;

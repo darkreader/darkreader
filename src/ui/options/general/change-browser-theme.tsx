@@ -5,6 +5,9 @@ import {CheckButton} from '../../controls';
 export function ChangeBrowserTheme(props: ViewProps): Malevic.Child {
     function onBrowserThemeChange(checked: boolean) {
         props.actions.changeSettings({changeBrowserTheme: checked});
+        if(checked) {
+            props.actions.changeSettings({themeWithFirefox: false});
+        }
     }
 
     return (

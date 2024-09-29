@@ -1,6 +1,130 @@
-import {isMobile} from '../utils/platform';
+import {isMobile, isFirefox} from '../utils/platform';
+import UserStorage from '../background/user-storage';
 
 declare const __CHROMIUM_MV3__: boolean;
+
+declare const browser: {
+    theme: {
+        getCurrent: (() => Promise<void>);
+    };
+};
+
+export async function getTheme() {
+    // Check if theme setting should be used
+    await UserStorage.loadSettings();
+    if (UserStorage.settings.themeWithFirefox && isFirefox && typeof browser !== 'undefined' && browser.theme && browser.theme.getCurrent) {
+        setStyle(await browser.theme.getCurrent());
+    }
+}
+
+function parseColor(color: any) {
+    // Create a div, set a color, get it back in unified rgb format
+    var div = document.createElement('div'), m;
+    document.body.appendChild(div);
+    div.style.color = color;
+    m = getComputedStyle(div).color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+    div.remove();
+    if(m) return [Number(m[1]),Number(m[2]),Number(m[3])];
+    return [0,0,0];
+}
+
+function setStyle(Theme: any) {
+    if (Theme.colors) {
+        // Get color or use fallback white
+        var Color = Theme.colors.popup_text;
+        if (Color.toString() == "hsl(0, 0%, 100%)") {
+            Color = "rgb(255, 255, 255)";
+        }
+
+        // Get 2 different strength highlights
+        const BackgroundColor = "rgba" + Color.slice(3, Color.length - 1) + ", .17)"
+        const ActiveBackgroundColor = "rgba" + Color.slice(3, Color.length - 1) + ", .34)"
+
+        // Check whether theme is light or dark
+        var CRGB = parseColor(Color);
+        var BRGB = parseColor(Theme.colors.popup);
+        var Light = 1;
+        if(BRGB[0] + BRGB[1] + BRGB[2] <= CRGB[0] + CRGB[1] + CRGB[2]) {
+            Light = 0;
+        }
+
+        // Create and apply css
+        var Parser = new DOMParser();
+        var Style = Parser.parseFromString(`
+        <style>
+        * {
+            color: ${Color} !important;
+            border-color: ${BackgroundColor} !important;
+            scrollbar-color: ${Color} ${BackgroundColor} !important;
+        }
+
+        .color-picker--focused .color-picker__wrapper {
+            border: unset !important;
+            outline: 2px solid ${BackgroundColor};
+        }
+
+        .check-button .checkbox__input ~ .checkbox__checkmark {
+            background-color: ${ActiveBackgroundColor} !important;
+        }
+
+        .preview .settings-button-icon, .preview .m-help-button__text::before, .reset-button__icon, .dropdown__selected::after, .preview .theme-group__more-button::after, .preview .collapsible-panel__group__expand-button::before, .preview .page__back-button::before, .nav-button::after, .preview .m-help-button::after, .check-button .checkbox__input ~ .checkbox__checkmark {
+            filter: invert(${Light});
+        }
+
+        .color-picker__input, .color-picker__wrapper {
+            background-color: unset !important;
+        }
+
+        .site-list__item__remove:hover {
+            color: ${Theme.colors.popup} !important;
+        }
+
+        .preview .theme-group__presets-wrapper::before {
+            border-color: ${BackgroundColor} !important;
+        }
+
+        .loader__message {
+            display: none;
+        }
+
+        .textbox::placeholder {
+            color: ${Color};
+        }
+
+        .header__more-settings__shortcut-wrapper--set svg {
+            --icon-color: ${Color};
+        }
+
+        .tab-panel__buttons::before, .tab-panel__buttons::after {
+            border-bottom-color: ${BackgroundColor};
+        }
+
+        .footer-help-link:hover, .donate-link:hover, .site-list__textbox:focus, .automation__behavior .dropdown, .preview .theme-preset-picker .dropdown__list {
+            box-shadow: unset;
+        }
+
+        .checkbox__checkmark::before, .checkbox__checkmark::after, .updown__icon::before, .updown__icon::after, .checkbox__input:checked + .checkbox__checkmark::before, .checkbox__input:checked + .checkbox__checkmark::after, .select__expand__icon::before, .select__expand__icon::after, .check-button .checkbox__checkmark, .slider__thumb, .site-list__item__remove:hover {
+            background-color: ${Color};
+        }
+
+        .header__more-settings::after, .news::before, .news__header {
+            background-image: unset;
+        }
+
+        html, button, .tab-panel__tab, .toggle__btn, .updown__icon, .track--clickable, .toggle::before, .header__more-settings, .multi-switch, .checkbox, .header__more-settings__shortcut, .news__list, .select__option, .select__list, .news__header, .check-button .checkbox__checkmark, .dropdown__list__item, .message-box, .dropdown__list, .editor, .preview .page, .preview .news-section, .preview .news-section__popover, .color-picker__hsb-line, .site-list__textbox, .time-range-picker__input, .automation__location-control__latitude, .automation__location-control__longitude, .text-list__textbox, .select__textbox, .dynamic-per-site__search-input {
+            background-color: ${Theme.colors.popup} !important;
+        }
+
+        button:hover, .toggle__btn:hover, .updown__icon:hover, .track--clickable:hover, .track__value, .toggle__off:hover, .toggle__on:hover, .toggle, .toggle__btn--active:hover, .header__more-settings__top__close:hover, .multi-switch__option:hover, .news__close:hover, .select__option:hover, .footer-help-link, *::selection, .donate-link, .automation__behavior .dropdown__selected:hover, .dropdown__list__item:hover, .hotkeys__control:hover, .overlay, .button:hover, .checkbox:hover .checkbox__checkmark, .checkbox:hover .checkbox__content, .editor:hover, .slider__track, .preview .m-donate-button, .preview .m-help-button:hover, .slider__track::before, .slider__track::after, .slider__track__fill::before, .preview .theme-preset-picker__preset__remove-button:hover, .preview .theme-group__presets-wrapper, .preview .collapsible-panel__group__expand-button, .color-picker, .dropdown__selected, .header__more-settings__shortcut:hover, .site-list__textbox:hover, .time-range-picker__input:hover, .automation__location-control__latitude:hover, .automation__location-control__longitude:hover, .text-list__textbox:hover, .select__textbox:hover, .dynamic-per-site__search-input:hover {
+            background-color: ${BackgroundColor} !important;
+        }
+        .toggle__btn--active, .track__value, .multi-switch__highlight, .footer-help-link:hover, .updown__button--disabled .updown__icon::after, .updown__button--disabled .updown__icon::before, .donate-link:hover, .slider__track__fill, .color-picker:hover {
+            background-color: ${ActiveBackgroundColor} !important;
+        }
+        </style>`, "text/html");
+        document.head.appendChild(Style.head);
+    }
+}
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>): string {
     const classes: string[] = [];

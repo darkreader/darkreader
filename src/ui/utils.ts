@@ -35,6 +35,9 @@ function setStyle(Theme: any) {
         if (Color.toString() == "hsl(0, 0%, 100%)") {
             Color = "rgb(255, 255, 255)";
         }
+        if (Color.toString() == "hsl(0, 0%, 0%)") {
+            Color = "rgb(0, 0, 0)";
+        }
 
         // Get 2 different strength highlights
         const BackgroundColor = "rgba" + Color.slice(3, Color.length - 1) + ", .17)"

@@ -12,7 +12,7 @@ const excludedSelectors = [
     // Generic matches for icon/symbol fonts
     '.icofont',
     '[style*="font-"]',
-    '[class*="icon"i]', 
+    '[class*="icon"i]',
     '[class*="symbol"i]',
 
     // Glyph Icons

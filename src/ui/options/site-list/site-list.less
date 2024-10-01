@@ -36,18 +36,17 @@
         position: relative;
 
         &__remove {
+            align-items: center;
             border-radius: 50%;
             cursor: pointer;
-            display: none;
+            display: grid;
             height: 1.25rem;
             position: absolute;
             right: 0.125rem;
             top: 0.125rem;
+            visibility: hidden;
             width: 1.25rem;
             z-index: 1;
-            display: grid;
-            align-items: center;
-            visibility: hidden;
 
             &::after {
                 content: "\2715";

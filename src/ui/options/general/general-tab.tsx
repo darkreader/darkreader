@@ -3,7 +3,7 @@ import type {ViewProps} from '../../../definitions';
 import {isFirefox} from '../../../utils/platform';
 import {ChangeBrowserTheme} from './change-browser-theme';
 import {DetectDarkTheme} from './detect-dark-theme';
-import {ThemeWithFirefox} from './theme-with-firefox';
+import {UseFirefoxTheme} from './use-firefox-theme';
 import {EnabledByDefault} from './enabled-by-default';
 import {EnableForPDF} from './enabled-for-pdf';
 
@@ -13,6 +13,6 @@ export function GeneralTab(props: ViewProps): Malevic.Child {
         <DetectDarkTheme {...props} />
         {isFirefox ? null : <EnableForPDF {...props} />}
         {isFirefox ? <ChangeBrowserTheme {...props} /> : null}
-        {isFirefox ? <ThemeWithFirefox {...props} /> : null}
+        {isFirefox ? <UseFirefoxTheme {...props} /> : null}
     </div>;
 }

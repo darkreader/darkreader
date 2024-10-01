@@ -97,17 +97,17 @@
         height: @size-control-inner - 0.25rem;
         margin-bottom: 0.125rem;
         margin-top: @indent-small + 0.125rem;
-        width: 100%;
         position: relative;
+        width: 100%;
 
         &::after {
+            aspect-ratio: 1;
             background-image: @icon-right;
+            bottom: 0;
             content: "";
             position: absolute;
             right: @size-control-inner * 0.125;
             top: 0;
-            bottom: 0;
-            aspect-ratio: 1;
         }
     }
 

@@ -5,7 +5,7 @@ import {DebugMessageTypeBGtoUI} from '../../utils/message';
 import {isFirefox, isMobile} from '../../utils/platform';
 import Body from './body/body';
 import Connector from '../connect/connector';
-import {getTheme} from '../utils';
+import {setTheme} from '../utils';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -14,7 +14,7 @@ function renderBody(data: ExtensionData, actions: Connector) {
 }
 
 async function start(): Promise<void> {
-    await getTheme();
+    await setTheme();
 
     const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect(), {passive: true});

@@ -19,9 +19,9 @@
         justify-content: center;
         line-height: @dropdown-item-height;
         margin-top: (@dropdown-height - @dropdown-item-height) / 2;
+        position: relative;
         text-align: center;
         width: 100%;
-        position: relative;
 
         &__text {
             display: inline-block;
@@ -32,12 +32,12 @@
         }
 
         &::after {
+            aspect-ratio: 1;
             background-image: @icon-down;
             content: "";
+            height: @dropdown-item-height;
             position: absolute;
             right: @size-control-inner * 0.125;
-            aspect-ratio: 1;
-            height: @dropdown-item-height;
         }
     }
 

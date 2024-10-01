@@ -24,19 +24,17 @@
     &__back-button {
         flex: none;
         margin-top: @indent-small;
-        width: calc(100% - 2 * @size-border);
         position: relative;
+        width: calc(100% - 2 * @size-border);
 
         &::before {
-            background-image: @icon-left;
-            content: "";
-            position: absolute;
-            left: @size-control-inner * 0.125;
-            top: 0;
-            bottom: 0;
             aspect-ratio: 1;
+            background-image: @icon-left;
+            bottom: 0;
+            content: "";
+            left: @size-control-inner * 0.125;
+            position: absolute;
+            top: 0;
         }
-
-
     }
 }

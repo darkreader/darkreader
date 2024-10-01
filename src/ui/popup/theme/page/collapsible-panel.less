@@ -13,18 +13,18 @@
             height: @collapsible-panel-button-size;
             justify-content: center;
             line-height: @collapsible-panel-button-size;
+            position: relative;
             text-align: center;
             width: 100%;
-            position: relative;
 
             &::before {
-                background-image: @icon-plus;
-                content: "";
-                position: absolute;
-                left: @size-control-inner * 0.125;
-                top: @size-control-inner * 0.125;
-                bottom: @size-control-inner * 0.125;
                 aspect-ratio: 1;
+                background-image: @icon-plus;
+                bottom: @size-control-inner * 0.125;
+                content: "";
+                left: @size-control-inner * 0.125;
+                position: absolute;
+                top: @size-control-inner * 0.125;
             }
         }
 

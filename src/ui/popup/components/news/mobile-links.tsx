@@ -32,12 +32,11 @@ export function MobileLinks({expanded, onClose}: MobileLinksProps) {
                 <div class="news__mobile">
                     <div class="news__mobile__left">
                         <div class="news__mobile__text">
-                            Stop being blinded when reading from your phone or tablet.
-                            Simply scan the QR code to install.
+                            {getLocalMessage('mobile_text')}
                         </div>
                         <div class="news__mobile__learn-more-container">
                             <a href={MOBILE_URL} class="news__mobile__learn-more">
-                                Learn more
+                                {getLocalMessage('learn_more')}
                             </a>
                             <div class="news__mobile__logos">
                                 <img class="news__os-icon" src="../assets/images/icon-android-dark.svg" />

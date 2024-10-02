@@ -97,6 +97,10 @@ function joinSelectors(...selectors: string[]) {
     return selectors.filter(Boolean).join(', ');
 }
 
+const hostsWithOddScrollbars = [
+    'calendar.google.com',
+];
+
 export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean): string {
     const lines: string[] = [];
     if (!isIFrame) {
@@ -142,7 +146,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (theme.scrollbarColor) {
+    if (theme.scrollbarColor && !hostsWithOddScrollbars.includes(location.hostname)) {
         lines.push(getModifiedScrollbarStyle(theme));
     }
     if (theme.selectionColor) {

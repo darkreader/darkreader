@@ -1,3 +1,9 @@
+# 4.9.95 (October 2, 2024)
+
+- Fixed Google Calendar scroll bars.
+- Fixed automation panel.
+- Added links to mobile apps.
+
 # 4.9.94 (September 24, 2024)
 
 - API: Fixed TypeScript builds.

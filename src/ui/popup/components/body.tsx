@@ -86,7 +86,9 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
     const displayedNewsCount = newsWereLongTimeAgo ? 0 : unreadNews.length;
 
     context.onRender(() => {
-        if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn && !newsWereLongTimeAgo) {
+        if (props.data.uiHighlights.includes('mobile-links') && !state.mobileLinksOpen && !state.didMobileLinksSlideIn) {
+            setTimeout(toggleMobileLinks, 750);
+        } else if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn && !newsWereLongTimeAgo) {
             setTimeout(toggleNews, 750);
         }
     });
@@ -100,6 +102,12 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
 
     function toggleMobileLinks() {
         setState({mobileLinksOpen: !state.mobileLinksOpen, didMobileLinksSlideIn: state.didMobileLinksSlideIn || !state.mobileLinksOpen});
+        if (state.mobileLinksOpen && props.data.uiHighlights.includes('mobile-links')) {
+            disableMobileLinksSlideIn();
+        }
+    }
+
+    function disableMobileLinksSlideIn() {
         if (props.data.uiHighlights.includes('mobile-links')) {
             props.actions.hideHighlights(['mobile-links']);
         }
@@ -214,7 +222,7 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
             />
             <MobileLinks
                 expanded={state.mobileLinksOpen}
-                onLinkClick={() => null}
+                onLinkClick={disableMobileLinksSlideIn}
                 onClose={toggleMobileLinks}
             />
             <MoreSiteSettings

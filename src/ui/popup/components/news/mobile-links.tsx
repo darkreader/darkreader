@@ -10,7 +10,7 @@ interface MobileLinksProps {
     onClose: () => void;
 }
 
-export function MobileLinks({expanded, onClose}: MobileLinksProps) {
+export function MobileLinks({expanded, onLinkClick, onClose}: MobileLinksProps) {
     return (
         <div class={{'news': true, 'news--expanded': expanded}}>
             <div class="news__header">
@@ -35,7 +35,13 @@ export function MobileLinks({expanded, onClose}: MobileLinksProps) {
                             {getLocalMessage('mobile_text')}
                         </div>
                         <div class="news__mobile__learn-more-container">
-                            <a href={MOBILE_URL} class="news__mobile__learn-more">
+                            <a
+                                href={MOBILE_URL}
+                                class="news__mobile__learn-more"
+                                onclick={onLinkClick}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
                                 {getLocalMessage('learn_more')}
                             </a>
                             <div class="news__mobile__logos">

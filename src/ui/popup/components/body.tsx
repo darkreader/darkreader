@@ -2,18 +2,19 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
-import {TabPanel, Button} from '../../controls';
+import {TabPanel} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
+import {MobileLinks, MobileLinksButton} from './news/mobile-links';
 import SiteListSettings from './site-list-settings';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {compose, openExtensionPage} from '../../utils';
+import {compose} from '../../utils';
 import {PlusBody} from '@plus/popup/plus-body'; // eslint-disable-line
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
 import {isMobile} from '../../../utils/platform';
@@ -29,14 +30,12 @@ interface BodyProps {
 interface BodyState {
     activeTab: string;
     newsOpen: boolean;
+    mobileLinksOpen: boolean;
     didNewsSlideIn: boolean;
+    didMobileLinksSlideIn: boolean;
     moreSiteSettingsOpen: boolean;
     moreToggleSettingsOpen: boolean;
     newToggleMenusHighlightHidden: boolean;
-}
-
-async function openDevTools() {
-    await openExtensionPage('devtools');
 }
 
 function Body(props: BodyProps & {fonts: string[]} & {installation: {date: number; version: string}}) {
@@ -44,7 +43,9 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
         newsOpen: false,
+        mobileLinksOpen: false,
         didNewsSlideIn: false,
+        didMobileLinksSlideIn: false,
         moreSiteSettingsOpen: false,
         moreToggleSettingsOpen: false,
         newToggleMenusHighlightHidden: false,
@@ -95,6 +96,13 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
             props.actions.markNewsAsRead(unreadNews.map(({id}) => id));
         }
         setState({newsOpen: !state.newsOpen, didNewsSlideIn: state.didNewsSlideIn || !state.newsOpen});
+    }
+
+    function toggleMobileLinks() {
+        setState({mobileLinksOpen: !state.mobileLinksOpen, didMobileLinksSlideIn: state.didMobileLinksSlideIn || !state.mobileLinksOpen});
+        if (props.data.uiHighlights.includes('mobile-links')) {
+            props.actions.hideHighlights(['mobile-links']);
+        }
     }
 
     function onNewsOpen(...news: NewsObject[]) {
@@ -195,9 +203,7 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
                 <div class="footer-buttons">
                     <a class="footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <Button onclick={openDevTools} class="dev-tools-button">
-                        🛠 {getLocalMessage('open_dev_tools')}
-                    </Button>
+                    <MobileLinksButton active={state.mobileLinksOpen} onClick={toggleMobileLinks} />
                 </div>
             </footer>
             <NewsGroup
@@ -205,6 +211,11 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
                 expanded={state.newsOpen}
                 onNewsOpen={onNewsOpen}
                 onClose={toggleNews}
+            />
+            <MobileLinks
+                expanded={state.mobileLinksOpen}
+                onLinkClick={() => null}
+                onClose={toggleMobileLinks}
             />
             <MoreSiteSettings
                 data={props.data}

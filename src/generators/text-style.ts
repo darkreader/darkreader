@@ -10,9 +10,10 @@ const excludedSelectors = [
     '.fa', '.fab', '.fad', '.fal', '.far', '.fas', '.fass', '.fasr', '.fat',
 
     // Generic matches for icon/symbol fonts
-    '.icofont', '[style*="font-"]',
-    '[class*="icon"]', '[class*="Icon"]',
-    '[class*="symbol"]', '[class*="Symbol"]',
+    '.icofont',
+    '[style*="font-"]',
+    '[class*="icon"i]',
+    '[class*="symbol"i]',
 
     // Glyph Icons
     '.glyphicon',

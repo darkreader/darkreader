@@ -51,6 +51,13 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 }, {once: true, passive: true});
 
+document.addEventListener('__darkreader__shadowDomAttached', (e: CustomEvent) => {
+    const host = (e.target as HTMLElement);
+    if (host.shadowRoot && elementsDefinitionCallback) {
+        elementsDefinitionCallback([host]);
+    }
+});
+
 const resolvers = new Map<string, Array<() => void>>();
 
 export function handleIsDefined(e: CustomEvent<{tag: string}>): void {

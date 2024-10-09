@@ -51,11 +51,18 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 }, {once: true, passive: true});
 
-document.addEventListener('__darkreader__shadowDomAttached', (e: CustomEvent) => {
+const unhandledShadowHosts = new Set<Element>();
+
+document.addEventListener('__darkreader__shadowDomAttaching', (e: CustomEvent) => {
     const host = (e.target as HTMLElement);
-    if (host.shadowRoot && elementsDefinitionCallback) {
-        elementsDefinitionCallback([host]);
+    if (unhandledShadowHosts.size === 0) {
+        queueMicrotask(() => {
+            const hosts = [...unhandledShadowHosts].filter((el) => el.shadowRoot);
+            elementsDefinitionCallback?.(hosts);
+            unhandledShadowHosts.clear();
+        });
     }
+    unhandledShadowHosts.add(host);
 });
 
 const resolvers = new Map<string, Array<() => void>>();

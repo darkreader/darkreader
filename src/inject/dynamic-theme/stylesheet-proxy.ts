@@ -59,7 +59,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     const updateSheetEvent = new CustomEvent('__darkreader__updateSheet');
     const adoptedSheetChangeEvent = new CustomEvent('__darkreader__adoptedStyleSheetChange');
-    const shadowDomAttachedEvent = new CustomEvent('__darkreader__shadowDomAttached', {bubbles: true});
+    const shadowDomAttachingEvent = new CustomEvent('__darkreader__shadowDomAttaching', {bubbles: true});
     const adoptedSheetOwners = new WeakMap<CSSStyleSheet, Set<Document | ShadowRoot>>();
     const adoptedDeclarationSheets = new WeakMap<CSSStyleDeclaration, CSSStyleSheet>();
     let onFFSheetChange: (sheet: CSSStyleSheet) => void;
@@ -137,7 +137,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     });
 
     override(Element, 'attachShadow', (native) => function (options: any) {
-        queueMicrotask(() => this.dispatchEvent(shadowDomAttachedEvent));
+        this.dispatchEvent(shadowDomAttachingEvent);
         return native.call(this, options);
     });
 

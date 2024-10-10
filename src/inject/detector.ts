@@ -28,6 +28,12 @@ function hasBuiltInDarkTheme() {
             processedElements.add(element);
             const style = element === document.documentElement ? rootStyle : getComputedStyle(element);
             const bgColor = parseColorWithCache(style.backgroundColor)!;
+            if (bgColor.r === 24 && bgColor.g === 26 && bgColor.b === 27) {
+                // For some websites changes to CSSStyleSheet.disabled and HTMLStyleElement.textContent
+                // are not being applied synchronously. For example https://zorin.com/
+                // Probably a browser bug. Treat as not having a dark theme.
+                return false;
+            }
             if (bgColor.a === 1) {
                 const bgLightness = getSRGBLightness(bgColor.r, bgColor.g, bgColor.b);
                 if (bgLightness > 0.5) {
@@ -58,12 +64,12 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
         return;
     }
 
-    const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<HTMLStyleElement & {disabled: boolean}>;
-    drStyles.forEach((style) => style.disabled = true);
+    const drSheets = Array.from(document.styleSheets).filter((s) => (s.ownerNode as HTMLElement)?.classList.contains('darkreader'));
+    drSheets.forEach((sheet) => sheet.disabled = true);
 
     const darkThemeDetected = hasBuiltInDarkTheme();
 
-    drStyles.forEach((style) => style.disabled = false);
+    drSheets.forEach((sheet) => sheet.disabled = false);
     callback(darkThemeDetected);
 }
 

@@ -7,6 +7,7 @@ import {collectUndefinedElements, handleIsDefined, isCustomElement, recordUndefi
 
 const observers: Array<{disconnect(): void}> = [];
 let observedRoots: WeakSet<Node>;
+let handledShadowHosts: WeakSet<Node>;
 
 interface ChangedStyles {
     created: StyleElement[];
@@ -188,6 +189,7 @@ export function watchForStylePositions(
     deepObserve(document.documentElement);
 
     watchWhenCustomElementsDefined((hosts) => {
+        hosts = hosts.filter((node) => !handledShadowHosts.has(node));
         const newStyles: StyleElement[] = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
@@ -200,6 +202,7 @@ export function watchForStylePositions(
             deepObserve(shadowRoot);
             collectUndefinedElements(shadowRoot);
         });
+        hosts.forEach((node) => handledShadowHosts.add(node));
     });
     document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
@@ -209,6 +212,7 @@ function resetObservers() {
     observers.forEach((o) => o.disconnect());
     observers.splice(0, observers.length);
     observedRoots = new WeakSet();
+    handledShadowHosts = new WeakSet();
 }
 
 export function stopWatchingForStylePositions(): void {

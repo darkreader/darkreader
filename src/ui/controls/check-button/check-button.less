@@ -28,10 +28,30 @@
         }
 
         &__input:checked ~ .checkbox__checkmark {
-            background-image: @icon-check;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 1rem;
+            &::before,
+            &::after {
+                background-color: @color-control-fore;
+                content: "";
+                display: inline-block;
+                height: @size-control-inner * 0.125;
+                left: @size-control-inner * 0.125;
+                position: absolute;
+                top: @size-control-inner * 0.425;
+                transition: all @time-fast;
+                width: @size-control-inner * 0.75;
+            }
+
+            &::before {
+                top: @size-control-inner * 0.55;
+                transform: skewY(45deg);
+                width: @size-control-inner * 0.25;
+            }
+
+            &::after {
+                left: @size-control-inner * 0.375;
+                transform: skewY(-45deg);
+                width: @size-control-inner * 0.5;
+            }
         }
     }
 

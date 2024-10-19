@@ -120,6 +120,7 @@ export interface UserSettings {
     enableForProtectedPages: boolean;
     enableContextMenus: boolean;
     detectDarkTheme: boolean;
+    useFirefoxTheme: boolean;
 }
 
 export interface TimeSettings {

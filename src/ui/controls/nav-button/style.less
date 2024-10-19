@@ -1,11 +1,18 @@
 @import "../../theme.less";
 
 .nav-button {
-    background-image: @icon-right;
-    background-position: center right 0.25rem;
-    background-repeat: no-repeat;
-    background-size: 1rem;
+    position: relative;
     width: calc(100% - 2 * @size-border);
+
+    &::after {
+        aspect-ratio: 1;
+        background-image: @icon-right;
+        bottom: 0;
+        content: "";
+        position: absolute;
+        right: @size-control-inner * 0.125;
+        top: 0;
+    }
 
     &__content {
         align-items: center;

@@ -1,7 +1,7 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import {ThemeEngine} from './generators/theme-engines';
-import {isMacOS, isWindows, isCSSColorSchemePropSupported, isEdge, isMobile} from './utils/platform';
+import {isMacOS, isWindows, isCSSColorSchemePropSupported, isEdge, isMobile, isChromium} from './utils/platform';
 import {AutomationMode} from './utils/automation';
 
 declare const __CHROMIUM_MV3__: boolean;
@@ -55,13 +55,27 @@ export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
     },
 };
 
+const filterModeSites = [
+    '*.officeapps.live.com',
+    '*.sharepoint.com',
+    'docs.google.com',
+    'onedrive.live.com',
+];
+
 export const DEFAULT_SETTINGS: UserSettings = {
     schemeVersion: 0,
     enabled: true,
     fetchNews: true,
     theme: DEFAULT_THEME,
     presets: [],
-    customThemes: [],
+    customThemes: filterModeSites.map((url) => {
+        const engine: ThemeEngine = isChromium ? ThemeEngine.svgFilter : ThemeEngine.cssFilter;
+        return {
+            url: [url],
+            theme: {...DEFAULT_THEME, engine},
+            builtIn: true,
+        };
+    }),
     enabledByDefault: true,
     enabledFor: [],
     disabledFor: [],
@@ -86,5 +100,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     enableForPDF: true,
     enableForProtectedPages: false,
     enableContextMenus: false,
-    detectDarkTheme: isEdge && isMobile ? true : false,
+    detectDarkTheme: true,
 };

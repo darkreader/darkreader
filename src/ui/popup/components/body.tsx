@@ -2,18 +2,19 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
-import {TabPanel, Button} from '../../controls';
+import {TabPanel} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
+import {MobileLinks, MobileLinksButton} from './news/mobile-links';
 import SiteListSettings from './site-list-settings';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {compose, openExtensionPage} from '../../utils';
+import {compose} from '../../utils';
 import {PlusBody} from '@plus/popup/plus-body'; // eslint-disable-line
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
 import {isMobile} from '../../../utils/platform';
@@ -29,22 +30,22 @@ interface BodyProps {
 interface BodyState {
     activeTab: string;
     newsOpen: boolean;
+    mobileLinksOpen: boolean;
     didNewsSlideIn: boolean;
+    didMobileLinksSlideIn: boolean;
     moreSiteSettingsOpen: boolean;
     moreToggleSettingsOpen: boolean;
     newToggleMenusHighlightHidden: boolean;
 }
 
-async function openDevTools() {
-    await openExtensionPage('devtools');
-}
-
-function Body(props: BodyProps & {fonts: string[]}) {
+function Body(props: BodyProps & {fonts: string[]} & {installation: {date: number; version: string}}) {
     const context = getContext();
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
         newsOpen: false,
+        mobileLinksOpen: false,
         didNewsSlideIn: false,
+        didMobileLinksSlideIn: false,
         moreSiteSettingsOpen: false,
         moreToggleSettingsOpen: false,
         newToggleMenusHighlightHidden: false,
@@ -58,7 +59,14 @@ function Body(props: BodyProps & {fonts: string[]}) {
         );
     }
 
-    if (props.data.settings.previewNewestDesign && __PLUS__) {
+    const v = props.installation?.version?.split('.').map((p) => parseInt(p));
+    const n = v && v.length >= 3 ? (v[0] * 1e6 + v[1] * 1e3 + v[2]) : 0;
+
+    if (
+        __PLUS__ && (
+            props.data.settings.previewNewestDesign || (isMobile && n && n >= 4009093)
+        )
+    ) {
         return <PlusBody {...props} fonts={props.fonts} />;
     }
 
@@ -78,7 +86,9 @@ function Body(props: BodyProps & {fonts: string[]}) {
     const displayedNewsCount = newsWereLongTimeAgo ? 0 : unreadNews.length;
 
     context.onRender(() => {
-        if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn && !newsWereLongTimeAgo) {
+        if (props.data.uiHighlights.includes('mobile-links') && !state.mobileLinksOpen && !state.didMobileLinksSlideIn) {
+            setTimeout(toggleMobileLinks, 750);
+        } else if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn && !newsWereLongTimeAgo) {
             setTimeout(toggleNews, 750);
         }
     });
@@ -88,6 +98,19 @@ function Body(props: BodyProps & {fonts: string[]}) {
             props.actions.markNewsAsRead(unreadNews.map(({id}) => id));
         }
         setState({newsOpen: !state.newsOpen, didNewsSlideIn: state.didNewsSlideIn || !state.newsOpen});
+    }
+
+    function toggleMobileLinks() {
+        setState({mobileLinksOpen: !state.mobileLinksOpen, didMobileLinksSlideIn: state.didMobileLinksSlideIn || !state.mobileLinksOpen});
+        if (state.mobileLinksOpen && props.data.uiHighlights.includes('mobile-links')) {
+            disableMobileLinksSlideIn();
+        }
+    }
+
+    function disableMobileLinksSlideIn() {
+        if (props.data.uiHighlights.includes('mobile-links')) {
+            props.actions.hideHighlights(['mobile-links']);
+        }
     }
 
     function onNewsOpen(...news: NewsObject[]) {
@@ -188,9 +211,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 <div class="footer-buttons">
                     <a class="footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <Button onclick={openDevTools} class="dev-tools-button">
-                        🛠 {getLocalMessage('open_dev_tools')}
-                    </Button>
+                    <MobileLinksButton active={state.mobileLinksOpen} onClick={toggleMobileLinks} />
                 </div>
             </footer>
             <NewsGroup
@@ -198,6 +219,11 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 expanded={state.newsOpen}
                 onNewsOpen={onNewsOpen}
                 onClose={toggleNews}
+            />
+            <MobileLinks
+                expanded={state.mobileLinksOpen}
+                onLinkClick={disableMobileLinksSlideIn}
+                onClose={toggleMobileLinks}
             />
             <MoreSiteSettings
                 data={props.data}

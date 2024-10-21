@@ -82,6 +82,7 @@ export interface Theme {
 export interface CustomSiteConfig {
     url: string[];
     theme: Theme;
+    builtIn?: boolean;
 }
 
 export interface ThemePreset {

@@ -29,7 +29,7 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
     }
 
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    const previewNewestButtonText = data.settings.previewNewestDesign ? 'Switch to old design' : 'Preview newest design';
+    const previewNewestButtonText = data.settings.previewNewestDesign ? 'Switch to desktop design' : 'Preview new mobile design';
 
     function toggleDesign(): void {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign, previewNewestDesign: false});
@@ -67,7 +67,7 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
                     <div class="buttons">
-                        {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
+                        {isMobile || (__PLUS__ && !data.settings.previewNewDesign) ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
                         {__PLUS__ ? <Button class="preview-design-button" onclick={toggleNewestDesign}>{previewNewestButtonText}</Button> : null}
                     </div>
                 </TabPanel.Tab>

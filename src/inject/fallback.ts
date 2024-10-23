@@ -42,3 +42,22 @@ if (
         observer.observe(root, {childList: true});
     }
 }
+
+declare const __FIREFOX_MV2__: boolean;
+
+if (__FIREFOX_MV2__ && location.host === 'teams.live.com' && !document.getElementById('darkreader-ms-teams-fix')) {
+    // Microsoft Teams calls sheet.cssRules on extension styles and that
+    // causes "Not allowed to access cross-origin stylesheet" in Firefox
+    (() => {
+        const descriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'cssRules')!;
+        Object.defineProperty(CSSStyleSheet.prototype, 'cssRules', {
+            ...descriptor,
+            get: function () {
+                if (this.ownerNode?.classList?.contains('darkreader')) {
+                    return [];
+                }
+                return descriptor.get!.call(this) as CSSStyleSheet[];
+            },
+        });
+    })();
+}

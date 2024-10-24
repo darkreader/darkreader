@@ -3,6 +3,7 @@ import {sync} from 'malevic/dom';
 import Body from './components/body';
 import Connector from '../connect/connector';
 import type {DevToolsData, ExtensionData} from '../../definitions';
+import {setTheme} from '../utils';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -11,6 +12,8 @@ function renderBody(data: ExtensionData, devToolsData: DevToolsData, actions: Co
 }
 
 async function start(): Promise<void> {
+    await setTheme();
+
     const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 

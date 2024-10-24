@@ -7,25 +7,32 @@
         &__expand-button {
             align-items: center;
             background-color: @color-control-active;
-            background-image: @icon-plus;
-            background-position: center left 0.375rem;
-            background-repeat: no-repeat;
-            background-size: 0.5rem;
             color: @color-control-fore;
             cursor: pointer;
             display: none;
             height: @collapsible-panel-button-size;
             justify-content: center;
             line-height: @collapsible-panel-button-size;
+            position: relative;
             text-align: center;
             width: 100%;
+
+            &::before {
+                aspect-ratio: 1;
+                background-image: @icon-plus;
+                bottom: @size-control-inner * 0.125;
+                content: "";
+                left: @size-control-inner * 0.125;
+                position: absolute;
+                top: @size-control-inner * 0.125;
+            }
         }
 
         &--collapsed {
             .collapsible-panel__group__expand-button {
                 display: inline-flex;
             }
-    
+
             .collapsible-panel__group__content {
                 display: none;
             }

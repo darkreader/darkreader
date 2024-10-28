@@ -92,12 +92,21 @@ let observer: MutationObserver | null;
 let readyStateListener: (() => void) | null;
 
 function canCheckForStyle() {
-    return (
+    if (!(
         document.body &&
         document.body.scrollHeight > 0 &&
         document.body.clientHeight > 0 &&
+        document.body.childElementCount > 0 &&
         hasSomeStyle()
-    );
+    )) {
+        return false;
+    }
+    for (const child of document.body.children) {
+        if (child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE' && child.tagName !== 'LINK') {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void, hints: DetectorHint[]): void {

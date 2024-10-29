@@ -1,6 +1,9 @@
+import {wasEnabledForHost} from './cache';
+
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
+    wasEnabledForHost() !== false &&
     !document.querySelector('.darkreader--fallback') &&
     !document.querySelector('.darkreader')
 ) {

@@ -1,3 +1,11 @@
+# 4.9.96 (October 29, 2024)
+
+- Dark theme detection improvements.
+- Fixed overriding styles in Shadow DOM of built-in elements.
+- Firefox: Fix breaking Microsoft Teams.
+- Prevent dark content flashes for disabled websites.
+- Fixed loading styles with imports from same domain.
+
 # 4.9.95 (October 2, 2024)
 
 - Fixed Google Calendar scroll bars.

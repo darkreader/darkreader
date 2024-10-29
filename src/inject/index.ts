@@ -8,6 +8,7 @@ import {collectCSS} from './dynamic-theme/css-collection';
 import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
+import {writeEnabledForHost} from './cache';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
@@ -105,6 +106,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
                     }
                 }, detectorHints);
             }
+            writeEnabledForHost(true);
             break;
         }
         case MessageTypeBGtoCS.ADD_SVG_FILTER: {
@@ -121,6 +123,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
                     }
                 }, detectorHints);
             }
+            writeEnabledForHost(true);
             break;
         }
         case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
@@ -140,6 +143,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
                 sendMessageForTesting('darkreader-dynamic-theme-ready');
                 sendMessageForTesting(`darkreader-dynamic-theme-ready-${document.location.pathname}`);
             }
+            writeEnabledForHost(true);
             break;
         }
         case MessageTypeUItoCS.EXPORT_CSS:
@@ -151,6 +155,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
+            writeEnabledForHost(false);
             break;
         default:
             break;

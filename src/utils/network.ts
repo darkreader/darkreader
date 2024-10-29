@@ -1,7 +1,7 @@
 import {isFirefox} from './platform';
 
 async function getOKResponse(url: string, mimeType?: string, origin?: string): Promise<Response> {
-    const credentials = origin && url.startsWith(origin) ? undefined : 'omit';
+    const credentials = origin && url.startsWith(`${origin}/`) ? undefined : 'omit';
     const response = await fetch(
         url,
         {

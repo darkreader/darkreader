@@ -1,5 +1,6 @@
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
+import {modifyBackgroundColor, modifyForegroundColor} from './modify-colors';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
@@ -10,7 +11,6 @@ import {logInfo, logWarn} from '../utils/log';
 import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
-import {modifyBackgroundColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import type {Theme, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
@@ -23,6 +23,7 @@ import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {combineFixes, findRelevantFix} from './fixes';
+import {registerVariablesSheet, releaseVariablesSheet} from './palette';
 
 export {createFallbackFactory} from './modify-css';
 
@@ -137,6 +138,7 @@ function createStaticStyleOverrides() {
     ].join('\n');
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupNodePositionWatcher(variableStyle, 'variables');
+    registerVariablesSheet(variableStyle.sheet!);
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
@@ -734,4 +736,5 @@ export function cleanDynamicThemeCache(): void {
     stopWatchingForUpdates();
     cleanModificationCache();
     clearColorCache();
+    releaseVariablesSheet();
 }

@@ -121,10 +121,6 @@ config.overrides.push({
             },
             {
                 target: './src/background/',
-                from: './src/inject/',
-            },
-            {
-                target: './src/background/',
                 from: './src/ui/',
             },
             {

@@ -1,7 +1,6 @@
 import {parseColorWithCache, rgbToHexString, type RGBA} from '../../utils/color';
 
 interface RegisteredColor {
-    source: string;
     parsed: RGBA;
     background?: {
         value: string;
@@ -17,9 +16,17 @@ interface RegisteredColor {
     };
 }
 
-type ColorType = 'background' | 'text' | 'border';
+type ColorType = 'background' | 'border' | 'text';
+
+interface ColorPalette {
+    background: RGBA[];
+    border: RGBA[];
+    text: RGBA[];
+}
 
 let variablesSheet: CSSStyleSheet | null;
+
+const registeredColors = new Map<string, RegisteredColor>();
 
 export function registerVariablesSheet(sheet: CSSStyleSheet): void {
     variablesSheet = sheet;
@@ -36,9 +43,8 @@ export function registerVariablesSheet(sheet: CSSStyleSheet): void {
 
 export function releaseVariablesSheet(): void {
     variablesSheet = null;
+    clearColorPalette();
 }
-
-const registeredColors = new Map<string, RegisteredColor>();
 
 function getRegisteredVariableValue(type: ColorType, registered: RegisteredColor) {
     return `var(${registered[type]!.variable}, ${registered[type]!.value})`;
@@ -61,17 +67,39 @@ export function registerColor(type: ColorType, parsed: RGBA, value: string): str
         registered = registeredColors.get(hex)!;
     } else {
         const parsed = parseColorWithCache(hex)!;
-        registered = {source: hex, parsed};
+        registered = {parsed};
         registeredColors.set(hex, registered);
     }
 
-    if (!registered[type]) {
-        const variable = `--darkreader-${type}-${hex.replace('#', '')}`;
-        registered[type] = {variable, value};
-        if ((variablesSheet?.cssRules[0] as CSSStyleRule)?.style) {
-            (variablesSheet?.cssRules[0] as CSSStyleRule).style.setProperty(variable, value);
-        }
+    const variable = `--darkreader-${type}-${hex.replace('#', '')}`;
+    registered[type] = {variable, value};
+    if ((variablesSheet?.cssRules[0] as CSSStyleRule)?.style) {
+        (variablesSheet?.cssRules[0] as CSSStyleRule).style.setProperty(variable, value);
     }
 
     return getRegisteredVariableValue(type, registered);
+}
+
+export function getColorPalette(): ColorPalette {
+    const background: RGBA[] = [];
+    const border: RGBA[] = [];
+    const text: RGBA[] = [];
+
+    registeredColors.forEach((registered) => {
+        if (registered.background) {
+            background.push(registered.parsed);
+        }
+        if (registered.border) {
+            border.push(registered.parsed);
+        }
+        if (registered.text) {
+            text.push(registered.parsed);
+        }
+    });
+
+    return {background, border, text};
+}
+
+export function clearColorPalette(): void {
+    registeredColors.clear();
 }

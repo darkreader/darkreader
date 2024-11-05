@@ -1,6 +1,6 @@
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {modifyBackgroundColor, modifyForegroundColor} from './modify-colors';
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from './modify-colors';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
@@ -23,7 +23,7 @@ import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {combineFixes, findRelevantFix} from './fixes';
-import {registerVariablesSheet, releaseVariablesSheet} from './palette';
+import {clearColorPalette, getColorPalette, registerVariablesSheet, releaseVariablesSheet} from './palette';
 
 export {createFallbackFactory} from './modify-css';
 
@@ -616,6 +616,9 @@ export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: Dyna
     createOrUpdateDynamicThemeInternal(theme, dynamicThemeFix, iframe);
 }
 
+let prevTheme: Theme | null = null;
+let prevFixes: DynamicThemeFix | null = null;
+
 /**
  * Note: This function should be directly used only in API builds, it is exported by this fle
  * only for use in src/api/enable() for backwards compatibility,
@@ -624,6 +627,44 @@ export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: Dyna
 export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
     theme = themeConfig;
     fixes = dynamicThemeFixes;
+
+    const colorAffectingKeys: Array<keyof Theme> = [
+        'brightness',
+        'contrast',
+        'darkSchemeBackgroundColor',
+        'darkSchemeTextColor',
+        'grayscale',
+        'lightSchemeBackgroundColor',
+        'lightSchemeTextColor',
+        'sepia',
+    ];
+
+    if (prevTheme && prevFixes) {
+        const themeKeys = new Set<keyof Theme>([
+            ...(Object.keys(theme) as Array<keyof Theme>),
+            ...(Object.keys(prevTheme) as Array<keyof Theme>),
+        ]);
+
+        let onlyColorsChanged = true;
+        for (const key of themeKeys) {
+            if (theme[key] !== prevTheme[key] && !colorAffectingKeys.includes(key)) {
+                onlyColorsChanged = false;
+                break;
+            }
+        }
+
+        if (onlyColorsChanged) {
+            const palette = getColorPalette();
+            clearColorPalette();
+            palette.background.forEach((color) => modifyBackgroundColor(color, theme!));
+            palette.text.forEach((color) => modifyForegroundColor(color, theme!));
+            palette.border.forEach((color) => modifyBorderColor(color, theme!));
+            return;
+        }
+
+        clearColorPalette();
+    }
+
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
@@ -681,6 +722,9 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
         });
         headObserver.observe(document, {childList: true, subtree: true});
     }
+
+    prevTheme = theme;
+    prevFixes = fixes;
 }
 
 function removeProxy() {
@@ -737,4 +781,6 @@ export function cleanDynamicThemeCache(): void {
     cleanModificationCache();
     clearColorCache();
     releaseVariablesSheet();
+    prevTheme = null;
+    prevFixes = null;
 }

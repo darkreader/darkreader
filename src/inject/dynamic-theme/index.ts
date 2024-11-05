@@ -653,6 +653,10 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
             }
         }
 
+        if (onlyColorsChanged && JSON.stringify(fixes) !== JSON.stringify(prevFixes)) {
+            onlyColorsChanged = false;
+        }
+
         if (onlyColorsChanged) {
             const palette = getColorPalette();
             clearColorPalette();

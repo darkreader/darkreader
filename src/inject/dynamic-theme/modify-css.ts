@@ -2,6 +2,7 @@ import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
+import {readImageDetailCache, writeImageDetailCache} from '../cache';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
@@ -285,6 +286,7 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
 
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails | null) => void>>();
+let didTryLoadCache = false;
 
 function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     if (!selectorText || selectors.length === 0) {
@@ -381,6 +383,16 @@ export function getBgImageModifier(
         };
 
         const getURLModifier = (urlValue: string) => {
+            if (!didTryLoadCache) {
+                didTryLoadCache = true;
+                const cache = readImageDetailCache();
+                if (cache) {
+                    Object.entries(cache).forEach(([url, details]) => {
+                        imageDetailsCache.set(url, details);
+                    });
+                }
+            }
+
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;
@@ -396,6 +408,7 @@ export function getBgImageModifier(
                 let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
+                    writeImageDetailCache(imageDetailsCache);
                 } else {
                     try {
                         if (!isBlobURLCheckResultReady()) {

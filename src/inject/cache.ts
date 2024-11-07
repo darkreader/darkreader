@@ -2,6 +2,7 @@ import type {ImageDetails} from './dynamic-theme/image';
 
 const STORAGE_KEY_WAS_ENABLED_FOR_HOST = '__darkreader__wasEnabledForHost';
 const STORAGE_KEY_IMAGE_DETAILS = '__darkreader__imageDetails_v1';
+const STORAGE_KEY_CSS_FETCH_PREFIX = '__darkreader__cssFetch_';
 
 export function wasEnabledForHost(): boolean | null {
     try {
@@ -12,10 +13,9 @@ export function wasEnabledForHost(): boolean | null {
         if (value === 'false') {
             return false;
         }
-        return null;
     } catch (err) {
-        return null;
     }
+    return null;
 }
 
 export function writeEnabledForHost(value: boolean): void {
@@ -36,7 +36,10 @@ export function writeImageDetailCache(imageDetailsCache: Map<string, ImageDetail
                 cache[url] = data;
             }
         });
-        sessionStorage.setItem(STORAGE_KEY_IMAGE_DETAILS, JSON.stringify(cache));
+        try {
+            sessionStorage.setItem(STORAGE_KEY_IMAGE_DETAILS, JSON.stringify(cache));
+        } catch (err) {
+        }
     }, 1000);
 }
 
@@ -46,6 +49,23 @@ export function readImageDetailCache(): Record<string, ImageDetails> | null {
         if (json) {
             return JSON.parse(json);
         }
+    } catch (err) {
+    }
+    return null;
+}
+
+export function writeCSSFetchCache(url: string, cssText: string): void {
+    const key = `${STORAGE_KEY_CSS_FETCH_PREFIX}${url}`;
+    try {
+        sessionStorage.setItem(key, cssText);
+    } catch (err) {
+    }
+}
+
+export function readCSSFetchCache(url: string): string | null {
+    const key = `${STORAGE_KEY_CSS_FETCH_PREFIX}${url}`;
+    try {
+        return sessionStorage.getItem(key) ?? null;
     } catch (err) {
     }
     return null;

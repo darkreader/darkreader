@@ -21,7 +21,7 @@ export type CSSValueModifier = (theme: Theme) => string | Promise<string | null>
 export interface CSSValueModifierResult {
     result: string;
     matchesLength: number;
-    unparseableMatchesLength: number;
+    unparsableMatchesLength: number;
 }
 
 export type CSSValueModifierWithInfo = (theme: Theme) => CSSValueModifierResult;
@@ -298,7 +298,17 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
-        if (ruleSelectors.some((s) => s === ignoredSelector)) {
+        if (ignoredSelector.startsWith('^')) {
+            const beginning = ignoredSelector.slice(1);
+            if (ruleSelectors.some((s) => s.startsWith(beginning))) {
+                return true;
+            }
+        } else if (ignoredSelector.endsWith('$')) {
+            const ending = ignoredSelector.slice(0, ignoredSelector.length - 1);
+            if (ruleSelectors.some((s) => s.endsWith(ending))) {
+                return true;
+            }
+        } else if (ruleSelectors.some((s) => s === ignoredSelector)) {
             return true;
         }
     }
@@ -559,7 +569,7 @@ export function getShadowModifierWithInfo(value: string): CSSValueModifierWithIn
             const modified = modifiers.map((modify) => modify(theme)).join('');
             return {
                 matchesLength: colorMatches.length,
-                unparseableMatchesLength: notParsed,
+                unparsableMatchesLength: notParsed,
                 result: modified,
             };
         };

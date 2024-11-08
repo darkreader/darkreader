@@ -13,7 +13,6 @@ import type {Theme} from '../../definitions';
 import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
-import {throttle} from '../../utils/throttle';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -327,15 +326,14 @@ interface BgImageMatches {
 
 const imageSelectorQueue = new Map<string, Array<() => void>>();
 
-export const checkImageSelectors = throttle(() => {
+export function checkImageSelectors(element: Element | Document | ShadowRoot): void {
     for (const [selector, callbacks] of imageSelectorQueue) {
-        // TODO: Search in Shadow DOM too.
-        if (document.querySelector(selector)) {
+        if (element.querySelector(selector)) {
             imageSelectorQueue.delete(selector);
             callbacks.forEach((cb) => cb());
         }
     }
-});
+}
 
 export function getBgImageModifier(
     value: string,
@@ -664,5 +662,4 @@ export function cleanModificationCache(): void {
     cleanImageProcessingCache();
     awaitingForImageLoading.clear();
     imageSelectorQueue.clear();
-    checkImageSelectors.cancel();
 }

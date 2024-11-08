@@ -106,7 +106,7 @@ export function watchForStylePositions(
         // URL for testing: https://chromestatus.com/roadmap
         additions.forEach((node) => isCustomElement(node) && recordUndefinedElement(node));
 
-        checkImageSelectors();
+        additions.forEach((node) => checkImageSelectors(node));
     }
 
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
@@ -137,7 +137,7 @@ export function watchForStylePositions(
         deepObserve(root);
         collectUndefinedElements(root);
 
-        checkImageSelectors();
+        checkImageSelectors(root);
     }
 
     function handleAttributeMutations(mutations: MutationRecord[]) {

@@ -13,6 +13,7 @@ import type {Theme} from '../../definitions';
 import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
+import {throttle} from '../../utils/throttle';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -324,6 +325,18 @@ interface BgImageMatches {
     hasComma?: boolean;
 }
 
+const imageSelectorQueue = new Map<string, Array<() => void>>();
+
+export const checkImageSelectors = throttle(() => {
+    for (const [selector, callbacks] of imageSelectorQueue) {
+        // TODO: Search in Shadow DOM too.
+        if (document.querySelector(selector)) {
+            imageSelectorQueue.delete(selector);
+            callbacks.forEach((cb) => cb());
+        }
+    }
+});
+
 export function getBgImageModifier(
     value: string,
     rule: CSSStyleRule,
@@ -415,6 +428,19 @@ export function getBgImageModifier(
                 if (isURLEmpty) {
                     return "url('')";
                 }
+
+                // TODO: Search in Shadow DOM too.
+                const selector = rule.selectorText;
+                if (selector && !document.querySelector(selector)) {
+                    await new Promise<void>((resolve) => {
+                        if (imageSelectorQueue.has(selector)) {
+                            imageSelectorQueue.get(selector)!.push(resolve);
+                        } else {
+                            imageSelectorQueue.set(selector, [resolve]);
+                        }
+                    });
+                }
+
                 let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
@@ -637,4 +663,6 @@ export function cleanModificationCache(): void {
     imageDetailsCache.clear();
     cleanImageProcessingCache();
     awaitingForImageLoading.clear();
+    imageSelectorQueue.clear();
+    checkImageSelectors.cancel();
 }

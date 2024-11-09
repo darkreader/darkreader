@@ -38,7 +38,7 @@ export function disable(): void {
     isDarkReaderEnabled = false;
 }
 
-const darkScheme = typeof(matchMedia) === "function" ? matchMedia('(prefers-color-scheme: dark)') : undefined;
+const darkScheme = typeof(matchMedia) === 'function' ? matchMedia('(prefers-color-scheme: dark)') : undefined;
 let store = {
     themeOptions: null as Partial<Theme> | null,
     fixes: null as DynamicThemeFix | null,

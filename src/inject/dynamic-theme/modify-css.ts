@@ -13,6 +13,7 @@ import type {Theme} from '../../definitions';
 import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
+import {getSheetScope} from './style-scope';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -326,9 +327,9 @@ interface BgImageMatches {
 
 const imageSelectorQueue = new Map<string, Array<() => void>>();
 
-export function checkImageSelectors(element: Element | Document | ShadowRoot): void {
+export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
     for (const [selector, callbacks] of imageSelectorQueue) {
-        if (element.querySelector(selector)) {
+        if (node.querySelector(selector)) {
             imageSelectorQueue.delete(selector);
             callbacks.forEach((cb) => cb());
         }
@@ -417,9 +418,11 @@ export function getBgImageModifier(
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;
+            const ownerNode = parentStyleSheet?.ownerNode;
+            const scope = (parentStyleSheet && getSheetScope(parentStyleSheet)) ?? document;
             const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
-                parentStyleSheet?.ownerNode?.baseURI || location.origin;
+                ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
             return async (theme: Theme): Promise<string | null> => {
@@ -429,7 +432,7 @@ export function getBgImageModifier(
 
                 // TODO: Search in Shadow DOM too.
                 const selector = rule.selectorText;
-                if (selector && !document.querySelector(selector)) {
+                if (selector && !scope.querySelector(selector)) {
                     await new Promise<void>((resolve) => {
                         if (imageSelectorQueue.has(selector)) {
                             imageSelectorQueue.get(selector)!.push(resolve);

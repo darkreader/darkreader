@@ -54,6 +54,18 @@ text: #5b6971
 
 ================================
 
+Github Modern
+
+DARK
+background: #0d1117
+text: #c9d1d9
+
+LIGHT
+background: #ffffff
+text: #24292f
+
+================================
+
 Gruvbox
 
 DARK
@@ -75,6 +87,18 @@ text: #dcd7ba
 LIGHT
 background: #f4ecca
 text: #1e4887
+
+================================
+
+Material You
+
+DARK
+background: #1f1b24
+text: #e3e3e3
+
+LIGHT
+background: #fefbff
+text: #1f1b24
 
 ================================
 

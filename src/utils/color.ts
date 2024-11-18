@@ -155,6 +155,9 @@ export function parse($color: string): RGBA | null {
     }
 
     if (c.match(rgbMatch)) {
+        if (c.startsWith('rgb(#') || c.startsWith('rgba(#')) {
+            return domParseColor(c);
+        }
         return parseRGB(c);
     }
 

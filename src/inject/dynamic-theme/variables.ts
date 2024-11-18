@@ -685,8 +685,16 @@ function isConstructedColorVar(value: string) {
     );
 }
 
+const textColorProps = [
+    'color',
+    'caret-color',
+    '-webkit-text-fill-color',
+    'fill',
+    'stroke',
+];
+
 function isTextColorProperty(property: string) {
-    return property === 'color' || property === 'caret-color' || property === '-webkit-text-fill-color';
+    return textColorProps.includes(property);
 }
 
 // [number] [number] [number]

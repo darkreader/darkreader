@@ -150,6 +150,9 @@ const hexMatch = /^#[0-9a-f]+$/i;
 
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
+    if ($color.includes('(from ')) {
+        return domParseColor(c);
+    }
 
     if (c.match(rgbMatch)) {
         return parseRGB(c);

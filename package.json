@@ -106,5 +106,8 @@
     "web-ext": "8.3.0",
     "ws": "8.18.0",
     "yazl": "3.3.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.27.3"
   }
 }

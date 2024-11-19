@@ -191,7 +191,7 @@ if (__TEST__) {
                 case 'getChromeStorage': {
                     const keys = message.data.keys;
                     const region = message.data.region;
-                    chrome.storage[region].get(keys, respond);
+                    chrome.storage[region].get(keys as any, respond);
                     break;
                 }
                 case 'setNews':

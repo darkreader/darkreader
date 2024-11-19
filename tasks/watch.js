@@ -1,4 +1,4 @@
-import chokidar from 'chokidar';
+import {watch as chokidarWatch} from 'chokidar';
 import {log} from './utils.js';
 
 const DEBOUNCE = 200;
@@ -32,7 +32,7 @@ function watch(options) {
         }, DEBOUNCE);
     }
 
-    const watcher = chokidar.watch(options.files, {ignoreInitial: true})
+    const watcher = chokidarWatch(options.files, {ignoreInitial: true})
         .on('add', onChange)
         .on('change', onChange)
         .on('unlink', onChange);

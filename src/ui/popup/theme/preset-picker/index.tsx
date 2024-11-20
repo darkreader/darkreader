@@ -5,6 +5,7 @@ import {isURLInList, isURLMatched, getURLHostOrProtocol} from '../../../../utils
 import {DropDown, MessageBox} from '../../../controls';
 import {generateUID} from '../../../../utils/uid';
 import type {DropDownOption} from '../../../controls/dropdown';
+import {getLocalMessage} from '../../../../utils/locales';
 
 interface PresetItemStore {
     isConfirmationVisible: boolean;
@@ -32,7 +33,7 @@ function PresetItem(props: ViewProps & {preset: ThemePreset}) {
 
     const confirmation = store.isConfirmationVisible ? (
         <MessageBox
-            caption={`Are you sure you want to remove ${props.preset.name}?`}
+            caption={`${getLocalMessage('ask_remove_theme')} ${props.preset.name}?`}
             onOK={onConfirmRemoveClick}
             onCancel={onCancelRemoveClick}
         />
@@ -61,9 +62,9 @@ export default function PresetPicker(props: ViewProps) {
 
     const selectedPresetId = custom ? 'custom' : preset ? preset.id : 'default';
 
-    const defaultOption = {id: 'default', content: 'Theme for all websites'};
+    const defaultOption = {id: 'default', content: getLocalMessage('theme_for_all')};
     const addNewPresetOption = props.data.settings.presets.length < MAX_ALLOWED_PRESETS ?
-        {id: 'add-preset', content: '\uff0b Create new theme'} :
+        {id: 'add-preset', content: '\uff0b ' + getLocalMessage('create_new_theme')} :
         null;
     const userPresetsOptions = props.data.settings.presets.map((preset) => {
         if (preset.id === selectedPresetId) {
@@ -76,7 +77,7 @@ export default function PresetPicker(props: ViewProps) {
     });
     const customSitePresetOption = {
         id: 'custom',
-        content: `${selectedPresetId === 'custom' ? '\u2605' : '\u2606'} Theme for ${host}`,
+        content: `${selectedPresetId === 'custom' ? '\u2605' : '\u2606'} ${getLocalMessage('theme_for')} ${host}`,
     };
 
     const dropdownOptions = [
@@ -111,7 +112,7 @@ export default function PresetPicker(props: ViewProps) {
         } else if (id === 'add-preset') {
             let newPresetName: string;
             for (let i = 0; i <= props.data.settings.presets.length; i++) {
-                newPresetName = `Theme ${i + 1}`;
+                newPresetName = `${getLocalMessage('theme')} ${i + 1}`;
                 if (props.data.settings.presets.every((p) => p.name !== newPresetName)) {
                     break;
                 }

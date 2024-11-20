@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import ColorPicker from '../color-picker';
 import DropDown from '../dropdown';
 import {parseColorWithCache} from '../../../utils/color';
+import {getLocalMessage} from '../../../utils/locales';
 
 interface ColorDropDownProps {
     class?: string;
@@ -25,9 +26,9 @@ export default function ColorDropDown(props: ColorDropDownProps) {
     const store: ColorDropDownStore = context.store;
 
     const labels = {
-        DEFAULT: 'Default',
-        AUTO: 'Auto',
-        CUSTOM: 'Custom',
+        DEFAULT: getLocalMessage('custom_browser_theme_off'),
+        AUTO: getLocalMessage('auto'),
+        CUSTOM: getLocalMessage('custom_browser_theme_on'),
     };
 
     const dropDownOptions = [

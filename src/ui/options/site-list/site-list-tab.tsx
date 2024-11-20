@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
 import {ClearSiteList} from './clear-site-list';
 import {SiteList} from './site-list';
+import {getLocalMessage} from '../../../utils/locales';
 
 export function SiteListTab(props: ViewProps): Malevic.Child {
     const {settings} = props.data;
@@ -15,8 +16,8 @@ export function SiteListTab(props: ViewProps): Malevic.Child {
     }
 
     const label = enabledByDefault ?
-        'Disable on these websites' :
-        'Enable on these websites';
+        getLocalMessage('disable_on_these_websites') :
+        getLocalMessage('enable_on_these_websites');
 
     const sites = enabledByDefault
         ? settings.disabledFor

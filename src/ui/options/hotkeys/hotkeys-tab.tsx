@@ -20,7 +20,7 @@ export function HotkeysTab(props: ViewProps): Malevic.Child {
                 />
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Enable/disable the extension
+                {getLocalMessage('enable_disable_extension')}
             </ControlGroup.Description>
         </ControlGroup>
         <ControlGroup>
@@ -37,7 +37,7 @@ export function HotkeysTab(props: ViewProps): Malevic.Child {
                 />
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Toggle the current website
+                {getLocalMessage('toggle_current_site')}
             </ControlGroup.Description>
         </ControlGroup>
     </div>;

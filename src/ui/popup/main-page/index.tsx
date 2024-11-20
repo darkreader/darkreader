@@ -5,6 +5,7 @@ import AppSwitch from './app-switch';
 import HelpGroup from './help';
 import SiteToggleGroup from './site-toggle';
 import ThemeGroup from './theme-group';
+import {getLocalMessage} from '../../../utils/locales';
 
 function SwitchGroup(props: ViewProps) {
     return (
@@ -19,7 +20,7 @@ function SettingsNavButton(props: {onClick: () => void}) {
     return (
         <NavButton onClick={props.onClick}>
             <span class="settings-button-icon" />
-            Settings
+            {getLocalMessage('settings')}
         </NavButton>
     );
 }

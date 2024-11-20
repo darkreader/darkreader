@@ -7,9 +7,7 @@ export function AboutTab(): Malevic.Child {
     return <div class="settings-tab about-tab">
         <AppVersion />
         <div>
-            <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
-                Privacy Policy
-            </a>
+            <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>
         </div>
         <div>
             <a href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>

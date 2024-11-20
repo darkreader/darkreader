@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import {Button, ControlGroup, MessageBox} from '../../controls';
 import {DeleteIcon} from '../../icons';
 import type {ViewProps} from '../../../definitions';
+import {getLocalMessage} from '../../../utils/locales';
 
 export function ClearSiteList(props: ViewProps): Malevic.Child {
     const context = getContext();
@@ -25,7 +26,7 @@ export function ClearSiteList(props: ViewProps): Malevic.Child {
 
     const dialog = store.isDialogVisible ? (
         <MessageBox
-            caption="Are you sure you want to remove all your sites from the list? You cannot restore them later"
+            caption={getLocalMessage('ask_remove_site_list')}
             onOK={reset}
             onCancel={hideDialog}
         />
@@ -39,13 +40,13 @@ export function ClearSiteList(props: ViewProps): Malevic.Child {
                         <span class="clear-site-list-button__icon">
                             <DeleteIcon />
                         </span>
-                        Clear site list
+                        {getLocalMessage('clear_site_list')}
                     </span>
                     {dialog}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Remove all sites from the list
+                {getLocalMessage('remove_all_site_list')}
             </ControlGroup.Description>
         </ControlGroup>
     );

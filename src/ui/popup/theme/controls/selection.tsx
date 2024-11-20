@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import ThemeControl from './theme-control';
 import {ColorDropDown} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 
 type SelectionColorValue = '' | 'auto' | string;
 
@@ -12,7 +13,7 @@ interface SelectionEditorProps {
 
 export default function SelectionColorEditor(props: SelectionEditorProps) {
     return (
-        <ThemeControl label="Selection">
+        <ThemeControl label={getLocalMessage('selection')}>
             <ColorDropDown
                 value={props.value}
                 colorSuggestion={'#005ccc'}

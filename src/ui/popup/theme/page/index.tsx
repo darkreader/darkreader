@@ -27,6 +27,7 @@ import {
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
+import {getLocalMessage} from '../../../../utils/locales';
 
 interface ThemeGroupProps {
     theme: Theme;
@@ -172,13 +173,13 @@ export default function ThemePage(props: ViewProps) {
         <section class="m-section theme-page">
             <ThemePresetPicker {...props} />
             <Collapsible>
-                <Collapsible.Group id="main" label="Brightness, contrast, mode">
+                <Collapsible.Group id="main" label={getLocalMessage('theme_mode')}>
                     <MainGroup theme={theme} change={change} />
                 </Collapsible.Group>
-                <Collapsible.Group id="colors" label="Colors">
+                <Collapsible.Group id="colors" label={getLocalMessage('theme_color')}>
                     <ColorsGroup theme={theme} change={change} colorSchemes={props.data.colorScheme} />
                 </Collapsible.Group>
-                <Collapsible.Group id="font" label="Font & more">
+                <Collapsible.Group id="font" label={getLocalMessage('theme_font')}>
                     <FontGroup theme={theme} fonts={props.fonts!} viewProps={props} change={change} />
                 </Collapsible.Group>
             </Collapsible>

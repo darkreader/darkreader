@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {isFirefox} from '../../../utils/platform';
 import {Button, MessageBox} from '../../controls';
+import {getLocalMessage} from '../../../utils/locales';
 
 interface ConfigEditorProps {
     header?: string;
@@ -77,14 +78,14 @@ export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
 
     function showResetDialog() {
         showDialog(
-            'Are you sure you want to remove the current changes? You cannot restore them later.',
+            getLocalMessage('ask_remove_current_changes'),
             reset,
         );
     }
 
     function showDeleteDialog() {
         showDialog(
-            'Are you sure you want to delete the fix?',
+            getLocalMessage('ask_delete_fix'),
             props.delete!,
         );
     }
@@ -116,14 +117,13 @@ export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
             />
             <label class="error-text">{store.errorText}</label>
             <div class="buttons">
-                {props.delete ? <Button onclick={showDeleteDialog}>Delete</Button> : null}
-                {props.reset ? <Button onclick={showResetDialog}>Reset changes</Button> : null}
-                {props.apply ? <Button onclick={apply}>Apply</Button> : null}
+                {props.delete ? <Button onclick={showDeleteDialog}>{getLocalMessage('delete')}</Button> : null}
+                {props.reset ? <Button onclick={showResetDialog}>{getLocalMessage('reset_changes')}</Button> : null}
+                {props.apply ? <Button onclick={apply}>{getLocalMessage('apply')}</Button> : null}
             </div>
             <p class="description">
-                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.
-                If a <strong>popular</strong> website looks incorrect
-                e-mail to <strong>support@darkreader.org</strong>
+                {getLocalMessage('read_about_this')} <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">
+                {getLocalMessage('here')}</a></strong>. {getLocalMessage('if_a_popular_website')} <strong>support@darkreader.org</strong>
             </p>
             {dialog}
         </div>

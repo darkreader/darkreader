@@ -3,9 +3,10 @@ import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
 
+
 export default function Scheme(props: {isDark: boolean; onChange: (dark: boolean) => void}) {
     return (
-        <ThemeControl label="Scheme">
+        <ThemeControl label={getLocalMessage('scheme')}>
             <DropDown
                 selected={props.isDark}
                 options={[

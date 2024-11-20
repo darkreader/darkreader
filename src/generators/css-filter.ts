@@ -135,7 +135,14 @@ export function getCSSFilterValue(config: Theme): string | null {
         filters.push(`grayscale(${config.grayscale}%)`);
     }
     if (config.sepia !== 0) {
-        filters.push(`sepia(${config.sepia}%)`);
+        // sepia 값을 기준으로 다른 필터들의 강도를 조절
+        const intensity = config.sepia / 100; // 0~1 사이 값으로 정규화
+        
+        // 블루라이트 감소를 위한 필터 조합
+        filters.push(`sepia(${config.sepia * 0.5}%)`);          // sepia는 절반으로 줄여서 적용
+        filters.push(`brightness(${100 - (intensity * 5)}%)`);   // 밝기 약간 감소
+        filters.push(`contrast(${100 - (intensity * 5)}%)`);     // 대비 약간 감소
+        filters.push(`hue-rotate(-${intensity * 10}deg)`);       // 파란색 계열 감소
     }
 
     if (filters.length === 0) {

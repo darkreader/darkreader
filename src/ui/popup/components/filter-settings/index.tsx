@@ -62,7 +62,7 @@ export default function FilterSettings({data, actions}: ExtWrapper, ...children:
             max={100}
             step={5}
             default={0}
-            name={getLocalMessage('sepia')}
+            name={getLocalMessage('NigthMode')}
             onChange={(value) => setConfig({sepia: value})}
         />
     );

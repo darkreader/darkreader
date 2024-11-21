@@ -17,7 +17,7 @@ export default function Mode(props: {mode: ThemeEngine; onChange: (mode: ThemeEn
         {id: ThemeEngine.staticTheme, content: getLocalMessage('engine_static')},
     ];
     return (
-        <ThemeControl label="Mode">
+        <ThemeControl label={getLocalMessage('mode')}>
             <div class="mode-control-container">
                 <DropDown
                     selected={modes.find((m) => m.id === props.mode)!.id}

@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import Button from '../button';
 import Overlay from '../overlay';
+import {getLocalMessage} from '../../../utils/locales';
 
 interface MessageBoxProps {
     caption: string;
@@ -23,7 +24,7 @@ export default function MessageBox(props: MessageBoxProps) {
                     </Button>
                     {props.hideCancel ? null :
                         <Button class="message-box__button message-box__button-cancel" onclick={props.onCancel}>
-                            Cancel
+                            {getLocalMessage('cancel')}
                         </Button>
                     }
                 </div>

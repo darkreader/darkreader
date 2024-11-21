@@ -41,14 +41,14 @@ export default function AppSwitch(props: ViewProps) {
     }
 
     const descriptionText = isOn ?
-        'Extension is enabled' :
+        getLocalMessage('extension_is_enabled') :
         isOff ?
-            'Extension is disabled' :
+            getLocalMessage('extension_is_disabled') :
             isTimeAutomation ?
-                'Switches according to specified time' :
+                getLocalMessage('switch_time') :
                 isLocationAutomation ?
-                    'Switched according to location' :
-                    'Switches according to system dark mode';
+                    getLocalMessage('switch_location') :
+                    getLocalMessage('switch_system');
     const description = (
         <span
             class={{

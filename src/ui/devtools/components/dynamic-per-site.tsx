@@ -5,6 +5,7 @@ import type {DynamicThemeFix} from '../../../definitions';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../generators/dynamic-theme';
 import {Button, TextBox} from '../../controls';
 import {ConfigEditor} from './config-editor';
+import {getLocalMessage} from '../../../utils/locales';
 
 export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
     const context = getContext();
@@ -79,7 +80,7 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
     return (
         <div class="dynamic-per-site">
             <div class="dynamic-per-site__search-wrapper">
-                <TextBox class="dynamic-per-site__search-input js-search" type="text" oninput={onSearchInput} placeholder="Search by URL" />
+                <TextBox class="dynamic-per-site__search-input js-search" type="text" oninput={onSearchInput} placeholder={getLocalMessage('search_by_url')} />
             </div>
             <list class="dynamic-per-site__urls">
                 {filteredFixes.map((fix) => {
@@ -118,10 +119,10 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
             ) : (
                 <div class="dynamic-per-site__add-fix">
                     <Button onclick={addNewFix} class="dynamic-per-site__add-fix__button">
-                        Create new fix
+                        {getLocalMessage('create_new_fix')}
                     </Button>
                     <p class="dynamic-per-site__add-fix__description">
-                        Search for an <strong>existing fix</strong> or enter a <strong>domain name</strong><br />for a new fix and click <strong>Create</strong>
+                    {getLocalMessage('search_for_an')} <strong>{getLocalMessage('existing_fix')}</strong> {getLocalMessage('or_enter_a')} <strong>{getLocalMessage('domain_name')}</strong><br />{getLocalMessage('for_a_new_fix_and_click')} <strong>{getLocalMessage('create_new_fix')}</strong>
                     </p>
                 </div>
             )}

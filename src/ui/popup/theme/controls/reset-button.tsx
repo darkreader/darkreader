@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {DEFAULT_SETTINGS} from '../../../../defaults';
 import type {ViewProps} from '../../../../definitions';
 import {ControlGroup, ResetButton} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 
 export default function ResetButtonGroup(props: ViewProps) {
     function reset() {
@@ -12,11 +13,11 @@ export default function ResetButtonGroup(props: ViewProps) {
         <ControlGroup>
             <ControlGroup.Control>
                 <ResetButton onClick={reset}>
-                    Reset to defaults
+                    {getLocalMessage('reset_to_defaults')}
                 </ResetButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Restore current theme values to defaults
+                {getLocalMessage('reset_description')}
             </ControlGroup.Description>
         </ControlGroup>
     );

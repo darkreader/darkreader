@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {Select} from '../../../controls';
 import ThemeControl from './theme-control';
 import type {Theme} from '../../../../definitions';
+import {getLocalMessage} from '../../../../utils/locales';
 
 interface FontPickerProps {
     theme: Theme;
@@ -11,7 +12,7 @@ interface FontPickerProps {
 
 export default function FontPicker(props: FontPickerProps) {
     return (
-        <ThemeControl label="Font name">
+        <ThemeControl label={getLocalMessage('font_name')}>
             <Select
                 class={{
                     'font-picker': true,

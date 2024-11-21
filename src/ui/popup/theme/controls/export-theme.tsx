@@ -4,6 +4,7 @@ import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../../utils/message';
 import {getURLHostOrProtocol} from '../../../../utils/url';
 import {Button} from '../../../controls';
 import {saveFile} from '../../../utils';
+import {getLocalMessage} from '../../../../utils/locales';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -37,9 +38,8 @@ export function ExportTheme({data}: ViewProps): Malevic.Child {
     return (
         <Button
             onclick={exportCSS}
-            class="export-theme-button"
-        >
-            Export Dynamic Theme
+            class="export-theme-button">
+            {getLocalMessage('export_dynamic_theme')}
         </Button>
     );
 }

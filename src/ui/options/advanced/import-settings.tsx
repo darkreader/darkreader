@@ -4,6 +4,7 @@ import {Button, ControlGroup, MessageBox} from '../../controls';
 import {openFile} from '../../utils';
 import {getContext} from 'malevic/dom';
 import {validateSettings} from '../../../utils/validation';
+import {getLocalMessage} from '../../../utils/locales';
 
 export function ImportSettings(props: ViewProps): Malevic.Child {
     const context = getContext();
@@ -40,10 +41,10 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
                     return;
                 }
                 props.actions.changeSettings(settings);
-                showDialog('Settings imported');
+                showDialog(getLocalMessage('settings_imported'));
             } catch (err) {
                 console.error(err);
-                showDialog('Failed to read file');
+                showDialog(getLocalMessage('failed_to_read_file'));
             }
         });
     }
@@ -53,14 +54,13 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
             <ControlGroup.Control>
                 <Button
                     onclick={importSettings}
-                    class="advanced__import-settings-button"
-                >
-                    Import Settings
+                    class="advanced__import-settings-button">
+                        {getLocalMessage('import_settings')}
                     {dialog}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Open settings from a JSON file
+                {getLocalMessage('open_json_file')}
             </ControlGroup.Description>
         </ControlGroup>
     );

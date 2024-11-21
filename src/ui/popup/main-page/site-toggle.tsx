@@ -16,17 +16,17 @@ export default function SiteToggleGroup(props: ViewProps) {
     if (isFile && !props.data.isAllowedFileSchemeAccess) {
         descriptionText = getLocalMessage('local_files_forbidden');
     } else if (isPDF(tab.url)) {
-        descriptionText = isPageEnabled ? 'Enabled for PDF files' : 'Disabled for PDF files';
+        descriptionText = isPageEnabled ? getLocalMessage('enabled_for_pdf') : getLocalMessage('disabled_for_pdf');
     } else if (isDarkThemeDetected) {
-        descriptionText = 'Dark theme detected on page';
+        descriptionText = getLocalMessage('dark_theme_detected_on_page');
     } else if (isPageEnabled) {
-        descriptionText = 'Enabled for current website';
+        descriptionText = getLocalMessage('enabled_for_current_website');
     } else if (isProtected) {
         descriptionText = getLocalMessage('page_protected');
     } else if (isInDarkList) {
         descriptionText = getLocalMessage('page_in_dark_list');
     } else {
-        descriptionText = 'Disabled for current website';
+        descriptionText = getLocalMessage('disabled_for_current_website');
     }
 
     const description = (

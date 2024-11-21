@@ -16,7 +16,7 @@ export function DevTools(): Malevic.Child {
                 </NavButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Make a fix for a website
+                {getLocalMessage('dev_tools_description')}
             </ControlGroup.Description>
         </ControlGroup>
     );

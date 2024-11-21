@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
 import {CheckButton} from '../../controls';
+import { getLocalMessage} from '../../../utils/locales';
 
 export function EnableForPDF(props: ViewProps): Malevic.Child {
     function onInvertPDFChange(checked: boolean) {
@@ -10,10 +11,10 @@ export function EnableForPDF(props: ViewProps): Malevic.Child {
     return (
         <CheckButton
             checked={props.data.settings.enableForPDF}
-            label="Enable for PDF files"
+            label={getLocalMessage('enable_for_pdf')}
             description={props.data.settings.enableForPDF ?
-                'Enabled for PDF documents' :
-                'Disabled for PDF documents'}
+                getLocalMessage('enabled_for_pdf'):
+                getLocalMessage('disabled_for_pdf')}
             onChange={onInvertPDFChange}
         />
     );

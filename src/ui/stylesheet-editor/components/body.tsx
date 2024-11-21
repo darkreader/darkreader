@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import {Button, MessageBox, Overlay} from '../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
 import type {ExtWrapper} from '../../../definitions';
+import {getLocalMessage} from '../../../utils/locales';
 
 export default function Body({data, actions}: ExtWrapper) {
     const context = getContext();
@@ -47,7 +48,7 @@ export default function Body({data, actions}: ExtWrapper) {
 
     const dialog = context && context.store.isDialogVisible ? (
         <MessageBox
-            caption="Are you sure you want to remove current changes? You cannot restore them later."
+            caption={getLocalMessage('ask_remove_changes')}
             onOK={reset}
             onCancel={hideDialog}
         />
@@ -67,9 +68,9 @@ export default function Body({data, actions}: ExtWrapper) {
         <body>
             <header>
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
-                <h1 id="title">CSS Editor</h1>
+                <h1 id="title">{getLocalMessage('css_editor')}</h1>
             </header>
-            <h3 class="sub-title">{custom ? host : 'All websites'}</h3>
+            <h3 class="sub-title">{custom ? host : getLocalMessage('all_websites')}</h3>
             <textarea
                 class="editor"
                 native
@@ -82,10 +83,12 @@ export default function Body({data, actions}: ExtWrapper) {
             />
             <div class="buttons">
                 <Button onclick={showDialog}>
-                    Reset changes
+                    {getLocalMessage('reset_changes')}
                     {dialog}
                 </Button>
-                <Button onclick={apply}>Apply</Button>
+                <Button onclick={apply}>
+                    {getLocalMessage('apply')}
+                </Button>
             </div>
             <Overlay />
         </body>

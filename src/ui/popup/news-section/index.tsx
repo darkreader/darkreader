@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import {getDuration} from '../../../utils/time';
 import type {News, ViewProps} from '../../../definitions';
 import {HOMEPAGE_URL} from '../../../utils/links';
+import {getLocalMessage} from '../../../utils/locales';
 
 function isFresh(n: News) {
     try {
@@ -88,7 +89,7 @@ export default function NewsSection(props: ViewProps) {
             <div class="news-section__popover">
                 <div class="news-section__popover__top">
                     <div class="news-section__title">
-                        What's New
+                        {getLocalMessage('news')}
                     </div>
                     <span role="button" class="news-section__close" onclick={toggleNews}>✕</span>
                 </div>

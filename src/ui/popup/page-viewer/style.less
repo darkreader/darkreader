@@ -22,12 +22,19 @@
     }
 
     &__back-button {
-        background-image: @icon-left;
-        background-position: center left 0.25rem;
-        background-repeat: no-repeat;
-        background-size: 1rem;
         flex: none;
         margin-top: @indent-small;
+        position: relative;
         width: calc(100% - 2 * @size-border);
+
+        &::before {
+            aspect-ratio: 1;
+            background-image: @icon-left;
+            bottom: 0;
+            content: "";
+            left: @size-control-inner * 0.125;
+            position: absolute;
+            top: 0;
+        }
     }
 }

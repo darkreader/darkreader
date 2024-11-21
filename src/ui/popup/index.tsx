@@ -6,7 +6,7 @@ import {fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
-import {getFontList, saveFile} from '../utils';
+import {getFontList, saveFile, setTheme} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], installation: {date: number; version: string}, actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
@@ -42,6 +42,8 @@ async function getInstallationData() {
 }
 
 async function start() {
+    await setTheme();
+
     const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 

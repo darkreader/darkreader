@@ -36,29 +36,31 @@
         position: relative;
 
         &__remove {
-            background-color: transparent;
-            background-image: @icon-close-inactive;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 0.75rem;
+            align-items: center;
             border-radius: 50%;
             cursor: pointer;
-            display: none;
+            display: grid;
             height: 1.25rem;
             position: absolute;
             right: 0.125rem;
             top: 0.125rem;
+            visibility: hidden;
             width: 1.25rem;
             z-index: 1;
 
+            &::after {
+                content: "\2715";
+                text-align: center;
+            }
+
             &:hover {
                 background-color: @color-control-active;
-                background-image: @icon-close;
+                color: @color-control-fore;
             }
         }
 
-        &:hover .site-list__item__remove {
-            display: inline-block;
+        &:hover &__remove {
+            visibility: visible;
         }
     }
 }

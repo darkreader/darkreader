@@ -93,15 +93,22 @@
 
     &__more-button {
         background-color: @color-control-active;
-        background-image: @icon-right;
-        background-position: center right 0.25rem;
-        background-repeat: no-repeat;
-        background-size: 1rem;
         border: none;
         height: @size-control-inner - 0.25rem;
         margin-bottom: 0.125rem;
         margin-top: @indent-small + 0.125rem;
+        position: relative;
         width: 100%;
+
+        &::after {
+            aspect-ratio: 1;
+            background-image: @icon-right;
+            bottom: 0;
+            content: "";
+            position: absolute;
+            right: @size-control-inner * 0.125;
+            top: 0;
+        }
     }
 
     &__description {

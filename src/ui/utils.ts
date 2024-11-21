@@ -1,6 +1,160 @@
-import {isMobile} from '../utils/platform';
+import {isMobile, isFirefox} from '../utils/platform';
+import UserStorage from '../background/user-storage';
+import {getSRGBLightness, parse, RGBA} from '../utils/color';
 
 declare const __CHROMIUM_MV3__: boolean;
+
+declare const browser: {
+    theme: {
+        getCurrent: (() => Promise<void>);
+    };
+};
+
+export async function setTheme() {
+    // Check if theme setting should be used
+    if (isFirefox && typeof browser !== 'undefined' && browser.theme && browser.theme.getCurrent) {
+        await UserStorage.loadSettings();
+        if (UserStorage.settings.useFirefoxTheme) {
+            applyTheme(await browser.theme.getCurrent());
+        }
+    }
+}
+
+function blendColors(background: RGBA, color: RGBA, alpha: number): RGBA {
+    // alpha between 0 and 1
+
+    return {
+        r: Math.floor(background.r + alpha * (color.r - background.r)),
+        g: Math.floor(background.g + alpha * (color.g - background.g)),
+        b: Math.floor(background.b + alpha * (color.b - background.b)),
+        a: 1};
+}
+
+function applyTheme(theme: any) {
+    if (theme.colors) {
+
+        // Get text and background colors
+        const text = theme.colors.popup_text;
+        const background = theme.colors.popup;
+
+        // Parse them into RGBA
+        const backgroundRGBA = parse(background);
+        const textRGBA = parse(text);
+
+        // If a value is missing, exit
+        if (backgroundRGBA == null || textRGBA == null) {
+            return;
+        }
+
+        // Check whether theme is light or dark
+        const light = Math.round(getSRGBLightness(backgroundRGBA.r, backgroundRGBA.g, backgroundRGBA.b));
+
+        // Create different highlights
+        const blendWeak = blendColors(backgroundRGBA, textRGBA, .17);
+        const highlightWeak = `rgb(${blendWeak.r}, ${blendWeak.g}, ${blendWeak.b})`;
+        const blendStrong = blendColors(backgroundRGBA, textRGBA, .25);
+        const highlightStrong = `rgb(${blendStrong.r}, ${blendStrong.g}, ${blendStrong.b})`;
+
+        // Create and apply css
+        const style = document.createElement('style');
+        style.textContent = `
+        * {
+            color: ${text} !important;
+            border-color: ${highlightWeak} !important;
+            scrollbar-color: ${text} ${highlightWeak} !important;
+        }
+
+        /* Icon inversions */
+        .settings-button-icon, .m-help-button__text::before, .nav-button::after,
+        .reset-button__icon, .dropdown__selected::after, .m-help-button::after,
+        .theme-group__more-button::after, .page__back-button::before,
+        .collapsible-panel__group__expand-button::before {
+            filter: invert(${light});
+        }
+
+        .color-picker__wrapper {
+            background-color: unset;
+        }
+
+        .site-list__item__remove:hover {
+            color: ${background} !important;
+        }
+
+        .theme-group__presets-wrapper::before {
+            border-color: ${highlightWeak} !important;
+        }
+
+        .loader__message {
+            display: none;
+        }
+
+        .textbox::placeholder {
+            color: ${text};
+        }
+
+        .header__more-settings__shortcut-wrapper--set svg {
+            --icon-color: ${text};
+        }
+
+        .tab-panel__buttons::before, .tab-panel__buttons::after {
+            border-bottom-color: ${highlightWeak};
+        }
+
+        /* Color fades */
+        .footer-help-link:hover, .donate-link:hover, .site-list__textbox:focus,
+        .dropdown__list, .automation__behavior .dropdown,
+        .theme-preset-picker .dropdown__list {
+            box-shadow: unset;
+        }
+
+        .checkbox__checkmark::before, .checkbox__checkmark::after,
+        .updown__icon::before, .updown__icon::after, .slider__thumb,
+        .select__expand__icon::before, .select__expand__icon::after,
+        .site-list__item__remove:hover,
+        .checkbox__input:checked + .checkbox__checkmark::before,
+        .checkbox__input:checked + .checkbox__checkmark::after,
+        .check-button .checkbox__input:checked ~ .checkbox__checkmark::before,
+        .check-button .checkbox__input:checked ~ .checkbox__checkmark::after {
+            background-color: ${text};
+        }
+
+        .header__more-settings::after, .news::before, .news__header {
+            background-image: unset;
+        }
+
+        html, button, .tab-panel__tab, .updown__icon, .track--clickable,
+        .header__more-settings, .multi-switch, .checkbox, .dropdown__list__item,
+        .header__more-settings__shortcut, .news__list, .select__option, .page,
+        .select__list, .news__header, .message-box, .toggle__btn, .news-section,
+        .news-section__popover, .editor, .color-picker__hsb-line, .textbox {
+            background-color: ${background} !important;
+        }
+
+        button:hover, .toggle__btn:hover, .updown__icon:hover, .checkbox:hover,
+        .track--clickable:hover, .track__value, .textbox:hover, .slider__track,
+        .header__more-settings__top__close:hover, .multi-switch__option:hover,
+        .news__close:hover, .select__option:hover, .footer-help-link,
+        *::selection, .donate-link, .automation__behavior, .m-help-button:hover,
+        .hotkeys__control:hover, .overlay, .button:hover, .editor:hover,
+        .m-donate-button, .slider__track::after, .dropdown__list__item:hover,
+        .theme-preset-picker__preset__remove-button:hover,
+        .theme-group__presets-wrapper, .collapsible-panel__group__expand-button,
+        .header__more-settings__shortcut:hover, .textbox.color-picker__input,
+        .dropdown__list {
+            background-color: ${highlightWeak} !important;
+        }
+
+        .toggle__btn--active, .track__value, .multi-switch__highlight,
+        .footer-help-link:hover, .updown__button--disabled .updown__icon::after,
+        .updown__button--disabled .updown__icon::before, .donate-link:hover,
+        .slider__track__fill, .checkbox__checkmark, .dropdown__selected,
+        .textbox.color-picker__input:hover, .slider__track__fill::before,
+        .toggle__btn--active:hover, .multi-switch__option--selected:hover {
+            background-color: ${highlightStrong} !important;
+        }`;
+        document.head.appendChild(style);
+    }
+}
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>): string {
     const classes: string[] = [];

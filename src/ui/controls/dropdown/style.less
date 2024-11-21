@@ -13,17 +13,13 @@
     &__selected {
         align-items: center;
         background-color: @color-control-active;
-        background-image: @icon-down;
-        background-position: center right 0.25rem;
-        background-repeat: no-repeat;
-        background-size: 1rem;
         color: @color-control-fore;
         display: inline-flex;
         height: @dropdown-item-height;
         justify-content: center;
         line-height: @dropdown-item-height;
         margin-top: (@dropdown-height - @dropdown-item-height) / 2;
-        position: absolute;
+        position: relative;
         text-align: center;
         width: 100%;
 
@@ -33,6 +29,15 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        &::after {
+            aspect-ratio: 1;
+            background-image: @icon-down;
+            content: "";
+            height: @dropdown-item-height;
+            position: absolute;
+            right: @size-control-inner * 0.125;
         }
     }
 
@@ -57,7 +62,7 @@
             min-height: @dropdown-item-height;
             text-align: center;
             width: 100%;
-            
+
             &:hover {
                 background-color: @color-control-hover;
                 transition: background-color @time-fast;

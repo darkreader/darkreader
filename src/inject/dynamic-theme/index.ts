@@ -694,15 +694,19 @@ export function removeDynamicTheme(): void {
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
+        const selectors = [
+            '.darkreader--user-agent',
+            '.darkreader--text',
+            '.darkreader--invert',
+            '.darkreader--inline',
+            '.darkreader--override',
+            '.darkreader--variables',
+            '.darkreader--root-vars',
+            'meta[name="darkreader"]',
+        ];
+
         restoreMetaThemeColor();
-        removeNode(document.head.querySelector('.darkreader--user-agent'));
-        removeNode(document.head.querySelector('.darkreader--text'));
-        removeNode(document.head.querySelector('.darkreader--invert'));
-        removeNode(document.head.querySelector('.darkreader--inline'));
-        removeNode(document.head.querySelector('.darkreader--override'));
-        removeNode(document.head.querySelector('.darkreader--variables'));
-        removeNode(document.head.querySelector('.darkreader--root-vars'));
-        removeNode(document.head.querySelector('meta[name="darkreader"]'));
+        selectors.forEach((selector) => removeNode(document.head.querySelector(selector)));
         removeProxy();
     }
     shadowRootsWithOverrides.forEach((root) => {

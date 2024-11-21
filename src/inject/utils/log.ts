@@ -1,5 +1,5 @@
-import {DebugMessageTypeCStoBG} from '../../utils/message';
 import type {DebugMessageCStoBG} from '../../definitions';
+import {DebugMessageTypeCStoBG} from '../../utils/message';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;

@@ -1,6 +1,7 @@
+import type {Theme} from '../../definitions';
 import {parseColorWithCache} from '../../utils/color';
 import {logWarn} from '../utils/log';
-import type {Theme} from '../../definitions';
+
 import {modifyBackgroundColor} from './modify-colors';
 
 const metaThemeColorName = 'theme-color';

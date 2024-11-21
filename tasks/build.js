@@ -1,21 +1,22 @@
 // @ts-check
+import process from 'node:process';
+
 import bundleAPI from './bundle-api.js';
-import bundleHTML from './bundle-html.js';
 import bundleCSS from './bundle-css.js';
+import bundleHTML from './bundle-html.js';
 import bundleJS from './bundle-js.js';
 import bundleLocales from './bundle-locales.js';
 import bundleManifest from './bundle-manifest.js';
 import bundleSignature from './bundle-signature.js';
 import clean from './clean.js';
+import codeStyle from './code-style.js';
 import copy from './copy.js';
 import saveLog from './log.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
-import codeStyle from './code-style.js';
-import zip from './zip.js';
 import {runTasks} from './task.js';
 import {log, pathExistsSync} from './utils.js';
-import process from 'node:process';
-import {PLATFORM} from './platform.js';
+import zip from './zip.js';
 
 const standardTask = [
     clean,

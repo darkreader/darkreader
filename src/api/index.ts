@@ -1,11 +1,12 @@
 import './chrome';
-import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
 import type {Theme, DynamicThemeFix} from '../definitions';
 import {ThemeEngine} from '../generators/theme-engines';
 import {createOrUpdateDynamicThemeInternal, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
+
+import {setFetchMethod as setFetch} from './fetch';
 
 let isDarkReaderEnabled = false;
 const isIFrame = (() => {

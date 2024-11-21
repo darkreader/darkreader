@@ -1,6 +1,6 @@
-import {generateUID} from '../../utils/uid';
 import type {MessageBGtoCS, MessageCStoBG} from '../../definitions';
 import {MessageTypeBGtoCS, MessageTypeCStoBG} from '../../utils/message';
+import {generateUID} from '../../utils/uid';
 
 interface FetchRequest {
     url: string;

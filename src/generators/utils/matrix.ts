@@ -1,6 +1,6 @@
+import type {Theme} from '../../definitions';
 import {clamp, multiplyMatrices} from '../../utils/math';
 import type {matrix5x1, matrix5x5} from '../../utils/math';
-import type {Theme} from '../../definitions';
 
 
 export function createFilterMatrix(config: Theme): matrix5x5 {

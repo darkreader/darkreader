@@ -1,6 +1,8 @@
 import {m} from 'malevic';
+
 import {DONATE_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
+
 import {AppVersion} from './version';
 
 export function AboutTab(): Malevic.Child {

@@ -1,6 +1,6 @@
 import {evalMath} from './math-eval';
-import {getParenthesesRange} from './text';
 import {isSystemDarkModeEnabled} from './media-query';
+import {getParenthesesRange} from './text';
 
 export interface RGBA {
     r: number;

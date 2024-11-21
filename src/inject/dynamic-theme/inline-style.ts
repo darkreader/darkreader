@@ -1,15 +1,17 @@
+import type {Theme} from '../../definitions';
 import {forEach, push} from '../../utils/array';
+import {isShadowDomSupported} from '../../utils/platform';
+import {throttle} from '../../utils/throttle';
+import {getDuration} from '../../utils/time';
+import {getAbsoluteURL} from '../../utils/url';
 import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener, addDOMReadyListener, isDOMReady} from '../utils/dom';
+
 import {iterateCSSDeclarations} from './css-rules';
+import {getImageDetails} from './image';
 import {getModifiableCSSDeclaration} from './modify-css';
 import type {CSSVariableModifier, ModifiedVarDeclaration} from './variables';
 import {variablesStore} from './variables';
-import type {Theme} from '../../definitions';
-import {isShadowDomSupported} from '../../utils/platform';
-import {getDuration} from '../../utils/time';
-import {throttle} from '../../utils/throttle';
-import {getAbsoluteURL} from '../../utils/url';
-import {getImageDetails} from './image';
+
 
 interface Overrides {
     [cssProp: string]: {

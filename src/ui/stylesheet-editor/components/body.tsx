@@ -1,8 +1,9 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {Button, MessageBox, Overlay} from '../../controls';
-import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
+
 import type {ExtWrapper} from '../../../definitions';
+import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
+import {Button, MessageBox, Overlay} from '../../controls';
 
 export default function Body({data, actions}: ExtWrapper) {
     const context = getContext();

@@ -1,29 +1,30 @@
+import type {Theme, DynamicThemeFix} from '../../definitions';
+import {getCSSFilterValue} from '../../generators/css-filter';
+import {createTextStyle} from '../../generators/text-style';
+import {forEach, push, toArray} from '../../utils/array';
+import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
+import {clamp} from '../../utils/math';
+import {isFirefox} from '../../utils/platform';
+import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
+import {generateUID} from '../../utils/uid';
+import {parsedURLCache} from '../../utils/url';
+import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
+import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
+import {logInfo, logWarn} from '../utils/log';
+
+import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
+import {combineFixes, findRelevantFix} from './fixes';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from './modify-colors';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
+import {clearColorPalette, getColorPalette, registerVariablesSheet, releaseVariablesSheet} from './palette';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
-import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
-import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
-import {logInfo, logWarn} from '../utils/log';
-import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
-import {clamp} from '../../utils/math';
-import {getCSSFilterValue} from '../../generators/css-filter';
-import {createTextStyle} from '../../generators/text-style';
-import type {Theme, DynamicThemeFix} from '../../definitions';
-import {generateUID} from '../../utils/uid';
-import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
-import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
-import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
-import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
-import {combineFixes, findRelevantFix} from './fixes';
-import {clearColorPalette, getColorPalette, registerVariablesSheet, releaseVariablesSheet} from './palette';
+import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 
 export {createFallbackFactory} from './modify-css';
 

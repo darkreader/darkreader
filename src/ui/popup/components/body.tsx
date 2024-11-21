@@ -2,22 +2,26 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
+
+import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
+import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
+import {getLocalMessage} from '../../../utils/locales';
+import {isMobile} from '../../../utils/platform';
+import {getDuration} from '../../../utils/time';
 import {TabPanel} from '../../controls';
+import {compose} from '../../utils';
+import NewBody from '../body';
+
 import FilterSettings from './filter-settings';
 import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
 import Loader from './loader';
-import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import {MobileLinks, MobileLinksButton} from './news/mobile-links';
 import SiteListSettings from './site-list-settings';
-import {getDuration} from '../../../utils/time';
-import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
-import {getLocalMessage} from '../../../utils/locales';
-import {compose} from '../../utils';
+
+
 import {PlusBody} from '@plus/popup/plus-body'; // eslint-disable-line
-import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
-import {isMobile} from '../../../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
 declare const __PLUS__: boolean;

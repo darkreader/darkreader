@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import type {ViewProps} from '../../../definitions';
 import {CheckButton} from '../../controls';
 

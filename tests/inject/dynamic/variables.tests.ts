@@ -1,11 +1,11 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
-import {isFirefox} from '../../../src/utils/platform';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout, waitForEvent} from '../support/test-utils';
+import {injectProxy} from '../../../src/inject/dynamic-theme/stylesheet-proxy';
+import {isFirefox} from '../../../src/utils/platform';
 import {stubChromeRuntimeGetURL} from '../support/background-stub';
 import {getJSEchoURL} from '../support/echo-client';
-import {injectProxy} from '../../../src/inject/dynamic-theme/stylesheet-proxy';
+import {multiline, timeout, waitForEvent} from '../support/test-utils';
 
 const theme = {
     ...DEFAULT_THEME,

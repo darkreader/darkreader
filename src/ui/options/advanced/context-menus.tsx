@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import type {ViewProps} from '../../../definitions';
 import {isFirefox, isMobile} from '../../../utils/platform';
 import {CheckButton} from '../../controls';

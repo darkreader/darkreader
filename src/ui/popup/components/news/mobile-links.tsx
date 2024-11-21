@@ -1,9 +1,11 @@
 import {m} from 'malevic';
-import {Button} from '../../../controls';
-import {getLocalMessage} from '../../../../utils/locales';
+import {isFirefox} from 'utils/platform';
+
 import {PhoneIcon} from '../../../../ui/icons/phone-icon';
 import {MOBILE_URL} from '../../../../utils/links';
-import {isFirefox} from 'utils/platform';
+import {getLocalMessage} from '../../../../utils/locales';
+import {Button} from '../../../controls';
+
 
 interface MobileLinksProps {
     expanded: boolean;

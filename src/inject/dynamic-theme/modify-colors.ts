@@ -1,9 +1,9 @@
 import type {Theme} from '../../definitions';
-import type {RGBA, HSLA} from '../../utils/color';
+import {applyColorMatrix, createFilterMatrix} from '../../generators/utils/matrix';
 import {getRegisteredColor, registerColor} from '../../inject/dynamic-theme/palette';
+import type {RGBA, HSLA} from '../../utils/color';
 import {parseToHSLWithCache, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../../utils/color';
 import {scale} from '../../utils/math';
-import {applyColorMatrix, createFilterMatrix} from '../../generators/utils/matrix';
 
 interface ColorFunction {
     (hsl: HSLA): HSLA;

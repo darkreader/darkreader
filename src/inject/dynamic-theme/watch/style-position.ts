@@ -4,6 +4,7 @@ import {iterateShadowHosts, createOptimizedTreeObserver} from '../../utils/dom';
 import {checkImageSelectors} from '../modify-css';
 import type {StyleElement} from '../style-manager';
 import {shouldManageStyle, getManageableStyles} from '../style-manager';
+
 import {collectUndefinedElements, handleIsDefined, isCustomElement, recordUndefinedElement, unsubscribeFromDefineCustomElements, watchWhenCustomElementsDefined} from './custom-elements';
 
 const observers: Array<{disconnect(): void}> = [];

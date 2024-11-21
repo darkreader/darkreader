@@ -1,9 +1,9 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
+import type {DynamicThemeFix} from '../../../src/definitions';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';
-import type {DynamicThemeFix} from '../../../src/definitions';
 
 const theme = {
     ...DEFAULT_THEME,

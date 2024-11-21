@@ -1,4 +1,5 @@
 import {watch as chokidarWatch} from 'chokidar';
+
 import {log} from './utils.js';
 
 const DEBOUNCE = 200;

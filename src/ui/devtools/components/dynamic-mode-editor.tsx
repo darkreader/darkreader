@@ -1,8 +1,10 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import TabPanel from '../../options/tab-panel/tab-panel';
-import {ConfigEditor} from './config-editor';
 import type {DevtoolsProps} from '../types';
+
+import {ConfigEditor} from './config-editor';
 import {DynamicPerSiteEditor} from './dynamic-per-site';
 
 export function DynamicModeEditor(props: DevtoolsProps): Malevic.Child {

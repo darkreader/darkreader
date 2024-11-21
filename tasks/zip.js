@@ -1,7 +1,9 @@
 // @ts-check
-import fs from 'node:fs';
 import {exec} from 'node:child_process';
+import fs from 'node:fs';
+
 import yazl from 'yazl';
+
 import {getDestDir} from './paths.js';
 import {PLATFORM} from './platform.js';
 import {createTask} from './task.js';

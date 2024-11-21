@@ -1,6 +1,7 @@
 // @ts-check
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
 import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';

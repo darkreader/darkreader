@@ -1,4 +1,5 @@
 import type {Theme} from '../../definitions';
+
 import {iterateCSSRules} from './css-rules';
 import {defineSheetScope} from './style-scope';
 import type {CSSBuilder} from './stylesheet-modifier';

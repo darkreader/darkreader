@@ -1,7 +1,8 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {throttle} from '../../../utils/throttle';
+
 import {scale, clamp} from '../../../utils/math';
+import {throttle} from '../../../utils/throttle';
 
 interface SliderProps {
     value: number;

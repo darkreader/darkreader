@@ -1,8 +1,9 @@
 import {m} from 'malevic';
-import {Button} from '../../../controls';
-import {getURLHostOrProtocol, isURLInList} from '../../../../utils/url';
-import {getLocalMessage} from '../../../../utils/locales';
+
 import type {ExtWrapper} from '../../../../definitions';
+import {getLocalMessage} from '../../../../utils/locales';
+import {getURLHostOrProtocol, isURLInList} from '../../../../utils/url';
+import {Button} from '../../../controls';
 
 declare const __THUNDERBIRD__: boolean;
 

@@ -1,5 +1,6 @@
-import {MessageTypeCStoBG, MessageTypeUItoBG} from '../utils/message';
 import type {MessageCStoBG, MessageUItoBG} from '../definitions';
+import {MessageTypeCStoBG, MessageTypeUItoBG} from '../utils/message';
+
 import {isPanel} from './utils/tab';
 
 declare const __CHROMIUM_MV2__: boolean;

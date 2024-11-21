@@ -1,9 +1,10 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import type {ThemePreset, ViewProps} from '../../../../definitions';
+import {generateUID} from '../../../../utils/uid';
 import {isURLInList, isURLMatched, getURLHostOrProtocol} from '../../../../utils/url';
 import {DropDown, MessageBox} from '../../../controls';
-import {generateUID} from '../../../../utils/uid';
 import type {DropDownOption} from '../../../controls/dropdown';
 
 interface PresetItemStore {

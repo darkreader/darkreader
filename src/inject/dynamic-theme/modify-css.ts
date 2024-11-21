@@ -1,19 +1,21 @@
+import type {Theme} from '../../definitions';
 import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
+import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
+import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';
+import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
 import {readImageDetailCache, writeImageDetailCache} from '../cache';
+import {logWarn, logInfo} from '../utils/log';
+
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from './modify-colors';
-import type {CSSVariableModifier, VariablesStore} from './variables';
-import {logWarn, logInfo} from '../utils/log';
-import type {Theme} from '../../definitions';
-import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
-import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
-import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {getSheetScope} from './style-scope';
+import type {CSSVariableModifier, VariablesStore} from './variables';
+
 
 declare const __CHROMIUM_MV3__: boolean;
 

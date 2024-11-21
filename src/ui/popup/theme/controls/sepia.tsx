@@ -1,6 +1,8 @@
 import {m} from 'malevic';
+
 import {getLocalMessage} from '../../../../utils/locales';
 import {Slider} from '../../../controls';
+
 import {formatPercent} from './format';
 import ThemeControl from './theme-control';
 

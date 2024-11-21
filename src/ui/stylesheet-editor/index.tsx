@@ -1,8 +1,10 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import Body from './components/body';
-import Connector from '../connect/connector';
+
 import type {ExtensionActions, ExtensionData} from '../../definitions';
+import Connector from '../connect/connector';
+
+import Body from './components/body';
 
 function renderBody(data: ExtensionData, actions: ExtensionActions) {
     sync(document.body, <Body data={data} actions={actions} />);

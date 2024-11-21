@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import CheckBox from '../checkbox';
 import ControlGroup from '../control-group/control-group';
 

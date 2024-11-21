@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import {getLocalMessage} from '../../../utils/locales';
 
 let appVersion: string;

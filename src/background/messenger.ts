@@ -1,6 +1,7 @@
-import {isFirefox} from '../utils/platform';
 import type {ExtensionData, Theme, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
+import {isFirefox} from '../utils/platform';
+
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT} from './utils/log';
 

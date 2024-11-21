@@ -1,8 +1,8 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../support/test-utils';
 import {isFirefox, isSafari} from '../../../src/utils/platform';
+import {multiline, timeout} from '../support/test-utils';
 
 const theme = {
     ...DEFAULT_THEME,

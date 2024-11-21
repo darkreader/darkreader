@@ -1,7 +1,9 @@
 import {m} from 'malevic';
-import Button from '../button';
-import Track from './track';
+
 import {getLocalMessage} from '../../../utils/locales';
+import Button from '../button';
+
+import Track from './track';
 
 interface UpDownProps {
     value: number;

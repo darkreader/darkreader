@@ -1,8 +1,10 @@
 import {m} from 'malevic';
-import CheckmarkIcon from './checkmark-icon';
-import {Button} from '../../../controls';
-import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
+
 import type {ExtWrapper} from '../../../../definitions';
+import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
+import {Button} from '../../../controls';
+
+import CheckmarkIcon from './checkmark-icon';
 
 declare const __THUNDERBIRD__: boolean;
 

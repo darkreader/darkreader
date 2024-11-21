@@ -1,7 +1,9 @@
 import {m} from 'malevic';
-import {getLocalMessage} from '../../../../utils/locales';
-import {withState, useState} from 'malevic/state';
 import {getContext} from 'malevic/dom';
+import {withState, useState} from 'malevic/state';
+
+import {getLocalMessage} from '../../../../utils/locales';
+
 
 interface LoaderProps {
     complete: boolean;

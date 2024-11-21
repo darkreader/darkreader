@@ -1,9 +1,11 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import type {DevtoolsProps} from '../types';
+
 import type {DynamicThemeFix} from '../../../definitions';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../generators/dynamic-theme';
 import {Button, TextBox} from '../../controls';
+import type {DevtoolsProps} from '../types';
+
 import {ConfigEditor} from './config-editor';
 
 export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {

@@ -1,12 +1,13 @@
+import type {Theme} from '../../definitions';
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
-import {bgFetch} from './network';
-import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
+import AsyncQueue from '../../utils/async-queue';
 import {getSRGBLightness} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
 import {getHashCode} from '../../utils/text';
-import type {Theme} from '../../definitions';
+import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
 import {logWarn} from '../utils/log';
-import AsyncQueue from '../../utils/async-queue';
+
+import {bgFetch} from './network';
 
 export interface ImageDetails {
     src: string;

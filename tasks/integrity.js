@@ -1,6 +1,8 @@
-import {tmpdir} from 'node:os';
 import {mkdir, rm, copyFile, writeFile, readFile, stat} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+
 import unzipper from 'adm-zip';
+
 import {log} from './utils.js';
 
 const tmpDirParent = `${tmpdir()}/darkreader-integrity`;

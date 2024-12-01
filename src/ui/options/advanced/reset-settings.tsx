@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import {DEFAULT_SETTINGS} from '../../../defaults';
 import type {ViewProps} from '../../../definitions';
 import {ControlGroup, MessageBox, ResetButton} from '../../controls';

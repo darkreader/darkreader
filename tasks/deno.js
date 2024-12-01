@@ -1,5 +1,6 @@
-import {readJSON, writeJSON} from './utils.js';
 import {resolve} from 'node:path';
+
+import {readJSON, writeJSON} from './utils.js';
 
 function resolvePath(path) {
     return resolve(import.meta.url.replace('file:/', ''), '../../', path);

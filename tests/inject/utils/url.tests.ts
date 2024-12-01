@@ -1,5 +1,5 @@
-import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
 import type {UserSettings} from '../../../src/definitions';
+import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
 
 it('URL is enabled', () => {
     function fillUserSettings(settings: Partial<UserSettings>): UserSettings {

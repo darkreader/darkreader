@@ -1,9 +1,10 @@
 import {m} from 'malevic';
-import {getLocalMessage} from '../../../utils/locales';
+
 import type {ViewProps} from '../../../definitions';
+import {AutomationMode} from '../../../utils/automation';
+import {getLocalMessage} from '../../../utils/locales';
 import {ControlGroup, MultiSwitch} from '../../controls';
 import {SunMoonIcon, SystemIcon, WatchIcon} from '../../icons';
-import {AutomationMode} from '../../../utils/automation';
 
 export default function AppSwitch(props: ViewProps) {
     const isOn = props.data.settings.enabled === true && !props.data.settings.automation.enabled;

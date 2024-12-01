@@ -1,10 +1,10 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../support/test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 import {FilterMode} from '../../../src/generators/css-filter';
+import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {removeNode} from '../../../src/inject/utils/dom';
+import {multiline, timeout} from '../support/test-utils';
 
 let container: HTMLElement;
 

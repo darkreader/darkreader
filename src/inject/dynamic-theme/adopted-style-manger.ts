@@ -1,5 +1,7 @@
 import type {Theme} from '../../definitions';
+
 import {iterateCSSRules} from './css-rules';
+import {defineSheetScope} from './style-scope';
 import type {CSSBuilder} from './stylesheet-modifier';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
@@ -27,6 +29,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             if (!overrides.has(sheet)) {
                 iterator(sheet);
             }
+            defineSheetScope(sheet, node);
         });
     }
 

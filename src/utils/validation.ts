@@ -1,5 +1,6 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import type {UserSettings, Theme, ThemePreset, CustomSiteConfig, TimeSettings, LocationSettings, Automation} from '../definitions';
+
 import {AutomationMode} from './automation';
 
 function isBoolean(x: any): x is boolean {

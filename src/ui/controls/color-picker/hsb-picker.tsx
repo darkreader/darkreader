@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import type {RGBA} from '../../../utils/color';
 import {parseColorWithCache, rgbToHSL, hslToString, rgbToHexString} from '../../../utils/color';
 import {clamp, scale} from '../../../utils/math';

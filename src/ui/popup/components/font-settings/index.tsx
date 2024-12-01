@@ -1,7 +1,8 @@
 import {m} from 'malevic';
-import {CheckBox, UpDown, Select} from '../../../controls';
-import {getLocalMessage} from '../../../../utils/locales';
+
 import type {Theme} from '../../../../definitions';
+import {getLocalMessage} from '../../../../utils/locales';
+import {CheckBox, UpDown, Select} from '../../../controls';
 
 interface FontSettingsProps {
     config: Theme;

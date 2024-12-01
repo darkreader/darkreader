@@ -1,7 +1,8 @@
-import {parseColorWithCache} from '../../utils/color';
-import {modifyBackgroundColor} from '../../generators/modify-colors';
-import {logWarn} from '../utils/log';
 import type {Theme} from '../../definitions';
+import {parseColorWithCache} from '../../utils/color';
+import {logWarn} from '../utils/log';
+
+import {modifyBackgroundColor} from './modify-colors';
 
 const metaThemeColorName = 'theme-color';
 const metaThemeColorSelector = `meta[name="${metaThemeColorName}"]`;

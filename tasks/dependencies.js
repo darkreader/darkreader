@@ -1,7 +1,8 @@
 // @ts-check
 import {exec} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
 import {readFile, writeFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+
 import {log} from './utils.js';
 
 const cwd = fileURLToPath(new URL('../', import.meta.url));

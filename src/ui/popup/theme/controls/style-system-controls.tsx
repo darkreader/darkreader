@@ -1,5 +1,7 @@
 import {m} from 'malevic';
+
 import {DropDown} from '../../../controls';
+
 import ThemeControl from './theme-control';
 
 export default function StyleSystemControls(props: {value: boolean; onChange: (value: boolean) => void}) {

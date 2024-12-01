@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import {DEFAULT_SETTINGS} from '../../../../defaults';
 import type {ViewProps} from '../../../../definitions';
 import {ControlGroup, ResetButton} from '../../../controls';

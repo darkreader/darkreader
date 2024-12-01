@@ -1,6 +1,6 @@
 import {evalMath} from './math-eval';
-import {getParenthesesRange} from './text';
 import {isSystemDarkModeEnabled} from './media-query';
+import {getParenthesesRange} from './text';
 
 export interface RGBA {
     r: number;
@@ -150,8 +150,14 @@ const hexMatch = /^#[0-9a-f]+$/i;
 
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
+    if ($color.includes('(from ')) {
+        return domParseColor(c);
+    }
 
     if (c.match(rgbMatch)) {
+        if (c.startsWith('rgb(#') || c.startsWith('rgba(#')) {
+            return domParseColor(c);
+        }
         return parseRGB(c);
     }
 

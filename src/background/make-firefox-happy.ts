@@ -1,5 +1,5 @@
-import {MessageTypeCStoBG} from '../utils/message';
 import type {MessageCStoBG, MessageUItoBG} from '../definitions';
+import {MessageTypeCStoBG} from '../utils/message';
 import {isFirefox} from '../utils/platform';
 
 // This function exists to prevent Firefox Sidebars from appearing broken

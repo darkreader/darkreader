@@ -1,8 +1,8 @@
-import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
-import type {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG, MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoBG, MessageTypeUItoCS} from './utils/message';
-import type {AutomationMode} from './utils/automation';
 import type {ThemeEngine} from './generators/theme-engines';
+import type {AutomationMode} from './utils/automation';
+import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
+import type {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG, MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoBG, MessageTypeUItoCS} from './utils/message';
 
 export type ColorScheme = 'dark' | 'light';
 

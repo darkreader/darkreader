@@ -2,6 +2,7 @@ import type {Theme} from '../../definitions';
 import {isChromium} from '../../utils/platform';
 import {getHashCode} from '../../utils/text';
 import {createAsyncTasksQueue} from '../../utils/throttle';
+
 import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';

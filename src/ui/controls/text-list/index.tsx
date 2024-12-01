@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 

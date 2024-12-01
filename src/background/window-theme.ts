@@ -1,7 +1,7 @@
+import type {Theme} from '../definitions';
+import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../inject/dynamic-theme/modify-colors';
 import type {RGBA} from '../utils/color';
 import {parseColorWithCache} from '../utils/color';
-import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
-import type {Theme} from '../definitions';
 
 // TODO: remove type after dependency update
 declare const browser: {

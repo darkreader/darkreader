@@ -1,28 +1,30 @@
-import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
-import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
-import type {StyleElement, StyleManager} from './style-manager';
-import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
-import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
+import type {Theme, DynamicThemeFix} from '../../definitions';
+import {getCSSFilterValue} from '../../generators/css-filter';
+import {createTextStyle} from '../../generators/text-style';
 import {forEach, push, toArray} from '../../utils/array';
+import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
+import {clamp} from '../../utils/math';
+import {isFirefox} from '../../utils/platform';
+import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
+import {generateUID} from '../../utils/uid';
+import {parsedURLCache} from '../../utils/url';
+import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
-import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
-import {clamp} from '../../utils/math';
-import {getCSSFilterValue} from '../../generators/css-filter';
-import {modifyBackgroundColor, modifyForegroundColor} from '../../generators/modify-colors';
-import {createTextStyle} from '../../generators/text-style';
-import type {Theme, DynamicThemeFix} from '../../definitions';
-import {generateUID} from '../../utils/uid';
+
 import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
-import {isFirefox} from '../../utils/platform';
-import {injectProxy} from './stylesheet-proxy';
-import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
-import {parsedURLCache} from '../../utils/url';
-import {variablesStore} from './variables';
-import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {combineFixes, findRelevantFix} from './fixes';
+import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
+import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from './modify-colors';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
+import {clearColorPalette, getColorPalette, registerVariablesSheet, releaseVariablesSheet} from './palette';
+import type {StyleElement, StyleManager} from './style-manager';
+import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
+import {injectProxy} from './stylesheet-proxy';
+import {variablesStore} from './variables';
+import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 
 export {createFallbackFactory} from './modify-css';
 
@@ -137,6 +139,7 @@ function createStaticStyleOverrides() {
     ].join('\n');
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupNodePositionWatcher(variableStyle, 'variables');
+    registerVariablesSheet(variableStyle.sheet!);
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
@@ -614,6 +617,9 @@ export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: Dyna
     createOrUpdateDynamicThemeInternal(theme, dynamicThemeFix, iframe);
 }
 
+let prevTheme: Theme | null = null;
+let prevFixes: DynamicThemeFix | null = null;
+
 /**
  * Note: This function should be directly used only in API builds, it is exported by this fle
  * only for use in src/api/enable() for backwards compatibility,
@@ -622,6 +628,48 @@ export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: Dyna
 export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
     theme = themeConfig;
     fixes = dynamicThemeFixes;
+
+    const colorAffectingKeys: Array<keyof Theme> = [
+        'brightness',
+        'contrast',
+        'darkSchemeBackgroundColor',
+        'darkSchemeTextColor',
+        'grayscale',
+        'lightSchemeBackgroundColor',
+        'lightSchemeTextColor',
+        'sepia',
+    ];
+
+    if (prevTheme && prevFixes) {
+        const themeKeys = new Set<keyof Theme>([
+            ...(Object.keys(theme) as Array<keyof Theme>),
+            ...(Object.keys(prevTheme) as Array<keyof Theme>),
+        ]);
+
+        let onlyColorsChanged = true;
+        for (const key of themeKeys) {
+            if (theme[key] !== prevTheme[key] && !colorAffectingKeys.includes(key)) {
+                onlyColorsChanged = false;
+                break;
+            }
+        }
+
+        if (onlyColorsChanged && JSON.stringify(fixes) !== JSON.stringify(prevFixes)) {
+            onlyColorsChanged = false;
+        }
+
+        if (onlyColorsChanged) {
+            const palette = getColorPalette();
+            clearColorPalette();
+            palette.background.forEach((color) => modifyBackgroundColor(color, theme!));
+            palette.text.forEach((color) => modifyForegroundColor(color, theme!));
+            palette.border.forEach((color) => modifyBorderColor(color, theme!));
+            return;
+        }
+
+        clearColorPalette();
+    }
+
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
@@ -679,6 +727,9 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
         });
         headObserver.observe(document, {childList: true, subtree: true});
     }
+
+    prevTheme = theme;
+    prevFixes = fixes;
 }
 
 function removeProxy() {
@@ -694,15 +745,19 @@ export function removeDynamicTheme(): void {
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
+        const selectors = [
+            '.darkreader--user-agent',
+            '.darkreader--text',
+            '.darkreader--invert',
+            '.darkreader--inline',
+            '.darkreader--override',
+            '.darkreader--variables',
+            '.darkreader--root-vars',
+            'meta[name="darkreader"]',
+        ];
+
         restoreMetaThemeColor();
-        removeNode(document.head.querySelector('.darkreader--user-agent'));
-        removeNode(document.head.querySelector('.darkreader--text'));
-        removeNode(document.head.querySelector('.darkreader--invert'));
-        removeNode(document.head.querySelector('.darkreader--inline'));
-        removeNode(document.head.querySelector('.darkreader--override'));
-        removeNode(document.head.querySelector('.darkreader--variables'));
-        removeNode(document.head.querySelector('.darkreader--root-vars'));
-        removeNode(document.head.querySelector('meta[name="darkreader"]'));
+        selectors.forEach((selector) => removeNode(document.head.querySelector(selector)));
         removeProxy();
     }
     shadowRootsWithOverrides.forEach((root) => {
@@ -734,4 +789,7 @@ export function cleanDynamicThemeCache(): void {
     stopWatchingForUpdates();
     cleanModificationCache();
     clearColorCache();
+    releaseVariablesSheet();
+    prevTheme = null;
+    prevFixes = null;
 }

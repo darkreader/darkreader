@@ -1,7 +1,9 @@
 import {m} from 'malevic';
-import {Select} from '../../../controls';
-import ThemeControl from './theme-control';
+
 import type {Theme} from '../../../../definitions';
+import {Select} from '../../../controls';
+
+import ThemeControl from './theme-control';
 
 interface FontPickerProps {
     theme: Theme;

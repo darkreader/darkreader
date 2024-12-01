@@ -1,13 +1,15 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {Button, Overlay} from '../../controls';
+
 import {ThemeEngine} from '../../../generators/theme-engines';
+import {isMobile} from '../../../utils/platform';
+import {Button, Overlay} from '../../controls';
 import TabPanel from '../../options/tab-panel/tab-panel';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
-import {isMobile} from '../../../utils/platform';
+import type {DevtoolsProps} from '../types';
+
 import {ConfigEditor} from './config-editor';
 import {DynamicModeEditor} from './dynamic-mode-editor';
-import type {DevtoolsProps} from '../types';
 
 declare const __PLUS__: boolean;
 

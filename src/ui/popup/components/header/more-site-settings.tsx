@@ -1,8 +1,9 @@
 import {m} from 'malevic';
-import {Button, CheckBox, Shortcut} from '../../../controls';
+
 import type {ExtWrapper} from '../../../../definitions';
 import {DONATE_URL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
+import {Button, CheckBox, Shortcut} from '../../../controls';
 import {KeyboardIcon} from '../../../icons';
 
 type MoreSiteSettingsProps = ExtWrapper & {

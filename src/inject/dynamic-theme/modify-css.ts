@@ -1,17 +1,21 @@
+import type {Theme} from '../../definitions';
 import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
+import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
+import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';
+import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
-import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
+import {readImageDetailCache, writeImageDetailCache} from '../cache';
+import {logWarn, logInfo} from '../utils/log';
+
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from './modify-colors';
+import {getSheetScope} from './style-scope';
 import type {CSSVariableModifier, VariablesStore} from './variables';
-import {logWarn, logInfo} from '../utils/log';
-import type {Theme} from '../../definitions';
-import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
-import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
-import {parseGradient} from '../../utils/css-text/parse-gradient';
+
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -20,7 +24,7 @@ export type CSSValueModifier = (theme: Theme) => string | Promise<string | null>
 export interface CSSValueModifierResult {
     result: string;
     matchesLength: number;
-    unparseableMatchesLength: number;
+    unparsableMatchesLength: number;
 }
 
 export type CSSValueModifierWithInfo = (theme: Theme) => CSSValueModifierResult;
@@ -285,6 +289,7 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
 
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails | null) => void>>();
+let didTryLoadCache = false;
 
 function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     if (!selectorText || selectors.length === 0) {
@@ -296,7 +301,17 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
-        if (ruleSelectors.some((s) => s === ignoredSelector)) {
+        if (ignoredSelector.startsWith('^')) {
+            const beginning = ignoredSelector.slice(1);
+            if (ruleSelectors.some((s) => s.startsWith(beginning))) {
+                return true;
+            }
+        } else if (ignoredSelector.endsWith('$')) {
+            const ending = ignoredSelector.slice(0, ignoredSelector.length - 1);
+            if (ruleSelectors.some((s) => s.endsWith(ending))) {
+                return true;
+            }
+        } else if (ruleSelectors.some((s) => s === ignoredSelector)) {
             return true;
         }
     }
@@ -310,6 +325,17 @@ interface BgImageMatches {
     offset: number;
     typeGradient?: string;
     hasComma?: boolean;
+}
+
+const imageSelectorQueue = new Map<string, Array<() => void>>();
+
+export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
+    for (const [selector, callbacks] of imageSelectorQueue) {
+        if (node.querySelector(selector)) {
+            imageSelectorQueue.delete(selector);
+            callbacks.forEach((cb) => cb());
+        }
+    }
 }
 
 export function getBgImageModifier(
@@ -381,21 +407,47 @@ export function getBgImageModifier(
         };
 
         const getURLModifier = (urlValue: string) => {
+            if (!didTryLoadCache) {
+                didTryLoadCache = true;
+                const cache = readImageDetailCache();
+                if (cache) {
+                    Object.entries(cache).forEach(([url, details]) => {
+                        imageDetailsCache.set(url, details);
+                    });
+                }
+            }
+
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;
+            const ownerNode = parentStyleSheet?.ownerNode;
+            const scope = (parentStyleSheet && getSheetScope(parentStyleSheet)) ?? document;
             const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
-                parentStyleSheet?.ownerNode?.baseURI || location.origin;
+                ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
             return async (theme: Theme): Promise<string | null> => {
                 if (isURLEmpty) {
                     return "url('')";
                 }
+
+                // TODO: Search in Shadow DOM too.
+                const selector = rule.selectorText;
+                if (selector && !scope.querySelector(selector)) {
+                    await new Promise<void>((resolve) => {
+                        if (imageSelectorQueue.has(selector)) {
+                            imageSelectorQueue.get(selector)!.push(resolve);
+                        } else {
+                            imageSelectorQueue.set(selector, [resolve]);
+                        }
+                    });
+                }
+
                 let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
+                    writeImageDetailCache(imageDetailsCache);
                 } else {
                     try {
                         if (!isBlobURLCheckResultReady()) {
@@ -546,7 +598,7 @@ export function getShadowModifierWithInfo(value: string): CSSValueModifierWithIn
             const modified = modifiers.map((modify) => modify(theme)).join('');
             return {
                 matchesLength: colorMatches.length,
-                unparseableMatchesLength: notParsed,
+                unparsableMatchesLength: notParsed,
                 result: modified,
             };
         };
@@ -614,4 +666,5 @@ export function cleanModificationCache(): void {
     imageDetailsCache.clear();
     cleanImageProcessingCache();
     awaitingForImageLoading.clear();
+    imageSelectorQueue.clear();
 }

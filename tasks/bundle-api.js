@@ -1,14 +1,17 @@
 // @ts-check
-import * as rollup from 'rollup';
-/** @type {any} */
-import rollupPluginReplace from '@rollup/plugin-replace';
-/** @type {any} */
-import rollupPluginTypescript from '@rollup/plugin-typescript';
-import typescript from 'typescript';
 import fs from 'node:fs';
 import os from 'node:os';
-import {createTask} from './task.js';
+
+import rollupPluginReplace from '@rollup/plugin-replace';
+import rollupPluginTypescript from '@rollup/plugin-typescript';
+import * as rollup from 'rollup';
+/** @type {any} */
+/** @type {any} */
+import typescript from 'typescript';
+
+
 import {absolutePath} from './paths.js';
+import {createTask} from './task.js';
 
 async function getVersion() {
     const file = await fs.promises.readFile(new URL('../package.json', import.meta.url), 'utf8');

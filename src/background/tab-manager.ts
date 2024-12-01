@@ -1,15 +1,16 @@
 import {canInjectScript} from '../background/utils/extension-api';
-import {createFileLoader} from './utils/network';
-import type {FetchRequestParameters} from './utils/network';
 import type {MessageBGtoCS, MessageCStoBG, MessageUItoBG} from '../definitions';
-import {isFirefox} from '../utils/platform';
 import {MessageTypeCStoBG, MessageTypeBGtoCS, MessageTypeUItoBG} from '../utils/message';
-import {ASSERT, logInfo, logWarn} from './utils/log';
+import {isFirefox} from '../utils/platform';
 import {StateManager} from '../utils/state-manager';
-import {getURLHostOrProtocol} from '../utils/url';
-import {isPanel} from './utils/tab';
-import {makeFirefoxHappy} from './make-firefox-happy';
 import {getActiveTab, queryTabs} from '../utils/tabs';
+import {getURLHostOrProtocol} from '../utils/url';
+
+import {makeFirefoxHappy} from './make-firefox-happy';
+import {ASSERT, logInfo, logWarn} from './utils/log';
+import type {FetchRequestParameters} from './utils/network';
+import {createFileLoader} from './utils/network';
+import {isPanel} from './utils/tab';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;

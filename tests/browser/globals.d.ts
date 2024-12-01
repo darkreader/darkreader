@@ -1,5 +1,7 @@
 import type {RequestListener} from 'http';
+
 import type {WaitForOptions} from 'puppeteer-core';
+
 import type {ColorScheme, ExtensionData, News, UserSettings} from '../../src/definitions';
 
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};

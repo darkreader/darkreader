@@ -2,14 +2,16 @@ import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {removeCSSComments} from '../../utils/css-text/css-text';
 import {loadAsText} from '../../utils/network';
+import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL, isRelativeHrefOnAbsolutePath} from '../../utils/url';
+import {readCSSFetchCache, writeCSSFetchCache} from '../cache';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
+
 import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
 import {createSheetWatcher} from './watch/sheet-changes';
 
 declare global {
@@ -554,11 +556,20 @@ async function loadText(url: string) {
     if (url.startsWith('data:')) {
         return await (await fetch(url)).text();
     }
-    const parsedURL = new URL(url);
-    if (parsedURL.origin === location.origin) {
-        return await loadAsText(url, 'text/css', location.origin);
+
+    const cache = readCSSFetchCache(url);
+    if (cache) {
+        return cache;
     }
-    return await bgFetch({url, responseType: 'text', mimeType: 'text/css', origin: location.origin});
+
+    const parsedURL = new URL(url);
+    let text: string;
+    if (parsedURL.origin === location.origin) {
+        text = await loadAsText(url, 'text/css', location.origin);
+    }
+    text = await bgFetch({url, responseType: 'text', mimeType: 'text/css', origin: location.origin});
+    writeCSSFetchCache(url, text);
+    return text;
 }
 
 async function replaceCSSImports(cssText: string, basePath: string, cache = new Map<string, string>()) {

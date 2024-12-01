@@ -5,20 +5,19 @@
  */
 
 // @ts-check
-import {execute, log} from './utils.js';
-import {fork} from 'node:child_process';
-import process from 'node:process';
-
-import {fileURLToPath} from 'node:url';
-import {join} from 'node:path';
-import {rm, stat} from 'node:fs/promises';
 import assert from 'node:assert/strict';
+import {fork} from 'node:child_process';
+import {rm, stat} from 'node:fs/promises';
+import {join} from 'node:path';
+import process from 'node:process';
+import {fileURLToPath} from 'node:url';
 
-import {runTasks} from './task.js';
-import zip from './zip.js';
 import signature from './bundle-signature.js';
-
 import {PLATFORM} from './platform.js';
+import {runTasks} from './task.js';
+import {execute, log} from './utils.js';
+import zip from './zip.js';
+
 
 const __filename = join(fileURLToPath(import.meta.url), '../build.js');
 

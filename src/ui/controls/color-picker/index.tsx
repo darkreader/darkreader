@@ -1,7 +1,9 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import {parseColorWithCache} from '../../../utils/color';
 import TextBox from '../textbox';
+
 import HSBPicker from './hsb-picker';
 
 interface ColorPickerProps {

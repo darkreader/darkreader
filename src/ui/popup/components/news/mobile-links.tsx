@@ -1,8 +1,11 @@
 import {m} from 'malevic';
-import {Button} from '../../../controls';
-import {getLocalMessage} from '../../../../utils/locales';
+import {isFirefox} from 'utils/platform';
+
 import {PhoneIcon} from '../../../../ui/icons/phone-icon';
 import {MOBILE_URL} from '../../../../utils/links';
+import {getLocalMessage} from '../../../../utils/locales';
+import {Button} from '../../../controls';
+
 
 interface MobileLinksProps {
     expanded: boolean;
@@ -51,7 +54,10 @@ export function MobileLinks({expanded, onLinkClick, onClose}: MobileLinksProps) 
                         </div>
                     </div>
                     <div class="news__mobile__right">
-                        <img class="news__qr-code" src="../assets/images/mobile-qr-code.png" />
+                        <img
+                            class="news__qr-code"
+                            src={`../assets/images/${isFirefox ? 'mobile-qr-code-firefox.png' : 'mobile-qr-code.png'}`}
+                        />
                     </div>
                 </div>
             </div>

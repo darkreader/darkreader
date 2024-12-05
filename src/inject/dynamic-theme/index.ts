@@ -282,22 +282,35 @@ function createDynamicStyleOverrides() {
     if (isFirefox) {
         const MATCH_VAR = Symbol();
 
+        type NodeSheet = {
+            sheetId: number;
+            cssRules: CSSRule[];
+        };
+
         const onAdoptedCSSChange = (e: CustomEvent) => {
-            const {node, id, cssRules, entries} = e.detail;
+            const {node, id, sheets, entries} = e.detail;
             if (Array.isArray(entries)) {
                 entries.forEach((e) => {
-                    const cssRules = e[2];
-                    variablesStore.addRulesForMatching(cssRules);
+                    const sheets = e[2];
+                    sheets.forEach((sheet: NodeSheet) => {
+                        const {cssRules} = sheet;
+                        variablesStore.addRulesForMatching(cssRules);
+                    });
                 });
                 variablesStore.matchVariablesAndDependents();
-            } else if (cssRules) {
-                variablesStore.addRulesForMatching(cssRules);
+            } else if (sheets) {
+                sheets.forEach((sheet: NodeSheet) => {
+                    const {cssRules} = sheet;
+                    variablesStore.addRulesForMatching(cssRules);
+                });
                 requestAnimationFrameOnce(MATCH_VAR, () => variablesStore.matchVariablesAndDependents());
             }
-            const tuples = Array.isArray(entries) ? entries : node && cssRules ? [[node, id, cssRules]] : [];
-            tuples.forEach(([node, id, cssRules]) => {
+            const tuples = Array.isArray(entries) ? entries : node && sheets ? [[node, id, sheets]] : [];
+            tuples.forEach(([node, id, sheets]) => {
                 adoptedStyleNodeIds.set(node, id);
                 const fallback = getAdoptedStyleSheetFallback(node);
+                const cssRules: CSSRule[] = [];
+                (sheets as NodeSheet[]).forEach((s) => cssRules.push(...s.cssRules));
                 fallback.updateCSS(cssRules);
             });
         };

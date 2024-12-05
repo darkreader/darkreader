@@ -361,6 +361,10 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             path: number[];
             cssText?: string;
         };
+        type NodeSheet = {
+            sheetId: number;
+            cssRules: CSSRule[];
+        };
         const targetNodes = new Set<Document | ShadowRoot>();
         const sourceSheets = new WeakSet<CSSStyleSheet>();
         const sourceSheetNodes = new WeakMap<CSSStyleSheet, Document | ShadowRoot>();
@@ -381,6 +385,19 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             const id = ++nodeCounter;
             nodeIds.set(node, id);
             nodesById.set(id, node);
+            return id;
+        };
+
+        let sheetCounter = 0;
+        const sheetIds = new WeakMap<CSSStyleSheet, number>();
+        const sheetsById = new Map<number, CSSStyleSheet>();
+        const getSheetId = (sheet: CSSStyleSheet) => {
+            if (sheetIds.has(sheet)) {
+                return sheetIds.get(sheet)!;
+            }
+            const id = ++sheetCounter;
+            sheetIds.set(sheet, id);
+            sheetsById.set(id, sheet);
             return id;
         };
 
@@ -419,8 +436,10 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         };
 
         const getSourceCSSRules = (node: Document | ShadowRoot) => {
-            const cssRules: CSSRule[] = [];
+            const allRules: NodeSheet[] = [];
             iterateSourceSheets(node, (sheet) => {
+                const sheetId = getSheetId(sheet);
+                const cssRules: CSSRule[] = [];
                 for (let i = 0; i < sheet.cssRules.length; i++) {
                     const rule = sheet.cssRules[i];
                     cssRules.push(rule);
@@ -428,8 +447,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                         observableStyleDeclarations.set((rule as CSSStyleRule).style, node);
                     }
                 }
+                allRules.push({sheetId, cssRules});
             });
-            return cssRules;
+            return allRules;
         };
 
         const walkNodesWithAdoptedStyles = (root: Document | ShadowRoot, iterator: (host: Document | ShadowRoot) => void) => {
@@ -461,8 +481,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             queuedSheetChanges.add(node);
             queueMicrotask(() => {
                 queuedSheetChanges.delete(node);
-                const cssRules = getSourceCSSRules(node);
-                sendSourceStyles(node, cssRules);
+                const sheets = getSourceCSSRules(node);
+                sendSourceStyles(node, sheets);
             });
         };
 
@@ -567,14 +587,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             });
         });
 
-        const sendSourceStyles = (node: Document | ShadowRoot, cssRules: CSSRule[]) => {
+        const sendSourceStyles = (node: Document | ShadowRoot, sheets: NodeSheet[]) => {
             const id = getNodeId(node);
-            const data = {detail: {node, id, cssRules}};
+            const data = {detail: {node, id, sheets}};
             const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
             document.dispatchEvent(event);
         };
 
-        const sendSourceStylesBatch = (entries: Array<[Document | ShadowRoot, number, CSSRule[]]>) => {
+        const sendSourceStylesBatch = (entries: Array<[Document | ShadowRoot, number, NodeSheet[]]>) => {
             const data = {detail: {entries}};
             const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
             document.dispatchEvent(event);
@@ -602,7 +622,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             walkNodesWithAdoptedStyles(document, (node) => targetNodes.add(node));
             cleaners.push(() => targetNodes.forEach((node) => cleanNode(node)));
 
-            const entries: Array<[Document | ShadowRoot, number, CSSRule[]]> = [];
+            const entries: Array<[Document | ShadowRoot, number, NodeSheet[]]> = [];
             targetNodes.forEach((node) => {
                 const id = getNodeId(node);
                 const rules = getSourceCSSRules(node);

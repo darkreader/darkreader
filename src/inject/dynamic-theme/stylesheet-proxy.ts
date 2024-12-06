@@ -363,14 +363,16 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         };
         type NodeSheet = {
             sheetId: number;
-            cssRules: CSSRule[];
+            sheet: CSSStyleSheet;
         };
+
         const targetNodes = new Set<Document | ShadowRoot>();
         const sourceSheets = new WeakSet<CSSStyleSheet>();
-        const sourceSheetNodes = new WeakMap<CSSStyleSheet, Document | ShadowRoot>();
-        const overrideSheets = new WeakMap<Document | ShadowRoot, CSSStyleSheet>();
+        const sourceSheetNodes = new WeakMap<CSSStyleSheet, Set<Document | ShadowRoot>>();
+        const overrideSheetsByNode = new WeakMap<Document | ShadowRoot, Set<CSSStyleSheet>>();
+        const overrideSheets = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 
-        let observableStyleDeclarations = new WeakMap<CSSStyleDeclaration, Document | ShadowRoot>();
+        let observableStyleDeclarations = new WeakMap<CSSStyleDeclaration, CSSStyleSheet>();
         cleaners.push(() => observableStyleDeclarations = new WeakMap());
 
         let executing = false;
@@ -405,49 +407,52 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             targetNodes.delete(node);
             nodesById.delete(getNodeId(node));
             iterateSourceSheets(node, (sheet) => {
-                sourceSheets.delete(sheet);
-                sourceSheetNodes.delete(sheet);
-            });
-            const override = overrideSheets.get(node);
-            if (override && Array.isArray(node.adoptedStyleSheets)) {
-                const index = node.adoptedStyleSheets.indexOf(override);
-                if (index >= 0) {
-                    node.adoptedStyleSheets.splice(index, 1);
+                sourceSheetNodes.get(sheet)?.delete(node);
+                if (sourceSheetNodes.get(sheet)?.size === 0) {
+                    sourceSheetNodes.delete(sheet);
                 }
+            });
+            const overrides = overrideSheetsByNode.get(node);
+            if (overrides && Array.isArray(node.adoptedStyleSheets)) {
+                overrides.forEach((override) => {
+                    const index = node.adoptedStyleSheets.indexOf(override);
+                    if (index >= 0) {
+                        node.adoptedStyleSheets.splice(index, 1);
+                    }
+                });
             }
-            overrideSheets.delete(node);
+            overrideSheetsByNode.delete(node);
         };
 
         const iterateSourceSheets = (node: Document | ShadowRoot, iterator: (sheet: CSSStyleSheet) => void) => {
             if (Array.isArray(node.adoptedStyleSheets)) {
+                const overrides = overrideSheetsByNode.get(node);
                 node.adoptedStyleSheets.forEach((sheet) => {
-                    const override = overrideSheets.get(node);
-                    if (sheet !== override) {
+                    if (!overrides || !overrides.has(sheet)) {
                         if (!sourceSheets.has(sheet)) {
                             sourceSheets.add(sheet);
                         }
                         if (!sourceSheetNodes.has(sheet)) {
-                            sourceSheetNodes.set(sheet, node);
+                            sourceSheetNodes.set(sheet, new Set());
                         }
+                        sourceSheetNodes.get(sheet)!.add(node);
                         iterator(sheet);
                     }
                 });
             }
         };
 
-        const getSourceCSSRules = (node: Document | ShadowRoot) => {
+        const getSourceSheets = (node: Document | ShadowRoot) => {
             const allRules: NodeSheet[] = [];
             iterateSourceSheets(node, (sheet) => {
                 const sheetId = getSheetId(sheet);
-                const cssRules: CSSRule[] = [];
                 for (let i = 0; i < sheet.cssRules.length; i++) {
                     const rule = sheet.cssRules[i];
-                    cssRules.push(rule);
                     if ((rule as CSSStyleRule).style) {
-                        observableStyleDeclarations.set((rule as CSSStyleRule).style, node);
+                        observableStyleDeclarations.set((rule as CSSStyleRule).style, sheet);
                     }
                 }
-                allRules.push({sheetId, cssRules});
+                allRules.push({sheetId, sheet});
             });
             return allRules;
         };
@@ -465,41 +470,52 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             }
         };
 
-        const queuedSheetChanges = new Set<Document | ShadowRoot>();
+        const queuedSheetChanges = new Set<CSSStyleSheet>();
 
-        const handleSheetChange = (node: Document | ShadowRoot) => {
+        const handleSheetChangeForNode = (node: Document | ShadowRoot) => {
             if (!node.isConnected) {
                 cleanNode(node);
-                return;
-            }
-            if (queuedSheetChanges.has(node)) {
                 return;
             }
             if (!targetNodes.has(node)) {
                 targetNodes.add(node);
             }
-            queuedSheetChanges.add(node);
+            const sheets = getSourceSheets(node);
+            if (sheets.every(({sheet}) => queuedSheetChanges.has(sheet))) {
+                return;
+            }
+            const unqueuedSheets = sheets.filter(({sheet}) => !queuedSheetChanges.has(sheet));
+            unqueuedSheets.forEach(({sheet}) => queuedSheetChanges.add(sheet));
             queueMicrotask(() => {
-                queuedSheetChanges.delete(node);
-                const sheets = getSourceCSSRules(node);
-                sendSourceStyles(node, sheets);
+                unqueuedSheets.forEach(({sheet}) => queuedSheetChanges.delete(sheet));
+                sendSourceStyles(sheets);
             });
         };
 
-        const executeCommands = (node: Document | ShadowRoot, commands: StyleSheetCommand[]) => {
+        const handleSheetChange = (sheet: CSSStyleSheet) => {
+            if (queuedSheetChanges.has(sheet)) {
+                return;
+            }
+            const sheetId = getSheetId(sheet);
+            queueMicrotask(() => {
+                sendSourceStyles([{sheetId, sheet}]);
+            });
+        };
+
+        const executeCommands = (sheet: CSSStyleSheet, commands: StyleSheetCommand[]) => {
             executing = true;
 
-            let sheet: CSSStyleSheet;
-            if (overrideSheets.has(node)) {
-                sheet = overrideSheets.get(node)!;
+            let override: CSSStyleSheet;
+            if (overrideSheets.has(sheet)) {
+                override = overrideSheets.get(sheet)!;
             } else {
-                sheet = new CSSStyleSheet();
-                overrideSheets.set(node, sheet);
+                override = new CSSStyleSheet();
+                overrideSheets.set(sheet, override);
             }
 
             commands.forEach((c) => {
                 const {type, path, cssText} = c;
-                let target: CSSStyleSheet | CSSGroupingRule = sheet;
+                let target: CSSStyleSheet | CSSGroupingRule = override;
                 const pathLength = path.length - (type === 'replace' ? 0 : 1);
                 for (let i = 0; i < pathLength; i++) {
                     target = target.cssRules[path[i]] as CSSGroupingRule;
@@ -515,13 +531,20 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 }
             });
 
-            const overrideIndex = node.adoptedStyleSheets.indexOf(sheet);
-            if (overrideIndex < 0) {
-                node.adoptedStyleSheets.push(sheet);
-            } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
-                node.adoptedStyleSheets.splice(overrideIndex, 1);
-                node.adoptedStyleSheets.push(sheet);
-            }
+            const nodes = sourceSheetNodes.get(sheet) ?? [];
+            nodes.forEach((node) => {
+                if (!node.isConnected) {
+                    cleanNode(node);
+                    return;
+                }
+                const overrideIndex = node.adoptedStyleSheets.indexOf(override);
+                if (overrideIndex < 0) {
+                    node.adoptedStyleSheets.push(override);
+                } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
+                    node.adoptedStyleSheets.splice(overrideIndex, 1);
+                    node.adoptedStyleSheets.push(override);
+                }
+            });
 
             executing = false;
         };
@@ -544,7 +567,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 set(target, property, value) {
                     target[property as any] = value;
                     if (property === 'length' && !executing) {
-                        handleSheetChange(node);
+                        handleSheetChangeForNode(node);
                     }
                     return true;
                 },
@@ -565,7 +588,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                         source = adoptedSheetsProxySources.get(source);
                     }
                     native.call(this, source);
-                    handleSheetChange(this);
+                    handleSheetChangeForNode(this);
                 },
             });
         });
@@ -575,41 +598,33 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 return function (...args: any[]) {
                     const returnValue = native.apply(this, args);
                     if (observableStyleDeclarations.has(this)) {
-                        const node = observableStyleDeclarations.get(this)!;
-                        if (!targetNodes.has(node)) {
-                            observableStyleDeclarations.delete(this);
-                            return;
-                        }
-                        handleSheetChange(node);
+                        const sheet = observableStyleDeclarations.get(this)!;
+                        handleSheetChange(sheet);
                     }
                     return returnValue;
                 };
             });
         });
 
-        const sendSourceStyles = (node: Document | ShadowRoot, sheets: NodeSheet[]) => {
-            const id = getNodeId(node);
-            const data = {detail: {node, id, sheets}};
-            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
-            document.dispatchEvent(event);
-        };
-
-        const sendSourceStylesBatch = (entries: Array<[Document | ShadowRoot, number, NodeSheet[]]>) => {
-            const data = {detail: {entries}};
+        const sendSourceStyles = (sheets: NodeSheet[]) => {
+            const data = {detail: {sheets}};
             const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
             document.dispatchEvent(event);
         };
 
         const commandsListener = (e: CustomEvent) => {
-            const {id, commands} = JSON.parse(e.detail);
-            const node = nodesById.get(id)!;
-            executeCommands(node, commands);
+            const response = JSON.parse(e.detail) as Array<{sheetId: number; commands: StyleSheetCommand[]}>;
+            response.forEach(({sheetId, commands}) => {
+                const sheet = sheetsById.get(sheetId);
+                if (sheet) {
+                    executeCommands(sheet, commands);
+                }
+            });
         };
 
         onFFSheetChange = (sheet) => {
             if (sourceSheets.has(sheet)) {
-                const node = sourceSheetNodes.get(sheet)!;
-                handleSheetChange(node);
+                handleSheetChange(sheet);
             }
         };
 
@@ -622,13 +637,15 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             walkNodesWithAdoptedStyles(document, (node) => targetNodes.add(node));
             cleaners.push(() => targetNodes.forEach((node) => cleanNode(node)));
 
-            const entries: Array<[Document | ShadowRoot, number, NodeSheet[]]> = [];
+            const allSheets: NodeSheet[] = [];
+            const addedSheetIds = new Set<number>();
             targetNodes.forEach((node) => {
-                const id = getNodeId(node);
-                const rules = getSourceCSSRules(node);
-                entries.push([node, id, rules]);
+                const sheets = getSourceSheets(node);
+                const filtered = sheets.filter(({sheetId}) => !addedSheetIds.has(sheetId));
+                allSheets.push(...filtered);
+                filtered.forEach(({sheetId}) => addedSheetIds.add(sheetId));
             });
-            sendSourceStylesBatch(entries);
+            sendSourceStyles(allSheets);
         });
     }
 }

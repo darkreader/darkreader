@@ -371,6 +371,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         const sourceSheetNodes = new WeakMap<CSSStyleSheet, Set<Document | ShadowRoot>>();
         const overrideSheetsByNode = new WeakMap<Document | ShadowRoot, Set<CSSStyleSheet>>();
         const overrideSheets = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
+        const relevantOverrides = new WeakSet<CSSStyleSheet>();
 
         let observableStyleDeclarations = new WeakMap<CSSStyleDeclaration, CSSStyleSheet>();
         cleaners.push(() => observableStyleDeclarations = new WeakMap());
@@ -484,12 +485,25 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             if (sheets.every(({sheet}) => queuedSheetChanges.has(sheet))) {
                 return;
             }
-            const unqueuedSheets = sheets.filter(({sheet}) => !queuedSheetChanges.has(sheet));
-            unqueuedSheets.forEach(({sheet}) => queuedSheetChanges.add(sheet));
-            queueMicrotask(() => {
-                unqueuedSheets.forEach(({sheet}) => queuedSheetChanges.delete(sheet));
-                sendSourceStyles(sheets);
+            const unqueuedSheets: NodeSheet[] = [];
+            unqueuedSheets.forEach(({sheetId, sheet}) => {
+                if (queuedSheetChanges.has(sheet)) {
+                    return;
+                }
+                const override = overrideSheets.get(sheet);
+                if (override && relevantOverrides.has(override)) {
+                    putOverride(node, override);
+                } else {
+                    queuedSheetChanges.add(sheet);
+                    unqueuedSheets.push({sheetId, sheet});
+                }
             });
+            if (unqueuedSheets.length > 0) {
+                queueMicrotask(() => {
+                    unqueuedSheets.forEach(({sheet}) => queuedSheetChanges.delete(sheet));
+                    sendSourceStyles(sheets);
+                });
+            }
         };
 
         const handleSheetChange = (sheet: CSSStyleSheet) => {
@@ -498,6 +512,10 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             }
             const sheetId = getSheetId(sheet);
             queueMicrotask(() => {
+                const override = overrideSheets.get(sheet);
+                if (override) {
+                    relevantOverrides.delete(override);
+                }
                 sendSourceStyles([{sheetId, sheet}]);
             });
         };
@@ -532,21 +550,31 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             });
 
             const nodes = sourceSheetNodes.get(sheet) ?? [];
-            nodes.forEach((node) => {
-                if (!node.isConnected) {
-                    cleanNode(node);
-                    return;
-                }
-                const overrideIndex = node.adoptedStyleSheets.indexOf(override);
-                if (overrideIndex < 0) {
-                    node.adoptedStyleSheets.push(override);
-                } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
-                    node.adoptedStyleSheets.splice(overrideIndex, 1);
-                    node.adoptedStyleSheets.push(override);
-                }
-            });
+            nodes.forEach((node) => putOverride(node, override));
+            relevantOverrides.add(override);
 
             executing = false;
+        };
+
+        const putOverride = (node: Document | ShadowRoot, override: CSSStyleSheet) => {
+            const wasExecuting = executing;
+            executing = true;
+
+            if (!node.isConnected) {
+                cleanNode(node);
+                return;
+            }
+            const overrideIndex = node.adoptedStyleSheets.indexOf(override);
+            if (overrideIndex < 0) {
+                node.adoptedStyleSheets.push(override);
+            } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
+                node.adoptedStyleSheets.splice(overrideIndex, 1);
+                node.adoptedStyleSheets.push(override);
+            }
+
+            if (!wasExecuting) {
+                executing = false;
+            }
         };
 
         const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();

@@ -171,20 +171,24 @@ To reset them, click on the reset (or delete icon, if present) icon at the most-
 ### Clarification about quarantined domains ("Run on sites with restrictions" option)
 <details><summary>Quarantined domains and Dark Reader — an explanation</summary>
 
-The option "Run on sites with restrictions", present in some extensions, is only related to quarantined domains, and is not needed for Dark Reader to work on restricted websites.
+The option "Run on sites with restrictions", present for some extensions, is only related to quarantined domains, and is not needed for Dark Reader to work on restricted websites. In the context of Firefox's source code, "restricted domains" and "quarantined domains" are two separate things.
 
-More information about quarantined domains: [Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)
+**The "restricted domains" list** (controlled by the preference `extensions.webextensions.restrictedDomains`) is the same for all users and will restrict *all* user-installed extensions (without exceptions) from running on the specified websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains Mozilla-owned domains. Sites that are not on that list will not be affected by those restrictions (meaning that the extensions will be able to run normally).
 
-For Dark Reader, the option is not shown because Dark Reader is a [Recommended](https://support.mozilla.org/en-US/kb/recommended-extensions-program) extension by Mozilla.
+**The "quarantined domains" list** (controlled by the preferences `extensions.quarantinedDomains.enabled` and `extensions.quarantinedDomains.list`) contain domains that will run extensions normally, but if Firefox detects suspicious activity from a particular extension it will block that extension on those specific websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains domains related to internet banking in Brazil. For more information about quarantined domains, see "[Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)".
 
-Due to it being a Recommended extension, it means it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to security, and because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains**.
+For Dark Reader, the option "Run on sites with restrictions" is not shown because Dark Reader is a [Recommended](https://support.mozilla.org/en-US/kb/recommended-extensions-program) extension by Mozilla. (The "Recommended" status is only relevant for "quarantined domains", and does not affect "restricted domains".)
 
-[From Firefox's source code:](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938)
+Due to the fact that it is a Recommended extension, it means that it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to extension security, and because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains** (but will still obey the "restricted domains" list if it is not empty).
+
+Regarding quarantined domains specifically, there is this [comment from Firefox's source code:](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938)
 
 ```
 // Privileged extensions and any extensions with a recommendation state are
 // exempt from the quarantined domains.
 ```
+
+A simple way to recapitulate all this information is: "restricted domains" exist to protect Mozilla-owned sites (no user-installed extension will run on them, without exceptions), while "quarantined domains" are meant to protect users from malicious extensions (and it doesn't apply to Dark Reader because it is a Recommended extension).
 
 </details>
 

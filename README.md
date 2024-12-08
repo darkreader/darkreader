@@ -157,8 +157,8 @@ Step 2: change Firefox's settings.
 
 - Type `about:config` in the address bar and press Enter.
   - A warning page may appear. Click `Accept the Risk and Continue` to proceed.
-- Search for and set `extensions.webextensions.restrictedDomains` to an empty value (if the preference does not exist, create with it `String` as the type).
-- Set `privacy.resistFingerprinting.block_mozAddonManager` to `true` (if the preference does not exist, create with it `Boolean` as the type).
+- Search for and set `extensions.webextensions.restrictedDomains` to an empty value (if the preference does not exist, create it with `String` as the type).
+- Set `privacy.resistFingerprinting.block_mozAddonManager` to `true` (if the preference does not exist, create it with `Boolean` as the type).
 
 After changing the necessary settings for both Dark Reader and Firefox, reload the desired page(s).
 

@@ -561,6 +561,7 @@ export class Extension {
         }
 
         Extension.onSettingsChanged();
+        IconManager.setTheme(UserStorage.settings.theme.mode);
     }
 
     private static async reportChanges() {
@@ -661,6 +662,7 @@ export class Extension {
         const settings = UserStorage.settings;
         const tabInfo = Extension.getTabInfo(tabURL);
         if (Extension.isExtensionSwitchedOn() && isURLEnabled(tabURL, settings, tabInfo) && !topFrameHasDarkTheme) {
+            this.isExtensionSwitchedOn
             const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURL, urlList));
             const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURL, urls));
             let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;

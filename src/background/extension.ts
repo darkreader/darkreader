@@ -639,6 +639,7 @@ export class Extension {
         TabManager.sendMessage(onlyUpdateActiveTab);
         Extension.saveUserSettings();
         Extension.reportChanges();
+        IconManager.setTheme(UserStorage.settings.theme.mode);
         Extension.stateManager!.saveState();
     }
 

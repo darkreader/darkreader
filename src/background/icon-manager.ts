@@ -1,4 +1,6 @@
+import { FilterMode } from 'generators/css-filter';
 import {isNonPersistent} from '../utils/platform';
+import UserStorage from './user-storage';
 
 declare const __THUNDERBIRD__: boolean;
 
@@ -9,13 +11,21 @@ interface IconState {
 
 export default class IconManager {
     private static readonly ICON_PATHS = {
-        active: {
-            19: '../icons/dr_active_19.png',
-            38: '../icons/dr_active_38.png',
+        activeDark: {
+            19: '../icons/dr_active_dark_19.png',
+            38: '../icons/dr_active_dark_38.png',
         },
-        inactive: {
-            19: '../icons/dr_inactive_19.png',
-            38: '../icons/dr_inactive_38.png',
+        activeLight: {
+            19: '../icons/dr_active_light_19.png',
+            38: '../icons/dr_active_light_38.png',
+        },
+        inactiveDark: {
+            19: '../icons/dr_inactive_dark_19.png',
+            38: '../icons/dr_inactive_dark_38.png',
+        },
+        inactiveLight: {
+            19: '../icons/dr_inactive_light_19.png',
+            38: '../icons/dr_inactive_light_38.png',
         },
     };
 
@@ -54,10 +64,8 @@ export default class IconManager {
             return;
         }
         IconManager.iconState.active = true;
-        chrome.browserAction.setIcon({
-            path: IconManager.ICON_PATHS.active,
-        });
-        IconManager.handleUpdate();
+
+        this.setTheme(UserStorage.settings.theme.mode);
     }
 
     static setInactive(): void {
@@ -66,9 +74,34 @@ export default class IconManager {
             return;
         }
         IconManager.iconState.active = false;
-        chrome.browserAction.setIcon({
-            path: IconManager.ICON_PATHS.inactive,
-        });
+
+        this.setTheme(UserStorage.settings.theme.mode);
+    }
+
+    static setTheme(theme: FilterMode): void {
+        if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
+            // Fix for Firefox Android and Thunderbird.
+            return;
+        }
+
+        if(IconManager.iconState.active) {
+            chrome.browserAction.setIcon({
+                path: (
+                    UserStorage.settings.theme.mode == FilterMode.dark ?
+                    IconManager.ICON_PATHS.activeDark :
+                    IconManager.ICON_PATHS.activeLight
+                )
+            });
+        } else {
+            chrome.browserAction.setIcon({
+                path: (
+                    UserStorage.settings.theme.mode == FilterMode.dark ?
+                    IconManager.ICON_PATHS.inactiveDark :
+                    IconManager.ICON_PATHS.inactiveLight
+                )
+            });
+        }
+
         IconManager.handleUpdate();
     }
 

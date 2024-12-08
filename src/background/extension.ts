@@ -561,7 +561,6 @@ export class Extension {
         }
 
         Extension.onSettingsChanged();
-        IconManager.setTheme(UserStorage.settings.theme.mode);
     }
 
     private static async reportChanges() {
@@ -640,6 +639,7 @@ export class Extension {
         TabManager.sendMessage(onlyUpdateActiveTab);
         Extension.saveUserSettings();
         Extension.reportChanges();
+        IconManager.setTheme(UserStorage.settings.theme.mode);
         Extension.stateManager!.saveState();
     }
 

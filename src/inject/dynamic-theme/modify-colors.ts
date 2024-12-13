@@ -178,7 +178,10 @@ function _modifyBackgroundColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyBgHSL, pole);
 }
 
-export function modifyBackgroundColor(rgb: RGBA, theme: Theme): string {
+export function modifyBackgroundColor(rgb: RGBA, theme: Theme, shouldRegisterColorVariable = true): string {
+    if (!shouldRegisterColorVariable) {
+        return _modifyBackgroundColor(rgb, theme);
+    }
     return modifyAndRegisterColor('background', rgb, theme, _modifyBackgroundColor);
 }
 
@@ -233,7 +236,10 @@ function _modifyForegroundColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyFgHSL, pole);
 }
 
-export function modifyForegroundColor(rgb: RGBA, theme: Theme): string {
+export function modifyForegroundColor(rgb: RGBA, theme: Theme, shouldRegisterColorVariable = true): string {
+    if (!shouldRegisterColorVariable) {
+        return _modifyForegroundColor(rgb, theme);
+    }
     return modifyAndRegisterColor('text', rgb, theme, _modifyForegroundColor);
 }
 
@@ -268,7 +274,10 @@ function _modifyBorderColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyBorderHSL, poleFg, poleBg);
 }
 
-export function modifyBorderColor(rgb: RGBA, theme: Theme): string {
+export function modifyBorderColor(rgb: RGBA, theme: Theme, shouldRegisterColorVariable = true): string {
+    if (!shouldRegisterColorVariable) {
+        return _modifyBorderColor(rgb, theme);
+    }
     return modifyAndRegisterColor('border', rgb, theme, _modifyBorderColor);
 }
 

@@ -1,3 +1,7 @@
+# 4.9.98 (December 13, 2024)
+
+- Firefox: Fixed custom browser theme.
+
 # 4.9.97 (December 10, 2024)
 
 - Analyze only background images present on a web page.
@@ -5,7 +9,7 @@
 - Cache image analysis results and CSS requests.
 - Improved relative CSS colors support.
 - Fixed handling custom CSS properties in inline SVGs.
-- Firefox: Optimize adopted style sheets workaround (Reddit issue).
+- Firefox: Optimized adopted style sheets workaround (Reddit issue).
 
 # 4.9.96 (October 29, 2024)
 

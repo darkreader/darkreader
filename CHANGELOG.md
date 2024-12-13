@@ -1,3 +1,7 @@
+# 4.9.99 (December 13, 2024)
+
+- Firefox: Fixed console error.
+
 # 4.9.98 (December 13, 2024)
 
 - Firefox: Fixed custom browser theme.

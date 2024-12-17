@@ -30,8 +30,11 @@ export function parseColorWithCache($color: string): RGBA | null {
         $color = lowerCalcExpression($color);
     }
     const color = parse($color);
-    color && rgbaParseCache.set($color, color);
-    return color;
+    if (color && color.r != null && color.g != null && color.b != null) {
+        rgbaParseCache.set($color, color);
+        return color;
+    }
+    return null;
 }
 
 export function parseToHSLWithCache(color: string): HSLA | null {

@@ -54,6 +54,8 @@ function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
 }
 
 const hostsBreakingOnSVGStyleOverride = [
+    'account.containerstore.com',
+    'containerstore.com',
     'www.onet.pl',
 ];
 

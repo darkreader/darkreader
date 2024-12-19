@@ -1,8 +1,6 @@
 import {readLocalStorage, writeLocalStorage} from './utils/extension-api';
 
-const proposedHighlights = [
-    'mobile-links',
-];
+const proposedHighlights: string[] = [];
 
 const KEY_UI_HIDDEN_HIGHLIGHTS = 'ui-hidden-highlights';
 

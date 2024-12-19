@@ -72,13 +72,13 @@ const $colors: { [key: string]: string } = {
 export function setWindowTheme(theme: Theme): void {
     const colors = Object.entries($colors).reduce((obj: { [key: string]: string }, [key, value]) => {
         const type: 'bg' | 'text' | 'border' = themeColorTypes[key];
-        const modify: ((rgb: RGBA, theme: Theme) => string) = {
+        const modify: ((rgb: RGBA, theme: Theme, shouldRegister: boolean) => string) = {
             'bg': modifyBackgroundColor,
             'text': modifyForegroundColor,
             'border': modifyBorderColor,
         }[type];
         const rgb = parseColorWithCache(value)!;
-        const modified = modify(rgb, theme);
+        const modified = modify(rgb, theme, false);
         obj[key] = modified;
         return obj;
     }, {});

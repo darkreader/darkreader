@@ -16,7 +16,7 @@ function changeMetaThemeColor(meta: HTMLMetaElement, theme: Theme) {
         logWarn('Invalid meta color', color);
         return;
     }
-    meta.content = modifyBackgroundColor(color, theme);
+    meta.content = modifyBackgroundColor(color, theme, false);
 }
 
 export function changeMetaThemeColorWhenAvailable(theme: Theme): void {

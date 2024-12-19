@@ -340,14 +340,7 @@ export function checkImageSelectors(node: Element | Document | ShadowRoot): void
     if (!classObserver) {
         classObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                const node = mutation.target as Element;
-                for (const [selector, callbacks] of imageSelectorQueue) {
-                    if (node.matches(selector)) {
-                        imageSelectorQueue.delete(selector);
-                        callbacks.forEach((cb) => cb());
-                    }
-                }
-                checkImageSelectors(node);
+                checkImageSelectors(mutation.target as Element);
             });
         });
         classObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class'], subtree: true});

@@ -332,7 +332,7 @@ let classObserver: MutationObserver | null = null;
 
 export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
     for (const [selector, callbacks] of imageSelectorQueue) {
-        if (node.querySelector(selector)) {
+        if (node.querySelector(selector) || (node instanceof Element && node.matches(selector))) {
             imageSelectorQueue.delete(selector);
             callbacks.forEach((cb) => cb());
         }

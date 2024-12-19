@@ -1,5 +1,5 @@
-import {ThemeEngine} from '../../generators/theme-engines';
 import type {ExtensionData, Theme, UserSettings} from '../../definitions';
+import {ThemeEngine} from '../../generators/theme-engines';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({

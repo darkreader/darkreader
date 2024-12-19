@@ -1,5 +1,7 @@
 import {m} from 'malevic';
+
 import {ColorPicker} from '../../../controls';
+
 import ThemeControl from './theme-control';
 
 type BgColorValue = 'auto' | string;

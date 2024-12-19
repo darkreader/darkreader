@@ -1,5 +1,7 @@
 import {m} from 'malevic';
+
 import {DropDown} from '../../../controls';
+
 import ThemeControl from './theme-control';
 
 interface ColorSchemeDropDownProps {

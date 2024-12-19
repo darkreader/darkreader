@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import type {ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
 import {AdvancedIcon, HelpIcon, KeyboardIcon, ListIcon, SettingsIcon, WatchIcon} from '../../icons';

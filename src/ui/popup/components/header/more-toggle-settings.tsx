@@ -1,10 +1,11 @@
 import {m} from 'malevic';
-import {Button, CheckBox, Shortcut, TextBox, TimeRangePicker} from '../../../controls';
-import {getLocalMessage} from '../../../../utils/locales';
-import {DONATE_URL} from '../../../../utils/links';
+
 import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
+import {DONATE_URL} from '../../../../utils/links';
+import {getLocalMessage} from '../../../../utils/locales';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../../utils/platform';
+import {Button, CheckBox, Shortcut, TextBox, TimeRangePicker} from '../../../controls';
 import {KeyboardIcon} from '../../../icons';
 
 type MoreToggleSettingsProps = ExtWrapper & {

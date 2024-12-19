@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {isFirefox} from '../../../utils/platform';
 import {Button, MessageBox} from '../../controls';

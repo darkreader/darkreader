@@ -1,7 +1,8 @@
 import {m} from 'malevic';
-import {mergeClass} from '../utils';
+
 import type {Shortcuts} from '../../../definitions';
 import {isFirefox, isEdge} from '../../../utils/platform';
+import {mergeClass} from '../utils';
 
 interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};

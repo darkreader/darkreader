@@ -1,3 +1,21 @@
+import type {ExtensionData, Theme, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
+import createCSSFilterStylesheet from '../generators/css-filter';
+import {getDetectorHintsFor} from '../generators/detector-hints';
+import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
+import createStaticStylesheet from '../generators/static-theme';
+import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
+import {ThemeEngine} from '../generators/theme-engines';
+import {AutomationMode} from '../utils/automation';
+import {debounce} from '../utils/debounce';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
+import {MessageTypeBGtoCS} from '../utils/message';
+import {isFirefox} from '../utils/platform';
+import {PromiseBarrier} from '../utils/promise-barrier';
+import {StateManager} from '../utils/state-manager';
+import {getActiveTab} from '../utils/tabs';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation, getDuration} from '../utils/time';
+import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
+
 import ConfigManager from './config-manager';
 import DevTools from './devtools';
 import IconManager from './icon-manager';
@@ -5,28 +23,12 @@ import type {ExtensionAdapter} from './messenger';
 import Messenger from './messenger';
 import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
-import UserStorage from './user-storage';
-import {setWindowTheme, resetWindowTheme} from './window-theme';
-import {getCommands, canInjectScript} from './utils/extension-api';
-import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation, getDuration} from '../utils/time';
-import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
-import {ThemeEngine} from '../generators/theme-engines';
-import createCSSFilterStylesheet from '../generators/css-filter';
-import {getDetectorHintsFor} from '../generators/detector-hints';
-import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
-import createStaticStylesheet from '../generators/static-theme';
-import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, Theme, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
-import {isFirefox} from '../utils/platform';
-import {MessageTypeBGtoCS} from '../utils/message';
-import {logInfo, logWarn} from './utils/log';
-import {PromiseBarrier} from '../utils/promise-barrier';
-import {StateManager} from '../utils/state-manager';
-import {debounce} from '../utils/debounce';
-import {AutomationMode} from '../utils/automation';
 import UIHighlights from './ui-highlights';
-import {getActiveTab} from '../utils/tabs';
+import UserStorage from './user-storage';
+import {getCommands, canInjectScript} from './utils/extension-api';
+import {logInfo, logWarn} from './utils/log';
+import {setWindowTheme, resetWindowTheme} from './window-theme';
+
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 

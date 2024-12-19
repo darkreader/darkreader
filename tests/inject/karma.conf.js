@@ -3,13 +3,15 @@
 
 import fs from 'node:fs';
 import os from 'node:os';
-import rollupPluginIstanbul from 'rollup-plugin-istanbul';
+
 import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from '@rollup/plugin-typescript';
+import rollupPluginIstanbul from 'rollup-plugin-istanbul';
 import typescript from 'typescript';
 
-import {createEchoServer} from './support/echo-server.js';
 import {absolutePath} from '../../tasks/paths.js';
+
+import {createEchoServer} from './support/echo-server.js';
 
 /**
  * @param {Partial<LocalConfig>} config

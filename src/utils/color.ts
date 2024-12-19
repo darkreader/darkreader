@@ -1,6 +1,6 @@
 import {evalMath} from './math-eval';
-import {getParenthesesRange} from './text';
 import {isSystemDarkModeEnabled} from './media-query';
+import {getParenthesesRange} from './text';
 
 export interface RGBA {
     r: number;
@@ -30,8 +30,11 @@ export function parseColorWithCache($color: string): RGBA | null {
         $color = lowerCalcExpression($color);
     }
     const color = parse($color);
-    color && rgbaParseCache.set($color, color);
-    return color;
+    if (color) {
+        rgbaParseCache.set($color, color);
+        return color;
+    }
+    return null;
 }
 
 export function parseToHSLWithCache(color: string): HSLA | null {
@@ -253,16 +256,22 @@ function getNumbersFromString(str: string, range: number[], units: {[unit: strin
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
-function parseRGB($rgb: string): RGBA {
+function parseRGB($rgb: string): RGBA | null {
     const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
+    if (r == null || g == null || b == null || a == null) {
+        return null;
+    }
     return {r, g, b, a};
 }
 
 const hslRange = [360, 1, 1, 1];
 const hslUnits = {'%': 100, 'deg': 360, 'rad': 2 * Math.PI, 'turn': 1};
 
-function parseHSL($hsl: string): RGBA {
+function parseHSL($hsl: string): RGBA | null {
     const [h, s, l, a = 1] = getNumbersFromString($hsl, hslRange, hslUnits);
+    if (h == null || s == null || l == null || a == null) {
+        return null;
+    }
     return hslToRGB({h, s, l, a});
 }
 

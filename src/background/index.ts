@@ -1,14 +1,16 @@
-import {Extension} from './extension';
-import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript, keepListeningToEvents} from '../background/utils/extension-api';
 import type {ColorScheme, DebugMessageBGtoCS, DebugMessageBGtoUI, DebugMessageCStoBG, ExtensionData, News, UserSettings} from '../definitions';
+import {getHelpURL, UNINSTALL_URL} from '../utils/links';
+import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query';
 import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG} from '../utils/message';
+import {isFirefox} from '../utils/platform';
+
+import {Extension} from './extension';
 import {makeChromiumHappy} from './make-chromium-happy';
+import {setNewsForTesting} from './newsmaker';
 import {ASSERT} from './utils/log';
 import {sendLog} from './utils/sendLog';
-import {isFirefox} from '../utils/platform';
-import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query';
-import {setNewsForTesting} from './newsmaker';
+
 
 type TestMessage = {
     type: 'getManifest';

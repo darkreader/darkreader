@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import type {Automation, MessageUItoBG, ViewProps} from '../../../definitions';
 import {AutomationMode} from '../../../utils/automation';
 import {getLocalMessage} from '../../../utils/locales';

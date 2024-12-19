@@ -1,6 +1,8 @@
 import {m} from 'malevic';
+
 import type {ViewProps} from '../../../definitions';
 import {isFirefox} from '../../../utils/platform';
+
 import {ChangeBrowserTheme} from './change-browser-theme';
 import {DetectDarkTheme} from './detect-dark-theme';
 import {EnabledByDefault} from './enabled-by-default';

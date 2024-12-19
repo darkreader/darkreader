@@ -1,12 +1,14 @@
+import type {Theme, InversionFix} from '../definitions';
+import {compareChromeVersions, chromiumVersion, isFirefox, firefoxVersion} from '../utils/platform';
+import {parseArray, formatArray} from '../utils/text';
+import {compareURLPatterns, isURLInList} from '../utils/url';
+
+import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
 import type {SitePropsIndex} from './utils/parse';
-import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns, isURLInList} from '../utils/url';
-import {createTextStyle} from './text-style';
-import type {Theme, InversionFix} from '../definitions';
-import {compareChromeVersions, chromiumVersion, isFirefox, firefoxVersion} from '../utils/platform';
+
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;

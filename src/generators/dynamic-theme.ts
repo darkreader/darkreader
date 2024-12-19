@@ -1,10 +1,11 @@
-import {formatSitesFixesConfig} from './utils/format';
-import {parseSitesFixesConfig, getSitesFixesFor, getDomain} from './utils/parse';
-import type {SitePropsIndex} from './utils/parse';
+import type {DynamicThemeFix} from '../definitions';
 import {formatCSS} from '../utils/css-text/format-css';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
-import type {DynamicThemeFix} from '../definitions';
+
+import {formatSitesFixesConfig} from './utils/format';
+import {parseSitesFixesConfig, getSitesFixesFor, getDomain} from './utils/parse';
+import type {SitePropsIndex} from './utils/parse';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;

@@ -1,16 +1,19 @@
 import {m} from 'malevic';
-import {Toggle} from '../../../controls';
-import {getLocalMessage} from '../../../../utils/locales';
+
 import type {ExtensionData, ExtWrapper} from '../../../../definitions';
+import {AutomationMode} from '../../../../utils/automation';
+import {HOMEPAGE_URL} from '../../../../utils/links';
+import {getLocalMessage} from '../../../../utils/locales';
+import {isChromium} from '../../../../utils/platform';
+import {isLocalFile} from '../../../../utils/url';
+import {Toggle} from '../../../controls';
 import {SettingsIcon, SunMoonIcon, SystemIcon, WatchIcon} from '../../../icons';
 import SiteToggle from '../site-toggle';
+
 import MoreNewHighlight from './more-new-highlight';
 import MoreSiteSettings from './more-site-settings';
 import MoreToggleSettings from './more-toggle-settings';
-import {AutomationMode} from '../../../../utils/automation';
-import {isLocalFile} from '../../../../utils/url';
-import {isChromium} from '../../../../utils/platform';
-import {HOMEPAGE_URL} from '../../../../utils/links';
+
 
 declare const __CHROMIUM_MV3__: boolean;
 

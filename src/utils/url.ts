@@ -1,4 +1,5 @@
 import type {UserSettings, TabInfo} from '../definitions';
+
 import {cachedFactory} from './cache';
 
 declare const __THUNDERBIRD__: boolean;

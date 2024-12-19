@@ -1,14 +1,15 @@
-import {readText} from './utils/network';
-import {getDuration} from '../utils/time';
-import {indexSiteListConfig, indexSitesFixesConfig, isURLInSiteList} from '../generators/utils/parse';
+import {DEFAULT_COLORSCHEME} from '../defaults';
 import type {InversionFix, StaticTheme, DynamicThemeFix, DetectorHint} from '../definitions';
+import {indexSiteListConfig, indexSitesFixesConfig, isURLInSiteList} from '../generators/utils/parse';
 import type {SiteListIndex, SitePropsIndex} from '../generators/utils/parse';
 import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {parseColorSchemeConfig} from '../utils/colorscheme-parser';
-import {logWarn} from './utils/log';
-import {DEFAULT_COLORSCHEME} from '../defaults';
-import UserStorage from './user-storage';
 import {CONFIG_URL_BASE} from '../utils/links';
+import {getDuration} from '../utils/time';
+
+import UserStorage from './user-storage';
+import {logWarn} from './utils/log';
+import {readText} from './utils/network';
 
 const CONFIG_URLs = {
     darkSites: {

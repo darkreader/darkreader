@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import {mergeClass, omitAttrs} from '../utils';
 
 interface TextBoxProps extends Malevic.NodeAttrs {

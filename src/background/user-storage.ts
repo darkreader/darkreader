@@ -1,11 +1,13 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
-import {debounce} from '../utils/debounce';
-import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
+import {debounce} from '../utils/debounce';
+import {PromiseBarrier} from '../utils/promise-barrier';
+import {isURLMatched} from '../utils/url';
+import {validateSettings} from '../utils/validation';
+
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
-import {PromiseBarrier} from '../utils/promise-barrier';
-import {validateSettings} from '../utils/validation';
+
 
 const SAVE_TIMEOUT = 1000;
 

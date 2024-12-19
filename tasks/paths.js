@@ -1,5 +1,5 @@
-import {dirname, join} from 'node:path';
 import {createRequire} from 'node:module';
+import {dirname, join} from 'node:path';
 
 let rootDir = dirname(createRequire(import.meta.url).resolve('../package.json'));
 

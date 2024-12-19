@@ -1,8 +1,9 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
+import type {ViewProps} from '../../../definitions';
 import {Button, ControlGroup, MessageBox} from '../../controls';
 import {DeleteIcon} from '../../icons';
-import type {ViewProps} from '../../../definitions';
 
 export function ClearSiteList(props: ViewProps): Malevic.Child {
     const context = getContext();

@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import {HELP_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {ControlGroup} from '../../controls';

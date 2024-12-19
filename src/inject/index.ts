@@ -1,14 +1,15 @@
-import {createOrUpdateStyle, removeStyle} from './style';
-import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
-import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
-import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logWarn, logInfoCollapsed} from './utils/log';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
-import {collectCSS} from './dynamic-theme/css-collection';
 import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
+
 import {writeEnabledForHost} from './cache';
+import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
+import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
+import {collectCSS} from './dynamic-theme/css-collection';
+import {createOrUpdateStyle, removeStyle} from './style';
+import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
+import {logWarn, logInfoCollapsed} from './utils/log';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;

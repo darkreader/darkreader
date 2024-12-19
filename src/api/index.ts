@@ -1,11 +1,12 @@
 import './chrome';
-import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
 import type {Theme, DynamicThemeFix} from '../definitions';
 import {ThemeEngine} from '../generators/theme-engines';
 import {createOrUpdateDynamicThemeInternal, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
+
+import {setFetchMethod as setFetch} from './fetch';
 
 let isDarkReaderEnabled = false;
 const isIFrame = (() => {
@@ -38,14 +39,14 @@ export function disable(): void {
     isDarkReaderEnabled = false;
 }
 
-const darkScheme = matchMedia('(prefers-color-scheme: dark)');
+const darkScheme = typeof(matchMedia) === 'function' ? matchMedia('(prefers-color-scheme: dark)') : undefined;
 let store = {
     themeOptions: null as Partial<Theme> | null,
     fixes: null as DynamicThemeFix | null,
 };
 
 function handleColorScheme(): void {
-    if (darkScheme.matches) {
+    if (darkScheme?.matches) {
         enable(store.themeOptions, store.fixes);
     } else {
         disable();
@@ -57,15 +58,15 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
         store = {themeOptions, fixes};
         handleColorScheme();
         if (isMatchMediaChangeEventListenerSupported) {
-            darkScheme.addEventListener('change', handleColorScheme);
+            darkScheme?.addEventListener('change', handleColorScheme);
         } else {
-            darkScheme.addListener(handleColorScheme);
+            darkScheme?.addListener(handleColorScheme);
         }
     } else {
         if (isMatchMediaChangeEventListenerSupported) {
-            darkScheme.removeEventListener('change', handleColorScheme);
+            darkScheme?.removeEventListener('change', handleColorScheme);
         } else {
-            darkScheme.removeListener(handleColorScheme);
+            darkScheme?.removeListener(handleColorScheme);
         }
         disable();
     }

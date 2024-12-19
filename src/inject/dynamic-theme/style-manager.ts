@@ -2,15 +2,16 @@ import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {removeCSSComments} from '../../utils/css-text/css-text';
 import {loadAsText} from '../../utils/network';
+import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL, isRelativeHrefOnAbsolutePath} from '../../utils/url';
 import {readCSSFetchCache, writeCSSFetchCache} from '../cache';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
+
 import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
 import {createSheetWatcher} from './watch/sheet-changes';
 
 declare global {
@@ -53,6 +54,8 @@ function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
 }
 
 const hostsBreakingOnSVGStyleOverride = [
+    'account.containerstore.com',
+    'containerstore.com',
     'www.onet.pl',
 ];
 

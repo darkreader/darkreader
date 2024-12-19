@@ -1,4 +1,5 @@
 import {expect, jest, test} from '@jest/globals';
+
 import {StateManagerImpl} from '../../../src/utils/state-manager-impl';
 
 class PromiseWrapper {

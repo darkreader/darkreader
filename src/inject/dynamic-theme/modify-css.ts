@@ -328,6 +328,9 @@ interface BgImageMatches {
 }
 
 const imageSelectorQueue = new Map<string, Array<() => void>>();
+const imageSelectorValues = new Map<string, string>();
+const imageSelectorNodeQueue = new Set<Element>();
+let imageSelectorQueueFrameId: number | null = null;
 let classObserver: MutationObserver | null = null;
 
 export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
@@ -340,7 +343,16 @@ export function checkImageSelectors(node: Element | Document | ShadowRoot): void
     if (!classObserver) {
         classObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                checkImageSelectors(mutation.target as Element);
+                imageSelectorNodeQueue.add(mutation.target as Element);
+                if (!imageSelectorQueueFrameId) {
+                    imageSelectorQueueFrameId = requestAnimationFrame(() => {
+                        imageSelectorNodeQueue.forEach((element) => {
+                            checkImageSelectors(element);
+                        });
+                        imageSelectorNodeQueue.clear();
+                        imageSelectorQueueFrameId = null;
+                    });
+                }
             });
         });
         classObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class'], subtree: true});
@@ -448,6 +460,7 @@ export function getBgImageModifier(
                             imageSelectorQueue.get(selector)!.push(resolve);
                         } else {
                             imageSelectorQueue.set(selector, [resolve]);
+                            imageSelectorValues.set(selector, urlValue);
                         }
                     });
                 }

@@ -328,6 +328,7 @@ interface BgImageMatches {
 }
 
 const imageSelectorQueue = new Map<string, Array<() => void>>();
+let classObserver: MutationObserver | null = null;
 
 export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
     for (const [selector, callbacks] of imageSelectorQueue) {
@@ -335,6 +336,21 @@ export function checkImageSelectors(node: Element | Document | ShadowRoot): void
             imageSelectorQueue.delete(selector);
             callbacks.forEach((cb) => cb());
         }
+    }
+    if (!classObserver) {
+        classObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                const node = mutation.target as Element;
+                for (const [selector, callbacks] of imageSelectorQueue) {
+                    if (node.matches(selector)) {
+                        imageSelectorQueue.delete(selector);
+                        callbacks.forEach((cb) => cb());
+                    }
+                }
+                checkImageSelectors(node);
+            });
+        });
+        classObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class'], subtree: true});
     }
 }
 
@@ -432,7 +448,6 @@ export function getBgImageModifier(
                     return "url('')";
                 }
 
-                // TODO: Search in Shadow DOM too.
                 const selector = rule.selectorText;
                 if (selector && !scope.querySelector(selector)) {
                     await new Promise<void>((resolve) => {
@@ -667,4 +682,6 @@ export function cleanModificationCache(): void {
     cleanImageProcessingCache();
     awaitingForImageLoading.clear();
     imageSelectorQueue.clear();
+    classObserver?.disconnect();
+    classObserver = null;
 }

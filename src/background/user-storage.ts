@@ -5,7 +5,7 @@ import {PromiseBarrier} from '../utils/promise-barrier';
 import {isURLMatched} from '../utils/url';
 import {validateSettings} from '../utils/validation';
 
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
+import {readManagedStorage, readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
 
 
@@ -84,7 +84,11 @@ export default class UserStorage {
         }
         UserStorage.loadBarrier = new PromiseBarrier();
 
-        let local = await readLocalStorage(DEFAULT_SETTINGS);
+        const managed = await readManagedStorage(DEFAULT_SETTINGS);
+        const {errors: managedCfgErrors} = validateSettings(managed);
+        managedCfgErrors.forEach((err) => logWarn(err));
+
+        let local = await readLocalStorage(managed);
 
         if (local.schemeVersion < 2) {
             const sync = await readSyncStorage({schemeVersion: 0});
@@ -104,7 +108,7 @@ export default class UserStorage {
                 await writeSyncStorage({schemeVersion: 2, ...syncTransformed});
                 await removeSyncStorage(Object.keys(deprecatedDefaults));
 
-                local = await readLocalStorage(DEFAULT_SETTINGS);
+                local = await readLocalStorage(managed);
             }
         }
 
@@ -120,7 +124,7 @@ export default class UserStorage {
             return local;
         }
 
-        const $sync = await readSyncStorage(DEFAULT_SETTINGS);
+        const $sync = await readSyncStorage(managed);
         if (!$sync) {
             logWarn('Sync settings are missing');
             local.syncSettings = false;

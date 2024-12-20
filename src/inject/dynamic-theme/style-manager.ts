@@ -581,27 +581,44 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
 
     const importMatches = getMatchesWithOffsets(cssImportRegex, cssText);
     let prev: {text: string; offset: number} | null = null;
+    let shouldIgnoreImportsInBetween = false;
+    let diff = 0;
     for (const match of importMatches) {
-        const between = prev ? cssText.substring(prev.offset + prev.text.length, match.offset) : '';
-        if (between.includes('{') && between.includes('}')) {
-            break;
-        }
-        const importURL = getCSSImportURL(match.text);
-        const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
-        if (cache.has(absoluteURL)) {
-            importedCSS = cache.get(absoluteURL)!;
+        const prevImportEnd = prev ? (prev.offset + prev.text.length) : 0;
+        const nextImportStart = match.offset;
+        const openBraceIndex = cssText.indexOf('{', prevImportEnd);
+        const closeBraceIndex = cssText.indexOf('}', prevImportEnd);
+        if (
+            shouldIgnoreImportsInBetween || (
+                openBraceIndex >= 0 && openBraceIndex < nextImportStart &&
+                closeBraceIndex >= 0 && closeBraceIndex < nextImportStart
+            )
+        ) {
+            shouldIgnoreImportsInBetween = true;
+            importedCSS = '';
         } else {
-            try {
-                importedCSS = await loadText(absoluteURL);
-                cache.set(absoluteURL, importedCSS);
-                importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
-            } catch (err) {
-                logWarn(err);
-                importedCSS = '';
+            const importURL = getCSSImportURL(match.text);
+            const absoluteURL = getAbsoluteURL(basePath, importURL);
+            if (cache.has(absoluteURL)) {
+                importedCSS = cache.get(absoluteURL)!;
+            } else {
+                try {
+                    importedCSS = await loadText(absoluteURL);
+                    cache.set(absoluteURL, importedCSS);
+                    importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
+                } catch (err) {
+                    logWarn(err);
+                    importedCSS = '';
+                }
             }
         }
-        cssText = cssText.split(match.text).join(importedCSS);
+        cssText = (
+            cssText.substring(0, match.offset + diff) +
+            importedCSS +
+            cssText.substring(match.offset + match.text.length + diff)
+        );
+        diff = importedCSS.length - match.text.length;
         prev = match;
     }
 

@@ -65,7 +65,7 @@ export function getMatches(regex: RegExp, input: string, group = 0): string[] {
 export function getMatchesWithOffsets(regex: RegExp, input: string, group = 0): Array<{text: string; offset: number}> {
     const matches: Array<{text: string; offset: number}> = [];
     let m: RegExpMatchArray | null;
-    while ((m = input.match(regex))) {
+    while ((m = regex.exec(input))) {
         matches.push({text: m[group], offset: m.index!});
     }
     return matches;

@@ -62,6 +62,15 @@ export function getMatches(regex: RegExp, input: string, group = 0): string[] {
     return matches;
 }
 
+export function getMatchesWithOffsets(regex: RegExp, input: string, group = 0): Array<{text: string; offset: number}> {
+    const matches: Array<{text: string; offset: number}> = [];
+    let m: RegExpMatchArray | null;
+    while ((m = input.match(regex))) {
+        matches.push({text: m[group], offset: m.index!});
+    }
+    return matches;
+}
+
 export function getStringSize(value: string): number {
     return value.length * 2;
 }

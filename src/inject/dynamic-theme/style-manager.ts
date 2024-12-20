@@ -3,7 +3,7 @@ import {forEach} from '../../utils/array';
 import {removeCSSComments} from '../../utils/css-text/css-text';
 import {loadAsText} from '../../utils/network';
 import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
-import {getMatches} from '../../utils/text';
+import {getMatchesWithOffsets} from '../../utils/text';
 import {getAbsoluteURL, isRelativeHrefOnAbsolutePath} from '../../utils/url';
 import {readCSSFetchCache, writeCSSFetchCache} from '../cache';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
@@ -579,9 +579,14 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
 
-    const importMatches = getMatches(cssImportRegex, cssText);
+    const importMatches = getMatchesWithOffsets(cssImportRegex, cssText);
+    let prev: {text: string; offset: number} | null = null;
     for (const match of importMatches) {
-        const importURL = getCSSImportURL(match);
+        const between = prev ? cssText.substring(prev.offset + prev.text.length, match.offset) : '';
+        if (between.includes('{') && between.includes('}')) {
+            break;
+        }
+        const importURL = getCSSImportURL(match.text);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
         if (cache.has(absoluteURL)) {
@@ -596,7 +601,8 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
                 importedCSS = '';
             }
         }
-        cssText = cssText.split(match).join(importedCSS);
+        cssText = cssText.split(match.text).join(importedCSS);
+        prev = match;
     }
 
     cssText = cssText.trim();

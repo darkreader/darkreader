@@ -1,6 +1,7 @@
-import {MessageTypeCStoBG, MessageTypeBGtoCS} from '../utils/message';
 import type {MessageBGtoCS} from '../definitions';
+import {MessageTypeCStoBG, MessageTypeBGtoCS} from '../utils/message';
 import {readResponseAsDataURL} from '../utils/network';
+
 import {callFetchMethod} from './fetch';
 
 if (!window.chrome) {

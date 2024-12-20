@@ -1,6 +1,8 @@
 import {m} from 'malevic';
+
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
+
 import ThemeControl from './theme-control';
 
 export default function Scheme(props: {isDark: boolean; onChange: (dark: boolean) => void}) {

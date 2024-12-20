@@ -1,8 +1,10 @@
 import {push} from '../../../utils/array';
 import type {ElementsTreeOperations} from '../../utils/dom';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../../utils/dom';
+import {checkImageSelectors} from '../modify-css';
 import type {StyleElement} from '../style-manager';
 import {shouldManageStyle, getManageableStyles} from '../style-manager';
+
 import {collectUndefinedElements, handleIsDefined, isCustomElement, recordUndefinedElement, unsubscribeFromDefineCustomElements, watchWhenCustomElementsDefined} from './custom-elements';
 
 const observers: Array<{disconnect(): void}> = [];
@@ -104,6 +106,8 @@ export function watchForStylePositions(
         // In practice, at least one place reflects appearance of the node.
         // URL for testing: https://chromestatus.com/roadmap
         additions.forEach((node) => isCustomElement(node) && recordUndefinedElement(node));
+
+        additions.forEach((node) => checkImageSelectors(node));
     }
 
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
@@ -133,6 +137,8 @@ export function watchForStylePositions(
 
         deepObserve(root);
         collectUndefinedElements(root);
+
+        checkImageSelectors(root);
     }
 
     function handleAttributeMutations(mutations: MutationRecord[]) {

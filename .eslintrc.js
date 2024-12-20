@@ -121,10 +121,6 @@ config.overrides.push({
             },
             {
                 target: './src/background/',
-                from: './src/inject/',
-            },
-            {
-                target: './src/background/',
                 from: './src/ui/',
             },
             {
@@ -155,6 +151,14 @@ config.overrides.push({
                 target: './src/generators/',
                 from: './src/ui/',
             }],
+        }],
+        'import/order': ['warn', {
+            'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+            'alphabetize': {
+                'order': 'asc',
+                'caseInsensitive': true,
+            },
         }],
     },
 

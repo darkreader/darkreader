@@ -3,9 +3,9 @@
  * which is in StateManagerImpl class.
  */
 
+import {isNonPersistent} from './platform';
 import {StateManagerImpl} from './state-manager-impl';
 
-import {isNonPersistent} from './platform';
 
 export class StateManager<T extends Record<string, unknown>> {
     private stateManager: StateManagerImpl<T> | null;

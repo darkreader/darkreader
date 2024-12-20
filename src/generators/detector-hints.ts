@@ -1,6 +1,7 @@
 import type {DetectorHint} from '../definitions';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
+
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
 import type {SitePropsIndex, SitesFixesParserOptions} from './utils/parse';

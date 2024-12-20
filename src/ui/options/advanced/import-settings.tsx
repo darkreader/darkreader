@@ -1,9 +1,10 @@
 import {m} from 'malevic';
+import {getContext} from 'malevic/dom';
+
 import type {UserSettings, ViewProps} from '../../../definitions';
+import {validateSettings} from '../../../utils/validation';
 import {Button, ControlGroup, MessageBox} from '../../controls';
 import {openFile} from '../../utils';
-import {getContext} from 'malevic/dom';
-import {validateSettings} from '../../../utils/validation';
 
 export function ImportSettings(props: ViewProps): Malevic.Child {
     const context = getContext();

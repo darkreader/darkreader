@@ -1,15 +1,16 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
+import type {ViewProps} from '../../../definitions';
 import {DONATE_URL, HOMEPAGE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
+import {isMobile} from '../../../utils/platform';
 import {Overlay} from '../../controls';
 import {openExtensionPage} from '../../utils';
 import MainPage from '../main-page';
 import NewsSection from '../news-section';
 import {Page, PageViewer} from '../page-viewer';
 import ThemePage from '../theme/page';
-import type {ViewProps} from '../../../definitions';
-import {isMobile} from '../../../utils/platform';
 
 interface IndexStore {
     activePage: PageId;

@@ -1,12 +1,13 @@
 // @ts-check
-import * as rollup from 'rollup';
 // This plugin resolves location of malevic module
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
+import * as rollup from 'rollup';
 import typescript from 'typescript';
+
 import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';

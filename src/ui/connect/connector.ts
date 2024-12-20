@@ -1,6 +1,6 @@
-import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, Theme, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI} from '../../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../../utils/message';
+import {isFirefox} from '../../utils/platform';
 
 declare const browser: {
     commands: {

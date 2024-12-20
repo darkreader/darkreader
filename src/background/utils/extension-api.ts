@@ -1,6 +1,6 @@
+import {isFirefox, isEdge} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {isPDF} from '../../utils/url';
-import {isFirefox, isEdge} from '../../utils/platform';
 
 export function canInjectScript(url: string | null | undefined): boolean {
     if (url === 'about:blank') {

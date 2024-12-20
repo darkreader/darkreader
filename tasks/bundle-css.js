@@ -1,6 +1,8 @@
 // @ts-check
-import less from 'less';
 import path from 'node:path';
+
+import less from 'less';
+
 import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';

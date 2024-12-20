@@ -1,13 +1,14 @@
 import {readFile} from 'node:fs';
-import {compareURLPatterns} from '../../../src/utils/url';
-import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../../src/utils/text';
+
+import type {StaticTheme} from '../../../src/definitions';
 import {parseInversionFixes, formatInversionFixes} from '../../../src/generators/css-filter';
 import {parseDetectorHints, formatDetectorHints} from '../../../src/generators/detector-hints';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../../src/generators/static-theme';
-import type {StaticTheme} from '../../../src/definitions';
 import {parseColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
 import type {ParsedColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
+import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../../src/utils/text';
+import {compareURLPatterns} from '../../../src/utils/url';
 import {rootPath} from '../../support/test-utils';
 
 function readConfig(fileName: string) {

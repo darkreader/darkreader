@@ -1,10 +1,11 @@
 // @ts-check
+import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
+
 import {getDestDir} from './paths.js';
 import {PLATFORM} from './platform.js';
 import {createTask} from './task.js';
 import {copyFile, getPaths, readJSON, writeFile, fileExists} from './utils.js';
-import {createHash} from 'node:crypto';
 
 function serializeHashManifest(entries) {
     const lines = [];

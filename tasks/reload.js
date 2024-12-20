@@ -1,6 +1,8 @@
 // @ts-check
 import process from 'node:process';
+
 import {WebSocketServer} from 'ws';
+
 import {log} from './utils.js';
 
 export const PORT = 8890;

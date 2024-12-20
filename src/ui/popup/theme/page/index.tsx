@@ -1,9 +1,10 @@
 import {m} from 'malevic';
+
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import type {Theme, ViewProps} from '../../../../definitions';
+import {ThemeEngine} from '../../../../generators/theme-engines';
 import type {ParsedColorSchemeConfig} from '../../../../utils/colorscheme-parser';
 import {isURLEnabled, isURLInList} from '../../../../utils/url';
-import {ThemeEngine} from '../../../../generators/theme-engines';
 import {
     BackgroundColor,
     Brightness,
@@ -26,6 +27,7 @@ import {
 } from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
+
 import Collapsible from './collapsible-panel';
 
 interface ThemeGroupProps {

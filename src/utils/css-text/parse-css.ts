@@ -1,5 +1,6 @@
 import {getOpenCloseRange, splitExcluding} from '../text';
 import type {TextRange} from '../text';
+
 import {removeCSSComments} from './css-text';
 
 export interface ParsedDeclaration {

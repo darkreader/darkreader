@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
 import {ControlGroup, TextBox} from '../../controls';
 import VirtualScroll from '../../controls/virtual-scroll';
 

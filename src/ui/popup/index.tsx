@@ -1,12 +1,14 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
+
+import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
+import {DebugMessageTypeBGtoUI} from '../../utils/message';
+import {isMobile, isFirefox} from '../../utils/platform';
 import Connector from '../connect/connector';
+import {getFontList, saveFile} from '../utils';
+
 import Body from './components/body';
 import {fixNotClosingPopupOnNavigation} from './utils/issues';
-import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
-import {isMobile, isFirefox} from '../../utils/platform';
-import {DebugMessageTypeBGtoUI} from '../../utils/message';
-import {getFontList, saveFile} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], installation: {date: number; version: string}, actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {

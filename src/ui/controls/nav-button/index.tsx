@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import Button from '../button';
 
 interface NavButtonProps {

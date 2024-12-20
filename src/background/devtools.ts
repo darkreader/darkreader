@@ -1,9 +1,10 @@
-import {logInfo} from './utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
-import ConfigManager from './config-manager';
 import {isFirefox} from '../utils/platform';
+
+import ConfigManager from './config-manager';
+import {logInfo} from './utils/log';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separately.

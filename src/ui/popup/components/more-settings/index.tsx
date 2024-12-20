@@ -1,14 +1,15 @@
 import {m} from 'malevic';
+
+import type {ExtWrapper, Theme} from '../../../../definitions';
+import {getLocalMessage} from '../../../../utils/locales';
+import {isFirefox} from '../../../../utils/platform';
+import {isURLInList} from '../../../../utils/url';
+import {Button, Toggle} from '../../../controls';
+import {SettingsIcon} from '../../../icons';
+import {openExtensionPage} from '../../../utils';
 import CustomSettingsToggle from '../custom-settings-toggle';
 import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
-import {Button, Toggle} from '../../../controls';
-import {isURLInList} from '../../../../utils/url';
-import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper, Theme} from '../../../../definitions';
-import {isFirefox} from '../../../../utils/platform';
-import {openExtensionPage} from '../../../utils';
-import {SettingsIcon} from '../../../icons';
 
 async function openSettings() {
     await openExtensionPage('options');

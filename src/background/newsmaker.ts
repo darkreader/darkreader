@@ -1,10 +1,11 @@
-import {getBlogPostURL, NEWS_URL} from '../utils/links';
-import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
+import {getBlogPostURL, NEWS_URL} from '../utils/links';
 import {StateManager} from '../utils/state-manager';
-import {logWarn} from './utils/log';
+import {getDurationInMinutes} from '../utils/time';
+
 import IconManager from './icon-manager';
+import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
+import {logWarn} from './utils/log';
 
 declare const __TEST__: boolean;
 

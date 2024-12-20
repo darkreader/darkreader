@@ -1,6 +1,9 @@
+import {wasEnabledForHost} from './cache';
+
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
+    wasEnabledForHost() !== false &&
     !document.querySelector('.darkreader--fallback') &&
     !document.querySelector('.darkreader')
 ) {
@@ -41,4 +44,23 @@ if (
         });
         observer.observe(root, {childList: true});
     }
+}
+
+declare const __FIREFOX_MV2__: boolean;
+
+if (__FIREFOX_MV2__ && location.host === 'teams.live.com') {
+    // Microsoft Teams calls sheet.cssRules on extension styles and that
+    // causes "Not allowed to access cross-origin stylesheet" in Firefox
+    (() => {
+        const descriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'cssRules')!;
+        Object.defineProperty(CSSStyleSheet.prototype, 'cssRules', {
+            ...descriptor,
+            get: function () {
+                if (this.ownerNode?.classList?.contains('darkreader')) {
+                    return [];
+                }
+                return descriptor.get!.call(this) as CSSStyleSheet[];
+            },
+        });
+    })();
 }

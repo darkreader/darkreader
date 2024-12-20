@@ -1,6 +1,8 @@
 import {m} from 'malevic';
-import ThemeControl from './theme-control';
+
 import {ColorDropDown} from '../../../controls';
+
+import ThemeControl from './theme-control';
 
 type ScrollbarColorValue = '' | 'auto' | string;
 

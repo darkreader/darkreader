@@ -1,10 +1,12 @@
 import {m} from 'malevic';
-import {UpDown} from '../../../controls';
-import CustomSettingsToggle from '../custom-settings-toggle';
-import ModeToggle from './mode-toggle';
+
+import type {ExtWrapper, Theme} from '../../../../definitions';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLInList} from '../../../../utils/url';
-import type {ExtWrapper, Theme} from '../../../../definitions';
+import {UpDown} from '../../../controls';
+import CustomSettingsToggle from '../custom-settings-toggle';
+
+import ModeToggle from './mode-toggle';
 
 export default function FilterSettings({data, actions}: ExtWrapper, ...children: Malevic.Child[]) {
     const custom = data.settings.customThemes.find(({url}) => isURLInList(data.activeTab.url, url));

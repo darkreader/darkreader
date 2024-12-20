@@ -1,5 +1,7 @@
 import {m} from 'malevic';
+
 import type {ViewProps} from '../../../definitions';
+
 import {ContextMenus} from './context-menus';
 import {DevTools} from './devtools';
 import {EnableForProtectedPages} from './enable-for-protected-pages';

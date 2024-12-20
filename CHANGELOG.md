@@ -1,3 +1,28 @@
+# 4.9.99 (December 13, 2024)
+
+- Firefox: Fixed console error.
+
+# 4.9.98 (December 13, 2024)
+
+- Firefox: Fixed custom browser theme.
+
+# 4.9.97 (December 10, 2024)
+
+- Analyze only background images present on a web page.
+- Optimized rebuilding theme after configuration changes.
+- Cache image analysis results and CSS requests.
+- Improved relative CSS colors support.
+- Fixed handling custom CSS properties in inline SVGs.
+- Firefox: Optimized adopted style sheets workaround (Reddit issue).
+
+# 4.9.96 (October 29, 2024)
+
+- Dark theme detection improvements.
+- Fixed overriding styles in Shadow DOM of built-in elements.
+- Firefox: Fix breaking Microsoft Teams.
+- Prevent dark content flashes for disabled websites.
+- Fixed loading styles with imports from same domain.
+
 # 4.9.95 (October 2, 2024)
 
 - Fixed Google Calendar scroll bars.

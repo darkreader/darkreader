@@ -65,6 +65,9 @@
     "previewNewDesign": {
       "type": "boolean"
     },
+    "previewNewestDesign": {
+      "type": "boolean"
+    },
     "enableForPDF": {
       "type": "boolean"
     },
@@ -227,6 +230,9 @@
             },
             "theme": {
               "$ref": "Theme"
+            },
+            "builtin": {
+              "type": "boolean"
             }
           },
           "required": [

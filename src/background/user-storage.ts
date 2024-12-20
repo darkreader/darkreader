@@ -3,8 +3,9 @@ import type {UserSettings} from '../definitions';
 import {debounce} from '../utils/debounce';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {isURLMatched} from '../utils/url';
-import {readManagedStorage, readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {validateSettings} from '../utils/validation';
+
+import {readManagedStorage, readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
 
 

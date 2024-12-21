@@ -286,6 +286,9 @@ function createDynamicStyleOverrides() {
 
         const onAdoptedCssChange = (e: CustomEvent) => {
             const {sheets} = e.detail;
+            if (!Array.isArray(sheets) || sheets.length === 0) {
+                return;
+            }
             sheets.forEach(({sheet}: NodeSheet) => {
                 const {cssRules} = sheet;
                 variablesStore.addRulesForMatching(cssRules);

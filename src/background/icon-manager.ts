@@ -58,7 +58,7 @@ export default class IconManager {
     }
 
 
-    static setIcon({isActive = this.iconState.active, mode}: {isActive?: boolean, mode: FilterMode}): void {
+    static setIcon({isActive = this.iconState.active, mode}: {isActive?: boolean; mode: FilterMode}): void {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
@@ -74,8 +74,8 @@ export default class IconManager {
         }
 
         chrome.browserAction.setIcon({
-            path: path,  
-        })
+            path: path, 
+        });
 
         IconManager.handleUpdate();
     }

@@ -74,7 +74,7 @@ export default class IconManager {
         }
 
         chrome.browserAction.setIcon({
-            path: path, 
+            path: path,
         });
 
         IconManager.handleUpdate();

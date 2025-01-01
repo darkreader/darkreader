@@ -328,13 +328,34 @@ interface BgImageMatches {
 }
 
 const imageSelectorQueue = new Map<string, Array<() => void>>();
+const imageSelectorValues = new Map<string, string>();
+const imageSelectorNodeQueue = new Set<Element>();
+let imageSelectorQueueFrameId: number | null = null;
+let classObserver: MutationObserver | null = null;
 
 export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
     for (const [selector, callbacks] of imageSelectorQueue) {
-        if (node.querySelector(selector)) {
+        if (node.querySelector(selector) || (node instanceof Element && node.matches(selector))) {
             imageSelectorQueue.delete(selector);
             callbacks.forEach((cb) => cb());
         }
+    }
+    if (!classObserver) {
+        classObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                imageSelectorNodeQueue.add(mutation.target as Element);
+                if (!imageSelectorQueueFrameId) {
+                    imageSelectorQueueFrameId = requestAnimationFrame(() => {
+                        imageSelectorNodeQueue.forEach((element) => {
+                            checkImageSelectors(element);
+                        });
+                        imageSelectorNodeQueue.clear();
+                        imageSelectorQueueFrameId = null;
+                    });
+                }
+            });
+        });
+        classObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class'], subtree: true});
     }
 }
 
@@ -432,7 +453,6 @@ export function getBgImageModifier(
                     return "url('')";
                 }
 
-                // TODO: Search in Shadow DOM too.
                 const selector = rule.selectorText;
                 if (selector && !scope.querySelector(selector)) {
                     await new Promise<void>((resolve) => {
@@ -440,6 +460,7 @@ export function getBgImageModifier(
                             imageSelectorQueue.get(selector)!.push(resolve);
                         } else {
                             imageSelectorQueue.set(selector, [resolve]);
+                            imageSelectorValues.set(selector, urlValue);
                         }
                     });
                 }
@@ -667,4 +688,6 @@ export function cleanModificationCache(): void {
     cleanImageProcessingCache();
     awaitingForImageLoading.clear();
     imageSelectorQueue.clear();
+    classObserver?.disconnect();
+    classObserver = null;
 }

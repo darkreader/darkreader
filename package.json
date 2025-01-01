@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.9.96",
+  "version": "4.9.99",
   "description": "Dark mode for every website",
   "scripts": {
     "api": "node --max-old-space-size=3072 tasks/cli.js build --api",
@@ -108,6 +108,7 @@
     "yazl": "3.3.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.27.3"
+    "@rollup/rollup-linux-x64-gnu": "4.27.3",
+    "@rollup/rollup-win32-x64-msvc": "4.28.1"
   }
 }

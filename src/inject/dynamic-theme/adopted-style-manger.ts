@@ -198,8 +198,11 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 }
 
 export interface AdoptedStyleSheetFallback {
-    render(theme: Theme, ignoreImageAnalysis: string[]): void;
-    updateCSS(cssRules: CSSRule[]): void;
+    render(options: {
+        theme: Theme;
+        ignoreImageAnalysis: string[];
+        cssRules: CSSRule[] | CSSRuleList;
+    }): void;
     commands(): DeepStyleSheetCommand[];
     destroy(): void;
 }
@@ -232,23 +235,16 @@ class StyleSheetCommandBuilder implements CSSBuilder {
     cssRules: StyleSheetCommandBuilder[] = [];
 
     private commands: StyleSheetCommand[] = [];
-    private onChange: () => void;
-
-    constructor(onChange: () => void) {
-        this.onChange = onChange;
-    }
 
     insertRule(cssText: string, index = 0): number {
         this.commands.push({type: 'insert', index, cssText});
-        this.cssRules.splice(index, 0, new StyleSheetCommandBuilder(this.onChange));
-        this.onChange();
+        this.cssRules.splice(index, 0, new StyleSheetCommandBuilder());
         return index;
     }
 
     deleteRule(index: number): void {
         this.commands.push({type: 'delete', index});
         this.cssRules.splice(index, 1);
-        this.onChange();
     }
 
     replaceSync(cssText: string) {
@@ -259,7 +255,6 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         } else {
             throw new Error('StyleSheetCommandBuilder.replaceSync() is not fully supported');
         }
-        this.onChange();
     }
 
     getDeepCSSCommands() {
@@ -284,26 +279,16 @@ class StyleSheetCommandBuilder implements CSSBuilder {
     }
 }
 
-export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedStyleSheetFallback {
+export function createAdoptedStyleSheetFallback(): AdoptedStyleSheetFallback {
     let cancelAsyncOperations = false;
 
-    let sourceCSSRules: CSSRule[] = [];
-    let lastTheme: Theme;
-    let lastIgnoreImageAnalysis: string[];
+    const builder = new StyleSheetCommandBuilder();
 
-    function updateCSS(cssRules: CSSRule[]) {
-        sourceCSSRules = cssRules;
-        if (lastTheme && lastIgnoreImageAnalysis) {
-            render(lastTheme, lastIgnoreImageAnalysis);
-        }
-    }
-
-    const builder = new StyleSheetCommandBuilder(onChange);
-
-    function render(theme: Theme, ignoreImageAnalysis: string[]) {
-        lastTheme = theme;
-        lastIgnoreImageAnalysis = ignoreImageAnalysis;
-
+    function render(options: {
+        theme: Theme;
+        ignoreImageAnalysis: string[];
+        cssRules: CSSRuleList | CSSRule[];
+    }) {
         const prepareSheet = () => {
             builder.replaceSync('');
             return builder;
@@ -312,9 +297,9 @@ export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedSt
         const sheetModifier = createStyleSheetModifier();
         sheetModifier.modifySheet({
             prepareSheet,
-            sourceCSSRules,
-            theme,
-            ignoreImageAnalysis,
+            sourceCSSRules: options.cssRules,
+            theme: options.theme,
+            ignoreImageAnalysis: options.ignoreImageAnalysis,
             force: false,
             isAsyncCancelled: () => cancelAsyncOperations,
         });
@@ -330,5 +315,5 @@ export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedSt
         cancelAsyncOperations = true;
     }
 
-    return {render, destroy, updateCSS, commands};
+    return {render, destroy, commands};
 }

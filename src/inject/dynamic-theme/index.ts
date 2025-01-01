@@ -33,9 +33,8 @@ declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
-const adoptedStyleFallbacks = new Map<Document | ShadowRoot, AdoptedStyleSheetFallback>();
-const adoptedStyleNodeIds = new WeakMap<Document | ShadowRoot, number>();
-const adoptedStyleChangeTokens = new WeakMap<Document | ShadowRoot, symbol>();
+const adoptedStyleFallbacks = new Map<CSSStyleSheet, AdoptedStyleSheetFallback>();
+const adoptedStyleChangeTokens = new WeakMap<CSSStyleSheet, symbol>();
 let theme: Theme | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
@@ -280,30 +279,41 @@ function createDynamicStyleOverrides() {
     variablesStore.matchVariablesAndDependents();
 
     if (isFirefox) {
-        const MATCH_VAR = Symbol();
+        type NodeSheet = {
+            sheetId: number;
+            sheet: CSSStyleSheet;
+        };
 
-        const onAdoptedCSSChange = (e: CustomEvent) => {
-            const {node, id, cssRules, entries} = e.detail;
-            if (Array.isArray(entries)) {
-                entries.forEach((e) => {
-                    const cssRules = e[2];
-                    variablesStore.addRulesForMatching(cssRules);
-                });
-                variablesStore.matchVariablesAndDependents();
-            } else if (cssRules) {
-                variablesStore.addRulesForMatching(cssRules);
-                requestAnimationFrameOnce(MATCH_VAR, () => variablesStore.matchVariablesAndDependents());
+        const onAdoptedCssChange = (e: CustomEvent) => {
+            const {sheets} = e.detail;
+            if (!Array.isArray(sheets) || sheets.length === 0) {
+                return;
             }
-            const tuples = Array.isArray(entries) ? entries : node && cssRules ? [[node, id, cssRules]] : [];
-            tuples.forEach(([node, id, cssRules]) => {
-                adoptedStyleNodeIds.set(node, id);
-                const fallback = getAdoptedStyleSheetFallback(node);
-                fallback.updateCSS(cssRules);
+            sheets.forEach(({sheet}: NodeSheet) => {
+                const {cssRules} = sheet;
+                variablesStore.addRulesForMatching(cssRules);
+            });
+            variablesStore.matchVariablesAndDependents();
+            const response: Array<{sheetId: number; commands: any}> = [];
+            sheets.forEach(({sheetId, sheet}: NodeSheet) => {
+                const fallback = getAdoptedStyleSheetFallback(sheet);
+                const cssRules = sheet.cssRules;
+                fallback.render({
+                    theme: theme!,
+                    ignoreImageAnalysis: ignoredImageAnalysisSelectors!,
+                    cssRules,
+                });
+                const commands = fallback.commands();
+                response.push({sheetId, commands});
+            });
+
+            requestAnimationFrameOnce(getAdoptedStyleChangeToken(sheets[0].sheet), () => {
+                document.dispatchEvent(new CustomEvent('__darkreader__adoptedStyleSheetCommands', {detail: JSON.stringify(response)}));
             });
         };
 
-        document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCSSChange);
-        cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCSSChange));
+        document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange);
+        cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange));
 
         document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
     }
@@ -400,8 +410,6 @@ function createThemeAndWatchForUpdates() {
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     if (isFirefox) {
-        const fallback = getAdoptedStyleSheetFallback(node);
-        fallback.render(theme!, ignoredImageAnalysisSelectors);
         return;
     }
 
@@ -422,31 +430,20 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     }
 }
 
-function getAdoptedStyleChangeToken(node: Document | ShadowRoot) {
-    if (adoptedStyleChangeTokens.has(node)) {
-        return adoptedStyleChangeTokens.get(node)!;
+function getAdoptedStyleChangeToken(sheet: CSSStyleSheet) {
+    if (adoptedStyleChangeTokens.has(sheet)) {
+        return adoptedStyleChangeTokens.get(sheet)!;
     }
     const token = Symbol();
-    adoptedStyleChangeTokens.set(node, token);
+    adoptedStyleChangeTokens.set(sheet, token);
     return token;
 }
 
-function getAdoptedStyleSheetFallback(node: Document | ShadowRoot) {
-    let fallback = adoptedStyleFallbacks.get(node);
+function getAdoptedStyleSheetFallback(sheet: CSSStyleSheet) {
+    let fallback = adoptedStyleFallbacks.get(sheet);
     if (!fallback) {
-        fallback = createAdoptedStyleSheetFallback(() => {
-            const token = getAdoptedStyleChangeToken(node);
-            requestAnimationFrameOnce(token, () => {
-                const id = adoptedStyleNodeIds.get(node);
-                const commands = fallback?.commands();
-                if (!id || !commands) {
-                    return;
-                }
-                const data = {id, commands};
-                document.dispatchEvent(new CustomEvent('__darkreader__adoptedStyleSheetCommands', {detail: JSON.stringify(data)}));
-            });
-        });
-        adoptedStyleFallbacks.set(node, fallback);
+        fallback = createAdoptedStyleSheetFallback();
+        adoptedStyleFallbacks.set(sheet, fallback);
     }
     return fallback;
 }

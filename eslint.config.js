@@ -15,6 +15,7 @@ export default tslint.config({
     ],
     ignores: [
         'build/**',
+        'darkreader.js',
         'node_modules/**',
         'tests/coverage/**',
         '**/compatibility.js',

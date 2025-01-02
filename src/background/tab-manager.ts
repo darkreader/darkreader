@@ -178,7 +178,7 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.DARK_THEME_DETECTED:
+                case MessageTypeCStoBG.DARK_THEME_DETECTED: {
                     const tabId = sender.tab!.id!;
                     const frames = TabManager.tabs[tabId];
                     if (!frames) {
@@ -198,6 +198,7 @@ export default class TabManager {
                         }
                     }
                     break;
+                }
 
                 case MessageTypeCStoBG.FETCH: {
                     // Using custom response due to Chrome and Firefox incompatibility
@@ -360,7 +361,7 @@ export default class TabManager {
     static async updateContentScript(options: {runOnProtectedPages: boolean}): Promise<void> {
         (await queryTabs({discarded: false}))
             .filter((tab) => __CHROMIUM_MV3__ || options.runOnProtectedPages || canInjectScript(tab.url))
-            .filter((tab) => !Boolean(TabManager.tabs[tab.id!]))
+            .filter((tab) => !TabManager.tabs[tab.id!])
             .forEach((tab) => {
                 if (__CHROMIUM_MV3__) {
                     chrome.scripting.executeScript({

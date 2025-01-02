@@ -22,7 +22,7 @@ export function configureKarma(config, env) {
     const headless = config.headless || Boolean(env.KARMA_HEADLESS) || false;
 
     /** @type {ConfigOptions} */
-    let options = {
+    const options = {
         failOnFailingTestSuite: true,
         failOnEmptyTestSuite: true,
         basePath: '../..',

@@ -3,7 +3,9 @@
 import {fixupPluginRules} from '@eslint/compat';
 import eslint from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
+import * as eslintPluginCompat from 'eslint-plugin-compat';
 import * as eslintPluginImport from 'eslint-plugin-import';
+import globals from 'globals';
 import tslint from 'typescript-eslint';
 import {localRules} from './eslint-plugin-local.js';
 
@@ -199,5 +201,63 @@ export default tslint.config({
 
         'local/jsx-uses-m-pragma': 'error',
         'local/jsx-uses-vars': 'error',
+    },
+}, {
+    files: [
+        '**/darkreader.js',
+    ],
+    extends: [
+        eslintPluginCompat.config['flat/recommended'],
+    ],
+    languageOptions: {
+        globals: {
+            ...globals.browser,
+        },
+        ecmaVersion: 2020,
+        sourceType: 'module',
+    },
+    settings: {
+        polyfills: [
+            'navigator.deviceMemory',
+            'navigator.userAgentData',
+        ],
+    },
+    rules: {
+        'compat/compat': ['error', [
+            '>0.5% and supports es5 and supports promises and supports url',
+            'not Explorer > 0',
+        ].join(', ')],
+    },
+}, {
+    files: [
+        'build/debug/chrome/**/*.js',
+    ],
+    extends: [
+        eslintPluginCompat.config['flat/recommended'],
+    ],
+    languageOptions: {
+        globals: {
+            ...globals.browser,
+        },
+        ecmaVersion: 2020,
+        sourceType: 'module',
+    },
+    settings: {
+        polyfills: [
+            'navigator.deviceMemory',
+            'navigator.userAgentData',
+        ],
+    },
+    rules: {
+        'compat/compat': ['error', [
+            '> 0.5% and supports es5',
+            'Firefox ESR',
+            'last 2 FirefoxAndroid versions',
+            'not Explorer > 0',
+            'not Safari > 0',
+            'not iOS > 0',
+            'not ChromeAndroid > 0',
+            'not OperaMini all',
+        ].join(', ')],
     },
 });

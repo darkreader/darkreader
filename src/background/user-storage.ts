@@ -5,7 +5,7 @@ import {PromiseBarrier} from '../utils/promise-barrier';
 import {isURLMatched} from '../utils/url';
 import {validateSettings} from '../utils/validation';
 
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
+import {readManagedStorage, readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
 
 
@@ -78,12 +78,7 @@ export default class UserStorage {
         return settings;
     }
 
-    private static async loadSettingsFromStorage(): Promise<UserSettings> {
-        if (UserStorage.loadBarrier) {
-            return await UserStorage.loadBarrier.entry();
-        }
-        UserStorage.loadBarrier = new PromiseBarrier();
-
+    private static async loadSettingsFromStorageWithoutManaged(): Promise<UserSettings> {
         let local = await readLocalStorage(DEFAULT_SETTINGS);
 
         if (local.schemeVersion < 2) {
@@ -113,10 +108,8 @@ export default class UserStorage {
         if (local.syncSettings == null) {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
         }
+
         if (!local.syncSettings) {
-            UserStorage.migrateAutomationSettings(local);
-            UserStorage.fillDefaults(local);
-            UserStorage.loadBarrier.resolve(local);
             return local;
         }
 
@@ -126,18 +119,34 @@ export default class UserStorage {
             local.syncSettings = false;
             UserStorage.set({syncSettings: false});
             UserStorage.saveSyncSetting(false);
-            UserStorage.loadBarrier.resolve(local);
             return local;
         }
 
         const {errors: syncCfgErrors} = validateSettings($sync);
         syncCfgErrors.forEach((err) => logWarn(err));
-
-        UserStorage.migrateAutomationSettings($sync);
-        UserStorage.fillDefaults($sync);
-
-        UserStorage.loadBarrier.resolve($sync);
         return $sync;
+    }
+
+    private static async loadSettingsFromStorage(): Promise<UserSettings> {
+        if (UserStorage.loadBarrier) {
+            return await UserStorage.loadBarrier.entry();
+        }
+        UserStorage.loadBarrier = new PromiseBarrier();
+
+        let settings = await UserStorage.loadSettingsFromStorageWithoutManaged();
+
+        const managed = await readManagedStorage(settings);
+        const {errors: managedCfgErrors} = validateSettings(managed);
+        if (managedCfgErrors.length === 0) {
+            settings = managed;
+        } else {
+            managedCfgErrors.forEach((err) => logWarn(err));
+        }
+
+        UserStorage.migrateAutomationSettings(settings);
+        UserStorage.fillDefaults(settings);
+        UserStorage.loadBarrier.resolve(settings);
+        return settings;
     }
 
     static async saveSettings(): Promise<void> {

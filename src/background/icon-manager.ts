@@ -73,9 +73,7 @@ export default class IconManager {
             path = (mode === FilterMode.dark) ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
         }
 
-        chrome.browserAction.setIcon({
-            path: path,
-        });
+        chrome.browserAction.setIcon({path});
 
         IconManager.handleUpdate();
     }

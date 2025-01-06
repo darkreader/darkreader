@@ -619,9 +619,9 @@ export class Extension {
 
     private static onAppToggle() {
         if (Extension.isExtensionSwitchedOn()) {
-            IconManager.setActive();
+            IconManager.setIcon({isActive: true, mode: UserStorage.settings.theme.mode});
         } else {
-            IconManager.setInactive();
+            IconManager.setIcon({isActive: false, mode: UserStorage.settings.theme.mode});
         }
 
         if (UserStorage.settings.changeBrowserTheme) {
@@ -639,6 +639,7 @@ export class Extension {
         TabManager.sendMessage(onlyUpdateActiveTab);
         Extension.saveUserSettings();
         Extension.reportChanges();
+        IconManager.setIcon({mode: UserStorage.settings.theme.mode});
         Extension.stateManager!.saveState();
     }
 

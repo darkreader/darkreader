@@ -196,6 +196,8 @@ export default class TabManager {
                                 scriptId,
                             };
                             TabManager.sendDocumentMessage(tabId, documentId, message, frameId);
+                        } else if (frameId === 0) {
+                            IconManager.setIcon({tabId, isActive: false});
                         }
                     }
                     break;

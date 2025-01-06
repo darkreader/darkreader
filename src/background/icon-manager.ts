@@ -1,4 +1,3 @@
-import {FilterMode} from '../generators/css-filter';
 import {isNonPersistent} from '../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
@@ -6,6 +5,12 @@ declare const __THUNDERBIRD__: boolean;
 interface IconState {
     badgeText: string;
     active: boolean;
+}
+
+interface IconOptions {
+    colorScheme: 'dark' | 'light';
+    isActive?: boolean;
+    tabId?: number;
 }
 
 export default class IconManager {
@@ -58,7 +63,7 @@ export default class IconManager {
     }
 
 
-    static setIcon({isActive = this.iconState.active, mode}: {isActive?: boolean; mode: FilterMode}): void {
+    static setIcon({isActive = this.iconState.active, colorScheme}: IconOptions): void {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
@@ -68,9 +73,9 @@ export default class IconManager {
 
         let path = this.ICON_PATHS.activeDark;
         if (isActive) {
-            path = (mode === FilterMode.dark) ? IconManager.ICON_PATHS.activeDark : IconManager.ICON_PATHS.activeLight;
+            path = colorScheme === 'dark' ? IconManager.ICON_PATHS.activeDark : IconManager.ICON_PATHS.activeLight;
         } else {
-            path = (mode === FilterMode.dark) ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
+            path = colorScheme === 'dark' ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
         }
 
         chrome.browserAction.setIcon({path});

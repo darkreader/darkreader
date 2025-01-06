@@ -619,9 +619,9 @@ export class Extension {
 
     private static onAppToggle() {
         if (Extension.isExtensionSwitchedOn()) {
-            IconManager.setIcon({isActive: true, mode: UserStorage.settings.theme.mode});
+            IconManager.setIcon({isActive: true, colorScheme: UserStorage.settings.theme.mode ? 'dark' : 'light'});
         } else {
-            IconManager.setIcon({isActive: false, mode: UserStorage.settings.theme.mode});
+            IconManager.setIcon({isActive: false, colorScheme: UserStorage.settings.theme.mode ? 'dark' : 'light'});
         }
 
         if (UserStorage.settings.changeBrowserTheme) {
@@ -639,7 +639,7 @@ export class Extension {
         TabManager.sendMessage(onlyUpdateActiveTab);
         Extension.saveUserSettings();
         Extension.reportChanges();
-        IconManager.setIcon({mode: UserStorage.settings.theme.mode});
+        IconManager.setIcon({colorScheme: UserStorage.settings.theme.mode ? 'dark' : 'light'});
         Extension.stateManager!.saveState();
     }
 

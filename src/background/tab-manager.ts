@@ -5,6 +5,7 @@ import {isFirefox} from '../utils/platform';
 import {StateManager} from '../utils/state-manager';
 import {getActiveTab, queryTabs} from '../utils/tabs';
 import {getURLHostOrProtocol} from '../utils/url';
+import IconManager from './icon-manager';
 
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT, logInfo, logWarn} from './utils/log';
@@ -245,6 +246,20 @@ export default class TabManager {
     }
 
     private static sendDocumentMessage(tabId: number, documentId: string, message: MessageBGtoCS, frameId: number) {
+        if (frameId === 0) {
+            const themeMessageTypes: MessageTypeBGtoCS[] = [
+                MessageTypeBGtoCS.ADD_CSS_FILTER,
+                MessageTypeBGtoCS.ADD_DYNAMIC_THEME,
+                MessageTypeBGtoCS.ADD_STATIC_THEME,
+                MessageTypeBGtoCS.ADD_SVG_FILTER,
+            ];
+            if (themeMessageTypes.includes(message.type)) {
+                IconManager.setIcon({tabId, isActive: true, colorScheme: message.data?.theme?.mode ? 'dark' : 'light'});
+            } else if (message.type === MessageTypeBGtoCS.CLEAN_UP) {
+                IconManager.setIcon({tabId, isActive: false});
+            }
+        }
+
         if (__CHROMIUM_MV3__) {
             // On MV3, Chromium has a bug which prevents sending messages to pre-rendered frames without specifying frameId
             // Furthermore, if we send a message addressed to a temporary frameId after the document exits prerender state,

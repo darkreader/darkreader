@@ -8,7 +8,7 @@ interface IconState {
 }
 
 interface IconOptions {
-    colorScheme: 'dark' | 'light';
+    colorScheme?: 'dark' | 'light';
     isActive?: boolean;
     tabId?: number;
 }
@@ -63,7 +63,7 @@ export default class IconManager {
     }
 
 
-    static setIcon({isActive = this.iconState.active, colorScheme}: IconOptions): void {
+    static setIcon({isActive = this.iconState.active, colorScheme = 'dark', tabId}: IconOptions): void {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
@@ -78,9 +78,12 @@ export default class IconManager {
             path = colorScheme === 'dark' ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
         }
 
-        chrome.browserAction.setIcon({path});
-
-        IconManager.handleUpdate();
+        if (tabId) {
+            chrome.browserAction.setIcon({tabId, path});
+        } else {
+            chrome.browserAction.setIcon({path});
+            IconManager.handleUpdate();
+        }
     }
 
     static showBadge(text: string): void {

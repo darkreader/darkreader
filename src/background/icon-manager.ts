@@ -11,8 +11,8 @@ interface IconState {
 export default class IconManager {
     private static readonly ICON_PATHS = {
         activeDark: {
-            19: '../icons/dr_active_dark_19.png',
-            38: '../icons/dr_active_dark_38.png',
+            19: '../icons/dr_active_19.png',
+            38: '../icons/dr_active_38.png',
         },
         activeLight: {
             19: '../icons/dr_active_light_19.png',

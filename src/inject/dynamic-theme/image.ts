@@ -23,6 +23,7 @@ export interface ImageDetails {
 const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string): Promise<ImageDetails> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise<ImageDetails>(async (resolve, reject) => {
         try {
             const dataURL = url.startsWith('data:') ? url : await getDataURL(url);

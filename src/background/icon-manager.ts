@@ -7,15 +7,29 @@ interface IconState {
     active: boolean;
 }
 
+interface IconOptions {
+    colorScheme?: 'dark' | 'light';
+    isActive?: boolean;
+    tabId?: number;
+}
+
 export default class IconManager {
     private static readonly ICON_PATHS = {
-        active: {
+        activeDark: {
             19: '../icons/dr_active_19.png',
             38: '../icons/dr_active_38.png',
         },
-        inactive: {
-            19: '../icons/dr_inactive_19.png',
-            38: '../icons/dr_inactive_38.png',
+        activeLight: {
+            19: '../icons/dr_active_light_19.png',
+            38: '../icons/dr_active_light_38.png',
+        },
+        inactiveDark: {
+            19: '../icons/dr_inactive_dark_19.png',
+            38: '../icons/dr_inactive_dark_38.png',
+        },
+        inactiveLight: {
+            19: '../icons/dr_inactive_light_19.png',
+            38: '../icons/dr_inactive_light_38.png',
         },
     };
 
@@ -48,28 +62,28 @@ export default class IconManager {
         }
     }
 
-    static setActive(): void {
-        if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
-            // Fix for Firefox Android and Thunderbird.
-            return;
-        }
-        IconManager.iconState.active = true;
-        chrome.browserAction.setIcon({
-            path: IconManager.ICON_PATHS.active,
-        });
-        IconManager.handleUpdate();
-    }
 
-    static setInactive(): void {
+    static setIcon({isActive = this.iconState.active, colorScheme = 'dark', tabId}: IconOptions): void {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
         }
-        IconManager.iconState.active = false;
-        chrome.browserAction.setIcon({
-            path: IconManager.ICON_PATHS.inactive,
-        });
-        IconManager.handleUpdate();
+
+        this.iconState.active = isActive;
+
+        let path = this.ICON_PATHS.activeDark;
+        if (isActive) {
+            path = colorScheme === 'dark' ? IconManager.ICON_PATHS.activeDark : IconManager.ICON_PATHS.activeLight;
+        } else {
+            path = colorScheme === 'dark' ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
+        }
+
+        if (tabId) {
+            chrome.browserAction.setIcon({tabId, path});
+        } else {
+            chrome.browserAction.setIcon({path});
+            IconManager.handleUpdate();
+        }
     }
 
     static showBadge(text: string): void {

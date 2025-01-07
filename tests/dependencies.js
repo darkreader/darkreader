@@ -14,8 +14,9 @@ function checkDependency({resolved, integrity}) {
         (resolved === undefined ||
         resolved.startsWith('https://registry.npmjs.org/')) &&
         (integrity === undefined ||
-        integrity.startsWith('sha512-')))) {
-            throw new Error('Invalid dependency', resolved);
+        integrity.startsWith('sha512-'))
+    )) {
+        throw new Error('Invalid dependency', resolved);
     }
 }
 
@@ -27,7 +28,7 @@ export async function checkDependencies() {
     const packageLock = await readJSON(packageLockPath);
 
     const stack = [packageLock.packages];
-    while(stack.length > 0) {
+    while (stack.length > 0) {
         const curr = stack.pop();
         for (const packageName in curr) {
             if (packageName === '') {
@@ -37,10 +38,8 @@ export async function checkDependencies() {
             if (curr[packageName].dependencies) {
                 stack.push(curr[packageName].dependencies);
             }
-            
         }
     }
-
 }
 
 await checkDependencies();

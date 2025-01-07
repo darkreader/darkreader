@@ -43,7 +43,7 @@ function logAssert(...args: any[]): void {
 }
 
 export function ASSERT(description: string, condition: (() => boolean) | any): void {
-    if ((__TEST__ || __DEBUG__) && (typeof condition === 'function' && !condition()) || !Boolean(condition)) {
+    if ((__TEST__ || __DEBUG__) && (typeof condition === 'function' && !condition()) || !condition) {
         logAssert(description);
         if (__TEST__) {
             throw new Error(`Assertion failed: ${description}`);

@@ -121,7 +121,7 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
 }
 
 export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         const packaged = prepareSyncStorage(values);
         chrome.storage.sync.set(packaged, () => {
             if (chrome.runtime.lastError) {
@@ -134,7 +134,7 @@ export async function writeSyncStorage<T extends {[key: string]: any}>(values: T
 }
 
 export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>(async (resolve) => {
+    return new Promise<void>((resolve) => {
         chrome.storage.local.set(values, () => {
             resolve();
         });
@@ -142,7 +142,7 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
 }
 
 export async function removeSyncStorage(keys: string[]): Promise<void> {
-    return new Promise<void>(async (resolve) => {
+    return new Promise<void>((resolve) => {
         chrome.storage.sync.remove(keys, () => {
             resolve();
         });
@@ -150,7 +150,7 @@ export async function removeSyncStorage(keys: string[]): Promise<void> {
 }
 
 export async function removeLocalStorage(keys: string[]): Promise<void> {
-    return new Promise<void>(async (resolve) => {
+    return new Promise<void>((resolve) => {
         chrome.storage.local.remove(keys, () => {
             resolve();
         });

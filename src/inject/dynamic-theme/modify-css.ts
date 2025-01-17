@@ -453,16 +453,24 @@ export function getBgImageModifier(
                     return "url('')";
                 }
 
-                const selector = rule.selectorText;
-                if (selector && !scope.querySelector(selector)) {
-                    await new Promise<void>((resolve) => {
-                        if (imageSelectorQueue.has(selector)) {
-                            imageSelectorQueue.get(selector)!.push(resolve);
-                        } else {
-                            imageSelectorQueue.set(selector, [resolve]);
-                            imageSelectorValues.set(selector, urlValue);
-                        }
-                    });
+                let selector = rule.selectorText;
+                if (selector) {
+                    if (selector.includes('::before')) {
+                        selector = selector.replaceAll('::before', '');
+                    }
+                    if (selector.includes('::after')) {
+                        selector = selector.replaceAll('::after', '');
+                    }
+                    if (!scope.querySelector(selector)) {
+                        await new Promise<void>((resolve) => {
+                            if (imageSelectorQueue.has(selector)) {
+                                imageSelectorQueue.get(selector)!.push(resolve);
+                            } else {
+                                imageSelectorQueue.set(selector, [resolve]);
+                                imageSelectorValues.set(selector, urlValue);
+                            }
+                        });
+                    }
                 }
 
                 let imageDetails: ImageDetails | null = null;

@@ -476,7 +476,6 @@ export function getBgImageModifier(
                 let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
-                    writeImageDetailCache(imageDetailsCache);
                 } else {
                     try {
                         if (!isBlobURLCheckResultReady()) {
@@ -492,6 +491,7 @@ export function getBgImageModifier(
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
                             imageDetailsCache.set(url, imageDetails);
+                            writeImageDetailCache(imageDetailsCache);
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);
                         }

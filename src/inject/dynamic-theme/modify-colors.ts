@@ -89,8 +89,7 @@ function modifyAndRegisterColor(
         return registered;
     }
     const value = modifier(rgb, theme);
-    registerColor(type, rgb, value);
-    return value;
+    return registerColor(type, rgb, value);
 }
 
 function modifyLightSchemeColor(rgb: RGBA, theme: Theme): string {

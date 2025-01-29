@@ -65,7 +65,6 @@ export default class IconManager {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     static setIcon({isActive = this.iconState.active, colorScheme = 'dark', tabId}: IconOptions): void {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
@@ -85,12 +84,22 @@ export default class IconManager {
             path = IconManager.ICON_PATHS.activeLight;
         }
 
+        // Temporary disable per-site icons
+        if (colorScheme === 'dark') {
+        }
+        if (tabId) {
+            return;
+        }
+        /*
         if (tabId) {
             chrome.browserAction.setIcon({tabId, path});
         } else {
             chrome.browserAction.setIcon({path});
             IconManager.handleUpdate();
         }
+        */
+        chrome.browserAction.setIcon({path});
+        IconManager.handleUpdate();
     }
 
     static showBadge(text: string): void {

@@ -1,3 +1,11 @@
+# 4.9.100 (January 29, 2025)
+
+- Improved performace of checking available background images.
+- Optimized image analysis caching.
+- Fixed processing style sheets with incorrect imports.
+- Fixed image analysis when extension is re-enabled.
+- Fixed theme update optimization.
+
 # 4.9.99 (December 13, 2024)
 
 - Firefox: Fixed console error.

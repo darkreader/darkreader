@@ -258,7 +258,8 @@ export default class TabManager {
             if (themeMessageTypes.includes(message.type)) {
                 IconManager.setIcon({tabId, isActive: true, colorScheme: message.data?.theme?.mode ? 'dark' : 'light'});
             } else if (message.type === MessageTypeBGtoCS.CLEAN_UP) {
-                IconManager.setIcon({tabId, isActive: false});
+                const isActive = TabManager.tabs[tabId]?.[0]?.url?.startsWith('https://darkreader.org/');
+                IconManager.setIcon({tabId, isActive});
             }
         }
 

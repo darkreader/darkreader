@@ -14,7 +14,7 @@
     "debug:watch:mv3": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --chrome-mv3",
     "debug:watch:plus": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --plus --chrome",
     "dependencies:upgrade": "node tasks/dependencies.js",
-    "lint": "eslint -- 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/[!coverage]**/*.js' 'tests/**/*.ts' 'eslint.config.js' 'index.d.ts'",
+    "lint": "eslint -- src/**/*.ts src/**/*.tsx tasks/**/*.js tests/[!coverage]**/*.js tests/**/*.ts eslint.config.js index.d.ts",
     "lint:bundle": "(node ./tasks/check-exists.js ./build/debug/chrome || node tasks/build.js --debug --api --chrome) && eslint -- 'build/debug/chrome/**/*.js' 'darkreader.js'",
     "plus-link": "cd src && ln -s ../../darkreader-plus plus",
     "prepublishOnly": "npm test && npm run api",

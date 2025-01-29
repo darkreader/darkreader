@@ -85,6 +85,7 @@ export default class IconManager {
         }
 
         // Temporary disable per-site icons
+        // eslint-disable-next-line no-empty
         if (colorScheme === 'dark') {
         }
         if (tabId) {

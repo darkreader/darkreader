@@ -70,6 +70,13 @@ export default class IconManager {
             // Fix for Firefox Android and Thunderbird.
             return;
         }
+        // Temporary disable per-site icons
+        // eslint-disable-next-line no-empty
+        if (colorScheme === 'dark') {
+        }
+        if (tabId) {
+            return;
+        }
 
         this.iconState.active = isActive;
 
@@ -85,12 +92,6 @@ export default class IconManager {
         }
 
         // Temporary disable per-site icons
-        // eslint-disable-next-line no-empty
-        if (colorScheme === 'dark') {
-        }
-        if (tabId) {
-            return;
-        }
         /*
         if (tabId) {
             chrome.browserAction.setIcon({tabId, path});

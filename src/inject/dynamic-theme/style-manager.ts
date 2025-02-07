@@ -618,7 +618,7 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
             importedCSS +
             cssText.substring(match.offset + match.text.length + diff)
         );
-        diff = importedCSS.length - match.text.length;
+        diff += importedCSS.length - match.text.length;
         prev = match;
     }
 

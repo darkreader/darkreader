@@ -1,3 +1,7 @@
+# 4.9.101 (February 7, 2025)
+
+- Fixed processing stylesheets with multiple CSS imports.
+
 # 4.9.100 (January 29, 2025)
 
 - Improved performace of checking available background images.

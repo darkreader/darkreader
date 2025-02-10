@@ -201,7 +201,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         });
     }
 
+    let blobURLAllowed: boolean | null = null;
+
     async function checkBlobURLSupport(): Promise<void> {
+        if (blobURLAllowed != null) {
+            document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
+            return;
+        }
+
         const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>';
         const bytes = new Uint8Array(svg.length);
         for (let i = 0; i < svg.length; i++) {
@@ -209,7 +216,6 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         }
         const blob = new Blob([bytes], {type: 'image/svg+xml'});
         const objectURL = URL.createObjectURL(blob);
-        let blobURLAllowed: boolean;
         try {
             const image = new Image();
             await new Promise<void>((resolve, reject) => {
@@ -224,7 +230,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
     }
 
-    documentEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport, {once: true});
+    documentEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport);
 
     if (enableStyleSheetsProxy) {
         overrideProperty(Document, 'styleSheets', {

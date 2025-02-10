@@ -1,3 +1,7 @@
+# 4.9.102 (February 10, 2025)
+
+- MV3: Fixed background cache performance.
+
 # 4.9.101 (February 7, 2025)
 
 - Fixed processing stylesheets with multiple CSS imports.

@@ -338,6 +338,27 @@ export default class TabManager {
         TabManager.stateManager.saveState();
     }
 
+    static async cleanState() {
+        await TabManager.stateManager.loadState();
+
+        const actualTabs = await queryTabs({});
+        const tabIds = Object.keys(TabManager.tabs).map((id) => Number(id));
+        const staleTabs = new Set(tabIds);
+        actualTabs.forEach((actualTab) => {
+            const tabId = actualTab.id;
+            if (tabId) {
+                staleTabs.delete(tabId);
+            }
+        });
+        staleTabs.forEach((staleTabId) => {
+            if (TabManager.tabs[staleTabId]) {
+                delete TabManager.tabs[staleTabId];
+            }
+        });
+
+        TabManager.stateManager.saveState();
+    }
+
     static async getTabURL(tab: chrome.tabs.Tab | null): Promise<string> {
         if (__CHROMIUM_MV3__) {
             if (!tab) {

@@ -187,7 +187,7 @@ describe('Style override', () => {
             (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
             await new Promise((resolve) => setTimeout(resolve));
             return (style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText;
-        })).resolves.toBe('html { background-color: rgb(89, 0, 16); }');
+        })).resolves.toBe('html { background-color: var(--darkreader-background-ffc0cb, #590010); }');
     });
 
     it('should react to a new style', async () => {

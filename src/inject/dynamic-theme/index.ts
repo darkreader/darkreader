@@ -506,6 +506,7 @@ function stopWatchingForUpdates() {
 }
 
 let metaObserver: MutationObserver;
+let headObserver: MutationObserver | null = null;
 
 function addMetaListener() {
     metaObserver = new MutationObserver(() => {
@@ -716,11 +717,16 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
             fallbackStyle.textContent = getModifiedFallbackStyle(theme, {strict: true});
         }
 
-        const headObserver = new MutationObserver(() => {
+        headObserver?.disconnect();
+        headObserver = new MutationObserver(() => {
             if (document.head) {
-                headObserver.disconnect();
+                headObserver?.disconnect();
                 ready();
             }
+        });
+        cleaners.push(() => {
+            headObserver?.disconnect();
+            headObserver = null;
         });
         headObserver.observe(document, {childList: true, subtree: true});
     }

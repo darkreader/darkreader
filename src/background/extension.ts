@@ -230,6 +230,7 @@ export class Extension {
 
     static async start(): Promise<void> {
         Extension.init();
+        await TabManager.cleanState();
         await Promise.all([
             ConfigManager.load({local: true}),
             Extension.MV3syncSystemColorStateManager(null),

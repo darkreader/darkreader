@@ -1,3 +1,20 @@
+# 4.9.103 (February 17, 2025)
+
+- Added support for more color spaces (Tailwind 4 issues).
+- Support variables in shorthand border properties of inline styles.
+- Fixed colors after style overrides were removed (Pinterest issue).
+- Fixed dark theme detection in background tabs.
+- Fixed numeric color variables.
+- Fixed same-origin CSS loading optimization.
+
+# 4.9.102 (February 10, 2025)
+
+- MV3: Fixed background cache performance.
+
+# 4.9.101 (February 7, 2025)
+
+- Fixed processing stylesheets with multiple CSS imports.
+
 # 4.9.100 (January 29, 2025)
 
 - Improved performace of checking available background images.

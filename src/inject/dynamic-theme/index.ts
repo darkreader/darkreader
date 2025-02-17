@@ -41,14 +41,21 @@ let isIFrame: boolean | null = null;
 let ignoredImageAnalysisSelectors: string[] = [];
 let ignoredInlineSelectors: string[] = [];
 
+const staticStyleMap = new Map<string, HTMLStyleElement>();
+
 function createOrUpdateStyle(className: string, root: ParentNode = document.head || document): HTMLStyleElement {
     let element: HTMLStyleElement | null = root.querySelector(`.${className}`);
-    if (!element) {
+    if (element) {
+        staticStyleMap.set(className, element);
+    } else if (staticStyleMap.has(className)) {
+        element = staticStyleMap.get(className)!;
+    } else {
         element = document.createElement('style');
         element.classList.add('darkreader');
         element.classList.add(className);
         element.media = 'screen';
         element.textContent = '';
+        staticStyleMap.set(className, element);
     }
     return element;
 }
@@ -68,9 +75,9 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
 
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
-function setupNodePositionWatcher(node: Node, alias: string) {
+function setupNodePositionWatcher(node: Node, alias: string, callback?: () => void) {
     nodePositionWatchers.has(alias) && nodePositionWatchers.get(alias)!.stop();
-    nodePositionWatchers.set(alias, watchForNodePosition(node, 'head'));
+    nodePositionWatchers.set(alias, watchForNodePosition(node, 'head', callback));
 }
 
 function stopStylePositionWatchers() {
@@ -137,7 +144,7 @@ function createStaticStyleOverrides() {
         `}`,
     ].join('\n');
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
-    setupNodePositionWatcher(variableStyle, 'variables');
+    setupNodePositionWatcher(variableStyle, 'variables', () => registerVariablesSheet(variableStyle.sheet!));
     registerVariablesSheet(variableStyle.sheet!);
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
@@ -231,7 +238,7 @@ function replaceCSSTemplates($cssText: string) {
 }
 
 function cleanFallbackStyle() {
-    const fallback = document.querySelector('.darkreader--fallback');
+    const fallback = staticStyleMap.get('darkreader--fallback') || document.querySelector('.darkreader--fallback');
     if (fallback) {
         fallback.textContent = '';
     }
@@ -330,7 +337,7 @@ function createManager(element: StyleElement) {
             loadingStyles.add(loadingStyleId);
             logInfo(`Current amount of styles loading: ${loadingStyles.size}`);
 
-            const fallbackStyle = document.querySelector('.darkreader--fallback')!;
+            const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             if (!fallbackStyle.textContent) {
                 fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: false});
             }
@@ -761,6 +768,7 @@ export function removeDynamicTheme(): void {
 
         restoreMetaThemeColor();
         selectors.forEach((selector) => removeNode(document.head.querySelector(selector)));
+        staticStyleMap.clear();
         removeProxy();
     }
     shadowRootsWithOverrides.forEach((root) => {

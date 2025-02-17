@@ -95,6 +95,31 @@ const shorthandOverrides: Overrides = {
         cssProp: 'background',
         dataAttr: 'data-darkreader-inline-bg',
     },
+    'border': {
+        customProp: '--darkreader-inline-border-short',
+        cssProp: 'border',
+        dataAttr: 'data-darkreader-inline-border-short',
+    },
+    'border-bottom': {
+        customProp: '--darkreader-inline-border-bottom-short',
+        cssProp: 'border-bottom',
+        dataAttr: 'data-darkreader-inline-border-bottom-short',
+    },
+    'border-left': {
+        customProp: '--darkreader-inline-border-left-short',
+        cssProp: 'border-left',
+        dataAttr: 'data-darkreader-inline-border-left-short',
+    },
+    'border-right': {
+        customProp: '--darkreader-inline-border-right-short',
+        cssProp: 'border-right',
+        dataAttr: 'data-darkreader-inline-border-right-short',
+    },
+    'border-top': {
+        customProp: '--darkreader-inline-border-top-short',
+        cssProp: 'border-top',
+        dataAttr: 'data-darkreader-inline-border-top-short',
+    },
 };
 
 const overridesList = Object.values(overrides);
@@ -471,8 +496,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         }
         if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {
             setCustomProp(property, property, value);
-        } else if (property === 'background' && value.includes('var(')) {
-            setCustomProp('background', 'background', value);
+        } else if (shorthandOverrides[property] && value.includes('var(')) {
+            setCustomProp(property, property, value);
         } else {
             const overriddenProp = normalizedPropList[property];
             if (overriddenProp &&

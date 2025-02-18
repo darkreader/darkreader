@@ -20,8 +20,7 @@ const options = {
 
 const extensions = ['html', 'css', 'js'];
 
-async function processAPIBuild() {
-    const filepath = 'darkreader.js';
+async function processAPIBuildModule(filepath) {
     const code = await readFile(filepath);
     const formatted = await format(code, {
         ...options,
@@ -30,6 +29,11 @@ async function processAPIBuild() {
     if (code !== formatted) {
         await writeFile(filepath, formatted);
     }
+}
+
+async function processAPIBuild() {
+    await processAPIBuildModule('darkreader.js');
+    await processAPIBuildModule('darkreader.mjs');
 }
 
 async function processExtensionPlatform(platform) {

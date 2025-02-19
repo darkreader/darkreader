@@ -21,9 +21,8 @@ async function getVersion() {
 
 let watchFiles = [];
 
-async function bundleAPIModule({debug, watch}, moduleType) {
+async function bundleAPIModule({debug, watch}, moduleType, dest) {
     const src = absolutePath('src/api/index.ts');
-    const dest = moduleType === 'umd' ? 'darkreader.js' : 'darkreader.mjs';
     const bundle = await rollup.rollup({
         input: src,
         onwarn: (error) => {
@@ -68,8 +67,8 @@ async function bundleAPIModule({debug, watch}, moduleType) {
 }
 
 async function bundleAPI({debug, watch}) {
-    await bundleAPIModule({debug, watch}, 'umd');
-    await bundleAPIModule({debug, watch}, 'esm');
+    await bundleAPIModule({debug, watch}, 'umd', 'darkreader.js');
+    await bundleAPIModule({debug, watch}, 'esm', 'darkreader.mjs');
 }
 
 const bundleAPITask = createTask(

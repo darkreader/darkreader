@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.9.103",
+  "version": "4.9.104",
   "description": "Dark mode for every website",
   "scripts": {
     "api": "node --max-old-space-size=3072 tasks/cli.js build --api",
@@ -15,7 +15,7 @@
     "debug:watch:plus": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --plus --chrome",
     "dependencies:upgrade": "node tasks/dependencies.js",
     "lint": "eslint -- src/**/*.ts src/**/*.tsx tasks/**/*.js tests/[!coverage]**/*.js tests/**/*.ts eslint.config.js index.d.ts",
-    "lint:bundle": "(node ./tasks/check-exists.js ./build/debug/chrome || node tasks/build.js --debug --api --chrome) && eslint -- 'build/debug/chrome/**/*.js' 'darkreader.js'",
+    "lint:bundle": "(node ./tasks/check-exists.js ./build/debug/chrome || node tasks/build.js --debug --api --chrome) && eslint -- 'build/debug/chrome/**/*.js' 'darkreader.js' 'darkreader.mjs'",
     "plus-link": "cd src && ln -s ../../darkreader-plus plus",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && npm run lint && node tasks/cli.js build --release",
@@ -36,6 +36,7 @@
     "deno:bootstrap": "deno run --allow-read=./ --allow-sys=uid --allow-write=deno.json tasks/deno.js"
   },
   "main": "darkreader.js",
+  "module": "darkreader.mjs",
   "type": "module",
   "repository": {
     "type": "git",

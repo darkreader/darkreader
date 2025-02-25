@@ -40,3 +40,7 @@ isolate-*-v8.log
 #-----------------------------------
 deno.lock
 deno.json
+
+# System files
+#-----------------------------------
+.DS_Store

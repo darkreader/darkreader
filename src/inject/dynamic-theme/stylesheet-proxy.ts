@@ -203,7 +203,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
 
     let blobURLAllowed: boolean | null = null;
 
-    async function checkBlobURLSupport(): Promise<void> {
+    function checkBlobURLSupport() {
         if (blobURLAllowed != null) {
             document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
             return;
@@ -216,17 +216,19 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         }
         const blob = new Blob([bytes], {type: 'image/svg+xml'});
         const objectURL = URL.createObjectURL(blob);
-        try {
-            const image = new Image();
-            await new Promise<void>((resolve, reject) => {
-                image.onload = () => resolve();
-                image.onerror = () => reject();
-                image.src = objectURL;
-            });
+        const image = new Image();
+        image.onload = () => {
             blobURLAllowed = true;
-        } catch (err) {
+            sendBlobURLCheckResponse();
+        };
+        image.onerror = () => {
             blobURLAllowed = false;
-        }
+            sendBlobURLCheckResponse();
+        };
+        image.src = objectURL;
+    }
+
+    function sendBlobURLCheckResponse() {
         document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
     }
 

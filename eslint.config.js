@@ -137,7 +137,7 @@ export default tslint.config({
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-redeclare': 'error',
         '@typescript-eslint/no-unused-expressions': 'off',
-        '@typescript-eslint/no-unused-vars': ['error', {caughtErrors: 'none'}],
+        '@typescript-eslint/no-unused-vars': ['error', {caughtErrors: 'none', argsIgnorePattern: '^_'}],
         '@stylistic/semi': ['error', 'always'],
 
         '@stylistic/quotes': ['error', 'single', {

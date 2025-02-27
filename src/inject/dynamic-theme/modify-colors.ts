@@ -109,7 +109,7 @@ function modifyLightModeHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA): HSL
     }
 
     let hx = h;
-    let sx = l;
+    let sx = s;
     if (isNeutral) {
         if (isDark) {
             hx = poleFg.h;

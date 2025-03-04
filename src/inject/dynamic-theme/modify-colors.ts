@@ -1,4 +1,4 @@
-import {extendThemeCacheKeys, getBackgroundPoles, modifyBgColorExtended, modifyLightSchemeColorExtended} from '@plus/utils/theme';
+import {extendThemeCacheKeys, getBackgroundPoles, getTextPoles, modifyBgColorExtended, modifyFgColorExtended, modifyLightSchemeColorExtended} from '@plus/utils/theme';
 import type {Theme} from '../../definitions';
 import {applyColorMatrix, createFilterMatrix} from '../../generators/utils/matrix';
 import {getRegisteredColor, registerColor} from '../../inject/dynamic-theme/palette';
@@ -252,7 +252,15 @@ function modifyFgHSL({h, s, l, a}: HSLA, pole: HSLA): HSLA {
 
 function _modifyForegroundColor(rgb: RGBA, theme: Theme) {
     if (theme.mode === 0) {
+        if (__PLUS__) {
+            const poles = getTextPoles(theme);
+            return modifyColorWithCache(rgb, theme, modifyLightSchemeColorExtended, poles[0], poles[1]);
+        }
         return modifyLightSchemeColor(rgb, theme);
+    }
+    if (__PLUS__) {
+        const poles = getTextPoles(theme);
+        return modifyColorWithCache(rgb, theme, modifyFgColorExtended, poles[0], poles[1]);
     }
     const pole = getFgPole(theme);
     return modifyColorWithCache(rgb, theme, modifyFgHSL, pole);

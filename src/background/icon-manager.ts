@@ -7,16 +7,33 @@ interface IconState {
     active: boolean;
 }
 
+interface IconOptions {
+    colorScheme?: 'dark' | 'light';
+    isActive?: boolean;
+    tabId?: number;
+}
+
 export default class IconManager {
     private static readonly ICON_PATHS = {
-        active: {
+        activeDark: {
             19: '../icons/dr_active_19.png',
             38: '../icons/dr_active_38.png',
         },
-        inactive: {
-            19: '../icons/dr_inactive_19.png',
-            38: '../icons/dr_inactive_38.png',
+        activeLight: {
+            19: '../icons/dr_active_light_19.png',
+            38: '../icons/dr_active_light_38.png',
         },
+        // Temporary disable the gray icon
+        /*
+        inactiveDark: {
+            19: '../icons/dr_inactive_dark_19.png',
+            38: '../icons/dr_inactive_dark_38.png',
+        },
+        inactiveLight: {
+            19: '../icons/dr_inactive_light_19.png',
+            38: '../icons/dr_inactive_light_38.png',
+        },
+        */
     };
 
     private static readonly iconState: IconState = {
@@ -48,27 +65,42 @@ export default class IconManager {
         }
     }
 
-    static setActive(): void {
+    static setIcon({isActive = this.iconState.active, colorScheme = 'dark', tabId}: IconOptions): void {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
         }
-        IconManager.iconState.active = true;
-        chrome.browserAction.setIcon({
-            path: IconManager.ICON_PATHS.active,
-        });
-        IconManager.handleUpdate();
-    }
+        // Temporary disable per-site icons
+        // eslint-disable-next-line no-empty
+        if (colorScheme === 'dark') {
+        }
+        if (tabId) {
+            return;
+        }
 
-    static setInactive(): void {
-        if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
-            // Fix for Firefox Android and Thunderbird.
-            return;
+        this.iconState.active = isActive;
+
+        let path = this.ICON_PATHS.activeDark;
+        if (isActive) {
+            // Temporary disable the gray icon
+            // path = colorScheme === 'dark' ? IconManager.ICON_PATHS.activeDark : IconManager.ICON_PATHS.activeLight;
+            path = IconManager.ICON_PATHS.activeDark;
+        } else {
+            // Temporary disable the gray icon
+            // path = colorScheme === 'dark' ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
+            path = IconManager.ICON_PATHS.activeLight;
         }
-        IconManager.iconState.active = false;
-        chrome.browserAction.setIcon({
-            path: IconManager.ICON_PATHS.inactive,
-        });
+
+        // Temporary disable per-site icons
+        /*
+        if (tabId) {
+            chrome.browserAction.setIcon({tabId, path});
+        } else {
+            chrome.browserAction.setIcon({path});
+            IconManager.handleUpdate();
+        }
+        */
+        chrome.browserAction.setIcon({path});
         IconManager.handleUpdate();
     }
 

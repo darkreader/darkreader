@@ -12,6 +12,7 @@
     display: inline-block;
     height: @slider-height;
     position: relative;
+    touch-action: none;
     width: 100%;
 
     &__track {
@@ -102,5 +103,9 @@
     &--active &__track {
         height: @slider-track-active-height;
         margin-top: (@slider-height - @slider-track-active-height) / 2;
+    }
+
+    &__value {
+        display: none;
     }
 }

@@ -1,11 +1,9 @@
 // @ts-check
 
-'use strict';
-
 /**
  * @type {{[ruleName: string]: import('eslint').Rule.RuleModule}}
  */
-const rules = {
+export const localRules = {
     'jsx-uses-m-pragma': {
         create(context) {
             const pragma = 'm';
@@ -37,8 +35,4 @@ const rules = {
             };
         },
     },
-};
-
-module.exports = {
-    rules,
 };

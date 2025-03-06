@@ -1,4 +1,4 @@
-import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, UNINSTALL_URL, HELP_URL} from './links';
+import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, UNINSTALL_URL, HELP_URL} from './links';
 
 enum CSP {
     NONE = "'none'",
@@ -31,7 +31,6 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
                 `${HOMEPAGE_URL}/*`,
                 DEVTOOLS_DOCS_URL,
                 GITHUB_URL,
-                DONATE_URL,
                 TWITTER_URL,
             ],
             'media-src': [CSP.NONE],

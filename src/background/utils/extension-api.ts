@@ -1,7 +1,11 @@
-import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
+import {getDuration} from '../../utils/time';
+import {isPDF} from '../../utils/url';
 
 export function canInjectScript(url: string | null | undefined): boolean {
+    if (url === 'about:blank') {
+        return false;
+    }
     if (isFirefox) {
         return Boolean(url
             && !url.startsWith('about:')
@@ -21,6 +25,7 @@ export function canInjectScript(url: string | null | undefined): boolean {
             && !url.startsWith('devtools')
             && !url.startsWith('edge')
             && !url.startsWith('https://chrome.google.com/webstore')
+            && !url.startsWith('https://chromewebstore.google.com/')
             && !url.startsWith('https://microsoftedge.microsoft.com/addons')
             && !url.startsWith('view-source')
         );
@@ -28,6 +33,7 @@ export function canInjectScript(url: string | null | undefined): boolean {
     return Boolean(url
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
+        && !url.startsWith('https://chromewebstore.google.com/')
         && !url.startsWith('data')
         && !url.startsWith('devtools')
         && !url.startsWith('view-source')
@@ -115,7 +121,7 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
 }
 
 export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         const packaged = prepareSyncStorage(values);
         chrome.storage.sync.set(packaged, () => {
             if (chrome.runtime.lastError) {
@@ -128,7 +134,7 @@ export async function writeSyncStorage<T extends {[key: string]: any}>(values: T
 }
 
 export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>(async (resolve) => {
+    return new Promise<void>((resolve) => {
         chrome.storage.local.set(values, () => {
             resolve();
         });
@@ -136,7 +142,7 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
 }
 
 export async function removeSyncStorage(keys: string[]): Promise<void> {
-    return new Promise<void>(async (resolve) => {
+    return new Promise<void>((resolve) => {
         chrome.storage.sync.remove(keys, () => {
             resolve();
         });
@@ -144,7 +150,7 @@ export async function removeSyncStorage(keys: string[]): Promise<void> {
 }
 
 export async function removeLocalStorage(keys: string[]): Promise<void> {
-    return new Promise<void>(async (resolve) => {
+    return new Promise<void>((resolve) => {
         chrome.storage.local.remove(keys, () => {
             resolve();
         });
@@ -165,4 +171,18 @@ export async function getCommands(): Promise<chrome.commands.Command[]> {
             }
         });
     });
+}
+
+export function keepListeningToEvents(): () => void {
+    let intervalId = 0;
+    const keepHopeAlive = () => {
+        intervalId = setInterval(chrome.runtime.getPlatformInfo, getDuration({seconds: 10}));
+    };
+    chrome.runtime.onStartup.addListener(keepHopeAlive);
+    keepHopeAlive();
+    const stopListening = () => {
+        clearInterval(intervalId);
+        chrome.runtime.onStartup.removeListener(keepHopeAlive);
+    };
+    return stopListening;
 }

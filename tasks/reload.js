@@ -1,12 +1,14 @@
 // @ts-check
 import process from 'node:process';
+
 import {WebSocketServer} from 'ws';
+
 import {log} from './utils.js';
 
 export const PORT = 8890;
 const WAIT_FOR_CONNECTION = 2000;
 
-/** @type {import('ws').Server | null} */
+/** @type {import('ws').WebSocketServer | null} */
 let server = null;
 
 /** @type {Set<import('ws').WebSocket>} */
@@ -17,7 +19,7 @@ const times = new WeakMap();
 const userAgents = new WeakMap();
 
 /**
- * @returns {Promise<import('ws').Server>}
+ * @returns {Promise<import('ws').WebSocketServer>}
  */
 function createServer() {
     return new Promise((resolve) => {
@@ -40,7 +42,11 @@ function createServer() {
                     log.ok('Extension reloading...');
                 }
             });
-            ws.on('close', () => sockets.delete(ws));
+            ws.on('close', () => {
+                const userAgent = userAgents.get(ws);
+                log.warn(`Extension disconnected: ${userAgent}`);
+                sockets.delete(ws);
+            });
             if (connectionAwaiter !== null) {
                 connectionAwaiter();
             }

@@ -1,15 +1,16 @@
+import type {Theme} from '../../definitions';
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
-import {bgFetch} from './network';
-import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
+import AsyncQueue from '../../utils/async-queue';
 import {getSRGBLightness} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
-import type {FilterConfig} from '../../definitions';
-import {logInfo, logWarn} from '../utils/log';
-import AsyncQueue from '../../utils/async-queue';
+import {getHashCode} from '../../utils/text';
+import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
+import {logWarn} from '../utils/log';
+
+import {bgFetch} from './network';
 
 export interface ImageDetails {
     src: string;
-    blob: Blob;
     dataURL: string;
     width: number;
     height: number;
@@ -22,6 +23,7 @@ export interface ImageDetails {
 const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string): Promise<ImageDetails> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise<ImageDetails>(async (resolve, reject) => {
         try {
             const dataURL = url.startsWith('data:') ? url : await getDataURL(url);
@@ -36,8 +38,7 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                 const analysis = analyzeImage(image);
                 resolve({
                     src: url,
-                    blob,
-                    dataURL,
+                    dataURL: analysis.isLarge ? '' : dataURL,
                     width: image.width,
                     height: image.height,
                     ...analysis,
@@ -125,19 +126,10 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
             isLight: false,
             isTransparent: false,
             isLarge: false,
-            isTooLarge: false,
         };
     }
 
-    if (sw * sh > LARGE_IMAGE_PIXELS_COUNT) {
-        logInfo('Skipped large image analysis');
-        return {
-            isDark: false,
-            isLight: false,
-            isTransparent: false,
-            isLarge: true,
-        };
-    }
+    const isLarge = sw * sh > LARGE_IMAGE_PIXELS_COUNT;
 
     const sourcePixelsCount = sw * sh;
     const k = Math.min(1, Math.sqrt(MAX_ANALYSIS_PIXELS_COUNT / sourcePixelsCount));
@@ -193,7 +185,7 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
         isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
         isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
         isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
-        isLarge: false,
+        isLarge,
     };
 }
 
@@ -239,7 +231,7 @@ document.addEventListener('securitypolicyviolation', onCSPError);
 
 const objectURLs = new Set<string>();
 
-export function getFilteredImageURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
+export function getFilteredImageURL({dataURL, width, height}: ImageDetails, theme: Theme): string {
     if (dataURL.startsWith('data:image/svg+xml')) {
         dataURL = escapeXML(dataURL);
     }
@@ -281,7 +273,7 @@ function escapeXML(str: string): string {
     return str.replace(/[<>&'"]/g, (c: string) => xmlEscapeChars[c] ?? c);
 }
 
-const dataURLBlobURLs = new Map<string, string>();
+const dataURLBlobURLs = new Map<number, string>();
 
 function tryConvertDataURLToBlobSync(dataURL: string): Blob | null {
     const colonIndex = dataURL.indexOf(':');
@@ -308,7 +300,8 @@ export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<strin
     if (!isBlobURLSupported) {
         return null;
     }
-    let blobURL = dataURLBlobURLs.get(dataURL);
+    const hash = getHashCode(dataURL);
+    let blobURL = dataURLBlobURLs.get(hash);
     if (blobURL) {
         return blobURL;
     }
@@ -320,7 +313,7 @@ export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<strin
     }
 
     blobURL = URL.createObjectURL(blob);
-    dataURLBlobURLs.set(dataURL, blobURL);
+    dataURLBlobURLs.set(hash, blobURL);
     return blobURL;
 }
 

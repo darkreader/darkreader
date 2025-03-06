@@ -1,5 +1,7 @@
 import type {RequestListener} from 'http';
+
 import type {WaitForOptions} from 'puppeteer-core';
+
 import type {ColorScheme, ExtensionData, News, UserSettings} from '../../src/definitions';
 
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};
@@ -15,6 +17,7 @@ declare global {
         saveFile: (name: string, content: string) => Promise<void>;
     };
     const devtoolsUtils: {
+        click: (selector: string) => Promise<void>;
         exists: (selector: string) => Promise<void>;
         paste: (fixes: string) => Promise<void>;
         reset: () => Promise<void>;

@@ -1,6 +1,6 @@
-import {isFirefox} from '../../utils/platform';
-import type {ExtensionData, ExtensionActions, FilterConfig, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI} from '../../definitions';
+import type {ExtensionData, ExtensionActions, Theme, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI} from '../../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../../utils/message';
+import {isFirefox} from '../../utils/platform';
 
 declare const browser: {
     commands: {
@@ -97,7 +97,7 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.CHANGE_SETTINGS, data: settings});
     }
 
-    setTheme(theme: Partial<FilterConfig>): void {
+    setTheme(theme: Partial<Theme>): void {
         chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.SET_THEME, data: theme});
     }
 

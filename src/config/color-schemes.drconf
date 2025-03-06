@@ -22,6 +22,18 @@ text: #4c4f69
 
 ================================
 
+Deep Ocean
+
+DARK
+background: #00222b
+text: #a9b4b4
+
+LIGHT
+background: #cac5b6
+text: #cdd4d6
+
+================================
+
 Dracula
 
 DARK
@@ -39,6 +51,18 @@ text: #d1c4a9
 LIGHT
 background: #fdf9ed
 text: #5b6971
+
+================================
+
+Github Modern
+
+DARK
+background: #0d1117
+text: #c9d1d9
+
+LIGHT
+background: #ffffff
+text: #24292f
 
 ================================
 
@@ -66,6 +90,18 @@ text: #1e4887
 
 ================================
 
+Material You
+
+DARK
+background: #1f1b24
+text: #e3e3e3
+
+LIGHT
+background: #fefbff
+text: #1f1b24
+
+================================
+
 Nord
 
 DARK
@@ -87,6 +123,18 @@ text: #abb2bf
 LIGHT
 background: #fafafa
 text: #383a42
+
+================================
+
+Oxocarbon
+
+DARK
+background: #161616
+text: #f2f4f8
+
+LIGHT
+background: #f2f4f8
+text: #393939
 
 ================================
 

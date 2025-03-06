@@ -1,12 +1,13 @@
 import {m} from 'malevic';
-import {CheckBox, UpDown, Select} from '../../../controls';
+
+import type {Theme} from '../../../../definitions';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {FilterConfig} from '../../../../definitions';
+import {CheckBox, UpDown, Select} from '../../../controls';
 
 interface FontSettingsProps {
-    config: FilterConfig;
+    config: Theme;
     fonts: string[];
-    onChange: (config: Partial<FilterConfig>) => void;
+    onChange: (config: Partial<Theme>) => void;
 }
 
 export default function FontSettings({config, fonts, onChange}: FontSettingsProps) {

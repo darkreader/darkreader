@@ -1,8 +1,10 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import Body from './components/body';
-import Connector from '../connect/connector';
+
 import type {DevToolsData, ExtensionData} from '../../definitions';
+import Connector from '../connect/connector';
+
+import Body from './components/body';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -45,16 +47,38 @@ if (__TEST__) {
         const message: {type: string; id: number; data: string} = JSON.parse(e.data);
         const {type, id, data} = message;
         try {
-            const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor')!;
-            const [buttonReset, buttonApply] = document.querySelectorAll('button');
+            const textarea: HTMLTextAreaElement = document.querySelector('.config-editor textarea.editor')!;
+            const [buttonReset, buttonApply] = document.querySelectorAll('.config-editor .buttons button');
             switch (type) {
+                case 'devtools-click': {
+                    let attempts = 4;
+                    const click = () => {
+                        const element: HTMLElement | null = document.querySelector(data);
+                        if (element) {
+                            element.click();
+                            respond({id, data: true});
+                        } else if (attempts === 0) {
+                            respond({id, data: false});
+                        } else {
+                            attempts--;
+                            requestIdleCallback(click, {timeout: 500});
+                        }
+                    };
+
+                    click();
+                    break;
+                }
                 case 'devtools-exists': {
                     // The required element may not exist yet
+                    let attempts = 4;
                     const check = () => {
                         const element: HTMLElement | null = document.querySelector(data);
                         if (element) {
                             respond({id, data: true});
+                        } else if (attempts === 0) {
+                            respond({id, data: false});
                         } else {
+                            attempts--;
                             requestIdleCallback(check, {timeout: 500});
                         }
                     };
@@ -64,12 +88,12 @@ if (__TEST__) {
                 }
                 case 'devtools-paste':
                     textarea.value = data;
-                    buttonApply.click();
+                    (buttonApply as HTMLButtonElement).click();
                     respond({id});
                     break;
                 case 'devtools-reset':
                     respond({id});
-                    buttonReset.click();
+                    (buttonReset as HTMLButtonElement).click();
                     (document.querySelector('button.message-box__button-ok') as HTMLButtonElement).click();
                     break;
             }

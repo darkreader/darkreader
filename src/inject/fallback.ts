@@ -1,10 +1,28 @@
+import {wasEnabledForHost} from './cache';
+
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
-    !document.querySelector('.darkreader--fallback')
+    wasEnabledForHost() !== false &&
+    !document.querySelector('.darkreader--fallback') &&
+    !document.querySelector('.darkreader')
 ) {
-    // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
-    const css = 'html, body, body :not(iframe):not(div[style^="position:absolute;top:0;left:-"]) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; } html, body { opacity: 1 !important; transition: none !important; }';
+    const css = [
+        'html, body, body :not(iframe) {',
+        '    background-color: #181a1b !important;',
+        '    border-color: #776e62 !important;',
+        '    color: #e8e6e3 !important;',
+        '}',
+        'html, body {',
+        '    opacity: 1 !important;',
+        '    transition: none !important;',
+        '}',
+        // MS Learn High Contrast issue
+        // https://github.com/darkreader/darkreader/issues/3618
+        'div[style*="background-color: rgb(135, 135, 135)"] {',
+        '    background-color: #878787 !important;',
+        '}',
+    ].join('\n');
     const fallback = document.createElement('style');
     fallback.classList.add('darkreader');
     fallback.classList.add('darkreader--fallback');
@@ -26,4 +44,23 @@ if (
         });
         observer.observe(root, {childList: true});
     }
+}
+
+declare const __FIREFOX_MV2__: boolean;
+
+if (__FIREFOX_MV2__ && location.host === 'teams.live.com') {
+    // Microsoft Teams calls sheet.cssRules on extension styles and that
+    // causes "Not allowed to access cross-origin stylesheet" in Firefox
+    (() => {
+        const descriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'cssRules')!;
+        Object.defineProperty(CSSStyleSheet.prototype, 'cssRules', {
+            ...descriptor,
+            get: function () {
+                if (this.ownerNode?.classList?.contains('darkreader')) {
+                    return [];
+                }
+                return descriptor.get!.call(this) as CSSStyleSheet[];
+            },
+        });
+    })();
 }

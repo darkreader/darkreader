@@ -1,4 +1,5 @@
 import {evalMath} from './math-eval';
+import {isSystemDarkModeEnabled} from './media-query';
 import {getParenthesesRange} from './text';
 
 export interface RGBA {
@@ -29,8 +30,11 @@ export function parseColorWithCache($color: string): RGBA | null {
         $color = lowerCalcExpression($color);
     }
     const color = parse($color);
-    color && rgbaParseCache.set($color, color);
-    return color;
+    if (color) {
+        rgbaParseCache.set($color, color);
+        return color;
+    }
+    return null;
 }
 
 export function parseToHSLWithCache(color: string): HSLA | null {
@@ -147,10 +151,26 @@ const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
 
+const supportedColorFuncs = [
+    'color',
+    'color-mix',
+    'hwb',
+    'lab',
+    'lch',
+    'oklab',
+    'oklch',
+];
+
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
+    if (c.includes('(from ')) {
+        return domParseColor(c);
+    }
 
     if (c.match(rgbMatch)) {
+        if (c.startsWith('rgb(#') || c.startsWith('rgba(#')) {
+            return domParseColor(c);
+        }
         return parseRGB(c);
     }
 
@@ -170,8 +190,21 @@ export function parse($color: string): RGBA | null {
         return getSystemColor(c);
     }
 
-    if ($color === 'transparent') {
+    if (c === 'transparent') {
         return {r: 0, g: 0, b: 0, a: 0};
+    }
+
+    if (c.endsWith(')') && supportedColorFuncs.some((fn) => c.startsWith(fn) && c[fn.length] === '(')) {
+        return domParseColor(c);
+    }
+
+    if (c.startsWith('light-dark(') && c.endsWith(')')) {
+        // light-dark([color()], [color()])
+        const match = c.match(/^light-dark\(\s*([a-z]+(\(.*\))?),\s*([a-z]+(\(.*\))?)\s*\)$/);
+        if (match) {
+            const schemeColor = isSystemDarkModeEnabled() ? match[3] : match[1];
+            return parse(schemeColor);
+        }
     }
 
     return null;
@@ -233,16 +266,22 @@ function getNumbersFromString(str: string, range: number[], units: {[unit: strin
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
-function parseRGB($rgb: string): RGBA {
+function parseRGB($rgb: string): RGBA | null {
     const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
+    if (r == null || g == null || b == null || a == null) {
+        return null;
+    }
     return {r, g, b, a};
 }
 
 const hslRange = [360, 1, 1, 1];
 const hslUnits = {'%': 100, 'deg': 360, 'rad': 2 * Math.PI, 'turn': 1};
 
-function parseHSL($hsl: string): RGBA {
+function parseHSL($hsl: string): RGBA | null {
     const [h, s, l, a = 1] = getNumbersFromString($hsl, hslRange, hslUnits);
+    if (h == null || s == null || l == null || a == null) {
+        return null;
+    }
     return hslToRGB({h, s, l, a});
 }
 
@@ -508,4 +547,21 @@ const systemColors: Map<string, number> = new Map(Object.entries({
 // https://en.wikipedia.org/wiki/Relative_luminance
 export function getSRGBLightness(r: number, g: number, b: number): number {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
+let canvas: HTMLCanvasElement;
+let context: CanvasRenderingContext2D;
+
+function domParseColor($color: string) {
+    if (!context) {
+        canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        context = canvas.getContext('2d', {willReadFrequently: true})!;
+    }
+    context.fillStyle = $color;
+    context.fillRect(0, 0, 1, 1);
+    const d = context.getImageData(0, 0, 1, 1).data;
+    const color = `rgba(${d[0]}, ${d[1]}, ${d[2]}, ${(d[3] / 255).toFixed(2)})`;
+    return parseRGB(color);
 }

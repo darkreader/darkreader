@@ -51,6 +51,20 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 }, {once: true, passive: true});
 
+const unhandledShadowHosts = new Set<Element>();
+
+document.addEventListener('__darkreader__shadowDomAttaching', (e: CustomEvent) => {
+    const host = (e.target as HTMLElement);
+    if (unhandledShadowHosts.size === 0) {
+        queueMicrotask(() => {
+            const hosts = [...unhandledShadowHosts].filter((el) => el.shadowRoot);
+            elementsDefinitionCallback?.(hosts);
+            unhandledShadowHosts.clear();
+        });
+    }
+    unhandledShadowHosts.add(host);
+});
+
 const resolvers = new Map<string, Array<() => void>>();
 
 export function handleIsDefined(e: CustomEvent<{tag: string}>): void {

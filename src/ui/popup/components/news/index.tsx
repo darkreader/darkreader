@@ -1,8 +1,9 @@
 import {m} from 'malevic';
-import {Button} from '../../../controls';
+
+import type {News} from '../../../../definitions';
 import {BLOG_URL} from '../../../../utils/links';
 import {getLocalMessage, getUILanguage} from '../../../../utils/locales';
-import type {News} from '../../../../definitions';
+import {Button} from '../../../controls';
 
 interface NewsProps {
     news: News[];

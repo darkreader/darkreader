@@ -1,14 +1,15 @@
 import {m} from 'malevic';
-import {MultiSwitch} from '../../../controls';
+
 import {ThemeEngine} from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
+import {MultiSwitch} from '../../../controls';
 import {openExtensionPage} from '../../../utils';
 
 const engineNames: Array<[ThemeEngine, string]> = [
+    [ThemeEngine.dynamicTheme, getLocalMessage('engine_dynamic')],
     [ThemeEngine.cssFilter, getLocalMessage('engine_filter')],
     [ThemeEngine.svgFilter, getLocalMessage('engine_filter_plus')],
     [ThemeEngine.staticTheme, getLocalMessage('engine_static')],
-    [ThemeEngine.dynamicTheme, getLocalMessage('engine_dynamic')],
 ];
 
 interface EngineSwitchProps {

@@ -1,5 +1,7 @@
 import type {Theme} from '../../definitions';
+
 import {iterateCSSRules} from './css-rules';
+import {defineSheetScope} from './style-scope';
 import type {CSSBuilder} from './stylesheet-modifier';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
@@ -15,8 +17,8 @@ export interface AdoptedStyleSheetManager {
     watch(callback: (sheets: CSSStyleSheet[]) => void): void;
 }
 
-export function hasAdoptedStyleSheets(node: Document | ShadowRoot): boolean {
-    return Array.isArray(node.adoptedStyleSheets) && node.adoptedStyleSheets.length > 0;
+export function canHaveAdoptedStyleSheets(node: Document | ShadowRoot): boolean {
+    return Array.isArray(node.adoptedStyleSheets);
 }
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
@@ -27,6 +29,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             if (!overrides.has(sheet)) {
                 iterator(sheet);
             }
+            defineSheetScope(sheet, node);
         });
     }
 
@@ -47,7 +50,6 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             const sheet = newSheets[i];
             if (overrides.has(sheet)) {
                 newSheets.splice(i, 1);
-                overrides.delete(sheet);
             }
         }
         if (node.adoptedStyleSheets.length !== newSheets.length) {
@@ -103,7 +105,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             if (readyOverride) {
                 rulesChangeKey = getRulesChangeKey();
                 injectSheet(sheet, readyOverride);
-                return;
+                continue;
             }
 
             const rules = sheet.cssRules;
@@ -174,7 +176,10 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     function watch(callback: (sheets: CSSStyleSheet[]) => void) {
-        const onAdoptedSheetsChange = () => handleArrayChange(callback);
+        const onAdoptedSheetsChange = () => {
+            canUseSheetProxy = true;
+            handleArrayChange(callback);
+        };
         addSheetChangeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedSheetsChange);
         addSheetChangeEventListener('__darkreader__adoptedStyleSheetChange', onAdoptedSheetsChange);
         addSheetChangeEventListener('__darkreader__adoptedStyleDeclarationChange', onAdoptedSheetsChange);
@@ -193,8 +198,11 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 }
 
 export interface AdoptedStyleSheetFallback {
-    render(theme: Theme, ignoreImageAnalysis: string[]): void;
-    updateCSS(cssRules: CSSRule[]): void;
+    render(options: {
+        theme: Theme;
+        ignoreImageAnalysis: string[];
+        cssRules: CSSRule[] | CSSRuleList;
+    }): void;
     commands(): DeepStyleSheetCommand[];
     destroy(): void;
 }
@@ -227,23 +235,16 @@ class StyleSheetCommandBuilder implements CSSBuilder {
     cssRules: StyleSheetCommandBuilder[] = [];
 
     private commands: StyleSheetCommand[] = [];
-    private onChange: () => void;
-
-    constructor(onChange: () => void) {
-        this.onChange = onChange;
-    }
 
     insertRule(cssText: string, index = 0): number {
         this.commands.push({type: 'insert', index, cssText});
-        this.cssRules.splice(index, 0, new StyleSheetCommandBuilder(this.onChange));
-        this.onChange();
+        this.cssRules.splice(index, 0, new StyleSheetCommandBuilder());
         return index;
     }
 
     deleteRule(index: number): void {
         this.commands.push({type: 'delete', index});
         this.cssRules.splice(index, 1);
-        this.onChange();
     }
 
     replaceSync(cssText: string) {
@@ -254,7 +255,6 @@ class StyleSheetCommandBuilder implements CSSBuilder {
         } else {
             throw new Error('StyleSheetCommandBuilder.replaceSync() is not fully supported');
         }
-        this.onChange();
     }
 
     getDeepCSSCommands() {
@@ -279,26 +279,16 @@ class StyleSheetCommandBuilder implements CSSBuilder {
     }
 }
 
-export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedStyleSheetFallback {
+export function createAdoptedStyleSheetFallback(): AdoptedStyleSheetFallback {
     let cancelAsyncOperations = false;
 
-    let sourceCSSRules: CSSRule[] = [];
-    let lastTheme: Theme;
-    let lastIgnoreImageAnalysis: string[];
+    const builder = new StyleSheetCommandBuilder();
 
-    function updateCSS(cssRules: CSSRule[]) {
-        sourceCSSRules = cssRules;
-        if (lastTheme && lastIgnoreImageAnalysis) {
-            render(lastTheme, lastIgnoreImageAnalysis);
-        }
-    }
-
-    const builder = new StyleSheetCommandBuilder(onChange);
-
-    function render(theme: Theme, ignoreImageAnalysis: string[]) {
-        lastTheme = theme;
-        lastIgnoreImageAnalysis = ignoreImageAnalysis;
-
+    function render(options: {
+        theme: Theme;
+        ignoreImageAnalysis: string[];
+        cssRules: CSSRuleList | CSSRule[];
+    }) {
         const prepareSheet = () => {
             builder.replaceSync('');
             return builder;
@@ -307,9 +297,9 @@ export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedSt
         const sheetModifier = createStyleSheetModifier();
         sheetModifier.modifySheet({
             prepareSheet,
-            sourceCSSRules,
-            theme,
-            ignoreImageAnalysis,
+            sourceCSSRules: options.cssRules,
+            theme: options.theme,
+            ignoreImageAnalysis: options.ignoreImageAnalysis,
             force: false,
             isAsyncCancelled: () => cancelAsyncOperations,
         });
@@ -325,5 +315,5 @@ export function createAdoptedStyleSheetFallback(onChange: () => void): AdoptedSt
         cancelAsyncOperations = true;
     }
 
-    return {render, destroy, updateCSS, commands};
+    return {render, destroy, commands};
 }

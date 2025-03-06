@@ -1,13 +1,17 @@
+import type {Theme} from '../../definitions';
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
+import {isShadowDomSupported} from '../../utils/platform';
+import {throttle} from '../../utils/throttle';
+import {getDuration} from '../../utils/time';
+import {getAbsoluteURL} from '../../utils/url';
+import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener, addDOMReadyListener, isDOMReady} from '../utils/dom';
+
 import {iterateCSSDeclarations} from './css-rules';
+import {getImageDetails} from './image';
 import {getModifiableCSSDeclaration} from './modify-css';
 import type {CSSVariableModifier, ModifiedVarDeclaration} from './variables';
 import {variablesStore} from './variables';
-import type {FilterConfig} from '../../definitions';
-import {isShadowDomSupported} from '../../utils/platform';
-import {getDuration} from '../../utils/time';
-import {throttle} from '../../utils/throttle';
+
 
 interface Overrides {
     [cssProp: string]: {
@@ -91,13 +95,38 @@ const shorthandOverrides: Overrides = {
         cssProp: 'background',
         dataAttr: 'data-darkreader-inline-bg',
     },
+    'border': {
+        customProp: '--darkreader-inline-border-short',
+        cssProp: 'border',
+        dataAttr: 'data-darkreader-inline-border-short',
+    },
+    'border-bottom': {
+        customProp: '--darkreader-inline-border-bottom-short',
+        cssProp: 'border-bottom',
+        dataAttr: 'data-darkreader-inline-border-bottom-short',
+    },
+    'border-left': {
+        customProp: '--darkreader-inline-border-left-short',
+        cssProp: 'border-left',
+        dataAttr: 'data-darkreader-inline-border-left-short',
+    },
+    'border-right': {
+        customProp: '--darkreader-inline-border-right-short',
+        cssProp: 'border-right',
+        dataAttr: 'data-darkreader-inline-border-right-short',
+    },
+    'border-top': {
+        customProp: '--darkreader-inline-border-top-short',
+        cssProp: 'border-top',
+        dataAttr: 'data-darkreader-inline-border-top-short',
+    },
 };
 
 const overridesList = Object.values(overrides);
 const normalizedPropList: Record<string, string> = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
+const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color', 'background'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle(): string {
@@ -108,7 +137,11 @@ export function getInlineOverrideStyle(): string {
             `  ${cssProp}: var(${customProp}) !important;`,
             '}',
         ].join('\n');
-    }).join('\n');
+    }).concat([
+        '[data-darkreader-inline-invert] {',
+        '    filter: invert(100%) hue-rotate(180deg);',
+        '}',
+    ]).join('\n');
 }
 
 function getInlineStyleElements(root: Node) {
@@ -167,7 +200,7 @@ function deepWatchForInlineStyles(
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
-        onMinorMutations: ({additions}) => {
+        onMinorMutations: (_root, {additions}) => {
             additions.forEach((added) => discoverNodes(added));
         },
         onHugeMutations: () => {
@@ -241,12 +274,28 @@ export function stopWatchingForInlineStyles(): void {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const svgInversionCache = new WeakSet<SVGSVGElement>();
+const svgAnalysisConditionCache = new WeakMap<SVGSVGElement, boolean>();
+const themeProps: Array<keyof Theme> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
-function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig): string {
+function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
+    if (svgAnalysisConditionCache.has(svg)) {
+        return svgAnalysisConditionCache.get(svg);
+    }
+    const shouldAnalyze = Boolean(
+        svg && (
+            svg.getAttribute('class')?.includes('logo') ||
+            svg.parentElement?.getAttribute('class')?.includes('logo')
+        )
+    );
+    svgAnalysisConditionCache.set(svg, shouldAnalyze);
+    return shouldAnalyze;
+}
+
+function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {
     return INLINE_STYLE_ATTRS
         .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
-        .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
+        .concat(themeProps.map((prop) => `${prop}="${theme[prop]}"`))
         .join(' ');
 }
 
@@ -260,7 +309,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boo
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -309,11 +358,19 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             mod.onTypeChange.addListener(setProps);
         }
 
-        function setAsyncValue(promise: Promise<string | null>) {
+        function setAsyncValue(promise: Promise<string | null>, sourceValue: string) {
             promise.then((value) => {
                 if (value && targetCSSProp === 'background' && value.startsWith('var(--darkreader-bg--')) {
                     setStaticValue(value);
                 }
+                if (value && targetCSSProp === 'background-image') {
+                    if ((element === document.documentElement || element === document.body) && value === sourceValue) {
+                        // Remove big bright backgrounds from root or body
+                        value = 'none';
+                    }
+                    setStaticValue(value);
+                }
+                inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));
             });
         }
 
@@ -321,7 +378,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (typeof value === 'string') {
             setStaticValue(value);
         } else if (value instanceof Promise) {
-            setAsyncValue(value);
+            setAsyncValue(value, cssVal);
         } else if (typeof value === 'object') {
             setVarDeclaration(value);
         }
@@ -336,12 +393,49 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
     }
 
+    const isSVGElement = element instanceof SVGElement;
+    const svg = isSVGElement ? element.ownerSVGElement ?? (element instanceof SVGSVGElement ? element : null) : null;
+    if (isSVGElement && theme.mode === 1 && svg) {
+        if (svgInversionCache.has(svg)) {
+            return;
+        }
+        if (shouldAnalyzeSVGAsImage(svg)) {
+            svgInversionCache.add(svg);
+            const analyzeSVGAsImage = () => {
+                let svgString = svg.outerHTML;
+                svgString = svgString.replaceAll('<style class="darkreader darkreader--sync" media="screen"></style>', '');
+                const dataURL = `data:image/svg+xml;base64,${btoa(svgString)}`;
+                getImageDetails(dataURL).then((details) => {
+                    if (
+                        (details.isDark && details.isTransparent) ||
+                        (details.isLarge && details.isLight && !details.isTransparent)
+                    ) {
+                        svg.setAttribute('data-darkreader-inline-invert', '');
+                    } else {
+                        svg.removeAttribute('data-darkreader-inline-invert');
+                    }
+                });
+            };
+            analyzeSVGAsImage();
+            if (!isDOMReady()) {
+                addDOMReadyListener(analyzeSVGAsImage);
+            }
+            return;
+        }
+    }
+
     if (element.hasAttribute('bgcolor')) {
         let value = element.getAttribute('bgcolor')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
         }
         setCustomProp('background-color', 'background-color', value);
+    }
+
+    if ((element === document.documentElement || element === document.body) && element.hasAttribute('background')) {
+        const url = getAbsoluteURL(location.href, element.getAttribute('background') ?? '');
+        const value = `url("${url}")`;
+        setCustomProp('background-image', 'background-image', value);
     }
 
     // We can catch some link elements here, that are from `<link rel="mask-icon" color="#000000">`.
@@ -354,7 +448,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
         setCustomProp('color', 'color', value);
     }
-    if (element instanceof SVGElement) {
+
+    if (isSVGElement) {
         if (element.hasAttribute('fill')) {
             const SMALL_SVG_LIMIT = 32;
             const value = element.getAttribute('fill')!;
@@ -384,20 +479,25 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color')!);
         }
     }
+
     if (element.hasAttribute('stroke')) {
         const value = element.getAttribute('stroke')!;
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
+
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
         // Temporarily ignore background images due to the possible performance
         // issues and complexity of handling async requests.
         if (property === 'background-image' && value.includes('url')) {
+            if (element === document.documentElement || element === document.body) {
+                setCustomProp(property, property, value);
+            }
             return;
         }
         if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {
             setCustomProp(property, property, value);
-        } else if (property === 'background' && value.includes('var(')) {
-            setCustomProp('background', 'background', value);
+        } else if (shorthandOverrides[property] && value.includes('var(')) {
+            setCustomProp(property, property, value);
         } else {
             const overriddenProp = normalizedPropList[property];
             if (overriddenProp &&
@@ -409,6 +509,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             }
         }
     });
+
     if (element.style && element instanceof SVGTextElement && element.style.fill) {
         setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
     }

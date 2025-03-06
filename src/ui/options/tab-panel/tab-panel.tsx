@@ -1,8 +1,10 @@
 import {m} from 'malevic';
-import {Button} from '../../../ui/controls';
+
+import {Button} from '../../controls';
 
 interface TabPanelProps {
     activeTabId: string;
+    isVertical?: boolean;
     onTabChange: (tabId: string) => void;
 }
 
@@ -43,7 +45,7 @@ function TabPanel(props: TabPanelProps, ...children: Array<Malevic.ComponentSpec
     }
 
     return (
-        <div class="settings-tab-panel">
+        <div class={{'settings-tab-panel': true, 'settings-tab-panel--vertical': props.isVertical}}>
             <div class="settings-tab-panel__buttons">
                 {...children.map(createTabButton)}
             </div>
@@ -72,7 +74,7 @@ function Tab(props: TabProps, ...children: Malevic.Child[]) {
                 'settings-tab-panel__tab--active': props.isActive,
             }}
         >
-            {...children}
+            {props.isActive ? children : null}
         </div>
     );
 }

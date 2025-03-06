@@ -20,7 +20,7 @@ export function throttle<T extends(...args: any[]) => any>(callback: T): T & {ca
     }) as any;
 
     const cancel = () => {
-        // TODO: reove cast once types are updated
+        // TODO: resolve cast once types are updated
         cancelAnimationFrame(frameId!);
         pending = false;
         frameId = null;
@@ -62,7 +62,7 @@ export function createAsyncTasksQueue(): AsyncTaskQueue {
 
     function cancel() {
         tasks.splice(0);
-        // TODO: reove cast once types are updated
+        // TODO: resolve cast once types are updated
         cancelAnimationFrame(frameId!);
         frameId = null;
     }

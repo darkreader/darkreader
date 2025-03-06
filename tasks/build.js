@@ -1,22 +1,22 @@
 // @ts-check
+import process from 'node:process';
+
 import bundleAPI from './bundle-api.js';
-import bundleHTML from './bundle-html.js';
 import bundleCSS from './bundle-css.js';
+import bundleHTML from './bundle-html.js';
 import bundleJS from './bundle-js.js';
 import bundleLocales from './bundle-locales.js';
 import bundleManifest from './bundle-manifest.js';
 import bundleSignature from './bundle-signature.js';
 import clean from './clean.js';
+import codeStyle from './code-style.js';
 import copy from './copy.js';
 import saveLog from './log.js';
+import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
-import codeStyle from './code-style.js';
-import zip from './zip.js';
 import {runTasks} from './task.js';
-import {log} from './utils.js';
-import process from 'node:process';
-import paths from './paths.js';
-const {PLATFORM} = paths;
+import {log, pathExistsSync} from './utils.js';
+import zip from './zip.js';
 
 const standardTask = [
     clean,
@@ -71,7 +71,7 @@ async function api(debug, watch) {
         if (!debug) {
             tasks.push(codeStyle);
         }
-        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: null, log: false, test: false});
+        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: false, log: false, test: false});
         if (watch) {
             bundleAPI.watch();
             log.ok('Watching...');
@@ -110,6 +110,7 @@ function getParams(args) {
     };
     const platforms = {
         [PLATFORM.CHROMIUM_MV2]: false,
+        [PLATFORM.CHROMIUM_MV2_PLUS]: false,
         [PLATFORM.CHROMIUM_MV3]: false,
         [PLATFORM.FIREFOX_MV2]: false,
         [PLATFORM.THUNDERBIRD]: false,
@@ -121,6 +122,10 @@ function getParams(args) {
             allPlatforms = false;
         }
     }
+    if ((args.includes('--chrome') || args.includes('--chrome-mv2')) && args.includes('--plus')) {
+        platforms[PLATFORM.CHROMIUM_MV2] = false;
+        platforms[PLATFORM.CHROMIUM_MV2_PLUS] = true;
+    }
     if (allPlatforms) {
         Object.keys(platforms).forEach((platform) => platforms[platform] = true);
     }
@@ -129,6 +134,10 @@ function getParams(args) {
     if (platforms[PLATFORM.FIREFOX_MV3]) {
         platforms[PLATFORM.FIREFOX_MV3] = false;
         console.log('Firefox MV3 build is not supported yet');
+    }
+
+    if (!pathExistsSync('./src/plus/')) {
+        platforms[PLATFORM.CHROMIUM_MV2_PLUS] = false;
     }
 
     const versionArg = args.find((a) => a.startsWith('--version='));

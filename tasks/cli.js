@@ -5,21 +5,19 @@
  */
 
 // @ts-check
-import {execute, log} from './utils.js';
-import {fork} from 'node:child_process';
-import process from 'node:process';
-
-import {fileURLToPath} from 'node:url';
-import {join} from 'node:path';
-import {rm, stat} from 'node:fs/promises';
 import assert from 'node:assert/strict';
+import {fork} from 'node:child_process';
+import {rm, stat} from 'node:fs/promises';
+import {join} from 'node:path';
+import process from 'node:process';
+import {fileURLToPath} from 'node:url';
 
-import {runTasks} from './task.js';
-import zip from './zip.js';
 import signature from './bundle-signature.js';
+import {PLATFORM} from './platform.js';
+import {runTasks} from './task.js';
+import {execute, log} from './utils.js';
+import zip from './zip.js';
 
-import paths from './paths.js';
-const {PLATFORM} = paths;
 
 const __filename = join(fileURLToPath(import.meta.url), '../build.js');
 
@@ -52,7 +50,7 @@ function printHelp() {
         '',
         'To specify type of build:',
         '  --release      Release bundle for signing prior to publication',
-        '  --version=*    Released bundle complete with digial signature (Firefox only)',
+        '  --version=*    Released bundle complete with digital signature (Firefox only)',
         '  --debug        Build for development',
         '  --watch        Incremental build for development',
         '',
@@ -127,18 +125,18 @@ async function checkoutHead() {
 }
 
 function validateArguments(args) {
-    const validaionErrors = [];
+    const validationErrors = [];
 
-    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--plus', '--log-info', '--log-warn', '--test'];
     const invalidFlags = args.filter((flag) => !validFlags.includes(flag) && !flag.startsWith('--version='));
-    invalidFlags.forEach((flag) => validaionErrors.push(`Invalid flag ${flag}`));
+    invalidFlags.forEach((flag) => validationErrors.push(`Invalid flag ${flag}`));
 
     if (args.some((arg) => arg.startsWith('--version='))) {
         if (!args.includes('--firefox') || !args.includes('--release') || args.length !== 3) {
-            validaionErrors.push('Only Firefox build currenly supports signed builds');
+            validationErrors.push('Only Firefox build currently supports signed builds');
         }
     }
-    return validaionErrors;
+    return validationErrors;
 }
 
 function parseArguments(args) {
@@ -154,9 +152,9 @@ async function run() {
         process.exit(0);
     }
 
-    const validaionErrors = validateArguments(args);
-    if (validaionErrors.length > 0) {
-        validaionErrors.forEach(log.error);
+    const validationErrors = validateArguments(args);
+    if (validationErrors.length > 0) {
+        validationErrors.forEach(log.error);
         printHelp();
         process.exit(130);
     }

@@ -1,6 +1,6 @@
-// evalMath is a function that's able to evaluates a mathematical expression and return it's ouput.
+// evalMath is a function that's able to evaluates a mathematical expression and return it's output.
 //
-// Internally it uses the Shunting Yard algoritm. First it produces a reverse polish notation(RPN) stack.
+// Internally it uses the Shunting Yard algorithm. First it produces a reverse polish notation(RPN) stack.
 // Example: 1 + 2 * 3 -> [1, 2, 3, *, +] which with parentheses means 1 (2 3 *) +
 //
 // Then it evaluates the RPN stack and returns the output.

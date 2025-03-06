@@ -1,17 +1,21 @@
+import type {Theme} from '../../definitions';
 import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
+import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
+import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';
+import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
-import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
+import {readImageDetailsCache, writeImageDetailsCache} from '../cache';
+import {logWarn, logInfo} from '../utils/log';
+
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from './modify-colors';
+import {getSheetScope} from './style-scope';
 import type {CSSVariableModifier, VariablesStore} from './variables';
-import {logWarn, logInfo} from '../utils/log';
-import type {FilterConfig, Theme} from '../../definitions';
-import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
-import type {parsedGradient} from '../../utils/parsing';
-import {parseGradient} from '../../utils/parsing';
+
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -20,7 +24,7 @@ export type CSSValueModifier = (theme: Theme) => string | Promise<string | null>
 export interface CSSValueModifierResult {
     result: string;
     matchesLength: number;
-    unparseableMatchesLength: number;
+    unparsableMatchesLength: number;
 }
 
 export type CSSValueModifierWithInfo = (theme: Theme) => CSSValueModifierResult;
@@ -50,47 +54,56 @@ export function getModifiableCSSDeclaration(
     ignoreImageSelectors: string[],
     isCancelled: (() => boolean) | null,
 ): ModifiableCSSDeclaration | null {
+    let modifier: ModifiableCSSDeclaration['value'] | null = null;
     if (property.startsWith('--')) {
-        const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
     } else if (value.includes('var(')) {
-        const modifier = getVariableDependantModifier(variablesStore, property, value);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getVariableDependantModifier(variablesStore, property, value);
     } else if (property === 'color-scheme') {
-        // Note: this if statement needs to be above the next one
-        logWarn('CSS property color-scheme is not supported');
-        return null;
+        modifier = getColorSchemeModifier();
+    } else if (property === 'scrollbar-color') {
+        modifier = getScrollbarColorModifier(value);
     } else if (
-        (property.includes('color') && property !== '-webkit-print-color-adjust') ||
+        (
+            property.includes('color') &&
+            property !== '-webkit-print-color-adjust'
+        ) ||
         property === 'fill' ||
         property === 'stroke' ||
         property === 'stop-color'
     ) {
-        const modifier = getColorModifier(property, value, rule);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+        if (property.startsWith('border') && property !== 'border-color' && value === 'initial') {
+            const borderSideProp = property.substring(0, property.length - 6);
+            const borderSideVal = rule.style.getPropertyValue(borderSideProp);
+            if (borderSideVal.startsWith('0px') || borderSideVal === 'none') {
+                property = borderSideProp;
+                modifier = borderSideVal;
+            } else {
+                modifier = value;
+            }
+        } else {
+            modifier = getColorModifier(property, value, rule);
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
     } else if (property.includes('shadow')) {
-        const modifier = getShadowModifier(value);
-        if (modifier) {
-            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-        }
+        modifier = getShadowModifier(value);
     }
-    return null;
+
+    if (!modifier) {
+        return null;
+    }
+
+    return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
 }
 
 function joinSelectors(...selectors: string[]) {
     return selectors.filter(Boolean).join(', ');
 }
+
+const hostsWithOddScrollbars = [
+    'calendar.google.com',
+];
 
 export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean): string {
     const lines: string[] = [];
@@ -99,9 +112,14 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    if (__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) {
+    // color-scheme can change the background of an iframe
+    // that is supposed to be transparent
+    if ((__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) && theme.mode === 1) {
         lines.push('html {');
-        lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
+        lines.push(`    color-scheme: dark !important;`);
+        lines.push('}');
+        lines.push('iframe {');
+        lines.push(`    color-scheme: dark !important;`);
         lines.push('}');
     }
     const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button, dialog' : '');
@@ -120,6 +138,9 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push('table {');
     lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
     lines.push('}');
+    lines.push('mark {');
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
+    lines.push('}');
     lines.push('::placeholder {');
     lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, theme)};`);
     lines.push('}');
@@ -129,11 +150,15 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (theme.scrollbarColor) {
+    if (theme.scrollbarColor && !hostsWithOddScrollbars.includes(location.hostname)) {
         lines.push(getModifiedScrollbarStyle(theme));
     }
     if (theme.selectionColor) {
         lines.push(getModifiedSelectionStyle(theme));
+    }
+    if (isLayerRuleSupported) {
+        lines.unshift('@layer {');
+        lines.push('}');
     }
     return lines.join('\n');
 }
@@ -172,72 +197,43 @@ function getModifiedSelectionStyle(theme: Theme) {
 }
 
 function getModifiedScrollbarStyle(theme: Theme) {
-    const lines: string[] = [];
     let colorTrack: string;
-    let colorIcons: string;
     let colorThumb: string;
-    let colorThumbHover: string;
-    let colorThumbActive: string;
-    let colorCorner: string;
     if (theme.scrollbarColor === 'auto') {
         colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, theme);
-        colorIcons = modifyForegroundColor({r: 96, g: 96, b: 96}, theme);
         colorThumb = modifyBackgroundColor({r: 176, g: 176, b: 176}, theme);
-        colorThumbHover = modifyBackgroundColor({r: 144, g: 144, b: 144}, theme);
-        colorThumbActive = modifyBackgroundColor({r: 96, g: 96, b: 96}, theme);
-        colorCorner = modifyBackgroundColor({r: 255, g: 255, b: 255}, theme);
     } else {
         const rgb = parseColorWithCache(theme.scrollbarColor)!;
         const hsl = rgbToHSL(rgb);
-        const isLight = hsl.l > 0.5;
-        const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
         const darken = (darker: number) => ({...hsl, l: clamp(hsl.l - darker, 0, 1)});
         colorTrack = hslToString(darken(0.4));
-        colorIcons = hslToString(isLight ? darken(0.4) : lighten(0.4));
         colorThumb = hslToString(hsl);
-        colorThumbHover = hslToString(lighten(0.1));
-        colorThumbActive = hslToString(lighten(0.2));
-        colorCorner = hslToString(darken(0.5));
     }
-    lines.push('::-webkit-scrollbar {');
-    lines.push(`    background-color: ${colorTrack};`);
-    lines.push(`    color: ${colorIcons};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb {');
-    lines.push(`    background-color: ${colorThumb};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:hover {');
-    lines.push(`    background-color: ${colorThumbHover};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:active {');
-    lines.push(`    background-color: ${colorThumbActive};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-corner {');
-    lines.push(`    background-color: ${colorCorner};`);
-    lines.push('}');
-    if (isFirefox) {
-        lines.push('* {');
-        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
-        lines.push('}');
-    }
-    return lines.join('\n');
+    return [
+        `* {`,
+        `    scrollbar-color: ${colorThumb} ${colorTrack};`,
+        `}`,
+    ].join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}): string {
+export function getModifiedFallbackStyle(theme: Theme, {strict}: {strict: boolean}): string {
     const factory = fallbackFactory || defaultFallbackFactory;
-    return factory(filter, {strict});
+    return factory(theme, {strict});
 }
 
 type FallbackFactory = (theme: Theme, options: {strict: boolean}) => string;
 
-function defaultFallbackFactory(filter: Theme, {strict}: {strict: boolean}): string {
+function defaultFallbackFactory(theme: Theme, {strict}: {strict: boolean}): string {
     const lines: string[] = [];
-    // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
-    const isMicrosoft = ['microsoft.com', 'docs.microsoft.com'].includes(location.hostname);
-    lines.push(`html, body, ${strict ? `body :not(iframe)${isMicrosoft ? ':not(div[style^="position:absolute;top:0;left:-"]' : ''}` : 'body > :not(iframe)'} {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
-    lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
+    lines.push('}');
+    // MS Learn High Contrast issue
+    // https://github.com/darkreader/darkreader/issues/3618
+    lines.push(`div[style*="background-color: rgb(135, 135, 135)"] {`);
+    lines.push(`    background-color: #878787 !important;`);
     lines.push('}');
     return lines.join('\n');
 }
@@ -261,6 +257,7 @@ const unparsableColors = new Set([
     'currentcolor',
     'none',
     'unset',
+    'auto',
 ]);
 
 function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier | null {
@@ -280,18 +277,19 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
             (rule.style.mask && rule.style.mask !== 'none') ||
             (rule.style.getPropertyValue('mask-image') && rule.style.getPropertyValue('mask-image') !== 'none')
         ) {
-            return (filter) => modifyForegroundColor(rgb, filter);
+            return (theme) => modifyForegroundColor(rgb, theme);
         }
-        return (filter) => modifyBackgroundColor(rgb, filter);
+        return (theme) => modifyBackgroundColor(rgb, theme);
     }
     if (prop.includes('border') || prop.includes('outline')) {
-        return (filter) => modifyBorderColor(rgb, filter);
+        return (theme) => modifyBorderColor(rgb, theme);
     }
-    return (filter) => modifyForegroundColor(rgb, filter);
+    return (theme) => modifyForegroundColor(rgb, theme);
 }
 
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails | null) => void>>();
+let didTryLoadCache = false;
 
 function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     if (!selectorText || selectors.length === 0) {
@@ -303,7 +301,17 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
-        if (ruleSelectors.some((s) => s === ignoredSelector)) {
+        if (ignoredSelector.startsWith('^')) {
+            const beginning = ignoredSelector.slice(1);
+            if (ruleSelectors.some((s) => s.startsWith(beginning))) {
+                return true;
+            }
+        } else if (ignoredSelector.endsWith('$')) {
+            const ending = ignoredSelector.slice(0, ignoredSelector.length - 1);
+            if (ruleSelectors.some((s) => s.endsWith(ending))) {
+                return true;
+            }
+        } else if (ruleSelectors.some((s) => s === ignoredSelector)) {
             return true;
         }
     }
@@ -319,6 +327,38 @@ interface BgImageMatches {
     hasComma?: boolean;
 }
 
+const imageSelectorQueue = new Map<string, Array<() => void>>();
+const imageSelectorValues = new Map<string, string>();
+const imageSelectorNodeQueue = new Set<Element>();
+let imageSelectorQueueFrameId: number | null = null;
+let classObserver: MutationObserver | null = null;
+
+export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
+    for (const [selector, callbacks] of imageSelectorQueue) {
+        if (node.querySelector(selector) || (node instanceof Element && node.matches(selector))) {
+            imageSelectorQueue.delete(selector);
+            callbacks.forEach((cb) => cb());
+        }
+    }
+    if (!classObserver) {
+        classObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                imageSelectorNodeQueue.add(mutation.target as Element);
+                if (!imageSelectorQueueFrameId) {
+                    imageSelectorQueueFrameId = requestAnimationFrame(() => {
+                        imageSelectorNodeQueue.forEach((element) => {
+                            checkImageSelectors(element);
+                        });
+                        imageSelectorNodeQueue.clear();
+                        imageSelectorQueueFrameId = null;
+                    });
+                }
+            });
+        });
+        classObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class'], subtree: true});
+    }
+}
+
 export function getBgImageModifier(
     value: string,
     rule: CSSStyleRule,
@@ -326,6 +366,10 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier | null {
     try {
+        if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
+            return value;
+        }
+
         const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
 
@@ -347,7 +391,7 @@ export function getBgImageModifier(
                 .concat(getIndices(urls).map((i) => ({type: 'url', offset: 0, ...i})))
                 .sort((a, b) => a.index > b.index ? 1 : -1);
 
-        const getGradientModifier = (gradient: parsedGradient) => {
+        const getGradientModifier = (gradient: ParsedGradient) => {
             const {typeGradient, match, hasComma} = gradient;
 
             const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?([^\(\), ]|( (?!calc)))*),?/g;
@@ -358,47 +402,72 @@ export function getBgImageModifier(
 
                 let rgb = parseColorWithCache(part);
                 if (rgb) {
-                    return (filter: FilterConfig) => modifyGradientColor(rgb!, filter);
+                    return (theme: Theme) => modifyGradientColor(rgb!, theme);
                 }
 
                 const space = part.lastIndexOf(' ');
                 rgb = parseColorWithCache(part.substring(0, space));
                 if (rgb) {
-                    return (filter: FilterConfig) => `${modifyGradientColor(rgb!, filter)} ${part.substring(space + 1)}`;
+                    return (theme: Theme) => `${modifyGradientColor(rgb!, theme)} ${part.substring(space + 1)}`;
                 }
 
                 const colorStopMatch = part.match(colorStopRegex);
                 if (colorStopMatch) {
                     rgb = parseColorWithCache(colorStopMatch[3]);
                     if (rgb) {
-                        return (filter: FilterConfig) => `${colorStopMatch[1]}(${colorStopMatch[2] ? `${colorStopMatch[2]}, ` : ''}${modifyGradientColor(rgb!, filter)})`;
+                        return (theme: Theme) => `${colorStopMatch[1]}(${colorStopMatch[2] ? `${colorStopMatch[2]}, ` : ''}${modifyGradientColor(rgb!, theme)})`;
                     }
                 }
 
                 return () => part;
             });
 
-            return (filter: FilterConfig) => {
-                return `${typeGradient}(${parts.map((modify) => modify(filter)).join(', ')})${hasComma ? ', ' : ''}`;
+            return (theme: Theme) => {
+                return `${typeGradient}(${parts.map((modify) => modify(theme)).join(', ')})${hasComma ? ', ' : ''}`;
             };
         };
 
         const getURLModifier = (urlValue: string) => {
-            if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
-                return null;
+            if (!didTryLoadCache) {
+                didTryLoadCache = true;
+                readImageDetailsCache(imageDetailsCache);
             }
+
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;
+            const ownerNode = parentStyleSheet?.ownerNode;
+            const scope = (parentStyleSheet && getSheetScope(parentStyleSheet)) ?? document;
             const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
-                parentStyleSheet!.ownerNode?.baseURI || location.origin;
+                ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
-            return async (filter: FilterConfig): Promise<string | null> => {
+            return async (theme: Theme): Promise<string | null> => {
                 if (isURLEmpty) {
                     return "url('')";
                 }
+
+                let selector = rule.selectorText;
+                if (selector) {
+                    if (selector.includes('::before')) {
+                        selector = selector.replaceAll('::before', '');
+                    }
+                    if (selector.includes('::after')) {
+                        selector = selector.replaceAll('::after', '');
+                    }
+                    if (!scope.querySelector(selector)) {
+                        await new Promise<void>((resolve) => {
+                            if (imageSelectorQueue.has(selector)) {
+                                imageSelectorQueue.get(selector)!.push(resolve);
+                            } else {
+                                imageSelectorQueue.set(selector, [resolve]);
+                                imageSelectorValues.set(selector, urlValue);
+                            }
+                        });
+                    }
+                }
+
                 let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
@@ -417,6 +486,7 @@ export function getBgImageModifier(
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
                             imageDetailsCache.set(url, imageDetails);
+                            writeImageDetailsCache(url, imageDetails);
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);
                         }
@@ -432,7 +502,7 @@ export function getBgImageModifier(
                     }
                 }
                 if (imageDetails) {
-                    const bgImageValue = getBgImageValue(imageDetails, filter);
+                    const bgImageValue = getBgImageValue(imageDetails, theme);
                     if (bgImageValue) {
                         return bgImageValue;
                     }
@@ -447,24 +517,24 @@ export function getBgImageModifier(
             };
         };
 
-        const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
+        const getBgImageValue = (imageDetails: ImageDetails, theme: Theme) => {
             const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string | null;
             const logSrc = imageDetails.src.startsWith('data:') ? 'data:' : imageDetails.src;
-            if (isLarge) {
-                logInfo(`Not modifying too large image ${logSrc}`);
-                result = null;
-            } else if (isDark && isTransparent && filter.mode === 1 && width > 2) {
+            if (isLarge && isLight && !isTransparent && theme.mode === 1) {
+                logInfo(`Hiding large light image ${logSrc}`);
+                result = 'none';
+            } else if (isDark && isTransparent && theme.mode === 1 && width > 2) {
                 logInfo(`Inverting dark image ${logSrc}`);
-                const inverted = getFilteredImageURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
+                const inverted = getFilteredImageURL(imageDetails, {...theme, sepia: clamp(theme.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
-            } else if (isLight && !isTransparent && filter.mode === 1) {
+            } else if (isLight && !isTransparent && theme.mode === 1) {
                 logInfo(`Dimming light image ${logSrc}`);
-                const dimmed = getFilteredImageURL(imageDetails, filter);
+                const dimmed = getFilteredImageURL(imageDetails, theme);
                 result = `url("${dimmed}")`;
-            } else if (filter.mode === 0 && isLight) {
+            } else if (theme.mode === 0 && isLight) {
                 logInfo(`Applying filter to image ${logSrc}`);
-                const filtered = getFilteredImageURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
+                const filtered = getFilteredImageURL(imageDetails, {...theme, brightness: clamp(theme.brightness - 10, 5, 200), sepia: clamp(theme.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;
             } else {
                 logInfo(`Not modifying the image ${logSrc}`);
@@ -510,8 +580,8 @@ export function getBgImageModifier(
             }
         });
 
-        return (filter: FilterConfig) => {
-            const results = modifiers.filter(Boolean).map((modify) => modify!(filter));
+        return (theme: Theme) => {
+            const results = modifiers.filter(Boolean).map((modify) => modify!(theme));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results).then((asyncResults) => {
                     return asyncResults.filter(Boolean).join('');
@@ -545,14 +615,14 @@ export function getShadowModifierWithInfo(value: string): CSSValueModifierWithIn
                 notParsed++;
                 return () => value.substring(prefixIndex, matchEnd);
             }
-            return (filter: FilterConfig) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
+            return (theme: Theme) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, theme)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
         });
 
-        return (filter: FilterConfig) => {
-            const modified = modifiers.map((modify) => modify(filter)).join('');
+        return (theme: Theme) => {
+            const modified = modifiers.map((modify) => modify(theme)).join('');
             return {
                 matchesLength: colorMatches.length,
-                unparseableMatchesLength: notParsed,
+                unparsableMatchesLength: notParsed,
                 result: modified,
             };
         };
@@ -568,6 +638,26 @@ export function getShadowModifier(value: string): CSSValueModifier | null {
         return null;
     }
     return (theme: Theme) => shadowModifier(theme).result;
+}
+
+export function getScrollbarColorModifier(value: string): string | CSSValueModifier | null {
+    const colorsMatch = value.match(/^\s*([a-z]+(\(.*\))?)\s+([a-z]+(\(.*\))?)\s*$/);
+    if (!colorsMatch) {
+        return value;
+    }
+
+    const thumb = parseColorWithCache(colorsMatch[1]);
+    const track = parseColorWithCache(colorsMatch[3]);
+    if (!thumb || !track) {
+        logWarn("Couldn't parse color", ...([thumb, track].filter((c) => !c)));
+        return null;
+    }
+
+    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(thumb, theme)}`;
+}
+
+export function getColorSchemeModifier(): CSSValueModifier {
+    return (theme: Theme) => theme.mode === 0 ? 'dark light' : 'dark';
 }
 
 function getVariableModifier(
@@ -600,4 +690,7 @@ export function cleanModificationCache(): void {
     imageDetailsCache.clear();
     cleanImageProcessingCache();
     awaitingForImageLoading.clear();
+    imageSelectorQueue.clear();
+    classObserver?.disconnect();
+    classObserver = null;
 }

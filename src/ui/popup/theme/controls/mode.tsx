@@ -1,9 +1,11 @@
 import {m} from 'malevic';
+
 import {ThemeEngine} from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
-import ThemeControl from './theme-control';
 import {openExtensionPage} from '../../../utils';
+
+import ThemeControl from './theme-control';
 
 export default function Mode(props: {mode: ThemeEngine; onChange: (mode: ThemeEngine) => void}) {
     async function openCSSEditor() {

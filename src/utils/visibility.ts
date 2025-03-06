@@ -3,7 +3,7 @@
  * GitHub issue: https://github.com/darkreader/darkreader/issues/10004
  * GitHub PR: https://github.com/darkreader/darkreader/pull/10047
  *
- * Doue to the intntional breakage introduced by these extensions, this utility might incorrecly report that document
+ * Due to the intentional breakage introduced by these extensions, this utility might incorrectly report that document
  * is visible while it is not, but it will never report document as hidden while it is visible.
  *
  * This code exploits the fact that most such extensions block only a subset of Page Lifecycle API,

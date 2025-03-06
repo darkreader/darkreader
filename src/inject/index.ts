@@ -1,13 +1,15 @@
-import {createOrUpdateStyle, removeStyle} from './style';
-import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
-import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
-import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logWarn, logInfoCollapsed} from './utils/log';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
-import {collectCSS} from './dynamic-theme/css-collection';
 import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
+
+import {writeEnabledForHost} from './cache';
+import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
+import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
+import {collectCSS} from './dynamic-theme/css-collection';
+import {createOrUpdateStyle, removeStyle} from './style';
+import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
+import {logWarn, logInfoCollapsed} from './utils/log';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
@@ -38,13 +40,13 @@ function sendMessageForTesting(uuid: string) {
     document.dispatchEvent(new CustomEvent('test-message', {detail: uuid}));
 }
 
-function sendMessage(message: MessageCStoBG | MessageCStoUI) {
+function sendMessage(message: MessageCStoBG | MessageCStoUI): true | undefined {
     if (unloaded) {
         return;
     }
     const responseHandler = (response: MessageBGtoCS | 'unsupportedSender' | undefined) => {
         // Vivaldi bug workaround. See TabManager for details.
-        if (response === 'unsupportedSender') {
+        if (response === 'unsupportedSender' || response?.type === MessageTypeBGtoCS.UNSUPPORTED_SENDER) {
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
@@ -71,7 +73,7 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
          * Regular message passing errors are returned via rejected promise or runtime.lastError.
          */
         if (error.message === 'Extension context invalidated.') {
-            console.log('Dark Reader: instance of old CS detected, clening up.');
+            console.log('Dark Reader: instance of old CS detected, cleaning up.');
             cleanup();
         } else {
             console.log('Dark Reader: unexpected error during message passing.');
@@ -97,6 +99,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             const {css, detectDarkTheme, detectorHints} = message.data;
             removeDynamicTheme();
             createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
+            writeEnabledForHost(true);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -112,6 +115,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
+            writeEnabledForHost(true);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -127,6 +131,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             const {theme, fixes, isIFrame, detectDarkTheme, detectorHints} = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
+            writeEnabledForHost(true);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -151,6 +156,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
+            writeEnabledForHost(false);
             break;
         default:
             break;
@@ -193,6 +199,7 @@ function onResume() {
 }
 
 function onDarkThemeDetected() {
+    writeEnabledForHost(false);
     sendMessage({type: MessageTypeCStoBG.DARK_THEME_DETECTED});
 }
 
@@ -239,7 +246,7 @@ if (__TEST__) {
         }, {passive: true});
 
         // Wait for DOM to be complete
-        // Note that here we wait only for DOM parsing and not for subresource load
+        // Note that here we wait only for DOM parsing and not for sub-resource load
         await awaitDOMContentLoaded();
         await awaitDarkReaderReady();
         socket.send(JSON.stringify({
@@ -310,7 +317,7 @@ if (__TEST__) {
                 }
                 case 'firefox-expectPageStyles': {
                     // Styles may not have been applied to the document yet,
-                    // so we check once immediatelly and then on an interval.
+                    // so we check once immediately and then on an interval.
                     function checkPageStylesNow() {
                         const errors = expectPageStyles(data);
                         if (errors.length === 0) {

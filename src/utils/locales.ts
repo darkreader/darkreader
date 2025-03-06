@@ -7,7 +7,7 @@ export function getUILanguage(): string {
     if ('i18n' in chrome && 'getUILanguage' in chrome.i18n && typeof chrome.i18n.getUILanguage === 'function') {
         code = chrome.i18n.getUILanguage();
     } else {
-        // Background serivice workers do not have access to "foreground" APIs like chrome.i18n
+        // Background service workers do not have access to "foreground" APIs like chrome.i18n
         code = navigator.language.split('-')[0];
     }
     if (code.endsWith('-mac')) {

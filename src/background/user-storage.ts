@@ -1,11 +1,13 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
-import {debounce} from '../utils/debounce';
-import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
+import {debounce} from '../utils/debounce';
+import {PromiseBarrier} from '../utils/promise-barrier';
+import {isURLMatched} from '../utils/url';
+import {validateSettings} from '../utils/validation';
+
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
-import {PromiseBarrier} from '../utils/promise-barrier';
-import {validateSettings} from '../utils/validation';
+
 
 const SAVE_TIMEOUT = 1000;
 
@@ -29,6 +31,9 @@ export default class UserStorage {
         settings.customThemes.forEach((site) => {
             site.theme = {...DEFAULT_THEME, ...site.theme};
         });
+        if (settings.customThemes.length === 0) {
+            settings.customThemes = DEFAULT_SETTINGS.customThemes;
+        }
     }
 
     // migrateAutomationSettings migrates old automation settings to the new interface.

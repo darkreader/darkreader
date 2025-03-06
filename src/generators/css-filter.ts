@@ -1,12 +1,14 @@
+import type {Theme, InversionFix} from '../definitions';
+import {compareChromeVersions, chromiumVersion, isFirefox, firefoxVersion} from '../utils/platform';
+import {parseArray, formatArray} from '../utils/text';
+import {compareURLPatterns, isURLInList} from '../utils/url';
+
+import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
 import type {SitePropsIndex} from './utils/parse';
-import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns, isURLInList} from '../utils/url';
-import {createTextStyle} from './text-style';
-import type {FilterConfig, InversionFix} from '../definitions';
-import {compareChromeVersions, chromiumVersion, isFirefox, firefoxVersion} from '../utils/platform';
+
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -42,13 +44,13 @@ export function hasFirefoxNewRootBehavior(): boolean {
     );
 }
 
-export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
+export default function createCSSFilterStyleSheet(config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
     const filterValue = getCSSFilterValue(config)!;
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
     return cssFilterStyleSheetTemplate('html', filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
 }
 
-export function cssFilterStyleSheetTemplate(filterRoot: string, filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
+export function cssFilterStyleSheetTemplate(filterRoot: string, filterValue: string, reverseFilterValue: string, config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
     const fix = getInversionFixesFor(url, fixes, index);
 
     const lines: string[] = [];
@@ -119,7 +121,7 @@ export function cssFilterStyleSheetTemplate(filterRoot: string, filterValue: str
     return lines.join('\n');
 }
 
-export function getCSSFilterValue(config: FilterConfig): string | null {
+export function getCSSFilterValue(config: Theme): string | null {
     const filters: string[] = [];
 
     if (config.mode === FilterMode.dark) {

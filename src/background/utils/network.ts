@@ -1,7 +1,7 @@
 import {loadAsDataURL, loadAsText} from '../../utils/network';
+import {isXMLHttpRequestSupported, isFetchSupported} from '../../utils/platform';
 import {getStringSize} from '../../utils/text';
 import {getDuration} from '../../utils/time';
-import {isXMLHttpRequestSupported, isFetchSupported} from '../../utils/platform';
 
 declare const __TEST__: boolean;
 

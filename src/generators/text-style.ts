@@ -1,13 +1,40 @@
-import type {FilterConfig} from '../definitions';
+import type {Theme} from '../definitions';
 
-export function createTextStyle(config: FilterConfig): string {
+// Exclude font libraries to preserve icons
+const excludedSelectors = [
+    'pre', 'pre *', 'code',
+    '[aria-hidden="true"]',
+
+    // Font Awesome
+    '[class*="fa-"]',
+    '.fa', '.fab', '.fad', '.fal', '.far', '.fas', '.fass', '.fasr', '.fat',
+
+    // Generic matches for icon/symbol fonts
+    '.icofont', '[style*="font-"]',
+    '[class*="icon"]', '[class*="Icon"]',
+    '[class*="symbol"]', '[class*="Symbol"]',
+
+    // Glyph Icons
+    '.glyphicon',
+
+    // Material Design
+    '[class*="material-symbol"]', '[class*="material-icon"]',
+
+    // MUI
+    'mu', '[class*="mu-"]',
+
+    // Typicons
+    '.typcn',
+
+    // Videojs font
+    '[class*="vjs-"]',
+];
+
+export function createTextStyle(config: Theme): string {
     const lines: string[] = [];
-    // Don't target pre elements as they are preformatted element's e.g. code blocks
-    // Exclude font libraries to preserve icons
-    lines.push('*:not(pre, pre *, code, .far, .fa, .glyphicon, [class*="vjs-"], .fab, .fa-github, .fas, .material-icons, .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon) {');
+    lines.push(`*:not(${excludedSelectors.join(', ')}) {`);
 
     if (config.useFont && config.fontFamily) {
-        // TODO: Validate...
         lines.push(`  font-family: ${config.fontFamily} !important;`);
     }
 

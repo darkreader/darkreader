@@ -1,15 +1,17 @@
 // @ts-check
-import * as rollup from 'rollup';
-/** @type {any} */
-import rollupPluginReplace from '@rollup/plugin-replace';
-/** @type {any} */
-import rollupPluginTypescript from '@rollup/plugin-typescript';
-import typescript from 'typescript';
 import fs from 'node:fs';
 import os from 'node:os';
+
+import rollupPluginReplace from '@rollup/plugin-replace';
+import rollupPluginTypescript from '@rollup/plugin-typescript';
+import * as rollup from 'rollup';
+/** @type {any} */
+/** @type {any} */
+import typescript from 'typescript';
+
+
+import {absolutePath} from './paths.js';
 import {createTask} from './task.js';
-import paths from './paths.js';
-const {rootDir, rootPath} = paths;
 
 async function getVersion() {
     const file = await fs.promises.readFile(new URL('../package.json', import.meta.url), 'utf8');
@@ -19,9 +21,8 @@ async function getVersion() {
 
 let watchFiles = [];
 
-async function bundleAPI({debug, watch}) {
-    const src = rootPath('src/api/index.ts');
-    const dest = 'darkreader.js';
+async function bundleAPIModule({debug, watch}, moduleType, dest) {
+    const src = absolutePath('src/api/index.ts');
     const bundle = await rollup.rollup({
         input: src,
         onwarn: (error) => {
@@ -29,9 +30,9 @@ async function bundleAPI({debug, watch}) {
         },
         plugins: [
             rollupPluginTypescript({
-                rootDir,
+                rootDir: absolutePath('.'),
                 typescript,
-                tsconfig: rootPath('src/api/tsconfig.json'),
+                tsconfig: absolutePath('src/api/tsconfig.json'),
                 noImplicitAny: debug ? false : true,
                 noUnusedLocals: debug ? false : true,
                 strictNullChecks: debug ? false : true,
@@ -59,10 +60,15 @@ async function bundleAPI({debug, watch}) {
         esModule: true,
         file: dest,
         strict: true,
-        format: 'umd',
+        format: moduleType,
         name: 'DarkReader',
         sourcemap: debug ? 'inline' : false,
     });
+}
+
+async function bundleAPI({debug, watch}) {
+    await bundleAPIModule({debug, watch}, 'umd', 'darkreader.js');
+    await bundleAPIModule({debug, watch}, 'esm', 'darkreader.mjs');
 }
 
 const bundleAPITask = createTask(

@@ -1,4 +1,5 @@
 import type {StyleElement} from '../style-manager';
+
 import {stopWatchingForStylePositions, watchForStylePositions} from './style-position';
 
 interface ChangedStyles {

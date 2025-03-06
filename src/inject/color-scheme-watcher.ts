@@ -1,5 +1,5 @@
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import type {MessageBGtoCS, MessageCStoBG} from '../definitions';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import {MessageTypeCStoBG} from '../utils/message';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../utils/visibility';
 
@@ -31,7 +31,7 @@ function sendMessage(message: MessageCStoBG): void {
          * Regular message passing errors are returned via rejected promise or runtime.lastError.
          */
         if (error.message === 'Extension context invalidated.') {
-            console.log('Dark Reader: instance of old CS detected, clening up.');
+            console.log('Dark Reader: instance of old CS detected, cleaning up.');
             cleanup();
         } else {
             console.log('Dark Reader: unexpected error during message passing.');

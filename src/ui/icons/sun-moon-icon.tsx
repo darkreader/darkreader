@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import {isNightAtLocation} from '../../utils/time';
 
 interface SunMoonIconProps {

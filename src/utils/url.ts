@@ -1,6 +1,6 @@
 import type {UserSettings, TabInfo} from '../definitions';
+
 import {cachedFactory} from './cache';
-import {isIPV6, compareIPV6} from './ipv6';
 
 declare const __THUNDERBIRD__: boolean;
 
@@ -104,17 +104,11 @@ export function isURLInList(url: string, list: string[]): boolean {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    const isFirstIPV6 = isIPV6(url);
-    const isSecondIPV6 = isIPV6(urlTemplate);
     if (isRegExp(urlTemplate)) {
         const regexp = createRegExp(urlTemplate);
         return regexp ? regexp.test(url) : false;
-    } else if (isFirstIPV6 && isSecondIPV6) {
-        return compareIPV6(url, urlTemplate);
-    } else if (!isFirstIPV6 && !isSecondIPV6) {
-        return matchURLPattern(url, urlTemplate);
     }
-    return false;
+    return matchURLPattern(url, urlTemplate);
 }
 
 const URL_CACHE_SIZE = 32;
@@ -165,11 +159,29 @@ const preparePattern = cachedFactory((pattern: string) => {
     const host = slashIndex < 0 ? pattern : pattern.substring(0, slashIndex);
 
     let hostName = host;
+
+    let isIPv6 = false;
+    let ipV6End = -1;
+    if (host.startsWith('[')) {
+        ipV6End = host.indexOf(']');
+        if (ipV6End > 0) {
+            isIPv6 = true;
+        }
+    }
+
     let port = '*';
-    const portIndex = host.indexOf(':');
-    if (portIndex >= 0) {
+    const portIndex = host.lastIndexOf(':');
+    if (portIndex >= 0 && (!isIPv6 || ipV6End < portIndex)) {
         hostName = host.substring(0, portIndex);
         port = host.substring(portIndex + 1);
+    }
+
+    if (isIPv6) {
+        try {
+            const ipV6URL = new URL(`http://${hostName}`);
+            hostName = ipV6URL.hostname;
+        } catch (err) {
+        }
     }
 
     const hostParts = hostName.split('.').reverse();

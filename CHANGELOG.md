@@ -1,6 +1,178 @@
+# 4.9.105 (February 25, 2025)
+
+- API: Fixed breaking ES5 builds.
+
+# 4.9.104 (February 19, 2025)
+
+- API: ES Module bundle.
+
+# 4.9.103 (February 17, 2025)
+
+- Added support for more color spaces (Tailwind 4 issues).
+- Support variables in shorthand border properties of inline styles.
+- Fixed colors after style overrides were removed (Pinterest issue).
+- Fixed dark theme detection in background tabs.
+- Fixed numeric color variables.
+- Fixed same-origin CSS loading optimization.
+
+# 4.9.102 (February 10, 2025)
+
+- MV3: Fixed background cache performance.
+
+# 4.9.101 (February 7, 2025)
+
+- Fixed processing stylesheets with multiple CSS imports.
+
+# 4.9.100 (January 29, 2025)
+
+- Improved performace of checking available background images.
+- Optimized image analysis caching.
+- Fixed processing style sheets with incorrect imports.
+- Fixed image analysis when extension is re-enabled.
+- Fixed theme update optimization.
+
+# 4.9.99 (December 13, 2024)
+
+- Firefox: Fixed console error.
+
+# 4.9.98 (December 13, 2024)
+
+- Firefox: Fixed custom browser theme.
+
+# 4.9.97 (December 10, 2024)
+
+- Analyze only background images present on a web page.
+- Optimized rebuilding theme after configuration changes.
+- Cache image analysis results and CSS requests.
+- Improved relative CSS colors support.
+- Fixed handling custom CSS properties in inline SVGs.
+- Firefox: Optimized adopted style sheets workaround (Reddit issue).
+
+# 4.9.96 (October 29, 2024)
+
+- Dark theme detection improvements.
+- Fixed overriding styles in Shadow DOM of built-in elements.
+- Firefox: Fix breaking Microsoft Teams.
+- Prevent dark content flashes for disabled websites.
+- Fixed loading styles with imports from same domain.
+
+# 4.9.95 (October 2, 2024)
+
+- Fixed Google Calendar scroll bars.
+- Fixed automation panel.
+- Added links to mobile apps.
+
+# 4.9.94 (September 24, 2024)
+
+- API: Fixed TypeScript builds.
+- Updated experimental design for Microsoft Edge for Android.
+
+# 4.9.93 (September 20, 2024)
+
+- Experimental design for Microsoft Edge for Android.
+
+# 4.9.92 (September 10, 2024)
+
+- Detect website's dark theme by default.
+- Use Filter mode for particular websites by default (Google Docs, Microsoft Office).
+- Restored scrollbar colors.
+- Fixed breaking on default selection color.
+
+# 4.9.90 (September 1, 2024)
+
+- Fixed "Aw, Snap" in Google Search (Chrome and Edge on Windows).
+
+# 4.9.89 (August 23, 2024)
+
+- Removed www part from website URLs.
+- Enabled automation and dark theme detection by default for mobile version.
+- Fixed colors for static site fixes.
+- Apply ignored image selectors for gradients.
+
+# 4.9.88 (July 11, 2024)
+
+- Fixed breaking browser panels.
+
+# 4.9.87 (June 27, 2024)
+
+- Added link to Settings page.
+- Fixed CSS editor layout.
+- Fixed delay when opening settings.
+- Fixed warnings for protected pages.
+- Fixed conflicts with Dark Reader based scripts.
+- Improved fallback color support in CSS variables.
+- Japanese Help page translation.
+
+# 4.9.86 (May 30, 2024)
+
+- CSS variables performance optimizations.
+- Fixed Manifest V3 bugs.
+- Fixed loosing control over tabs after update.
+
+# 4.9.85 (May 14, 2024)
+
+- Bulgarian translation.
+- Improved color variables support.
+- Fixed handling styles with embedded SVGs.
+- Fixed Inversion Dev Tools.
+- Fixed inline SVG image analysis.
+- Fixed overriding icon fonts.
+
+# 4.9.84 (April 25, 2024)
+
+- Improved Dev Tools (per site editor).
+- Improved SVG logos analysis.
+- Improved large background image analysis.
+- Fixed IPv6 URL support.
+- Fixed Mark elements' colors.
+- Check for CSS @layer support.
+
+# 4.9.83 (April 10, 2024)
+
+- Reduced memory consumption.
+- Fixed iframes background colors.
+- Optimized CSS @import loading.
+
+# 4.9.82 (April 5, 2024)
+
+- Fixed performance issue when detecting @layer and @supports rules.
+- Improved border colors with CSS variables.
+- Leave iframes unchanged when dark theme is detected on a web page.
+
+## 4.9.81 (March 29, 2024)
+
+- Fixed performance degradation when computer wakes up from sleep mode.
+- Improved dark theme detection.
+- Support for CSS layers.
+- Support for color mixing functions.
+- Override author's scrollbar colors.
+- Override color-scheme CSS property.
+- Fixes for backgrounds with variable colors.
+- Dynamic mode bug fixes and performance optimizations.
+
+## 4.9.80 (March 13, 2024)
+
+- Analyze inline background images for root elements.
+- Support for "background" attribute.
+- Fixed performance for asynchronously resolved inline styles.
+- Fixed freezes and incorrect work on several websites.
+- Dev Tools: Formatting of CSS fixes.
+
+## 4.9.79 (February 29, 2024)
+
+- Use ES2020 for API bundle.
+
+## 4.9.78 (February 29, 2024)
+
+- Optimized Adopted Style Sheets changes handling.
+- Fixed watching for style/link element position changes.
+- Fixed processing large style elements loaded by chunks.
+- Fixed enabling the extension with a hotkey after it was disabled automatically.
+- Fixed sliders in mobile UI.
+
 ## 4.9.77 (February 7, 2024)
 
-- Firefox: Fixed errors when Adopted Stylesheets were not present.
+- Firefox: Fixed errors when Adopted Style Sheets were not present.
 - Fixed breaking on ::view-transition selectors (Airbnb issue).
 
 ## 4.9.76 (January 17, 2024)

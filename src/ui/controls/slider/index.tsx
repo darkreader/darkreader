@@ -1,7 +1,8 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {throttle} from '../../../utils/throttle';
+
 import {scale, clamp} from '../../../utils/math';
+import {throttle} from '../../../utils/throttle';
 
 interface SliderProps {
     value: number;
@@ -10,6 +11,7 @@ interface SliderProps {
     step: number;
     formatValue: (value: number) => string;
     onChange: (value: number | null) => void;
+    onPreview?: (value: number | null) => void;
 }
 
 interface SliderStore {
@@ -41,6 +43,7 @@ export default function Slider(props: SliderProps) {
 
     function onRootCreate(rootNode: HTMLElement) {
         rootNode.addEventListener('touchstart', onPointerDown, {passive: true});
+        rootNode.addEventListener('wheel', onWheel, {passive: false});
     }
 
     function saveTrackNode(el: HTMLElement) {
@@ -114,6 +117,9 @@ export default function Slider(props: SliderProps) {
             const value = getEventValue(e);
             store.activeValue = value;
             context.refresh();
+
+            const {onPreview} = store.activeProps;
+            onPreview?.(value);
         }
 
         function onPointerUp(e: MouseEvent | TouchEvent) {
@@ -137,9 +143,9 @@ export default function Slider(props: SliderProps) {
         }
 
         function subscribe() {
-            window.addEventListener(pointerMoveEvent, onPointerMove, {once: true, passive: true});
-            window.addEventListener(pointerUpEvent, onPointerUp, {once: true, passive: true});
-            window.addEventListener('keypress', onKeyPress, {once: true, passive: true});
+            window.addEventListener(pointerMoveEvent, onPointerMove, {passive: true});
+            window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
+            window.addEventListener('keypress', onKeyPress, {passive: true});
         }
 
         function unsubscribe() {
@@ -198,7 +204,6 @@ export default function Slider(props: SliderProps) {
             class={{'slider': true, 'slider--active': store.isActive}}
             oncreate={onRootCreate}
             onmousedown={onPointerDown}
-            onwheel={onWheel}
         >
             <span
                 class="slider__track"
@@ -224,6 +229,9 @@ export default function Slider(props: SliderProps) {
                         {formattedValue}
                     </span>
                 </span>
+            </span>
+            <span class="slider__value">
+                {formattedValue}
             </span>
         </span>
     );

@@ -1,4 +1,5 @@
-import {formatCSS, getParenthesesRange} from '../../../src/utils/text';
+import {formatCSS} from '../../../src/utils/css-text/format-css';
+import {getParenthesesRange} from '../../../src/utils/text';
 
 test('CSS formatting', () => {
     expect(formatCSS('div { color: red; }'))
@@ -47,8 +48,7 @@ test('CSS formatting', () => {
 
     expect(formatCSS('@media print, screen and (min-width: 20rem) { div, span { background: green; color: red; } }'))
         .toEqual([
-            '@media print,',
-            'screen and (min-width: 20rem) {',
+            '@media print, screen and (min-width: 20rem) {',
             '    div,',
             '    span {',
             '        background: green;',

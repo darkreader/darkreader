@@ -1,6 +1,7 @@
-import {isFirefox} from '../utils/platform';
-import type {ExtensionData, FilterConfig, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
+import type {ExtensionData, Theme, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
+import {isFirefox} from '../utils/platform';
+
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT} from './utils/log';
 
@@ -8,7 +9,7 @@ export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     collectDevToolsData: () => Promise<DevToolsData>;
     changeSettings: (settings: Partial<UserSettings>) => void;
-    setTheme: (theme: Partial<FilterConfig>) => void;
+    setTheme: (theme: Partial<Theme>) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
     markNewsAsDisplayed: (ids: string[]) => Promise<void>;
     toggleActiveTab: () => void;

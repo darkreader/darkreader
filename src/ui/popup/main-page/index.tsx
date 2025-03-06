@@ -1,6 +1,8 @@
 import {m} from 'malevic';
+
 import type {ViewProps} from '../../../definitions';
 import {NavButton} from '../../controls';
+
 import AppSwitch from './app-switch';
 import HelpGroup from './help';
 import SiteToggleGroup from './site-toggle';

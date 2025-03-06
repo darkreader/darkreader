@@ -87,5 +87,10 @@ describe('Domain utilities', () => {
 
         expect(isURLMatched('https://www.example.com/page/1', '/www\.ex.*\.com/')).toEqual(true);
         expect(isURLMatched('https://www.failure.com/page/1', '/www\.ex.*\.com/')).toEqual(false);
+
+        expect(isURLMatched('https://[2001:0DB8:AC10:FE01::200E]/', '[2001:0DB8:AC10:FE01::200E]')).toEqual(true);
+        expect(isURLMatched('https://[2001:0DB8:AC10:FE02::200E]/', '[2001:0DB8:AC10:FE01::200E]')).toEqual(false);
+        expect(isURLMatched('https://[2001:0DB8:AC10:FE01::200E]:8080/', '[2001:0DB8:AC10:FE01::200E]:8080')).toEqual(true);
+        expect(isURLMatched('https://[2001:0DB8:AC10:FE02::200E]:1024/', '[2001:0DB8:AC10:FE01::200E]:8080')).toEqual(false);
     });
 });

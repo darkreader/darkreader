@@ -9,7 +9,6 @@
         "types": [
             "chrome",
             "jest",
-            "offscreencanvas",
             "puppeteer-core"
         ],
         "allowJs": true,

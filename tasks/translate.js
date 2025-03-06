@@ -1,5 +1,6 @@
 // @ts-check
 import fs from 'node:fs/promises';
+
 import {readFile, writeFile, httpsRequest, timeout, log} from './utils.js';
 
 // To use this tool:
@@ -181,7 +182,7 @@ async function translate(text, lang) {
     })).toString();
     const response = await httpsRequest(url.toString());
     const translation = JSON.parse(response.text());
-    return translation.sentences.map((s) => s.trans).join('\n');
+    return translation.sentences.map((s) => s.trans).join('\n').replaceAll(/\n+/g, '\n');
 }
 
 const args = process.argv.slice(2);

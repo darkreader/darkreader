@@ -1,12 +1,15 @@
 import {push} from '../../../utils/array';
 import type {ElementsTreeOperations} from '../../utils/dom';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../../utils/dom';
+import {checkImageSelectors} from '../modify-css';
 import type {StyleElement} from '../style-manager';
 import {shouldManageStyle, getManageableStyles} from '../style-manager';
+
 import {collectUndefinedElements, handleIsDefined, isCustomElement, recordUndefinedElement, unsubscribeFromDefineCustomElements, watchWhenCustomElementsDefined} from './custom-elements';
 
 const observers: Array<{disconnect(): void}> = [];
 let observedRoots: WeakSet<Node>;
+let handledShadowHosts: WeakSet<Node>;
 
 interface ChangedStyles {
     created: StyleElement[];
@@ -22,7 +25,23 @@ export function watchForStylePositions(
 ): void {
     stopWatchingForStylePositions();
 
-    const prevStyles = new Set<StyleElement>(currentStyles);
+    const prevStylesByRoot = new WeakMap<Node, Set<StyleElement>>();
+    const getPrevStyles = (root: Node) => {
+        if (!prevStylesByRoot.has(root)) {
+            prevStylesByRoot.set(root, new Set());
+        }
+        return prevStylesByRoot.get(root)!;
+    };
+    currentStyles.forEach((node) => {
+        let root: Node | null = node;
+        while ((root = root.parentNode)) {
+            if (root === document || root.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+                const prevStyles = getPrevStyles(root);
+                prevStyles.add(node);
+                break;
+            }
+        }
+    });
     const prevStyleSiblings = new WeakMap<Element, Element>();
     const nextStyleSiblings = new WeakMap<Element, Element>();
 
@@ -45,13 +64,14 @@ export function watchForStylePositions(
 
     currentStyles.forEach(saveStylePosition);
 
-    function handleStyleOperations(operations: {createdStyles: Set<StyleElement>; movedStyles: Set<StyleElement>; removedStyles: Set<StyleElement>}) {
+    function handleStyleOperations(root: Document | ShadowRoot, operations: {createdStyles: Set<StyleElement>; movedStyles: Set<StyleElement>; removedStyles: Set<StyleElement>}) {
         const {createdStyles, removedStyles, movedStyles} = operations;
 
         createdStyles.forEach((s) => saveStylePosition(s));
         movedStyles.forEach((s) => saveStylePosition(s));
         removedStyles.forEach((s) => forgetStylePosition(s));
 
+        const prevStyles = getPrevStyles(root);
         createdStyles.forEach((s) => prevStyles.add(s));
         removedStyles.forEach((s) => prevStyles.delete(s));
 
@@ -65,7 +85,7 @@ export function watchForStylePositions(
         }
     }
 
-    function handleMinorTreeMutations({additions, moves, deletions}: ElementsTreeOperations) {
+    function handleMinorTreeMutations(root: Document | ShadowRoot, {additions, moves, deletions}: ElementsTreeOperations) {
         const createdStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         const movedStyles = new Set<StyleElement>();
@@ -74,7 +94,7 @@ export function watchForStylePositions(
         deletions.forEach((node) => getManageableStyles(node).forEach((style) => removedStyles.add(style)));
         moves.forEach((node) => getManageableStyles(node).forEach((style) => movedStyles.add(style)));
 
-        handleStyleOperations({createdStyles, removedStyles, movedStyles});
+        handleStyleOperations(root, {createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
             deepObserve(n);
@@ -86,6 +106,8 @@ export function watchForStylePositions(
         // In practice, at least one place reflects appearance of the node.
         // URL for testing: https://chromestatus.com/roadmap
         additions.forEach((node) => isCustomElement(node) && recordUndefinedElement(node));
+
+        additions.forEach((node) => checkImageSelectors(node));
     }
 
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
@@ -94,6 +116,7 @@ export function watchForStylePositions(
         const createdStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         const movedStyles = new Set<StyleElement>();
+        const prevStyles = getPrevStyles(root);
         styles.forEach((s) => {
             if (!prevStyles.has(s)) {
                 createdStyles.add(s);
@@ -110,10 +133,12 @@ export function watchForStylePositions(
             }
         });
 
-        handleStyleOperations({createdStyles, removedStyles, movedStyles});
+        handleStyleOperations(root, {createdStyles, removedStyles, movedStyles});
 
         deepObserve(root);
         collectUndefinedElements(root);
+
+        checkImageSelectors(root);
     }
 
     function handleAttributeMutations(mutations: MutationRecord[]) {
@@ -170,6 +195,7 @@ export function watchForStylePositions(
     deepObserve(document.documentElement);
 
     watchWhenCustomElementsDefined((hosts) => {
+        hosts = hosts.filter((node) => !handledShadowHosts.has(node));
         const newStyles: StyleElement[] = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
@@ -182,6 +208,7 @@ export function watchForStylePositions(
             deepObserve(shadowRoot);
             collectUndefinedElements(shadowRoot);
         });
+        hosts.forEach((node) => handledShadowHosts.add(node));
     });
     document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
@@ -191,6 +218,7 @@ function resetObservers() {
     observers.forEach((o) => o.disconnect());
     observers.splice(0, observers.length);
     observedRoots = new WeakSet();
+    handledShadowHosts = new WeakSet();
 }
 
 export function stopWatchingForStylePositions(): void {

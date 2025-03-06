@@ -1,6 +1,7 @@
 import {m} from 'malevic';
-import TextBox from '../textbox';
+
 import {parseTime} from '../../../utils/time';
+import TextBox from '../textbox';
 
 interface TimePickerProps {
     startTime: string;

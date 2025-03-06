@@ -1,8 +1,9 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+
+import {parseColorWithCache} from '../../../utils/color';
 import ColorPicker from '../color-picker';
 import DropDown from '../dropdown';
-import {parseColorWithCache} from '../../../utils/color';
 
 interface ColorDropDownProps {
     class?: string;

@@ -2,12 +2,39 @@
     "browser_specific_settings": {
         "gecko": {
             "id": "addon@darkreader.org",
-            "strict_min_version": "54.0"
-        }
+            "strict_min_version": "78.0"
+        },
+        "gecko_android": {}
     },
     "background": {
         "page": "background/index.html"
     },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "inject/fallback.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "match_about_blank": true,
+            "world": "MAIN"
+        },
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "inject/index.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "match_about_blank": true,
+            "world": "ISOLATED"
+        }
+    ],
     "permissions": [
         "alarms",
         "contextMenus",

@@ -97,6 +97,7 @@ footer {
     color: @color-control-fore;
     cursor: pointer;
     display: inline-flex;
+    height: @size-control-inner + 2 * @size-border;
     justify-content: center;
     margin: 0;
     position: relative;
@@ -109,7 +110,8 @@ footer {
 
     &__text {
         font-weight: bold;
-        line-height: @size-control-inner;
+        line-height: @size-text-normal;
+        text-align: center;
         transform: skewX(-10deg);
     }
 }
@@ -194,18 +196,98 @@ footer {
     }
 }
 
-.footer-help-link {
-    color: @color-control-fore;
-    font-weight: bold;
+.mobile-link {
+    display: none;
+}
 
-    &::after {
-        background-color: @color-control-active;
+.birthday-container {
+    align-items: stretch;
+    column-gap: @indent-small;
+    display: grid;
+    grid:
+        "icon message" auto
+        "button button" @size-control-inner + 2 * @size-border
+        e('/') 2rem auto;
+    width: @popup-content-width;
+
+    .birthday-icon {
+        background-image: url(../assets/images/birthday-icon.svg);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        display: inline-block;
+        grid-area: icon;
+        height: 2rem;
+        line-height: 2rem;
+        margin: 0.5rem 0;
+        text-align: center;
+        text-indent: -999rem;
+        width: 2rem;
+    }
+
+    .birthday-message {
+        align-items: center;
+        color: @color-control-fore;
+        display: flex;
+        flex-direction: column;
+        grid-area: message;
+        height: 3rem;
+        line-height: 1rem;
+        justify-content: center;
+        text-align: left;
+
+        a {
+            color: @color-control-fore;
+        }
+    }
+
+    .donate-link {
+        background-color: @color-control-back;
+        background-image: linear-gradient(135deg, #954d6d, transparent 10%, transparent 90%, #31367d);
+        border: @size-border solid @color-border;
+        box-shadow: none;
+        box-sizing: border-box;
+        grid-area: button;
+        transition: all @time-slow;
+        width: 100%;
+
+        &:hover {
+            background-color: @color-control-hover;
+            box-shadow: none;
+        }
+    }
+}
+
+.footer-help-link {
+    align-items: center;
+    background-color: @color-control-active;
+    color: @color-control-fore;
+    cursor: pointer;
+    display: inline-flex;
+    font-weight: bold;
+    justify-content: center;
+    margin: 0;
+    position: relative;
+    text-decoration: none;
+    transition: all @time-fast;
+
+    &::before {
+        background-color: @color-control-fore;
         border-radius: 50%;
+        box-sizing: border-box;
+        color: @color-control-active;
         content: "?";
         display: inline-block;
+        font-weight: bold;
         height: @size-text-normal-height;
-        margin-left: 0.125rem;
+        margin-right: 0.125rem;
+        text-align: center;
+        -webkit-text-stroke: 0.0625rem;
         width: @size-text-normal-height;
+    }
+
+    &:hover {
+        box-shadow: 0 0 @indent-large @color-control-active;
     }
 }
 
@@ -229,3 +311,7 @@ html:not(.mobile):not(.preview) body {
 }
 
 @import "./body/style";
+
+/* @plus-start */
+@import "../../plus/popup/plus-body.less";
+/* @plus-end */

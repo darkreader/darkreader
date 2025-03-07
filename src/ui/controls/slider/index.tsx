@@ -10,8 +10,8 @@ interface SliderProps {
     max: number;
     step: number;
     formatValue: (value: number) => string;
-    onChange: (value: number | null) => void;
-    onPreview?: (value: number | null) => void;
+    onChange: (value: number) => void;
+    onPreview?: (value: number) => void;
 }
 
 interface SliderStore {
@@ -178,8 +178,10 @@ export default function Slider(props: SliderProps) {
     const refreshOnWheel = throttle(() => {
         store.activeValue = stickToStep(store.wheelValue!, props.step);
         store.wheelTimeoutId = setTimeout(() => {
-            const {onChange} = store.activeProps;
-            onChange(store.activeValue);
+            if (store.activeValue != null) {
+                const {onChange} = store.activeProps;
+                onChange(store.activeValue);
+            }
             store.isActive = false;
             store.activeValue = null;
             store.wheelValue = null;

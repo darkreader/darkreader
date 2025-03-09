@@ -41,7 +41,7 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
 
     const warningDialog = context.store.isWarningDialogVisible ? (
         <MessageBox
-            caption='Are you sure you want to import? Please export your current settings if you would like to restore them later.'
+            caption="Are you sure you want to import? Please export your current settings if you would like to restore them later."
             onOK={importSettings}
             onCancel={hideWarningDialog}
         />

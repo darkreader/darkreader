@@ -21,7 +21,12 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                     />
                     <Select
                         value={config.fontFamily}
-                        onChange={(value) => onChange({fontFamily: value})}
+                        onChange={(value) =>
+                            onChange({
+                                fontFamily: value,
+                                useFont: true,
+                            })
+                        }
                         options={fonts.reduce((map, font) => {
                             map[font] = (
                                 <div style={{'font-family': font}}>

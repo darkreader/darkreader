@@ -136,6 +136,10 @@ class LimitedCacheStorage {
             }
         }
 
+        if (this.records.size === 0) {
+            this.bytesInUse = 0;
+        }
+
         const expires = Date.now() + LimitedCacheStorage.TTL;
         this.records.set(url, {url, value, size, expires});
         this.bytesInUse += size;
@@ -152,7 +156,9 @@ class LimitedCacheStorage {
             }
         }
 
-        if (this.records.size !== 0) {
+        if (this.records.size === 0) {
+            this.bytesInUse = 0;
+        } else {
             LimitedCacheStorage.ensureAlarmIsScheduled();
         }
     }

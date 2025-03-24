@@ -164,6 +164,34 @@ class LimitedCacheStorage {
     }
 }
 
+function createLimiter() {
+    const loadingUrls = new Set<string>();
+    const awaitingUrls = new Map<string, Set<(data: string) => void>>();
+
+    function loading(url: string) {
+        return loadingUrls.has(url);
+    }
+
+    async function wait(url: string) {
+        return new Promise<string>((resolve) => {
+            if (!awaitingUrls.has(url)) {
+                awaitingUrls.set(url, new Set());
+            }
+            awaitingUrls.get(url)?.add(resolve);
+        });
+    }
+
+    async function loaded(url: string, data: string) {
+        loadingUrls.delete(url);
+        if (awaitingUrls.has(url)) {
+            awaitingUrls.get(url)!.forEach((callback) => callback(data));
+            awaitingUrls.delete(url);
+        }
+    }
+
+    return {loading, wait, loaded};
+}
+
 export interface FetchRequestParameters {
     url: string;
     responseType: 'data-url' | 'text';
@@ -182,15 +210,27 @@ export function createFileLoader(): FileLoader {
         'text': loadAsText,
     };
 
+    const limiters = {
+        'data-url': createLimiter(),
+        'text': createLimiter(),
+    };
+
     async function get({url, responseType, mimeType, origin}: FetchRequestParameters) {
         const cache = caches[responseType];
         const load = loaders[responseType];
+        const limiter = limiters[responseType];
         if (cache.has(url)) {
-            return cache.get(url);
+            return cache.get(url)!;
+        }
+
+        if (limiter.loading(url)) {
+            return limiter.wait(url);
         }
 
         const data = await load(url, mimeType, origin);
         cache.set(url, data);
+        limiter.loaded(url, data);
+
         return data;
     }
 

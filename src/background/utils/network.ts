@@ -169,7 +169,9 @@ function createLimiter() {
     const awaitingUrls = new Map<string, Set<(data: string) => void>>();
 
     function loading(url: string) {
-        return loadingUrls.has(url);
+        const result = loadingUrls.has(url);
+        loadingUrls.add(url);
+        return result;
     }
 
     async function wait(url: string) {

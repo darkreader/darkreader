@@ -153,7 +153,6 @@ function createStaticStyleOverrides() {
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     injectStaticStyle(rootVarsStyle, variableStyle.nextSibling, 'root-vars');
-    document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
     const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);

@@ -1,5 +1,6 @@
 const hostsBreakingOnStylePosition = [
     'www.diffusioneshop.com',
+    'zhale.me',
 ];
 
 const mode = hostsBreakingOnStylePosition.includes(location.hostname) ? 'away' : 'next'

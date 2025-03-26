@@ -10,6 +10,7 @@ import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompl
 import {logInfo, logWarn} from '../utils/log';
 
 import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {getStyleInjectionMode, injectStyleAway} from './injection';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {createSheetWatcher} from './watch/sheet-changes';
@@ -106,13 +107,20 @@ export function cleanLoadingLinks(): void {
 }
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}: {update: () => void; loadingStart: () => void; loadingEnd: () => void}): StyleManager {
-    const prevStyles: HTMLStyleElement[] = [];
-    let next: Element | null = element;
-    while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
-        prevStyles.push(next as HTMLStyleElement);
+    const inMode = getStyleInjectionMode();
+
+    let corsCopy: HTMLStyleElement | null = null;
+    let syncStyle: HTMLStyleElement | SVGStyleElement | null = null;
+
+    if (inMode === 'next') {
+        const prevStyles: HTMLStyleElement[] = [];
+        let next: Element | null = element;
+        while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
+            prevStyles.push(next as HTMLStyleElement);
+        }
+        corsCopy = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
+        syncStyle = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
     }
-    let corsCopy: HTMLStyleElement | null = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
-    let syncStyle: HTMLStyleElement | SVGStyleElement | null = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
 
     let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> | null = null;
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> | null = null;
@@ -203,15 +211,22 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     }
 
     function insertStyle() {
-        if (corsCopy) {
-            if (element.nextSibling !== corsCopy) {
-                element.parentNode!.insertBefore(corsCopy, element.nextSibling);
+        if (inMode === 'next') {
+            if (corsCopy) {
+                if (element.nextSibling !== corsCopy) {
+                    element.parentNode!.insertBefore(corsCopy, element.nextSibling);
+                }
+                if (corsCopy.nextSibling !== syncStyle) {
+                    element.parentNode!.insertBefore(syncStyle!, corsCopy.nextSibling);
+                }
+            } else if (element.nextSibling !== syncStyle) {
+                element.parentNode!.insertBefore(syncStyle!, element.nextSibling);
             }
-            if (corsCopy.nextSibling !== syncStyle) {
-                element.parentNode!.insertBefore(syncStyle!, corsCopy.nextSibling);
+        } else if (inMode === 'away') {
+            if (corsCopy && !corsCopy.parentNode) {
+                injectStyleAway(corsCopy);
             }
-        } else if (element.nextSibling !== syncStyle) {
-            element.parentNode!.insertBefore(syncStyle!, element.nextSibling);
+            injectStyleAway(syncStyle!);
         }
     }
 
@@ -306,12 +321,24 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                         corsCopy.textContent = fullCSSText;
                     }
                 } else {
-                    corsCopy = createCORSCopy(element, fullCSSText);
+                    corsCopy = createCORSCopy(
+                        fullCSSText,
+                        inMode === 'next' ?
+                            (cc) =>  element.parentNode!.insertBefore(cc, element.nextSibling) :
+                            injectStyleAway,
+                    );
+                    if (corsCopy) {
+                        if (inMode === 'next') {
+                            element.parentNode!.insertBefore(corsCopy, element.nextSibling);
+                        } else if (inMode === 'away') {
+                            injectStyleAway(corsCopy);
+                        }
+                    }
                 }
             } catch (err) {
                 logWarn(err);
             }
-            if (corsCopy) {
+            if (corsCopy && inMode === 'next') {
                 corsCopyPositionWatcher = watchForNodePosition(corsCopy, 'prev-sibling');
             }
         }
@@ -392,7 +419,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();
-            } else {
+            } else if (inMode === 'next') {
                 syncStylePositionWatcher = watchForNodePosition(syncStyle!, 'prev-sibling', () => {
                     forceRenderStyle = true;
                     buildOverrides();
@@ -628,7 +655,7 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
     return cssText;
 }
 
-function createCORSCopy(srcElement: StyleElement, cssText: string) {
+function createCORSCopy(cssText: string, inject: (cc: HTMLStyleElement) => void) {
     if (!cssText) {
         return null;
     }
@@ -638,7 +665,7 @@ function createCORSCopy(srcElement: StyleElement, cssText: string) {
     cors.classList.add('darkreader--cors');
     cors.media = 'screen';
     cors.textContent = cssText;
-    srcElement.parentNode!.insertBefore(cors, srcElement.nextSibling);
+    inject(cors);
     cors.sheet!.disabled = true;
     corsStyleSet.add(cors);
     return cors;

@@ -15,6 +15,7 @@ import {logInfo, logWarn} from '../utils/log';
 import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {combineFixes, findRelevantFix} from './fixes';
+import {getStyleInjectionMode, injectStyleAway} from './injection';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from './modify-colors';
@@ -85,16 +86,24 @@ function stopStylePositionWatchers() {
     nodePositionWatchers.clear();
 }
 
+function injectStaticStyle(style: HTMLStyleElement, prevNode: Node | null, watchAlias: string, callback?: () => void) {
+    const mode = getStyleInjectionMode();
+    if (mode === 'next') {
+        document.head.insertBefore(style, prevNode);
+        setupNodePositionWatcher(style, watchAlias, callback);
+    } else if (mode === 'away') {
+        injectStyleAway(style);
+    }
+}
+
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
     fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: true});
-    document.head.insertBefore(fallbackStyle, document.head.firstChild);
-    setupNodePositionWatcher(fallbackStyle, 'fallback');
+    injectStaticStyle(fallbackStyle, document.head.firstChild, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     userAgentStyle.textContent = getModifiedUserAgentStyle(theme!, isIFrame!, theme!.styleSystemControls);
-    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
-    setupNodePositionWatcher(userAgentStyle, 'user-agent');
+    injectStaticStyle(userAgentStyle, fallbackStyle.nextSibling, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     if (theme!.useFont || theme!.textStroke > 0) {
@@ -102,8 +111,7 @@ function createStaticStyleOverrides() {
     } else {
         textStyle.textContent = '';
     }
-    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
-    setupNodePositionWatcher(textStyle, 'text');
+    injectStaticStyle(textStyle, userAgentStyle.nextSibling, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
@@ -118,18 +126,15 @@ function createStaticStyleOverrides() {
     } else {
         invertStyle.textContent = '';
     }
-    document.head.insertBefore(invertStyle, textStyle.nextSibling);
-    setupNodePositionWatcher(invertStyle, 'invert');
+    injectStaticStyle(invertStyle, textStyle.nextSibling, 'invert');
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     inlineStyle.textContent = getInlineOverrideStyle();
-    document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
-    setupNodePositionWatcher(inlineStyle, 'inline');
+    injectStaticStyle(inlineStyle, invertStyle.nextSibling, 'inline');
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
-    document.head.appendChild(overrideStyle);
-    setupNodePositionWatcher(overrideStyle, 'override');
+    injectStaticStyle(overrideStyle, null, 'override');
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
     const selectionColors = theme?.selectionColor ? getSelectionColor(theme) : null;
@@ -143,11 +148,11 @@ function createStaticStyleOverrides() {
         `   --darkreader-selection-text: ${selectionColors?.foregroundColorSelection ?? 'initial'};`,
         `}`,
     ].join('\n');
-    document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
-    setupNodePositionWatcher(variableStyle, 'variables', () => registerVariablesSheet(variableStyle.sheet!));
+    injectStaticStyle(variableStyle, inlineStyle.nextSibling, 'variables', () => registerVariablesSheet(variableStyle.sheet!));
     registerVariablesSheet(variableStyle.sheet!);
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    injectStaticStyle(rootVarsStyle, variableStyle.nextSibling, 'root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);

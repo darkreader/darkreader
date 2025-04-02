@@ -8,6 +8,9 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
     forEach(rules, (rule) => {
         if (isStyleRule(rule)) {
             iterate(rule);
+            if (rule.cssRules?.length > 0) {
+                iterateCSSRules(rule.cssRules, iterate);
+            }
         } else if (isImportRule(rule)) {
             try {
                 iterateCSSRules(rule.styleSheet!.cssRules, iterate, onImportError);

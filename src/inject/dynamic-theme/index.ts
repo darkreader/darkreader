@@ -89,7 +89,7 @@ function stopStylePositionWatchers() {
 function injectStaticStyle(style: HTMLStyleElement, prevNode: Node | null, watchAlias: string, callback?: () => void) {
     const mode = getStyleInjectionMode();
     if (mode === 'next') {
-        document.head.insertBefore(style, prevNode);
+        document.head.insertBefore(style, prevNode ? prevNode.nextSibling : document.head.firstChild);
         setupNodePositionWatcher(style, watchAlias, callback);
     } else if (mode === 'away') {
         injectStyleAway(style);
@@ -99,11 +99,11 @@ function injectStaticStyle(style: HTMLStyleElement, prevNode: Node | null, watch
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
     fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: true});
-    injectStaticStyle(fallbackStyle, document.head.firstChild, 'fallback');
+    injectStaticStyle(fallbackStyle, null, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     userAgentStyle.textContent = getModifiedUserAgentStyle(theme!, isIFrame!, theme!.styleSystemControls);
-    injectStaticStyle(userAgentStyle, fallbackStyle.nextSibling, 'user-agent');
+    injectStaticStyle(userAgentStyle, fallbackStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     if (theme!.useFont || theme!.textStroke > 0) {
@@ -111,7 +111,7 @@ function createStaticStyleOverrides() {
     } else {
         textStyle.textContent = '';
     }
-    injectStaticStyle(textStyle, userAgentStyle.nextSibling, 'text');
+    injectStaticStyle(textStyle, userAgentStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
@@ -126,15 +126,11 @@ function createStaticStyleOverrides() {
     } else {
         invertStyle.textContent = '';
     }
-    injectStaticStyle(invertStyle, textStyle.nextSibling, 'invert');
+    injectStaticStyle(invertStyle, textStyle, 'invert');
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     inlineStyle.textContent = getInlineOverrideStyle();
-    injectStaticStyle(inlineStyle, invertStyle.nextSibling, 'inline');
-
-    const overrideStyle = createOrUpdateStyle('darkreader--override');
-    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
-    injectStaticStyle(overrideStyle, null, 'override');
+    injectStaticStyle(inlineStyle, invertStyle, 'inline');
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
     const selectionColors = theme?.selectionColor ? getSelectionColor(theme) : null;
@@ -148,11 +144,11 @@ function createStaticStyleOverrides() {
         `   --darkreader-selection-text: ${selectionColors?.foregroundColorSelection ?? 'initial'};`,
         `}`,
     ].join('\n');
-    injectStaticStyle(variableStyle, inlineStyle.nextSibling, 'variables', () => registerVariablesSheet(variableStyle.sheet!));
+    injectStaticStyle(variableStyle, inlineStyle, 'variables', () => registerVariablesSheet(variableStyle.sheet!));
     registerVariablesSheet(variableStyle.sheet!);
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-    injectStaticStyle(rootVarsStyle, variableStyle.nextSibling, 'root-vars');
+    injectStaticStyle(rootVarsStyle, variableStyle, 'root-vars');
 
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
     const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
@@ -166,6 +162,10 @@ function createStaticStyleOverrides() {
         document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
         proxyScript.remove();
     }
+
+    const overrideStyle = createOrUpdateStyle('darkreader--override');
+    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    injectStaticStyle(overrideStyle, document.head.lastChild, 'override');
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

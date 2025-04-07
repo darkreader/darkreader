@@ -42,21 +42,25 @@ let isIFrame: boolean | null = null;
 let ignoredImageAnalysisSelectors: string[] = [];
 let ignoredInlineSelectors: string[] = [];
 
-const staticStyleMap = new Map<string, HTMLStyleElement>();
+let staticStyleMap = new WeakMap<ParentNode, Map<string, HTMLStyleElement>>();
 
 function createOrUpdateStyle(className: string, root: ParentNode = document.head || document): HTMLStyleElement {
     let element: HTMLStyleElement | null = root.querySelector(`.${className}`);
+    if (!staticStyleMap.has(root)) {
+        staticStyleMap.set(root, new Map());
+    }
+    const classMap = staticStyleMap.get(root)!;
     if (element) {
-        staticStyleMap.set(className, element);
-    } else if (staticStyleMap.has(className)) {
-        element = staticStyleMap.get(className)!;
+        classMap.set(className, element);
+    } else if (classMap.has(className)) {
+        element = classMap.get(className)!;
     } else {
         element = document.createElement('style');
         element.classList.add('darkreader');
         element.classList.add(className);
         element.media = 'screen';
         element.textContent = '';
-        staticStyleMap.set(className, element);
+        classMap.set(className, element);
     }
     return element;
 }
@@ -242,7 +246,11 @@ function replaceCSSTemplates($cssText: string) {
 }
 
 function cleanFallbackStyle() {
-    const fallback = staticStyleMap.get('darkreader--fallback') || document.querySelector('.darkreader--fallback');
+    const fallback = (
+        staticStyleMap.get(document.head)?.get('darkreader--fallback') ||
+        staticStyleMap.get(document)?.get('darkreader--fallback') ||
+        document.querySelector('.darkreader--fallback')
+    );
     if (fallback) {
         fallback.textContent = '';
     }
@@ -772,7 +780,7 @@ export function removeDynamicTheme(): void {
 
         restoreMetaThemeColor();
         selectors.forEach((selector) => removeNode(document.head.querySelector(selector)));
-        staticStyleMap.clear();
+        staticStyleMap = new WeakMap();
         removeProxy();
     }
     shadowRootsWithOverrides.forEach((root) => {

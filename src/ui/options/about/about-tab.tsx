@@ -23,9 +23,9 @@ export function AboutTab(): Malevic.Child {
             </a>
         </div>
         {isMobile ? null : (
-        <div>
-            <a href={MOBILE_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('mobile')}</a>
-        </div>
+            <div>
+                <a href={MOBILE_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('mobile')}</a>
+            </div>
         )}
         <div>
             <a href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>

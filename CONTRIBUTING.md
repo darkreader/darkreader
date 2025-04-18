@@ -183,6 +183,10 @@ CSS
 - If an inverted element contains images or other content that becomes incorrectly displayed, use the `NO INVERT` rule.
 - `REMOVE BG` removes the background image from an element and forces a black background.
 
+## Adding new Issues or Bugs
+
+If your issue or pull request involves visual changesespecially on restricted, private, or login-required sites please include screenshots to help maintainers review your submission effectively.
+
 ## Adding new features or fixing bugs
 
 If you would like to **add a new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.

@@ -355,7 +355,7 @@ export class Extension {
 
     private static registerContextMenus() {
         chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameId, frameUrl, pageUrl}, tab) =>
-            Extension.onCommand(menuItemId as Command, tab && tab.id || null, frameId || null, frameUrl || pageUrl));
+            Extension.onCommand(menuItemId as Command, tab && tab.id || null, frameId || null, frameUrl || pageUrl || null));
         chrome.contextMenus.removeAll(() => {
             Extension.registeredContextMenus = false;
             chrome.contextMenus.create({

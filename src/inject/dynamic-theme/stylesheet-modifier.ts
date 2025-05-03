@@ -3,23 +3,12 @@ import {isChromium} from '../../utils/platform';
 import {getHashCode} from '../../utils/text';
 import {createAsyncTasksQueue} from '../../utils/throttle';
 
-import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule, isStyleRule} from './css-rules';
+import {themeCacheKeys} from './modify-colors';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
 import type {CSSVariableModifier} from './variables';
-
-const themeCacheKeys: Array<keyof Theme> = [
-    'mode',
-    'brightness',
-    'contrast',
-    'grayscale',
-    'sepia',
-    'darkSchemeBackgroundColor',
-    'darkSchemeTextColor',
-    'lightSchemeBackgroundColor',
-    'lightSchemeTextColor',
-];
 
 function getThemeKey(theme: Theme) {
     let resultKey = '';
@@ -311,6 +300,12 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         function buildStyleSheet() {
             function createTarget(group: ReadyGroup, parent: CSSBuilder): CSSBuilder {
                 const {rule} = group;
+                if (isStyleRule(rule)) {
+                    const {selectorText} = rule;
+                    const index = parent.cssRules.length;
+                    parent.insertRule(`${selectorText} {}`, index);
+                    return parent.cssRules[index] as CSSBuilder;
+                }
                 if (isMediaRule(rule)) {
                     const {media} = rule;
                     const index = parent.cssRules.length;

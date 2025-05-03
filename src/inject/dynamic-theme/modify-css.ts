@@ -1,5 +1,5 @@
 import type {Theme} from '../../definitions';
-import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
+import {parseColorWithCache, rgbToHSL, hslToString, RGBA} from '../../utils/color';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';
@@ -261,10 +261,18 @@ const unparsableColors = new Set([
 ]);
 
 function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier | null {
-    if (unparsableColors.has(value.toLowerCase())) {
+    if (
+        unparsableColors.has(value.toLowerCase()) &&
+        !(prop === 'color' && value === 'initial')
+    ) {
         return value;
     }
-    const rgb = parseColorWithCache(value);
+    let rgb: RGBA | null = null;
+    if (prop === 'color' && value === 'initial') {
+        rgb = {r: 0, g: 0, b: 0, a: 1};
+    } else {
+        rgb = parseColorWithCache(value);
+    }
     if (!rgb) {
         logWarn("Couldn't parse color", value);
         return null;

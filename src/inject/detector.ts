@@ -27,7 +27,10 @@ function hasBuiltInDarkTheme() {
             }
             processedElements.add(element);
             const style = element === document.documentElement ? rootStyle : getComputedStyle(element);
-            const bgColor = parseColorWithCache(style.backgroundColor)!;
+            const bgColor = parseColorWithCache(style.backgroundColor);
+            if (!bgColor) {
+                return false;
+            }
             if (bgColor.r === 24 && bgColor.g === 26 && bgColor.b === 27) {
                 // For some websites changes to CSSStyleSheet.disabled and HTMLStyleElement.textContent
                 // are not being applied synchronously. For example https://zorin.com/
@@ -40,7 +43,10 @@ function hasBuiltInDarkTheme() {
                     return false;
                 }
             } else {
-                const textColor = parseColorWithCache(style.color)!;
+                const textColor = parseColorWithCache(style.color);
+                if (!textColor) {
+                    return false;
+                }
                 const textLightness = getSRGBLightness(textColor.r, textColor.g, textColor.b);
                 if (textLightness < 0.5) {
                     return false;
@@ -49,8 +55,14 @@ function hasBuiltInDarkTheme() {
         }
     }
 
-    const rootColor = parseColorWithCache(rootStyle.backgroundColor)!;
-    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor)! : {r: 0, g: 0, b: 0, a: 0};
+    const rootColor = parseColorWithCache(rootStyle.backgroundColor);
+    if (!rootColor) {
+        return false;
+    }
+    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor) : {r: 0, g: 0, b: 0, a: 0};
+    if (!bodyColor) {
+        return false;
+    }
     const rootLightness = (1 - rootColor.a!) + rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
     const finalLightness = (1 - bodyColor.a!) * rootLightness + bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
     return finalLightness < 0.5;

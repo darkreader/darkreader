@@ -258,7 +258,8 @@ export default class TabManager {
             if (themeMessageTypes.includes(message.type)) {
                 IconManager.setIcon({tabId, isActive: true, colorScheme: message.data?.theme?.mode ? 'dark' : 'light'});
             } else if (message.type === MessageTypeBGtoCS.CLEAN_UP) {
-                IconManager.setIcon({tabId, isActive: false});
+                const isActive = TabManager.tabs[tabId]?.[0]?.url?.startsWith('https://darkreader.org/');
+                IconManager.setIcon({tabId, isActive});
             }
         }
 
@@ -333,6 +334,27 @@ export default class TabManager {
             // in sendMessage() would enumerate undefined as well.
             delete TabManager.tabs[tabId][frameId];
         }
+
+        TabManager.stateManager.saveState();
+    }
+
+    static async cleanState() {
+        await TabManager.stateManager.loadState();
+
+        const actualTabs = await queryTabs({});
+        const tabIds = Object.keys(TabManager.tabs).map((id) => Number(id));
+        const staleTabs = new Set(tabIds);
+        actualTabs.forEach((actualTab) => {
+            const tabId = actualTab.id;
+            if (tabId) {
+                staleTabs.delete(tabId);
+            }
+        });
+        staleTabs.forEach((staleTabId) => {
+            if (TabManager.tabs[staleTabId]) {
+                delete TabManager.tabs[staleTabId];
+            }
+        });
 
         TabManager.stateManager.saveState();
     }

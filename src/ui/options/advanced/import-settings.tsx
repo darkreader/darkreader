@@ -29,6 +29,24 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
         />
     ) : null;
 
+    function showWarningDialog() {
+        context.store.isWarningDialogVisible = true;
+        context.refresh();
+    }
+
+    function hideWarningDialog() {
+        context.store.isWarningDialogVisible = false;
+        context.refresh();
+    }
+
+    const warningDialog = context.store.isWarningDialogVisible ? (
+        <MessageBox
+            caption="Warning! Your current settings will be overwritten. Click OK to proceed."
+            onOK={importSettings}
+            onCancel={hideWarningDialog}
+        />
+    ) : null;
+
     function importSettings() {
         openFile({extensions: ['json']}, (result: string) => {
             try {
@@ -53,11 +71,12 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
         <ControlGroup>
             <ControlGroup.Control>
                 <Button
-                    onclick={importSettings}
+                    onclick={showWarningDialog}
                     class="advanced__import-settings-button"
                 >
                     Import Settings
                     {dialog}
+                    {warningDialog}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>

@@ -2,6 +2,7 @@
 #-----------------------------------
 build/
 darkreader.js
+darkreader.mjs
 debug.log
 src/plus
 
@@ -39,3 +40,7 @@ isolate-*-v8.log
 #-----------------------------------
 deno.lock
 deno.json
+
+# System files
+#-----------------------------------
+.DS_Store

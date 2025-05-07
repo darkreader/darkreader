@@ -22,7 +22,7 @@ import IconManager from './icon-manager';
 import type {ExtensionAdapter} from './messenger';
 import Messenger from './messenger';
 import Newsmaker from './newsmaker';
-import TabManager, {detectDarkThemeInIFrames} from './tab-manager';
+import TabManager from './tab-manager';
 import UIHighlights from './ui-highlights';
 import UserStorage from './user-storage';
 import {getCommands, canInjectScript} from './utils/extension-api';
@@ -670,13 +670,13 @@ export class Extension {
                 const mode = Extension.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
+            const detectorHints = settings.detectDarkTheme ? getDetectorHintsFor(url, ConfigManager.DETECTOR_HINTS_RAW!, ConfigManager.DETECTOR_HINTS_INDEX!) : null;
             const detectDarkTheme = (
-                (isTopFrame || detectDarkThemeInIFrames.some((f) => url.startsWith(f))) &&
                 settings.detectDarkTheme &&
+                (isTopFrame || detectorHints?.some((h) => h.iframe)) &&
                 !isURLInList(tabURL, settings.enabledFor) &&
                 !isPDF(tabURL)
             );
-            const detectorHints = detectDarkTheme ? getDetectorHintsFor(url, ConfigManager.DETECTOR_HINTS_RAW!, ConfigManager.DETECTOR_HINTS_INDEX!) : null;
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}

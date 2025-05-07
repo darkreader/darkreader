@@ -48,7 +48,7 @@ if (
 
 declare const __FIREFOX_MV2__: boolean;
 
-if (__FIREFOX_MV2__ && location.host === 'teams.live.com') {
+if (__FIREFOX_MV2__ && (location.host === 'teams.live.com' || location.host === 'teams.microsoft.com')) {
     // Microsoft Teams calls sheet.cssRules on extension styles and that
     // causes "Not allowed to access cross-origin stylesheet" in Firefox
     (() => {

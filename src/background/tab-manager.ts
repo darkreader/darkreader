@@ -52,6 +52,10 @@ enum DocumentState {
     DISCARDED = 5
 }
 
+export const detectDarkThemeInIFrames = [
+    'https://word-edit.officeapps.live.com/',
+];
+
 /**
  * Note: On Chromium builds, we use documentId if it is available.
  * We avoid messaging using frameId entirely since when document is pre-rendered, it gets a temporary frameId
@@ -190,7 +194,10 @@ export default class TabManager {
                         const frame = entry[1];
                         frame.darkThemeDetected = true;
                         const {documentId, scriptId} = frame;
-                        if (sender.frameId === 0 && !frame.isTop && frameId && documentId) {
+                        if (
+                            (sender.frameId === 0 && !frame.isTop && frameId && documentId) ||
+                            (documentId && detectDarkThemeInIFrames.some((f) => sender.url?.startsWith(f)))
+                        ) {
                             const message = {
                                 type: MessageTypeBGtoCS.CLEAN_UP,
                                 scriptId,

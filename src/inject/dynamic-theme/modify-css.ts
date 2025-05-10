@@ -661,7 +661,7 @@ export function getScrollbarColorModifier(value: string): string | CSSValueModif
         return null;
     }
 
-    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(thumb, theme)}`;
+    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(track, theme)}`;
 }
 
 export function getColorSchemeModifier(): CSSValueModifier {

@@ -81,7 +81,7 @@ export function watchForNodePosition<T extends Node>(
     const MAX_ATTEMPTS_COUNT = 10;
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
-    const prevSibling = node.previousSibling;
+    let prevSibling = node.previousSibling;
     let parent = node.parentNode;
     if (!parent) {
         throw new Error('Unable to watch for node position: parent element not found');
@@ -117,9 +117,8 @@ export function watchForNodePosition<T extends Node>(
 
         if (mode === 'head') {
             if (prevSibling && prevSibling.parentNode !== parent) {
-                logWarn('Unable to restore node position: sibling parent changed', node, prevSibling, parent);
-                stop();
-                return;
+                logWarn('Sibling moved, moving node to the head end', node, prevSibling, parent);
+                prevSibling = document.head.lastChild;
             }
         }
 

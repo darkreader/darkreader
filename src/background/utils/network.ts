@@ -136,6 +136,10 @@ class LimitedCacheStorage {
             }
         }
 
+        if (this.records.size === 0) {
+            this.bytesInUse = 0;
+        }
+
         const expires = Date.now() + LimitedCacheStorage.TTL;
         this.records.set(url, {url, value, size, expires});
         this.bytesInUse += size;
@@ -152,10 +156,42 @@ class LimitedCacheStorage {
             }
         }
 
-        if (this.records.size !== 0) {
+        if (this.records.size === 0) {
+            this.bytesInUse = 0;
+        } else {
             LimitedCacheStorage.ensureAlarmIsScheduled();
         }
     }
+}
+
+function createLimiter() {
+    const loadingUrls = new Set<string>();
+    const awaitingUrls = new Map<string, Set<(data: string) => void>>();
+
+    function loading(url: string) {
+        const result = loadingUrls.has(url);
+        loadingUrls.add(url);
+        return result;
+    }
+
+    async function wait(url: string) {
+        return new Promise<string>((resolve) => {
+            if (!awaitingUrls.has(url)) {
+                awaitingUrls.set(url, new Set());
+            }
+            awaitingUrls.get(url)?.add(resolve);
+        });
+    }
+
+    async function loaded(url: string, data: string) {
+        loadingUrls.delete(url);
+        if (awaitingUrls.has(url)) {
+            awaitingUrls.get(url)!.forEach((callback) => callback(data));
+            awaitingUrls.delete(url);
+        }
+    }
+
+    return {loading, wait, loaded};
 }
 
 export interface FetchRequestParameters {
@@ -176,15 +212,27 @@ export function createFileLoader(): FileLoader {
         'text': loadAsText,
     };
 
+    const limiters = {
+        'data-url': createLimiter(),
+        'text': createLimiter(),
+    };
+
     async function get({url, responseType, mimeType, origin}: FetchRequestParameters) {
         const cache = caches[responseType];
         const load = loaders[responseType];
+        const limiter = limiters[responseType];
         if (cache.has(url)) {
-            return cache.get(url);
+            return cache.get(url)!;
+        }
+
+        if (limiter.loading(url)) {
+            return limiter.wait(url);
         }
 
         const data = await load(url, mimeType, origin);
         cache.set(url, data);
+        limiter.loaded(url, data);
+
         return data;
     }
 

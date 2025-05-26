@@ -4,6 +4,8 @@ import type {AutomationMode} from './utils/automation';
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG, MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoBG, MessageTypeUItoCS} from './utils/message';
 
+// Don't forget to update `src/managed-storage.json` if `UserSettings` or any subtypes change
+
 export type ColorScheme = 'dark' | 'light';
 
 export interface ExtensionData {
@@ -218,6 +220,7 @@ export interface DetectorHint {
     match: string[];
     noDarkTheme: boolean;
     systemTheme: boolean;
+    iframe: boolean;
 }
 
 export interface StaticTheme {

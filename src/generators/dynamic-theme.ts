@@ -69,17 +69,27 @@ export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: 
 
     if (enabledForPDF) {
         // Copy part of fixes which will be mutated
-        const fixes_: DynamicThemeFix[] = [...fixes];
-        fixes_[0] = {...fixes_[0]};
-        if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
-            fixes_[0].css += '\nembed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }';
-        } else {
-            fixes_[0].css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
+        const commonFix = {...fixes[0]};
+        const pdfFixes: DynamicThemeFix[] = [
+            commonFix,
+            ...fixes.slice(1),
+        ];
+
+        const inversionFix = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ ?
+            '\nembed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }' :
+            '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
+        if (!commonFix.css.endsWith(inversionFix)) {
+            commonFix.css += inversionFix;
         }
+
         if (['drive.google.com', 'mail.google.com'].includes(getDomain(url))) {
-            fixes_[0].invert.push('div[role="dialog"] div[role="document"]');
+            const nestedInversionFix = 'div[role="dialog"] div[role="document"]';
+            if (commonFix.invert.at(-1) !== nestedInversionFix) {
+                commonFix.invert.push(nestedInversionFix);
+            }
         }
-        return fixes_;
+
+        return pdfFixes;
     }
 
     return fixes;

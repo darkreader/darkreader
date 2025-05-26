@@ -1,3 +1,45 @@
+# 4.9.106 (May 6, 2025)
+
+- Google Docs: use Filter mode instead of Filter+ by default.
+- Added support for nested CSS rules.
+- Fixed duplicate CSS files requests.
+- Fixed ShadowDOM static style injection.
+- Fixed style injection causing freeze for certain websites.
+- Fixed handling "initial" CSS color value.
+
+# 4.9.105 (February 25, 2025)
+
+- API: Fixed breaking ES5 builds.
+
+# 4.9.104 (February 19, 2025)
+
+- API: ES Module bundle.
+
+# 4.9.103 (February 17, 2025)
+
+- Added support for more color spaces (Tailwind 4 issues).
+- Support variables in shorthand border properties of inline styles.
+- Fixed colors after style overrides were removed (Pinterest issue).
+- Fixed dark theme detection in background tabs.
+- Fixed numeric color variables.
+- Fixed same-origin CSS loading optimization.
+
+# 4.9.102 (February 10, 2025)
+
+- MV3: Fixed background cache performance.
+
+# 4.9.101 (February 7, 2025)
+
+- Fixed processing stylesheets with multiple CSS imports.
+
+# 4.9.100 (January 29, 2025)
+
+- Improved performace of checking available background images.
+- Optimized image analysis caching.
+- Fixed processing style sheets with incorrect imports.
+- Fixed image analysis when extension is re-enabled.
+- Fixed theme update optimization.
+
 # 4.9.99 (December 13, 2024)
 
 - Firefox: Fixed console error.

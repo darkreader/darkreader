@@ -1,12 +1,12 @@
 import type {Theme} from '../../definitions';
-import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
+import {parseColorWithCache, rgbToHSL, hslToString, RGBA} from '../../utils/color';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';
 import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
-import {readImageDetailCache, writeImageDetailCache} from '../cache';
+import {readImageDetailsCache, writeImageDetailsCache} from '../cache';
 import {logWarn, logInfo} from '../utils/log';
 
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
@@ -261,10 +261,18 @@ const unparsableColors = new Set([
 ]);
 
 function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier | null {
-    if (unparsableColors.has(value.toLowerCase())) {
+    if (
+        unparsableColors.has(value.toLowerCase()) &&
+        !(prop === 'color' && value === 'initial')
+    ) {
         return value;
     }
-    const rgb = parseColorWithCache(value);
+    let rgb: RGBA | null = null;
+    if (prop === 'color' && value === 'initial') {
+        rgb = {r: 0, g: 0, b: 0, a: 1};
+    } else {
+        rgb = parseColorWithCache(value);
+    }
     if (!rgb) {
         logWarn("Couldn't parse color", value);
         return null;
@@ -430,12 +438,7 @@ export function getBgImageModifier(
         const getURLModifier = (urlValue: string) => {
             if (!didTryLoadCache) {
                 didTryLoadCache = true;
-                const cache = readImageDetailCache();
-                if (cache) {
-                    Object.entries(cache).forEach(([url, details]) => {
-                        imageDetailsCache.set(url, details);
-                    });
-                }
+                readImageDetailsCache(imageDetailsCache);
             }
 
             let url = getCSSURLValue(urlValue);
@@ -453,22 +456,29 @@ export function getBgImageModifier(
                     return "url('')";
                 }
 
-                const selector = rule.selectorText;
-                if (selector && !scope.querySelector(selector)) {
-                    await new Promise<void>((resolve) => {
-                        if (imageSelectorQueue.has(selector)) {
-                            imageSelectorQueue.get(selector)!.push(resolve);
-                        } else {
-                            imageSelectorQueue.set(selector, [resolve]);
-                            imageSelectorValues.set(selector, urlValue);
-                        }
-                    });
+                let selector = rule.selectorText;
+                if (selector) {
+                    if (selector.includes('::before')) {
+                        selector = selector.replaceAll('::before', '');
+                    }
+                    if (selector.includes('::after')) {
+                        selector = selector.replaceAll('::after', '');
+                    }
+                    if (!scope.querySelector(selector)) {
+                        await new Promise<void>((resolve) => {
+                            if (imageSelectorQueue.has(selector)) {
+                                imageSelectorQueue.get(selector)!.push(resolve);
+                            } else {
+                                imageSelectorQueue.set(selector, [resolve]);
+                                imageSelectorValues.set(selector, urlValue);
+                            }
+                        });
+                    }
                 }
 
                 let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
-                    writeImageDetailCache(imageDetailsCache);
                 } else {
                     try {
                         if (!isBlobURLCheckResultReady()) {
@@ -484,6 +494,7 @@ export function getBgImageModifier(
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
                             imageDetailsCache.set(url, imageDetails);
+                            writeImageDetailsCache(url, imageDetails);
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);
                         }
@@ -650,7 +661,7 @@ export function getScrollbarColorModifier(value: string): string | CSSValueModif
         return null;
     }
 
-    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(thumb, theme)}`;
+    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(track, theme)}`;
 }
 
 export function getColorSchemeModifier(): CSSValueModifier {

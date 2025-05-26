@@ -5,6 +5,7 @@ import {isFirefox} from '../utils/platform';
 import {StateManager} from '../utils/state-manager';
 import {getActiveTab, queryTabs} from '../utils/tabs';
 import {getURLHostOrProtocol} from '../utils/url';
+import IconManager from './icon-manager';
 
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT, logInfo, logWarn} from './utils/log';
@@ -178,7 +179,7 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.DARK_THEME_DETECTED:
+                case MessageTypeCStoBG.DARK_THEME_DETECTED: {
                     const tabId = sender.tab!.id!;
                     const frames = TabManager.tabs[tabId];
                     if (!frames) {
@@ -189,15 +190,19 @@ export default class TabManager {
                         const frame = entry[1];
                         frame.darkThemeDetected = true;
                         const {documentId, scriptId} = frame;
-                        if (sender.frameId === 0 && !frame.isTop && frameId && documentId) {
+                        if (documentId) {
                             const message = {
                                 type: MessageTypeBGtoCS.CLEAN_UP,
                                 scriptId,
                             };
                             TabManager.sendDocumentMessage(tabId, documentId, message, frameId);
                         }
+                        if (frameId === 0) {
+                            IconManager.setIcon({tabId, isActive: false});
+                        }
                     }
                     break;
+                }
 
                 case MessageTypeCStoBG.FETCH: {
                     // Using custom response due to Chrome and Firefox incompatibility
@@ -244,6 +249,21 @@ export default class TabManager {
     }
 
     private static sendDocumentMessage(tabId: number, documentId: string, message: MessageBGtoCS, frameId: number) {
+        if (frameId === 0) {
+            const themeMessageTypes: MessageTypeBGtoCS[] = [
+                MessageTypeBGtoCS.ADD_CSS_FILTER,
+                MessageTypeBGtoCS.ADD_DYNAMIC_THEME,
+                MessageTypeBGtoCS.ADD_STATIC_THEME,
+                MessageTypeBGtoCS.ADD_SVG_FILTER,
+            ];
+            if (themeMessageTypes.includes(message.type)) {
+                IconManager.setIcon({tabId, isActive: true, colorScheme: message.data?.theme?.mode ? 'dark' : 'light'});
+            } else if (message.type === MessageTypeBGtoCS.CLEAN_UP) {
+                const isActive = TabManager.tabs[tabId]?.[0]?.url?.startsWith('https://darkreader.org/');
+                IconManager.setIcon({tabId, isActive});
+            }
+        }
+
         if (__CHROMIUM_MV3__) {
             // On MV3, Chromium has a bug which prevents sending messages to pre-rendered frames without specifying frameId
             // Furthermore, if we send a message addressed to a temporary frameId after the document exits prerender state,
@@ -319,6 +339,27 @@ export default class TabManager {
         TabManager.stateManager.saveState();
     }
 
+    static async cleanState() {
+        await TabManager.stateManager.loadState();
+
+        const actualTabs = await queryTabs({});
+        const tabIds = Object.keys(TabManager.tabs).map((id) => Number(id));
+        const staleTabs = new Set(tabIds);
+        actualTabs.forEach((actualTab) => {
+            const tabId = actualTab.id;
+            if (tabId) {
+                staleTabs.delete(tabId);
+            }
+        });
+        staleTabs.forEach((staleTabId) => {
+            if (TabManager.tabs[staleTabId]) {
+                delete TabManager.tabs[staleTabId];
+            }
+        });
+
+        TabManager.stateManager.saveState();
+    }
+
     static async getTabURL(tab: chrome.tabs.Tab | null): Promise<string> {
         if (__CHROMIUM_MV3__) {
             if (!tab) {
@@ -360,7 +401,7 @@ export default class TabManager {
     static async updateContentScript(options: {runOnProtectedPages: boolean}): Promise<void> {
         (await queryTabs({discarded: false}))
             .filter((tab) => __CHROMIUM_MV3__ || options.runOnProtectedPages || canInjectScript(tab.url))
-            .filter((tab) => !Boolean(TabManager.tabs[tab.id!]))
+            .filter((tab) => !TabManager.tabs[tab.id!])
             .forEach((tab) => {
                 if (__CHROMIUM_MV3__) {
                     chrome.scripting.executeScript({

@@ -1,7 +1,8 @@
 import type {ImageDetails} from './dynamic-theme/image';
 
 const STORAGE_KEY_WAS_ENABLED_FOR_HOST = '__darkreader__wasEnabledForHost';
-const STORAGE_KEY_IMAGE_DETAILS = '__darkreader__imageDetails_v1';
+const STORAGE_KEY_IMAGE_DETAILS_LIST = '__darkreader__imageDetails_v2_list';
+const STORAGE_KEY_IMAGE_DETAILS_PREFIX = '__darkreader__imageDetails_v2_';
 const STORAGE_KEY_CSS_FETCH_PREFIX = '__darkreader__cssFetch_';
 
 export function wasEnabledForHost(): boolean | null {
@@ -26,32 +27,49 @@ export function writeEnabledForHost(value: boolean): void {
 }
 
 let imageCacheTimeout: number = 0;
+const imageDetailsCacheQueue = new Map<string, ImageDetails>();
+const cachedImageUrls: string[] = [];
 
-export function writeImageDetailCache(imageDetailsCache: Map<string, ImageDetails>): void {
-    clearTimeout(imageCacheTimeout);
-    imageCacheTimeout = setTimeout(() => {
-        const cache = {} as Record<string, ImageDetails>;
-        imageDetailsCache.forEach((data, url) => {
-            if (url && url.startsWith('https://')) {
-                cache[url] = data;
+function writeImageDetailsQueue() {
+    imageDetailsCacheQueue.forEach((details, url) => {
+        if (url && url.startsWith('https://')) {
+            try {
+                const json = JSON.stringify(details);
+                sessionStorage.setItem(`${STORAGE_KEY_IMAGE_DETAILS_PREFIX}${url}`, json);
+                cachedImageUrls.push(url);
+            } catch (err) {
             }
-        });
-        try {
-            sessionStorage.setItem(STORAGE_KEY_IMAGE_DETAILS, JSON.stringify(cache));
-        } catch (err) {
         }
-    }, 1000);
+    });
+    imageDetailsCacheQueue.clear();
+    sessionStorage.setItem(STORAGE_KEY_IMAGE_DETAILS_LIST, JSON.stringify(cachedImageUrls));
 }
 
-export function readImageDetailCache(): Record<string, ImageDetails> | null {
+export function writeImageDetailsCache(url: string, imageDetails: ImageDetails): void {
+    if (!url || !url.startsWith('https://')) {
+        return;
+    }
+    imageDetailsCacheQueue.set(url, imageDetails);
+    clearTimeout(imageCacheTimeout);
+    imageCacheTimeout = setTimeout(writeImageDetailsQueue, 1000);
+}
+
+export function readImageDetailsCache(targetMap: Map<string, ImageDetails>): void {
     try {
-        const json = sessionStorage.getItem(STORAGE_KEY_IMAGE_DETAILS);
-        if (json) {
-            return JSON.parse(json);
+        const jsonList = sessionStorage.getItem(STORAGE_KEY_IMAGE_DETAILS_LIST);
+        if (!jsonList) {
+            return;
         }
+        const list: string[] = JSON.parse(jsonList);
+        list.forEach((url) => {
+            const json = sessionStorage.getItem(`${STORAGE_KEY_IMAGE_DETAILS_PREFIX}${url}`);
+            if (json) {
+                const details = JSON.parse(json);
+                targetMap.set(url, details);
+            }
+        });
     } catch (err) {
     }
-    return null;
 }
 
 export function writeCSSFetchCache(url: string, cssText: string): void {

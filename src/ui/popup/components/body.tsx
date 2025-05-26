@@ -21,7 +21,7 @@ import {MobileLinks, MobileLinksButton} from './news/mobile-links';
 import SiteListSettings from './site-list-settings';
 
 
-import {PlusBody} from '@plus/popup/plus-body'; // eslint-disable-line
+import {PlusBody} from '@plus/popup/plus-body';
 
 declare const __THUNDERBIRD__: boolean;
 declare const __PLUS__: boolean;

@@ -1,6 +1,5 @@
 import {TestEnvironment} from 'jest-environment-node';
 import {launch, connect} from 'puppeteer-core';
-import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
 
 import {generateHTMLCoverageReports} from './coverage.js';
@@ -129,6 +128,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
         // We need to manually launch Firefox via cmd.run() to install extension
         // because Firefox does not support installing via CLI arguments
         const firefox = await getFirefoxPath();
+        const {cmd} = await import('web-ext');
         await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
             firefox,

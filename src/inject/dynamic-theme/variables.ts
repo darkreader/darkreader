@@ -712,12 +712,16 @@ function parseRawColorValue(input: string) {
     return {isRaw: false, color: input};
 }
 
-function handleRawColorValue(input: string, theme: Theme, modifyFunction: (rgb: RGBA, theme: Theme) => string) {
+function handleRawColorValue(
+    input: string,
+    theme: Theme,
+    modifyFunction: (rgb: RGBA, theme: Theme, useRegisteredVarColor?: boolean) => string,
+) {
     const {isRaw, color} = parseRawColorValue(input);
 
     const rgb = parseColorWithCache(color);
     if (rgb) {
-        const outputColor = modifyFunction(rgb, theme);
+        const outputColor = modifyFunction(rgb, theme, !isRaw);
 
         // If it's raw, we need to convert it back to the "raw" format.
         if (isRaw) {

@@ -15,21 +15,23 @@ function sendLogToBG(level: 'info' | 'warn' | 'assert', ...args: any[]) {
 
 export function logInfo(...args: any[]): void {
     if (__DEBUG__) {
-        console.info(...args);
+        console.info('DARK READER', ...args);
         sendLogToBG('info', ...args);
     }
 }
 
 export function logWarn(...args: any[]): void {
     if (__DEBUG__) {
-        console.warn(...args);
+        // console.warn is slow in Chrome
+        // console.warn(...args);
+        console.log('DARK READER', ...args);
         sendLogToBG('warn', ...args);
     }
 }
 
 export function logInfoCollapsed(title: string, ...args: any[]): void {
     if (__DEBUG__) {
-        console.groupCollapsed(title);
+        console.groupCollapsed(`DARK READER ${title}`);
         console.log(...args);
         console.groupEnd();
     }
@@ -37,13 +39,13 @@ export function logInfoCollapsed(title: string, ...args: any[]): void {
 
 function logAssert(...args: any[]): void {
     if ((__TEST__ || __DEBUG__)) {
-        console.assert(...args);
+        console.assert(false, 'DARK READER', ...args);
         sendLogToBG('assert', ...args);
     }
 }
 
 export function ASSERT(description: string, condition: (() => boolean) | any): void {
-    if ((__TEST__ || __DEBUG__) && (typeof condition === 'function' && !condition()) || !Boolean(condition)) {
+    if ((__TEST__ || __DEBUG__) && (typeof condition === 'function' && !condition()) || !condition) {
         logAssert(description);
         if (__TEST__) {
             throw new Error(`Assertion failed: ${description}`);

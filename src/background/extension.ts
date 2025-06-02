@@ -670,8 +670,13 @@ export class Extension {
                 const mode = Extension.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
-            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURL, settings.enabledFor) && !isPDF(tabURL);
-            const detectorHints = detectDarkTheme ? getDetectorHintsFor(url, ConfigManager.DETECTOR_HINTS_RAW!, ConfigManager.DETECTOR_HINTS_INDEX!) : null;
+            const detectorHints = settings.detectDarkTheme ? getDetectorHintsFor(url, ConfigManager.DETECTOR_HINTS_RAW!, ConfigManager.DETECTOR_HINTS_INDEX!) : null;
+            const detectDarkTheme = (
+                settings.detectDarkTheme &&
+                (isTopFrame || detectorHints?.some((h) => h.iframe)) &&
+                !isURLInList(tabURL, settings.enabledFor) &&
+                !isPDF(tabURL)
+            );
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}

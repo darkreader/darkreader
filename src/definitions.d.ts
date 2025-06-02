@@ -218,6 +218,7 @@ export interface DetectorHint {
     match: string[];
     noDarkTheme: boolean;
     systemTheme: boolean;
+    iframe: boolean;
 }
 
 export interface StaticTheme {

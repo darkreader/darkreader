@@ -190,13 +190,14 @@ export default class TabManager {
                         const frame = entry[1];
                         frame.darkThemeDetected = true;
                         const {documentId, scriptId} = frame;
-                        if (sender.frameId === 0 && !frame.isTop && frameId && documentId) {
+                        if (documentId) {
                             const message = {
                                 type: MessageTypeBGtoCS.CLEAN_UP,
                                 scriptId,
                             };
                             TabManager.sendDocumentMessage(tabId, documentId, message, frameId);
-                        } else if (frameId === 0) {
+                        }
+                        if (frameId === 0) {
                             IconManager.setIcon({tabId, isActive: false});
                         }
                     }

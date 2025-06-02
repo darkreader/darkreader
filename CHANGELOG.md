@@ -1,3 +1,12 @@
+# 4.9.106 (May 6, 2025)
+
+- Google Docs: use Filter mode instead of Filter+ by default.
+- Added support for nested CSS rules.
+- Fixed duplicate CSS files requests.
+- Fixed ShadowDOM static style injection.
+- Fixed style injection causing freeze for certain websites.
+- Fixed handling "initial" CSS color value.
+
 # 4.9.105 (February 25, 2025)
 
 - API: Fixed breaking ES5 builds.

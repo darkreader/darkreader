@@ -127,7 +127,7 @@ However, this can be manually enabled with the following steps:
 4. Close the developer tools window and click on the Dark Reader extension icon again.
 5. Go to `Settings` -> `Advanced` and enable the `Synchronize sites fixes` setting.
 
-To force a synchronization of the site fixes (when the corresponding setting is enabled), perform the following steps:
+To force a synchronization of the sites fixes (when the corresponding setting is enabled), perform the following steps:
 
 1. Click on the Dark Reader extension icon.
 2. Go to `Settings` -> `Advanced` -> `Dev tools`.
@@ -179,7 +179,7 @@ The option "Run on sites with restrictions", present for some extensions, is onl
 
 For Dark Reader, the option "Run on sites with restrictions" is not shown because Dark Reader is a [Recommended](https://support.mozilla.org/en-US/kb/recommended-extensions-program) extension by Mozilla. (The "Recommended" status is only relevant for "quarantined domains", and does not affect "restricted domains".)
 
-The fact that it is a Recommended extension, means that it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to extension security. Because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains** (but will still obey the "restricted domains" list if it is not empty).
+The fact that it is a Recommended extension means that it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to extension security. Because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains** (but will still obey the "restricted domains" list if it is not empty).
 
 Regarding quarantined domains specifically, there is this [comment from Firefox's source code:](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938)
 

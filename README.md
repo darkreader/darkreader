@@ -33,17 +33,17 @@ Open the terminal in the root folder and run:
 
 This will create a `build/release/darkreader-chrome.zip` file for use in a Chromium-based browser and a `build/release/darkreader-firefox.xpi` file for use in Firefox.
 
-You can customize build process by passing flags to build script. To see all flags, run `npm run build -- --help`.
+You can customize the build process by passing flags to build script. To see all flags, run `npm run build -- --help`.
 
 ### Building with Deno
 
-You can build Dark Reader with alternative runtime called [Deno](https://deno.land/). For this run `deno:bootstrap` script (e.g., via `npm run deno:bootstrap` or manually copy the command from `package.json`). Then run the same commands described above.
+You can build Dark Reader with an alternative runtime called [Deno](https://deno.land/). For this run `deno:bootstrap` script (e.g., via `npm run deno:bootstrap` or manually copy the command from `package.json`). Then run the same commands described above.
 
-Please note that if you encounter error `Too many open files (os error 24)`, then you should use the newer version of Deno (preferably built from source or canary).
+Please note that if you encounter the error `Too many open files (os error 24)`, then you should use the newer version of Deno (preferably built from source or canary).
 
 ### Bundling with official Firefox store signatures (experimental)
 
-Prior to publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that extension bundle did not get corrupted or bit-rotted) and that extension store performed very basic extension validation.
+Before publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that the extension bundle did not get corrupted or bit-rotted) and that the extension store performed very basic extension validation.
 
 Dark Reader repository contains these digital signatures and you can add them to the extension bundle. The following will build Dark Reader for Firefox version 4.9.63:
 ```
@@ -171,15 +171,15 @@ To reset them, click on the reset (or delete icon, if present) icon at the most-
 ### Clarification about quarantined domains ("Run on sites with restrictions" option)
 <details><summary>Quarantined domains and Dark Reader — an explanation</summary>
 
-The option "Run on sites with restrictions", present for some extensions, is only related to quarantined domains, and is not needed for Dark Reader to work on restricted websites. In the context of Firefox's source code, "restricted domains" and "quarantined domains" are two separate things.
+The option "Run on sites with restrictions", present for some extensions, is only related to quarantined domains and is not needed for Dark Reader to work on restricted websites. In the context of Firefox's source code, "restricted domains" and "quarantined domains" are two separate things.
 
-**The "restricted domains" list** (controlled by the preference `extensions.webextensions.restrictedDomains`) is the same for all users and will restrict *all* user-installed extensions (without exceptions) from running on the specified websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains Mozilla-owned domains. Sites that are not on that list will not be affected by those restrictions (meaning that the extensions will be able to run normally).
+**The "restricted domains" list** (controlled by the preference `extensions.webextensions.restrictedDomains`) is the same for all users. It will restrict *all* user-installed extensions (without exceptions) from running on the specified websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains Mozilla-owned domains. Sites that are not on that list will not be affected by those restrictions (meaning that the extensions will be able to run normally).
 
-**The "quarantined domains" list** (controlled by the preferences `extensions.quarantinedDomains.enabled` and `extensions.quarantinedDomains.list`) contain domains that will run extensions normally, but if Firefox detects suspicious activity from a particular extension it will block that extension on those specific websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains domains related to internet banking in Brazil. For more information about quarantined domains, see "[Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)".
+**The "quarantined domains" list** (controlled by the preferences `extensions.quarantinedDomains.enabled` and `extensions.quarantinedDomains.list`) contains domains that will run extensions normally, but if Firefox detects suspicious activity from a particular extension it will block that extension on those specific websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains domains related to Internet banking in Brazil. For more information about quarantined domains, see "[Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)".
 
 For Dark Reader, the option "Run on sites with restrictions" is not shown because Dark Reader is a [Recommended](https://support.mozilla.org/en-US/kb/recommended-extensions-program) extension by Mozilla. (The "Recommended" status is only relevant for "quarantined domains", and does not affect "restricted domains".)
 
-Due to the fact that it is a Recommended extension, it means that it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to extension security, and because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains** (but will still obey the "restricted domains" list if it is not empty).
+The fact that it is a Recommended extension means that it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to extension security. Because Dark Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains** (but will still obey the "restricted domains" list if it is not empty).
 
 Regarding quarantined domains specifically, there is this [comment from Firefox's source code:](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/Extension.sys.mjs#2937-2938)
 

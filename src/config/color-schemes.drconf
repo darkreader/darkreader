@@ -102,6 +102,18 @@ text: #1f1b24
 
 ================================
 
+Night Owl
+
+DARK
+background: #011627
+text: #d6deeb
+
+LIGHT
+background: #fbfbfb
+text: #403f53
+
+================================
+
 Nord
 
 DARK

@@ -46,6 +46,7 @@ Please note that if you encounter the error `Too many open files (os error 24)`,
 Before publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that the extension bundle did not get corrupted or bit-rotted) and that the extension store performed very basic extension validation.
 
 Dark Reader repository contains these digital signatures and you can add them to the extension bundle. The following will build Dark Reader for Firefox version 4.9.63:
+
 ```
 npm run build -- --firefox --version=4.9.63
 ```
@@ -61,20 +62,21 @@ You can use Dark Reader to enable dark mode on your website!
 - or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
 
 Then you can use the following code to control Dark Reader's API:
+
 ```javascript
 DarkReader.enable({
-    brightness: 100,
-    contrast: 90,
-    sepia: 10
+  brightness: 100,
+  contrast: 90,
+  sepia: 10,
 });
 
 DarkReader.disable();
 
 // Enable when the system color scheme is dark.
 DarkReader.auto({
-    brightness: 100,
-    contrast: 90,
-    sepia: 10
+  brightness: 100,
+  contrast: 90,
+  sepia: 10,
 });
 
 // Stop watching for the system color scheme.
@@ -91,17 +93,17 @@ const isEnabled = DarkReader.isEnabled();
 
 ```javascript
 import {
-    enable as enableDarkMode,
-    disable as disableDarkMode,
-    auto as followSystemColorScheme,
-    exportGeneratedCSS as collectCSS,
-    isEnabled as isDarkReaderEnabled
-} from 'darkreader';
+  enable as enableDarkMode,
+  disable as disableDarkMode,
+  auto as followSystemColorScheme,
+  exportGeneratedCSS as collectCSS,
+  isEnabled as isDarkReaderEnabled,
+} from "darkreader";
 
 enableDarkMode({
-    brightness: 100,
-    contrast: 90,
-    sepia: 10,
+  brightness: 100,
+  contrast: 90,
+  sepia: 10,
 });
 
 disableDarkMode();
@@ -164,16 +166,18 @@ After changing the necessary settings for both Dark Reader and Firefox, reload t
 
 **If you had previously changed any of the following preferences, please reset them to their default values as they are only related to security and are not necessary for Dark Reader to work on restricted websites.**
 To reset them, click on the reset (or delete icon, if present) icon at the most-right corner of the preference line in `about:config`.
+
 - `extensions.webextensions.addons-restricted-domains@mozilla.com.disabled`
 - `extensions.quarantinedDomains.enabled`
 - `extensions.quarantinedDomains.list`
 
 ### Clarification about quarantined domains ("Run on sites with restrictions" option)
+
 <details><summary>Quarantined domains and Dark Reader — an explanation</summary>
 
 The option "Run on sites with restrictions", present for some extensions, is only related to quarantined domains and is not needed for Dark Reader to work on restricted websites. In the context of Firefox's source code, "restricted domains" and "quarantined domains" are two separate things.
 
-**The "restricted domains" list** (controlled by the preference `extensions.webextensions.restrictedDomains`) is the same for all users. It will restrict *all* user-installed extensions (without exceptions) from running on the specified websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains Mozilla-owned domains. Sites that are not on that list will not be affected by those restrictions (meaning that the extensions will be able to run normally).
+**The "restricted domains" list** (controlled by the preference `extensions.webextensions.restrictedDomains`) is the same for all users. It will restrict _all_ user-installed extensions (without exceptions) from running on the specified websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains Mozilla-owned domains. Sites that are not on that list will not be affected by those restrictions (meaning that the extensions will be able to run normally).
 
 **The "quarantined domains" list** (controlled by the preferences `extensions.quarantinedDomains.enabled` and `extensions.quarantinedDomains.list`) contains domains that will run extensions normally, but if Firefox detects suspicious activity from a particular extension it will block that extension on those specific websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains domains related to Internet banking in Brazil. For more information about quarantined domains, see "[Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)".
 

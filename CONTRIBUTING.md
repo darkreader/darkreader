@@ -2,12 +2,6 @@
 
 <p align="center">You can contribute to and help Dark Reader in many ways. Read on below to learn how and thank you in advance.</p>
 
-## Sponsor
-
-<a href="https://opencollective.com/darkreader/donate" target="_blank" rel="noreferrer noopener"> <img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 /></a>
-
-Sponsor the development of Dark Reader.
-
 ## Translation
 
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/main/src/_locales) a translation. See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
@@ -19,18 +13,20 @@ Website pages can request Dark Reader to disable itself by embedding a "Dark Rea
 ### Disabling Dark Reader statically
 
 Add `<meta name="darkreader-lock">` within your HTML document in `<head>` like so:
+
 ```html
 <head>
-    <meta name="darkreader-lock">
+  <meta name="darkreader-lock" />
 </head>
 ```
 
 ### Disabling Dark Reader dynamically
 
 Add the "lock" dynamically like so (assuming browser already parsed enough of the document to create a `head` attribute):
+
 ```js
-const lock = document.createElement('meta');
-lock.name = 'darkreader-lock';
+const lock = document.createElement("meta");
+lock.name = "darkreader-lock";
 document.head.appendChild(lock);
 ```
 
@@ -104,12 +100,12 @@ IGNORE IMAGE ANALYSIS
 .logo
 ```
 
-| Rule | Description | Notes / Examples |
-|---|---|---|
-| **INVERT** | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
-| **CSS** | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
-| **IGNORE&nbsp;INLINE&nbsp;STYLE** | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
-| **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |  |
+| Rule                                | Description                                                           | Notes / Examples                                                                                                                                                                                                                                                                |
+| ----------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **INVERT**                          | Inverts specified elements.                                           | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds.                                                                                                                                                                                           |
+| **CSS**                             | Adds custom CSS to a web page.                                        | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>_Example_: `${white}` will become `${black}` in dark mode. |
+| **IGNORE&nbsp;INLINE&nbsp;STYLE**   | Prevents inline style analysis of matched elements.                   | _Example_: `<p style="color: red">` element's style attribute will not be changed.                                                                                                                                                                                              |
+| **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |                                                                                                                                                                                                                                                                                 |
 
 ## Adding a new color scheme
 
@@ -147,12 +143,12 @@ CSS
 
 Here is a full table of available CSS variables:
 
-| Variable | Description | Use |
-|---|---|---|
-| **`--darkreader-neutral-background`** | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>the wrong background color. |
-| **`--darkreader-neutral-text`** | Neutral text color that <br>corresponds to the user's settings. | Used for elements with the wrong text color. |
-| **`--darkreader-selection-background`** | The background color setting <br>defined by the user. | The user's Background Color setting. |
-| **`--darkreader-selection-text`** | The text color setting <br>defined by the user. | The user's Text Color setting. |
+| Variable                                | Description                                                           | Use                                                                |
+| --------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **`--darkreader-neutral-background`**   | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>the wrong background color. |
+| **`--darkreader-neutral-text`**         | Neutral text color that <br>corresponds to the user's settings.       | Used for elements with the wrong text color.                       |
+| **`--darkreader-selection-background`** | The background color setting <br>defined by the user.                 | The user's Background Color setting.                               |
+| **`--darkreader-selection-text`**       | The text color setting <br>defined by the user.                       | The user's Text Color setting.                                     |
 
 ## Fixes for Filter and Filter+ mode
 

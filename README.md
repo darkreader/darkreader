@@ -8,6 +8,10 @@
 <br/>
 <br/>
 
+## Release Notes
+
+- Cleaned Up uneccesary functions
+
 ## Questions
 
 Most questions can be answered by reading the [help page](https://darkreader.org/help/).

@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Midnight Surf",
-  "version": "4.9.106",
-  "author": "Alexander Shutau",
+  "version": "1",
+  "author": " Manas Doshi",
   "description": "__MSG_extension_description__",
   "default_locale": "en",
   "browser_action": {

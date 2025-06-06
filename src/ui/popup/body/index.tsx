@@ -2,7 +2,6 @@ import { m } from "malevic";
 import { getContext } from "malevic/dom";
 
 import type { ViewProps } from "../../../definitions";
-import { getLocalMessage } from "../../../utils/locales";
 import { isMobile } from "../../../utils/platform";
 import { Overlay } from "../../controls";
 import { openExtensionPage } from "../../utils";

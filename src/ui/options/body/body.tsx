@@ -5,7 +5,6 @@ import type { ViewProps } from "../../../definitions";
 import { Overlay } from "../../controls";
 import {
   AdvancedIcon,
-  HelpIcon,
   KeyboardIcon,
   ListIcon,
   SettingsIcon,

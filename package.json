@@ -1,5 +1,5 @@
 {
-  "name": "darkreader",
+  "name": "midnight-surf",
   "version": "4.9.106",
   "description": "Dark mode for every website",
   "scripts": {
@@ -40,13 +40,10 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/darkreader/darkreader.git"
+    "url": "https://github.com/moodynooby/modern-darkreader.git"
   },
-  "author": "Alexander Shutau <darkreaderapp@gmail.com> (https://darkreader.org/)",
+  "author": "Manas",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/darkreader/darkreader/issues"
-  },
   "keywords": [
     "dark-theme",
     "dark-mode",
@@ -56,11 +53,6 @@
     "accessibility",
     "eye-care"
   ],
-  "homepage": "https://darkreader.org/",
-  "funding": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/darkreader/donate"
-  },
   "dependencies": {
     "malevic": "0.20.2"
   },

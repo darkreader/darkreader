@@ -2,7 +2,6 @@ import { m } from "malevic";
 import { getContext } from "malevic/dom";
 
 import type { ViewProps } from "../../../definitions";
-import { HOMEPAGE_URL } from "../../../utils/links";
 import { getLocalMessage } from "../../../utils/locales";
 import { isMobile } from "../../../utils/platform";
 import { Overlay } from "../../controls";
@@ -17,13 +16,8 @@ interface IndexStore {
 
 function Logo() {
   return (
-    <a
-      class="m-logo"
-      href={HOMEPAGE_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Dark Reader
+    <a class="m-logo" target="_blank" rel="noopener noreferrer">
+      Midnight Surf
     </a>
   );
 }

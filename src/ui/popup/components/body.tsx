@@ -4,7 +4,6 @@ import { withForms } from "malevic/forms";
 import { withState, useState } from "malevic/state";
 
 import type { ExtensionData, ExtensionActions } from "../../../definitions";
-import { MOBILE_URL } from "../../../utils/links";
 import { getLocalMessage } from "../../../utils/locales";
 import { isMobile } from "../../../utils/platform";
 import { TabPanel } from "../../controls";
@@ -176,19 +175,6 @@ function Body(
         }}
       />
 
-      <div class="mobile-link-container">
-        <a
-          class="mobile-link"
-          href={MOBILE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span class="mobile-link__icon"></span>
-          <span class="mobile-link__text">
-            {getLocalMessage("mobile_link")}
-          </span>
-        </a>
-      </div>
       <MoreSiteSettings
         data={props.data}
         actions={props.actions}

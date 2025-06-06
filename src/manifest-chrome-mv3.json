@@ -1,69 +1,49 @@
 {
-    "manifest_version": 3,
-    "minimum_chrome_version": "106.0.0.0",
-    "action": {
-        "default_title": "Dark Reader",
-        "default_icon": {
-            "38": "icons/dr_active_38.png",
-            "19": "icons/dr_active_19.png"
-        },
-        "default_popup": "ui/popup/index.html"
+  "manifest_version": 3,
+  "minimum_chrome_version": "106.0.0.0",
+  "action": {
+    "default_title": "Midnight Surg",
+    "default_icon": {
+      "38": "icons/dr_active_38.png",
+      "19": "icons/dr_active_19.png"
     },
-    "options_ui": {
-        "page": "ui/popup/index.html"
+    "default_popup": "ui/popup/index.html"
+  },
+  "options_ui": {
+    "page": "ui/popup/index.html"
+  },
+  "background": {
+    "service_worker": "background/index.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src * data:; connect-src *; navigate-to 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://twitter.com/darkreaderapp; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["inject/proxy.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "world": "MAIN"
     },
-    "background": {
-        "service_worker": "background/index.js"
+    {
+      "matches": ["<all_urls>"],
+      "js": ["inject/fallback.js", "inject/index.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "world": "ISOLATED"
     },
-    "content_security_policy": {
-        "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src * data:; connect-src *; navigate-to 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://twitter.com/darkreaderapp; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "inject/proxy.js"
-            ],
-            "run_at": "document_start",
-            "all_frames": true,
-            "match_about_blank": true,
-            "world": "MAIN"
-        },
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "inject/fallback.js",
-                "inject/index.js"
-            ],
-            "run_at": "document_start",
-            "all_frames": true,
-            "match_about_blank": true,
-            "world": "ISOLATED"
-        },
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "inject/color-scheme-watcher.js"
-            ],
-            "run_at": "document_idle",
-            "all_frames": false,
-            "match_about_blank": false,
-            "world": "ISOLATED"
-        }
-    ],
-    "permissions": [
-        "alarms",
-        "fontSettings",
-        "scripting",
-        "storage"
-    ],
-    "host_permissions": [
-        "*://*/*"
-    ]
+    {
+      "matches": ["<all_urls>"],
+      "js": ["inject/color-scheme-watcher.js"],
+      "run_at": "document_idle",
+      "all_frames": false,
+      "match_about_blank": false,
+      "world": "ISOLATED"
+    }
+  ],
+  "permissions": ["alarms", "fontSettings", "scripting", "storage"],
+  "host_permissions": ["*://*/*"]
 }

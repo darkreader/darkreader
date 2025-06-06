@@ -1,66 +1,53 @@
 {
-    "manifest_version": 2,
-    "name": "Dark Reader",
-    "version": "4.9.106",
-    "author": "Alexander Shutau",
-    "description": "__MSG_extension_description__",
-    "default_locale": "en",
-    "browser_action": {
-        "default_title": "Dark Reader",
-        "default_icon": {
-            "38": "icons/dr_active_38.png",
-            "19": "icons/dr_active_19.png"
-        },
-        "default_popup": "ui/popup/index.html"
+  "manifest_version": 2,
+  "name": "Midnight Surf",
+  "version": "4.9.106",
+  "author": "Alexander Shutau",
+  "description": "__MSG_extension_description__",
+  "default_locale": "en",
+  "browser_action": {
+    "default_title": "Midnight Surf",
+    "default_icon": {
+      "38": "icons/dr_active_38.png",
+      "19": "icons/dr_active_19.png"
     },
-    "icons": {
-        "16": "icons/dr_16.png",
-        "48": "icons/dr_48.png",
-        "128": "icons/dr_128.png"
-    },
-    "background": {
-        "persistent": true,
-        "page": "background/index.html"
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "inject/fallback.js",
-                "inject/index.js"
-            ],
-            "run_at": "document_start",
-            "all_frames": true,
-            "match_about_blank": true
-        }
-    ],
-    "permissions": [
-        "alarms",
-        "fontSettings",
-        "storage",
-        "tabs",
-        "<all_urls>"
-    ],
-    "optional_permissions": [
-        "contextMenus"
-    ],
-    "commands": {
-        "toggle": {
-            "suggested_key": {
-                "default": "Alt+Shift+D"
-            },
-            "description": "__MSG_toggle_extension__"
-        },
-        "addSite": {
-            "suggested_key": {
-                "default": "Alt+Shift+A"
-            },
-            "description": "__MSG_toggle_current_site__"
-        },
-        "switchEngine": {
-            "description": "__MSG_theme_generation_mode__"
-        }
+    "default_popup": "ui/popup/index.html"
+  },
+  "icons": {
+    "16": "icons/dr_16.png",
+    "48": "icons/dr_48.png",
+    "128": "icons/dr_128.png"
+  },
+  "background": {
+    "persistent": true,
+    "page": "background/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["inject/fallback.js", "inject/index.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
     }
+  ],
+  "permissions": ["alarms", "fontSettings", "storage", "tabs", "<all_urls>"],
+  "optional_permissions": ["contextMenus"],
+  "commands": {
+    "toggle": {
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
+      "description": "__MSG_toggle_extension__"
+    },
+    "addSite": {
+      "suggested_key": {
+        "default": "Alt+Shift+A"
+      },
+      "description": "__MSG_toggle_current_site__"
+    },
+    "switchEngine": {
+      "description": "__MSG_theme_generation_mode__"
+    }
+  }
 }

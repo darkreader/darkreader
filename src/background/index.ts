@@ -10,7 +10,6 @@ import type {
   ExtensionData,
   UserSettings,
 } from "../definitions";
-import { getHelpURL, UNINSTALL_URL } from "../utils/links";
 import {
   emulateColorScheme,
   isSystemDarkModeEnabled,
@@ -163,14 +162,6 @@ if (__WATCH__) {
   };
 
   listen();
-} else if (!__DEBUG__ && !__TEST__) {
-  chrome.runtime.onInstalled.addListener(({ reason }) => {
-    if (reason === "install") {
-      chrome.tabs.create({ url: getHelpURL() });
-    }
-  });
-
-  chrome.runtime.setUninstallURL(UNINSTALL_URL);
 }
 
 if (__TEST__) {

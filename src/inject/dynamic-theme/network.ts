@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) =>
         resolvers.delete(id!);
         rejectors.delete(id!);
         if (error) {
-            reject && reject(error);
+            reject && reject(typeof error === 'string' ? new Error(error) : error);
         } else {
             resolve && resolve(data);
         }

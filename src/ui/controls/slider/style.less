@@ -7,13 +7,14 @@
 @slider-track-color: @color-control-hover;
 @slider-track-fill-color: @color-control-active;
 @slider-thumb-color: @color-control-fore;
-
+@slider-border-radius: 30px;
 .slider {
     display: inline-block;
     height: @slider-height;
     position: relative;
     touch-action: none;
     width: 100%;
+    border-radius: 30px;
 
     &__track {
         background-color: @slider-track-color;
@@ -23,12 +24,16 @@
         margin-top: (@slider-height - @slider-track-height) / 2;
         position: absolute;
         width: calc(100% - @slider-thumb-width);
+        border-radius: 30px;
+
 
         &__fill {
             background-color: @slider-track-fill-color;
             display: inline-block;
             height: 100%;
             position: absolute;
+            border-radius: 30px;
+
 
             &::before {
                 background-color: @slider-track-fill-color;
@@ -37,6 +42,8 @@
                 position: absolute;
                 right: 100%;
                 width: @slider-thumb-width / 2;
+                border-radius: 30px;
+
             }
         }
 
@@ -47,6 +54,8 @@
             height: 100%;
             position: absolute;
             width: @slider-thumb-width / 2;
+            border-radius: 30px;
+
         }
 
         &::before {
@@ -62,6 +71,8 @@
         margin-left: @slider-thumb-width / 2;
         position: absolute;
         width: calc(100% - @slider-thumb-width);
+        border-radius: 30px;
+
     }
 
     &__thumb {
@@ -73,6 +84,8 @@
         margin-top: (@slider-height - @slider-thumb-size) / 2;
         position: absolute;
         width: @slider-thumb-width;
+        border-radius: 30px;
+
 
         &__value {
             color: @color-control-fore;
@@ -82,10 +95,13 @@
             position: absolute;
             -moz-user-select: none;
             user-select: none;
+            border-radius: 30px;
 
             &--flip {
                 left: initial;
                 right: calc(100% + @size-text-normal / 2);
+                border-radius: 30px;
+
             }
         }
     }
@@ -94,18 +110,25 @@
         box-shadow: 0 0 0.25rem black;
         height: @slider-thumb-active-size;
         margin-top: (@slider-height - @slider-thumb-active-size) / 2;
+        border-radius: 30px;
 
         &__value {
             line-height: @slider-thumb-active-size;
+            border-radius: 30px;
+
         }
     }
 
     &--active &__track {
         height: @slider-track-active-height;
         margin-top: (@slider-height - @slider-track-active-height) / 2;
+        border-radius: 30px;
+
     }
 
     &__value {
         display: none;
+        border-radius: 30px;
+
     }
 }

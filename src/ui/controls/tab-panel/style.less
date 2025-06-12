@@ -7,38 +7,38 @@
   min-height: 0;
 
   &__button {
-    border-bottom: @size-border solid @color-border;
-    border-radius: 50px;
-    border-left: none;
-    border-right: none;
-    border-top: none;
     box-sizing: border-box;
     color: @color-control-fore-inactive;
     font-size: @size-text-large;
     font-weight: bold;
-    height: @size-control-inner + @size-border;
-    padding: 0 @indent-small + @size-border;
+    height: @size-control-inner;
+    padding: 0 @indent-small;
     white-space: pre;
-
+    border: 0;
     &:hover {
       color: @color-fore;
+      border-radius: 30px;
     }
 
     &:active {
       background-color: @color-control-hover;
+      border-radius: 30px;
     }
 
     &--active {
       border-bottom: none;
-      border-radius: 50px;
+      border-radius: 30px;
       border-left: @size-border solid @color-border;
       border-right: @size-border solid @color-border;
       border-top: @size-border solid @color-border;
       color: @color-heading;
       padding: 0 @indent-small;
+      border-radius: 30px;
 
       &:hover {
         color: @color-heading;
+            border-radius: 30px;
+
       }
     }
   }
@@ -54,6 +54,8 @@
       border-bottom: @size-border solid @color-border;
       content: "";
       flex: auto;
+      border-radius: 30px;
+
     }
   }
 

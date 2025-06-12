@@ -6,6 +6,7 @@
     flex-direction: column;
     -moz-user-select: none;
     user-select: none;
+    border-radius: 30px;
 
     &__line {
         display: flex;
@@ -69,6 +70,7 @@
         &:hover,
         &:active {
             background-color: @color-control-back;
+            border-radius: 30px;
         }
     }
 
@@ -102,14 +104,20 @@
     transition: background-color @time-slow;
     -moz-user-select: none;
     user-select: none;
+    border-radius: 30px;
+
 
     &:hover {
         background-color: @color-control-hover;
         transition: background-color @time-fast;
+        border-radius: 30px;
+
     }
 
     &--clickable {
         cursor: pointer;
+        border-radius: 30px;
+
     }
 
     &__value {
@@ -119,6 +127,8 @@
         position: absolute;
         top: 0;
         transition: width @time-fast;
+        border-radius: 30px;
+
     }
 
     &__label {
@@ -129,5 +139,7 @@
         position: relative;
         white-space: nowrap;
         z-index: 1;
+        border-radius: 30px;
+
     }
 }

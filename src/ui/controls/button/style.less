@@ -2,7 +2,7 @@
 
 .button {
     background-color: @color-control-back;
-    border: @size-border solid @color-border;
+    border: 0;
     box-sizing: content-box;
     color: @color-control-fore;
     cursor: pointer;
@@ -21,10 +21,14 @@
     &:hover {
         background-color: @color-control-hover;
         transition: background-color @time-fast;
+        border-radius: 30px;
+        border: @size-border solid @color-border;
     }
 
     &:active {
         background-color: @color-control-active;
+        border: @size-border solid @color-border;
+        border-radius: 30px;
     }
 
     &__wrapper {

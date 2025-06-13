@@ -23,7 +23,12 @@
         "removeComments": false,
         "sourceMap": true,
         "inlineSources": true,
-        "noEmitOnError": true
+        "noEmitOnError": true,
+        "paths": {
+            "@plus/*": ["../../src/stubs/*"],
+            "definitions": ["../../src/definitions"],
+            "utils/*": ["../../src/utils/*"]
+        }
     },
     "exclude": [
         "./coverage"

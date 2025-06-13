@@ -25,7 +25,7 @@ it('URL is enabled', () => {
             enableContextMenus: false,
             detectDarkTheme: false,
             ...settings,
-        };
+        } as UserSettings;
     }
 
     // Not invert listed

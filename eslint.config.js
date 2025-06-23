@@ -125,7 +125,7 @@ export default tslint.config({
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
-        '@stylistic/func-call-spacing': ['error', 'never'],
+        '@stylistic/function-call-spacing': ['error', 'never'],
         '@stylistic/keyword-spacing': ['error', {
             after: true,
             before: true,

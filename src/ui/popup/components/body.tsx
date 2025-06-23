@@ -159,15 +159,17 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
     }
 
     const filterTab = <FilterSettings data={props.data} actions={props.actions}>
-        <div class="birthday-container">
-            <i class="birthday-icon">🎉</i>
-            <span class="birthday-message">
-                {birthdayMessageSpec}
-            </span>
-            <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
-            </a>
-        </div>
+        {props.data.uiHighlights.includes('anniversary') ? (
+            <div class="birthday-container">
+                <i class="birthday-icon">🎉</i>
+                <span class="birthday-message">
+                    {birthdayMessageSpec}
+                </span>
+                <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                    <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
+                </a>
+            </div>
+        ) : null}
     </FilterSettings>;
 
     const moreTab = <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />;

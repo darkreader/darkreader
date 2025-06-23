@@ -25,7 +25,7 @@ import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UIHighlights from './ui-highlights';
 import UserStorage from './user-storage';
-import {getCommands, canInjectScript} from './utils/extension-api';
+import {getCommands, canInjectScript, writeLocalStorage, removeLocalStorage} from './utils/extension-api';
 import {logInfo, logWarn} from './utils/log';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 
@@ -284,6 +284,8 @@ export class Extension {
             resetDevInversionFixes: DevTools.resetInversionFixes,
             applyDevStaticThemes: DevTools.applyStaticThemes,
             resetDevStaticThemes: DevTools.resetStaticThemes,
+            startActivation: Extension.startActivation,
+            resetActivation: Extension.resetActivation,
             hideHighlights: UIHighlights.hideHighlights,
         };
     }
@@ -642,6 +644,25 @@ export class Extension {
         Extension.reportChanges();
         IconManager.setIcon({colorScheme: UserStorage.settings.theme.mode ? 'dark' : 'light'});
         Extension.stateManager!.saveState();
+    }
+
+    private static async startActivation(email: string, key: string) {
+        const delay = 2000 + Math.round(Math.random() * 2000);
+        const checkEmail = (email: string) => email && email.trim().includes('@');
+        const checkKey = (key: string) => key.replaceAll('-', '').length === 25 && key.toLocaleLowerCase().startsWith('dr') && key.replaceAll('-', '').match(/^[0-9a-z]{25}$/i);
+        setTimeout(async () => {
+            await writeLocalStorage({activationEmail: email, activationKey: key});
+            if (checkEmail(email) && checkKey(key)) {
+                await UIHighlights.hideHighlights(['anniversary']);
+            }
+            Extension.reportChanges();
+        }, delay);
+    }
+
+    private static async resetActivation() {
+        await removeLocalStorage(['activationEmail', 'activationKey']);
+        await UIHighlights.restoreHighlights(['anniversary']);
+        Extension.reportChanges();
     }
 
     //----------------------

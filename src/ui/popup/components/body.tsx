@@ -175,7 +175,12 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
     const moreTab = <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />;
 
     return (
-        <body class={{'ext-disabled': !props.data.isEnabled}}>
+        <body
+            class={{
+                'ext-disabled': !props.data.isEnabled,
+                'anniversary': props.data.uiHighlights.includes('anniversary'),
+            }}
+        >
             <Loader complete />
 
             <Header

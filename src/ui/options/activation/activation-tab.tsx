@@ -100,7 +100,7 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
             <ControlGroup.Control class="activation__key-control">
                 <TextBox
                     class="activation__key-control__text"
-                    placeholder="XXXXX-XXXXX-XXXXX"
+                    placeholder="XXXX-XXXX-XXXX-XXXX"
                     onchange={(e: {target: HTMLInputElement}) => e.target.value}
                     oncreate={(node: HTMLInputElement) => {
                         store.keyTextElement = node;

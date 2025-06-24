@@ -42,6 +42,9 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                         </Button>
                     </ControlGroup.Control>
                 </ControlGroup>
+                <div class="activation__thumb-up">
+                    <img src="../assets/images/darkreader-thumb-up.svg" />
+                </div>
             </div>
         );
     }

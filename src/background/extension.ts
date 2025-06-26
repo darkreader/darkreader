@@ -44,6 +44,7 @@ interface SystemColorState extends Record<string, unknown> {
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
+declare const __PLUS__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
 export class Extension {
@@ -654,6 +655,9 @@ export class Extension {
             await writeLocalStorage({activationEmail: email, activationKey: key});
             if (checkEmail(email) && checkKey(key)) {
                 await UIHighlights.hideHighlights(['anniversary']);
+                if (__PLUS__) {
+                    await Extension.changeSettings({previewNewestDesign: true});
+                }
             }
             Extension.reportChanges();
         }, delay);
@@ -662,6 +666,9 @@ export class Extension {
     private static async resetActivation() {
         await removeLocalStorage(['activationEmail', 'activationKey']);
         await UIHighlights.restoreHighlights(['anniversary']);
+        if (__PLUS__) {
+            await Extension.changeSettings({previewNewestDesign: false});
+        }
         Extension.reportChanges();
     }
 

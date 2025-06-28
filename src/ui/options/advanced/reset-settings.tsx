@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 
 import {DEFAULT_SETTINGS} from '../../../defaults';
 import type {ViewProps} from '../../../definitions';
+import {getLocalMessage} from '../../../utils/locales';
 import {ControlGroup, MessageBox, ResetButton} from '../../controls';
 
 export function ResetSettings(props: ViewProps): Malevic.Child {
@@ -25,7 +26,7 @@ export function ResetSettings(props: ViewProps): Malevic.Child {
 
     const dialog = context.store.isDialogVisible ? (
         <MessageBox
-            caption="Are you sure you want to remove all your settings? You cannot restore them later"
+            caption={getLocalMessage('reset_settings_confirm')}
             onOK={reset}
             onCancel={hideDialog}
         />
@@ -35,12 +36,12 @@ export function ResetSettings(props: ViewProps): Malevic.Child {
         <ControlGroup>
             <ControlGroup.Control>
                 <ResetButton onClick={showDialog}>
-                    Reset settings
+                    {getLocalMessage('reset_settings')}
                     {dialog}
                 </ResetButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Restore settings to defaults
+                {getLocalMessage('restore_settings_defaults')}
             </ControlGroup.Description>
         </ControlGroup>
     );

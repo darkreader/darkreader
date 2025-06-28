@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
+import {getLocalMessage} from '../../../utils/locales';
 import TabPanel from '../../options/tab-panel/tab-panel';
 import type {DevtoolsProps} from '../types';
 
@@ -19,14 +20,14 @@ export function DynamicModeEditor(props: DevtoolsProps): Malevic.Child {
     return (
         <div class="dynamic-mode-editor">
             <TabPanel isVertical activeTabId={store.activeTabId} onTabChange={onTabChange}>
-                <TabPanel.Tab id="full-editor" label="Full Editor">
+                <TabPanel.Tab id="full-editor" label={getLocalMessage('full_editor')}>
                     <ConfigEditor
                         text={props.devtools.dynamicFixesText}
                         apply={(text) => props.actions.applyDevDynamicThemeFixes(text)}
                         reset={() => props.actions.resetDevDynamicThemeFixes()}
                     />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="per-site-editor" label="Per Site Editor">
+                <TabPanel.Tab id="per-site-editor" label={getLocalMessage('per_site_editor')}>
                     <DynamicPerSiteEditor {...props} />
                 </TabPanel.Tab>
             </TabPanel>

@@ -16,12 +16,12 @@ export function AboutTab(props: ViewProps & AboutTabProps): Malevic.Child {
         <AppVersion />
         <div>
             <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
-                Privacy Policy
+                {getLocalMessage('privacy_policy')}
             </a>
         </div>
         <div>
             <a href={`${HOMEPAGE_URL}/terms/`} target="_blank" rel="noopener noreferrer">
-                Terms of Use
+                {getLocalMessage('terms_of_use')}
             </a>
         </div>
         {isMobile ? null : (

@@ -5,6 +5,7 @@ import type {UserSettings, ViewProps} from '../../../definitions';
 import {validateSettings} from '../../../utils/validation';
 import {Button, ControlGroup, MessageBox} from '../../controls';
 import {openFile} from '../../utils';
+import {getLocalMessage} from '../../../utils/locales';
 
 export function ImportSettings(props: ViewProps): Malevic.Child {
     const context = getContext();
@@ -41,7 +42,7 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
 
     const warningDialog = context.store.isWarningDialogVisible ? (
         <MessageBox
-            caption="Warning! Your current settings will be overwritten. Click OK to proceed."
+            caption={getLocalMessage('import_settings')}
             onOK={importSettings}
             onCancel={hideWarningDialog}
         />
@@ -74,13 +75,13 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
                     onclick={showWarningDialog}
                     class="advanced__import-settings-button"
                 >
-                    Import Settings
+                    {getLocalMessage('import_settings')}
                     {dialog}
                     {warningDialog}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Open settings from a JSON file
+                {getLocalMessage('open_settings_json')}
             </ControlGroup.Description>
         </ControlGroup>
     );

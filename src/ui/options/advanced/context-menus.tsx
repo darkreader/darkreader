@@ -3,6 +3,7 @@ import {m} from 'malevic';
 import type {ViewProps} from '../../../definitions';
 import {isFirefox, isMobile} from '../../../utils/platform';
 import {CheckButton} from '../../controls';
+import {getLocalMessage} from '../../../utils/locales';
 
 export function ContextMenus(props: ViewProps): Malevic.Child {
     function onContextMenusChange(checked: boolean) {
@@ -31,10 +32,10 @@ export function ContextMenus(props: ViewProps): Malevic.Child {
     return isMobile ? null : (
         <CheckButton
             checked={props.data.settings.enableContextMenus}
-            label="Use context menus"
+            label={getLocalMessage('use_context_menus')}
             description={props.data.settings.enableContextMenus ?
-                'Context menu integration is enabled' :
-                'Context menu integration is disabled'}
+                getLocalMessage('use_context_menus') :
+                getLocalMessage('context_menu_disabled')}
             onChange={onContextMenusChange}
         />
     );

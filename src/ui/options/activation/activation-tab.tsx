@@ -3,7 +3,7 @@ import {getContext} from 'malevic/dom';
 
 import type {ViewProps} from '../../../definitions';
 import {DONATE_URL} from '../../../utils/links';
-// import {getLocalMessage} from '../../../utils/locales';
+import {getLocalMessage} from '../../../utils/locales';
 import {Button, ControlGroup, TextBox} from '../../controls';
 
 export function ActivationTab(props: ViewProps): Malevic.Child {
@@ -24,7 +24,7 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                 }}
             >
                 <div class="activation__success-message">
-                    Activation was successful
+                    {getLocalMessage('activate_the_code')}
                 </div>
                 <ControlGroup>
                     <ControlGroup.Control class="activation__reset-control">
@@ -38,7 +38,7 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                                 store.checking = false;
                             }}
                         >
-                            Reset
+                            {getLocalMessage('reset_settings')}
                         </Button>
                     </ControlGroup.Control>
                 </ControlGroup>
@@ -75,7 +75,7 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
         <ControlGroup>
             <ControlGroup.Control class="activation__get-code-control">
                 <a href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                    Get activation code
+                    {getLocalMessage('get_activation_code')}
                 </a>
             </ControlGroup.Control>
         </ControlGroup>
@@ -83,7 +83,7 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
             <ControlGroup.Control class="activation__email-control">
                 <TextBox
                     class="activation__email-control__text"
-                    placeholder="example@gmail.com"
+                    placeholder={getLocalMessage('email_placeholder')}
                     onchange={(e: {target: HTMLInputElement}) => e.target.value}
                     oncreate={(node: HTMLInputElement) => {
                         store.emailTextElement = node;
@@ -96,14 +96,14 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                 />
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Email
+                {getLocalMessage('email_placeholder')}
             </ControlGroup.Description>
         </ControlGroup>
         <ControlGroup>
             <ControlGroup.Control class="activation__key-control">
                 <TextBox
                     class="activation__key-control__text"
-                    placeholder="XXXX-XXXX-XXXX-XXXX"
+                    placeholder={getLocalMessage('code_placeholder')}
                     onchange={(e: {target: HTMLInputElement}) => e.target.value}
                     oncreate={(node: HTMLInputElement) => {
                         store.keyTextElement = node;
@@ -117,7 +117,7 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                 />
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Code
+                {getLocalMessage('code_placeholder')}
             </ControlGroup.Description>
         </ControlGroup>
         <ControlGroup>
@@ -126,11 +126,11 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                     class="activation__activate-control__button"
                     onclick={activate}
                 >
-                    Activate
+                    {getLocalMessage('activate')}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Activate the code
+                {getLocalMessage('activate_the_code')}
             </ControlGroup.Description>
         </ControlGroup>
         <ControlGroup>

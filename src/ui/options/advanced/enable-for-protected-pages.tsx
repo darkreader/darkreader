@@ -2,6 +2,7 @@ import {m} from 'malevic';
 
 import type {ViewProps} from '../../../definitions';
 import {CheckButton} from '../../controls';
+import {getLocalMessage} from '../../../utils/locales';
 
 export function EnableForProtectedPages(props: ViewProps): Malevic.Child {
     function onEnableForProtectedPages(value: boolean) {
@@ -12,10 +13,10 @@ export function EnableForProtectedPages(props: ViewProps): Malevic.Child {
         <CheckButton
             checked={props.data.settings.enableForProtectedPages}
             onChange={onEnableForProtectedPages}
-            label={'Enable on restricted pages'}
+            label={getLocalMessage('enable_on_restricted_pages')}
             description={props.data.settings.enableForProtectedPages ?
-                'You should enable it in browser flags too' :
-                'Disabled for web store and other pages'}
+                getLocalMessage('enable_on_restricted_pages') :
+                getLocalMessage('disabled_for_web_store')}
         />
     );
 }

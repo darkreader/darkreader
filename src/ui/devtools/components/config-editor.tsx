@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
+import {getLocalMessage} from '../../../utils/locales';
 import {isFirefox} from '../../../utils/platform';
 import {Button, MessageBox} from '../../controls';
 
@@ -117,9 +118,9 @@ export function ConfigEditor(props: ConfigEditorProps): Malevic.Child {
             />
             <label class="error-text">{store.errorText}</label>
             <div class="buttons">
-                {props.delete ? <Button onclick={showDeleteDialog}>Delete</Button> : null}
-                {props.reset ? <Button onclick={showResetDialog}>Reset changes</Button> : null}
-                {props.apply ? <Button onclick={apply}>Apply</Button> : null}
+                {props.delete ? <Button onclick={showDeleteDialog}>{getLocalMessage('delete')}</Button> : null}
+                {props.reset ? <Button onclick={showResetDialog}>{getLocalMessage('reset_changes')}</Button> : null}
+                {props.apply ? <Button onclick={apply}>{getLocalMessage('apply')}</Button> : null}
             </div>
             <p class="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.

@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
 import type {ViewProps} from '../../../definitions';
+import {getLocalMessage} from '../../../utils/locales';
 import {Overlay} from '../../controls';
 import {AdvancedIcon, HelpIcon, KeyboardIcon, KeyIcon, ListIcon, SettingsIcon, WatchIcon} from '../../icons';
 import {AboutTab} from '../about/about-tab';
@@ -31,28 +32,28 @@ export default function Body(props: BodyProps): Malevic.Child {
         <body>
             <header>
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
-                <h1 id="title">Settings</h1>
+                <h1 id="title">{getLocalMessage('settings_title') || 'Settings'}</h1>
             </header>
             <TabPanel activeTabId={store.activeTabId} onTabChange={onSettingsTabChange}>
-                <TabPanel.Tab id="general" label="General" icon={<SettingsIcon />} iconClass="settings-icon-general">
+                <TabPanel.Tab id="general" label={getLocalMessage('general') || 'General'} icon={<SettingsIcon />} iconClass="settings-icon-general">
                     <GeneralTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="site-list" label="Site List" icon={<ListIcon />} iconClass="settings-icon-list">
+                <TabPanel.Tab id="site-list" label={getLocalMessage('site_list') || 'Site List'} icon={<ListIcon />} iconClass="settings-icon-list">
                     <SiteListTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="automation" label="Automation" icon={autoIcon} iconClass="settings-icon-auto">
+                <TabPanel.Tab id="automation" label={getLocalMessage('automation') || 'Automation'} icon={autoIcon} iconClass="settings-icon-auto">
                     <AutomationTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="hotkeys" label="Hotkeys" icon={<KeyboardIcon />} iconClass="settings-icon-hotkeys">
+                <TabPanel.Tab id="hotkeys" label={getLocalMessage('hotkeys') || 'Hotkeys'} icon={<KeyboardIcon />} iconClass="settings-icon-hotkeys">
                     <HotkeysTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="activation" label="Activation" icon={<KeyIcon />} iconClass="settings-icon-activation">
+                <TabPanel.Tab id="activation" label={getLocalMessage('activation') || 'Activation'} icon={<KeyIcon />} iconClass="settings-icon-activation">
                     <ActivationTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="advanced" label="Advanced" icon={<AdvancedIcon />} iconClass="settings-icon-advanced">
+                <TabPanel.Tab id="advanced" label={getLocalMessage('advanced') || 'Advanced'} icon={<AdvancedIcon />} iconClass="settings-icon-advanced">
                     <AdvancedTab {...props} />
                 </TabPanel.Tab>
-                <TabPanel.Tab id="about" label="About" icon={<HelpIcon />} iconClass="settings-icon-about">
+                <TabPanel.Tab id="about" label={getLocalMessage('about') || 'About'} icon={<HelpIcon />} iconClass="settings-icon-about">
                     <AboutTab {...props} />
                 </TabPanel.Tab>
             </TabPanel>

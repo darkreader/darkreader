@@ -162,13 +162,13 @@ export function AutomationTab(props: ViewProps): Malevic.Child {
                     onChange={(selected: any) => changeAutomationBehavior(selected)}
                     selected={props.data.settings.automation.behavior}
                     options={[
-                        {id: 'OnOff', content: 'Toggle on/off'},
-                        {id: 'Scheme', content: 'Toggle dark/light'},
+                        {id: 'OnOff', content: getLocalMessage('toggle_on_off')},
+                        {id: 'Scheme', content: getLocalMessage('toggle_dark_light')},
                     ]}
                 />
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Automation behavior
+                {getLocalMessage('automation_behavior')}
             </ControlGroup.Description>
         </ControlGroup>
     </div>;

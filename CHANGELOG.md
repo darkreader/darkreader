@@ -1,5 +1,6 @@
-# 4.9.107 (July 2, 2025)
+# 4.9.108 (July 3, 2025)
 
+- Fixed crash when parsing invalid complex colors (Linkedin issue).
 - Fixed breaking when CSS @import can't be loaded.
 - Fixed compatibility with certain extensions.
 - Fixed processing background with variables defined later.

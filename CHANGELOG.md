@@ -1,3 +1,11 @@
+# 4.9.107 (July 2, 2025)
+
+- Fixed breaking when CSS @import can't be loaded.
+- Fixed compatibility with certain extensions.
+- Fixed processing background with variables defined later.
+- Detect dark theme in certain iframes.
+- Ability to hide payment messages.
+
 # 4.9.106 (May 6, 2025)
 
 - Google Docs: use Filter mode instead of Filter+ by default.

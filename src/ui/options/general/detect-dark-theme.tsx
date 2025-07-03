@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+import {getLocalMessage} from '../../../utils/locales';
 
 import type {ViewProps} from '../../../definitions';
 import {CheckButton} from '../../controls';
@@ -11,10 +12,10 @@ export function DetectDarkTheme(props: ViewProps): Malevic.Child {
     return (
         <CheckButton
             checked={props.data.settings.detectDarkTheme}
-            label="Detect dark theme"
+            label={getLocalMessage('detect_dark_theme')}
             description={props.data.settings.detectDarkTheme ?
-                `Will not override website's dark theme` :
-                `Will override website's dark theme`}
+                getLocalMessage('will_not_override_website_dark_theme') :
+                getLocalMessage('will_override_website_dark_theme')}
             onChange={onDetectDarkThemeChange}
         />
     );

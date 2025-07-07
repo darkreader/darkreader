@@ -1,3 +1,7 @@
+# 4.9.109 (July 7, 2025)
+
+- Fixed API bundle error.
+
 # 4.9.108 (July 3, 2025)
 
 - Fixed crash when parsing invalid complex colors (Linkedin issue).

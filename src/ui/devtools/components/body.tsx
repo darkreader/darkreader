@@ -30,8 +30,8 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
         context.refresh();
     }
 
-    const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    const previewNewestButtonText = data.settings.previewNewestDesign ? 'Switch to desktop design' : 'Preview new mobile design';
+    const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Enable design prototype';
+    const previewNewestButtonText = data.settings.previewNewestDesign ? 'Switch to old design' : 'Preview new design';
 
     function toggleDesign(): void {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign, previewNewestDesign: false});

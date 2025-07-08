@@ -20,6 +20,8 @@ export interface ExtensionAdapter {
     resetDevInversionFixes: () => void;
     applyDevStaticThemes: (text: string) => Error;
     resetDevStaticThemes: () => void;
+    startActivation: (email: string, key: string) => Promise<void>;
+    resetActivation: () => Promise<void>;
     hideHighlights: (ids: string[]) => Promise<void>;
 }
 
@@ -164,6 +166,12 @@ export default class Messenger {
             }
             case MessageTypeUItoBG.RESET_DEV_STATIC_THEMES:
                 Messenger.adapter.resetDevStaticThemes();
+                break;
+            case MessageTypeUItoBG.START_ACTIVATION:
+                Messenger.adapter.startActivation(data.email, data.key);
+                break;
+            case MessageTypeUItoBG.RESET_ACTIVATION:
+                Messenger.adapter.resetActivation();
                 break;
             case MessageTypeUItoBG.HIDE_HIGHLIGHTS:
                 Messenger.adapter.hideHighlights(data);

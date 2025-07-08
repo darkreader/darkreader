@@ -1,3 +1,33 @@
+# 4.9.109 (July 7, 2025)
+
+- Fixed API bundle error.
+
+# 4.9.108 (July 3, 2025)
+
+- Fixed crash when parsing invalid complex colors (Linkedin issue).
+- Fixed breaking when CSS @import can't be loaded.
+- Fixed compatibility with certain extensions.
+- Fixed processing background with variables defined later.
+- Detect dark theme in certain iframes.
+- Ability to hide payment messages.
+
+# 4.9.106 (May 6, 2025)
+
+- Google Docs: use Filter mode instead of Filter+ by default.
+- Added support for nested CSS rules.
+- Fixed duplicate CSS files requests.
+- Fixed ShadowDOM static style injection.
+- Fixed style injection causing freeze for certain websites.
+- Fixed handling "initial" CSS color value.
+
+# 4.9.105 (February 25, 2025)
+
+- API: Fixed breaking ES5 builds.
+
+# 4.9.104 (February 19, 2025)
+
+- API: ES Module bundle.
+
 # 4.9.103 (February 17, 2025)
 
 - Added support for more color spaces (Tailwind 4 issues).

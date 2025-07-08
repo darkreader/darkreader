@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 
 import {ControlGroup, TextBox} from '../../controls';
 import VirtualScroll from '../../controls/virtual-scroll';
+import {getLocalMessage} from '../../../utils/locales';
 
 interface SiteListProps {
     siteList: string[];
@@ -112,7 +113,7 @@ export function SiteList(props: SiteListProps): Malevic.Child {
                 </div>
             </ControlGroup.Control>
             <ControlGroup.Description class="site-list-group__description">
-                Type in the domain name and press Enter
+                {getLocalMessage('type_site_press_enter')}
             </ControlGroup.Description>
         </ControlGroup>
     );

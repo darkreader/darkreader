@@ -557,7 +557,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 }
             });
 
-            const nodes = sourceSheetNodes.get(sheet) ?? [];
+            const nodes = sourceSheetNodes.get(sheet) ?? new Set();
             nodes.forEach((node) => putOverride(node, override));
             relevantOverrides.add(override);
 

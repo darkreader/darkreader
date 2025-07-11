@@ -290,7 +290,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 }
             }
 
-            cssText = await loadText(element.href);
+            try {
+                cssText = await loadText(element.href);
+            } catch (err) {
+                logWarn(err);
+                cssText = '';
+            }
             cssBasePath = getCSSBaseBath(element.href);
             if (cancelAsyncOperations) {
                 return null;

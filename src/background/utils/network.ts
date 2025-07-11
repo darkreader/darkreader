@@ -10,8 +10,10 @@ interface RequestParams {
     timeout?: number;
 }
 
-interface FileLoader {
-    get: (fetchRequestParameters: FetchRequestParameters) => Promise<string | null>;
+type FileLoaderResponse = {data: string; error?: Error} | {data?: string; error: Error};
+
+export interface FileLoader {
+    get: (fetchRequestParameters: FetchRequestParameters) => Promise<FileLoaderResponse>;
 }
 
 export async function readText(params: RequestParams): Promise<string> {
@@ -166,7 +168,7 @@ class LimitedCacheStorage {
 
 function createLimiter() {
     const loadingUrls = new Set<string>();
-    const awaitingUrls = new Map<string, Set<(data: string) => void>>();
+    const awaitingUrls = new Map<string, Set<(response: FileLoaderResponse) => void>>();
 
     function loading(url: string) {
         const result = loadingUrls.has(url);
@@ -175,7 +177,7 @@ function createLimiter() {
     }
 
     async function wait(url: string) {
-        return new Promise<string>((resolve) => {
+        return new Promise<FileLoaderResponse>((resolve) => {
             if (!awaitingUrls.has(url)) {
                 awaitingUrls.set(url, new Set());
             }
@@ -186,12 +188,22 @@ function createLimiter() {
     async function loaded(url: string, data: string) {
         loadingUrls.delete(url);
         if (awaitingUrls.has(url)) {
-            awaitingUrls.get(url)!.forEach((callback) => callback(data));
+            const response = {data};
+            awaitingUrls.get(url)!.forEach((callback) => callback(response));
             awaitingUrls.delete(url);
         }
     }
 
-    return {loading, wait, loaded};
+    async function failed(url: string, error: Error) {
+        loadingUrls.delete(url);
+        if (awaitingUrls.has(url)) {
+            const response = {error};
+            awaitingUrls.get(url)!.forEach((callback) => callback(response));
+            awaitingUrls.delete(url);
+        }
+    }
+
+    return {loading, wait, loaded, failed};
 }
 
 export interface FetchRequestParameters {
@@ -217,23 +229,28 @@ export function createFileLoader(): FileLoader {
         'text': createLimiter(),
     };
 
-    async function get({url, responseType, mimeType, origin}: FetchRequestParameters) {
+    async function get({url, responseType, mimeType, origin}: FetchRequestParameters): Promise<FileLoaderResponse> {
         const cache = caches[responseType];
         const load = loaders[responseType];
         const limiter = limiters[responseType];
         if (cache.has(url)) {
-            return cache.get(url)!;
+            const data = cache.get(url)!;
+            return {data};
         }
 
         if (limiter.loading(url)) {
             return limiter.wait(url);
         }
 
-        const data = await load(url, mimeType, origin);
-        cache.set(url, data);
-        limiter.loaded(url, data);
-
-        return data;
+        try {
+            const data = await load(url, mimeType, origin);
+            cache.set(url, data);
+            limiter.loaded(url, data);
+            return {data};
+        } catch (error) {
+            limiter.failed(url, error);
+            return {error};
+        }
     }
 
     return {get};

@@ -59,7 +59,7 @@ describe('INLINE STYLES', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         const span = document.querySelector('span');
         expect(span.getAttribute('style').startsWith('color: red; --darkreader-inline-color:')).toBeTrue();
-        expect(span.getAttribute('style').endsWith('#ff1a1a;')).toBeTrue();
+        expect(span.getAttribute('style').includes('--darkreader-inline-color: var(--darkreader-text-ff0000, #ff1a1a);')).toBe(true);
 
         span.style.color = '';
         await timeout(0);

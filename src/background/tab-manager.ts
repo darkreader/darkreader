@@ -9,7 +9,7 @@ import IconManager from './icon-manager';
 
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT, logInfo, logWarn} from './utils/log';
-import type {FetchRequestParameters} from './utils/network';
+import type {FileLoader} from './utils/network';
 import {createFileLoader} from './utils/network';
 import {isPanel} from './utils/tab';
 
@@ -60,7 +60,7 @@ enum DocumentState {
 export default class TabManager {
     private static tabs: TabManagerState['tabs'];
     private static stateManager: StateManager<TabManagerState>;
-    private static fileLoader: {get: (params: FetchRequestParameters) => Promise<string | null>} | null = null;
+    private static fileLoader: FileLoader | null = null;
     private static onColorSchemeChange: TabManagerOptions['onColorSchemeChange'];
     private static getTabMessage: TabManagerOptions['getTabMessage'];
     private static timestamp: TabManagerState['timestamp'];
@@ -221,15 +221,16 @@ export default class TabManager {
                             return;
                         }
                     }
-                    try {
-                        const {url, responseType, mimeType, origin} = message.data;
-                        if (!TabManager.fileLoader) {
-                            TabManager.fileLoader = createFileLoader();
-                        }
-                        const response = await TabManager.fileLoader.get({url, responseType, mimeType, origin});
-                        sendResponse({data: response});
-                    } catch (err) {
-                        sendResponse({error: err && err.message ? err.message : err});
+                    const {url, responseType, mimeType, origin} = message.data;
+                    if (!TabManager.fileLoader) {
+                        TabManager.fileLoader = createFileLoader();
+                    }
+                    const response = await TabManager.fileLoader.get({url, responseType, mimeType, origin});
+                    if (response.error) {
+                        const err = response.error;
+                        sendResponse({error: err?.message ?? err});
+                    } else {
+                        sendResponse({data: response.data});
                     }
                     break;
                 }

@@ -10,7 +10,25 @@ export function getStyleInjectionMode() {
     return mode;
 }
 
+const stylesWaitingForBody = new Set<HTMLStyleElement | SVGStyleElement>();
+let bodyObserver: MutationObserver | null;
+
 export function injectStyleAway(styleElement: HTMLStyleElement | SVGStyleElement) {
+    if (!document.body) {
+        stylesWaitingForBody.add(styleElement);
+        if (!bodyObserver) {
+            bodyObserver = new MutationObserver(() => {
+                if (document.body) {
+                    bodyObserver!.disconnect();
+                    bodyObserver = null;
+                    stylesWaitingForBody.forEach((el) => injectStyleAway(el));
+                    stylesWaitingForBody.clear();
+                }
+            });
+        }
+        return;
+    }
+
     let container: HTMLElement | null = document.body.querySelector('.darkreader-style-container');
     if (!container) {
         container = document.createElement('div');
@@ -42,6 +60,7 @@ export function injectStyleAway(styleElement: HTMLStyleElement | SVGStyleElement
 let containerObserver: MutationObserver;
 
 export function removeStyleContainer() {
+    bodyObserver?.disconnect();
     containerObserver?.disconnect();
     document.querySelector('.darkreader-style-container')?.remove();
 }

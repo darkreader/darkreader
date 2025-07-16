@@ -328,7 +328,7 @@ export class Extension {
                         return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
                             frameId,
                             code: `(${detectPDF.toString()})()`,
-                        }, ([r]) => resolve(r)));
+                        }, (results) => resolve(results?.[0])));
                     }
                     return false;
                 }

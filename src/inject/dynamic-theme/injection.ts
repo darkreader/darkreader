@@ -1,4 +1,5 @@
 const hostsBreakingOnStylePosition = [
+    'www.bloomberg.com',
     'www.diffusioneshop.com',
     'zhale.me',
 ];
@@ -17,6 +18,30 @@ export function injectStyleAway(styleElement: HTMLStyleElement | SVGStyleElement
         container.classList.add('darkreader-style-container');
         container.style.display = 'none';
         document.body.append(container);
+
+        containerObserver = new MutationObserver(() => {
+            if (container?.nextElementSibling != null) {
+                // Prevent clearing style overrides after container move
+                container.querySelectorAll('.darkreader--sync').forEach((el: HTMLStyleElement) => {
+                    if (el.sheet!.cssRules.length > 0) {
+                        let cssText = '';
+                        for (const rule of el.sheet!.cssRules) {
+                            cssText += rule.cssText;
+                        }
+                        el.textContent = cssText;
+                    }
+                });
+                document.body.append(container);
+            }
+        });
+        containerObserver.observe(document.body, {childList: true});
     }
     container.append(styleElement);
+}
+
+let containerObserver: MutationObserver;
+
+export function removeStyleContainer() {
+    containerObserver?.disconnect();
+    document.querySelector('.darkreader-style-container')?.remove();
 }

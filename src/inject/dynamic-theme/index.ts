@@ -15,7 +15,7 @@ import {logInfo, logWarn} from '../utils/log';
 import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {combineFixes, findRelevantFix} from './fixes';
-import {getStyleInjectionMode, injectStyleAway} from './injection';
+import {getStyleInjectionMode, injectStyleAway, removeStyleContainer} from './injection';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from './modify-colors';
@@ -792,6 +792,7 @@ export function removeDynamicTheme(): void {
     loadingStyles.clear();
     cleanLoadingLinks();
     forEach(document.querySelectorAll('.darkreader'), removeNode);
+    removeStyleContainer();
 
     adoptedStyleManagers.forEach((manager) => manager.destroy());
     adoptedStyleManagers.splice(0);

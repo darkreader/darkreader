@@ -1,6 +1,9 @@
 import {readFile as fsReadFile, readdir as fsReadDir} from 'node:fs';
+import {stat} from 'node:fs/promises';
 
 import {rootPath} from '../../support/test-utils';
+
+const LOCALES_DIR = 'src/_locales';
 
 function readDir(dir: string) {
     return new Promise<string[]>((resolve, reject) => {
@@ -16,7 +19,7 @@ function readDir(dir: string) {
 
 function readLocale(name: string) {
     return new Promise<string>((resolve, reject) => {
-        fsReadFile(rootPath('src/_locales', name), {encoding: 'utf-8'}, (err, data) => {
+        fsReadFile(rootPath(LOCALES_DIR, name), {encoding: 'utf-8'}, (err, data) => {
             if (err) {
                 reject(err);
                 return;
@@ -27,11 +30,14 @@ function readLocale(name: string) {
 }
 
 test('Locales', async () => {
-    const files = await readDir(rootPath('src/_locales'));
+    const files = await readDir(rootPath(LOCALES_DIR));
     const enLocale = await readLocale('en.config');
     const enLines = enLocale.split('\n');
     const locales: string[] = [];
     for (const file of files) {
+        if ((await stat(rootPath(LOCALES_DIR, file))).isDirectory()) {
+            continue;
+        }
         const locale = await readLocale(file);
         locales.push(locale);
     }

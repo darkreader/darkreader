@@ -5,7 +5,7 @@
     "author": "Alexander Shutau",
     "description": "__MSG_extension_description__",
     "default_locale": "en",
-    "browser_action": {
+"browser_action": {
         "default_title": "Dark Reader",
         "default_icon": {
             "38": "icons/dr_active_38.png",
@@ -19,9 +19,9 @@
         "128": "icons/dr_128.png"
     },
     "background": {
-        "persistent": true,
-        "page": "background/index.html"
-    },
+  "page": "background/index.html",
+  "persistent": true
+ },
     "content_scripts": [
         {
             "matches": [

@@ -2,7 +2,7 @@
 
 .toggle {
     background-color: @color-control-back;
-    border: @size-border solid @color-border;
+    border: 0;
     box-sizing: content-box;
     color: @color-control-fore;
     display: inline-flex;
@@ -10,6 +10,7 @@
     position: relative;
     -moz-user-select: none;
     user-select: none;
+    border-radius: 30px;
 
     &__btn {
         align-items: center;
@@ -22,9 +23,12 @@
         transition: background-color @time-slow;
         white-space: nowrap;
         width: 50%;
+        border-radius: 30px;
 
         &:hover:not(&--active) {
             background-color: @color-control-hover;
+            border-radius: 30px;
+
         }
     }
 
@@ -38,11 +42,15 @@
         top: 0;
         transition: left @time-fast;
         width: 50%;
+        border-radius: 30px;
+
     }
 
     &--checked {
         &::before {
             left: 0;
+            border-radius: 30px;
+
         }
     }
 }

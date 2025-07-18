@@ -5,7 +5,6 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-
     > :not(:first-child) {
         margin-top: @indent-small;
     }
@@ -25,6 +24,8 @@
     flex-direction: column;
     -moz-user-select: none;
     user-select: none;
+    border-radius: 30px;
+    
 
     &__line {
         display: flex;
@@ -37,19 +38,26 @@
 
     .toggle {
         flex: auto;
+        border-radius: 30px;
+
     }
 
     &__label {
         font-size: @size-text-small;
         line-height: @size-text-small-height;
         text-align: center;
+        border-radius: 30px;
+
     }
 
     &__button--active {
         background: @color-control-active;
+        border-radius: 30px;
 
         &:hover {
             background: @color-control-active;
+            border-radius: 30px;
+
         }
     }
 }
@@ -59,12 +67,17 @@
     display: inline-block;
     height: 100%;
     width: 100%;
+    border-radius: 30px;
 }
 
 .icon--dark-mode {
     background-image: url(../assets/images/mode-dark-32.svg);
+    border-radius: 30px;
+
 }
 
 .icon--light-mode {
     background-image: url(../assets/images/mode-light-32.svg);
+    border-radius: 30px;
+
 }

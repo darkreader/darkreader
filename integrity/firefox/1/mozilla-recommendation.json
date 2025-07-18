@@ -1,0 +1,9 @@
+{
+  "addon_id": "{036a55b4-5e72-4d05-a06c-cba2d2c21354}",
+  "states": ["recommended", "recommended-android"],
+  "validity": {
+    "not_after": "2029-03-05T14:23:39Z",
+    "not_before": "2024-03-05T08:23:39Z"
+  },
+  "schema_version": 1
+}

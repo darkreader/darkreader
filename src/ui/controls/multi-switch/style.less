@@ -10,6 +10,8 @@
     position: relative;
     -moz-user-select: none;
     user-select: none;
+    border-radius: 30px;
+
 
     &__option {
         align-items: center;
@@ -22,9 +24,12 @@
         transition: background-color @time-slow;
         white-space: nowrap;
         width: 50%;
+        border-radius: 30px;
 
         &:hover:not(&--selected) {
             background-color: @color-control-hover;
+            border-radius: 30px;
+
         }
     }
 
@@ -37,5 +42,7 @@
         top: 0;
         transition: left @time-fast, width @time-fast;
         width: 0;
+        border-radius: 30px;
+
     }
 }

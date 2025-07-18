@@ -12,19 +12,26 @@
     padding: 0;
     text-indent: @size-control-inner / 2 - @size-text-normal / 2;
     transition: background-color @time-slow;
+    border-radius: 30px;
 
     &:hover,
     &:focus {
         background-color: @color-input-hover;
         transition: background-color @time-fast;
+        border-radius: 30px;
+
     }
 
     &:focus {
         color: @color-input-fore-active;
+        border-radius: 30px;
+
     }
 
     &::placeholder {
         color: @color-input-fore-placeholder;
+        border-radius: 30px;
+
     }
 }
 

@@ -2,114 +2,94 @@
 @import "../shared";
 
 @import "./tab-panel/tab-panel";
-@import "./about/about";
 @import "./advanced/advanced";
 @import "./automation/automation";
 @import "./hotkeys/hotkeys";
 @import "./site-list/site-list";
 
 html {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 #logo {
-    display: inline-block;
-    font-size: @size-text-large;
-    height: @size-control-inner;
-    width: 15rem;
+  display: inline-block;
+  font-size: @size-text-large;
+  height: @size-control-inner;
+  width: 15rem;
 }
 
 #title {
-    align-items: stretch;
-    display: inline-flex;
-    flex-direction: row;
-    font-size: @size-control-inner * 4 / 3;
-    font-weight: 100;
-    line-height: @size-control-inner;
-    height: @size-control-inner;
-    margin: 0 0 0 @indent-small;
-    text-transform: uppercase;
-    transform: translateY(-0.0625rem);
+  align-items: stretch;
+  display: inline-flex;
+  flex-direction: row;
+  font-size: @size-control-inner * 4 / 3;
+  font-weight: 100;
+  line-height: @size-control-inner;
+  height: @size-control-inner;
+  margin: 0 0 0 @indent-small;
+  text-transform: uppercase;
+  transform: translateY(-0.0625rem);
 }
 
 body {
-    box-sizing: content-box;
-    display: flex;
-    flex-direction: column;
-    gap: @indent-small;
-    margin: 0;
-    padding: 1rem;
+  box-sizing: content-box;
+  display: flex;
+  flex-direction: column;
+  gap: @indent-small;
+  margin: 0;
+  padding: 1rem;
 }
 
 main {
-    flex: none;
+  flex: none;
 }
 
 .settings-tab-panel {
-    flex: auto;
+  flex: auto;
 }
 
 .settings-tab {
-    max-width: 16rem;
-
-    .button,
-    .textbox {
-        width: calc(100% - 2 * @size-border);
-    }
-
-    a {
-        color: @color-fore;
-    }
+  max-width: 16rem;
 }
 
 .settings-tab > :not(:first-child) {
-    margin-top: @indent-small;
+  margin-top: @indent-small;
 }
 
 .settings-icon-list {
-    svg {
-        fill: currentColor;
-        height: 75%;
-        width: 75%;
-    }
-}
-
-.activation__error {
-    color: @color-error;
-    max-width: 16rem;
-}
-
-.activation-tab--checking {
-    opacity: 0.5;
-    pointer-events: none;
+  svg {
+    fill: currentColor;
+    height: 75%;
+    width: 75%;
+  }
 }
 
 @media screen and (max-width: 30rem) {
-    #title {
-        display: none;
-    }
+  #title {
+    display: none;
+  }
 
-    body {
-        margin: 0 auto;
-        width: 15rem;
-    }
+  body {
+    margin: 0 auto;
+    width: 15rem;
+  }
 }
 
 @media screen and (min-width: 21.25rem) {
-    .mobile {
-        font-size: 20px;
-    }
+  .mobile {
+    font-size: 20px;
+  }
 }
 
 @media screen and (min-width: 25.5rem) {
-    .mobile {
-        font-size: 24px;
-    }
+  .mobile {
+    font-size: 24px;
+  }
 }
 
 @media screen and (min-width: 29.75rem) {
-    .mobile {
-        font-size: 28px;
-    }
+  .mobile {
+    font-size: 28px;
+  }
 }

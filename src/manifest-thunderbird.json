@@ -1,19 +1,19 @@
 {
-    "applications": {
-        "gecko": {
-            "id": "addon@darkreader.org",
-            "strict_min_version": "78.0a1"
-        }
-    },
-    "background": {
-        "page": "background/index.html"
-    },
-    "permissions": [
-        "alarms",
-        "storage",
-        "tabs",
-        "theme",
-        "messagesModify",
-        "<all_urls>"
-    ]
+  "applications": {
+    "gecko": {
+      "id": "{57e8684d-5ae8-47dk-93c9-f370ef0270a3}",
+      "strict_min_version": "78.0a1"
+    }
+  },
+  "background": {
+    "page": "background/index.html"
+  },
+  "permissions": [
+    "alarms",
+    "storage",
+    "tabs",
+    "theme",
+    "messagesModify",
+    "<all_urls>"
+  ]
 }

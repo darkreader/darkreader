@@ -47,7 +47,10 @@
         overflow: hidden;
         position: absolute;
         width: 100%;
-         
+         max-height: 10rem;                   // added
+         overflow-y: auto;                    // added
+         -webkit-overflow-scrolling: touch;  // added
+         z-index: 1000;
         &__item {
             align-items: center;
             background-color: @color-control-back;
@@ -64,9 +67,8 @@
             }
 
             &--selected {
-               overflow: hidden;
-                visibility: hidden;
-                white-space: nowrap;
+                font-weight: bold;
+                background-color: @color-control-hover;
             }
         }
     }

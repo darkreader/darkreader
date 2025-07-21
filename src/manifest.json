@@ -1,11 +1,11 @@
 {
-    "manifest_version": 3,
+    "manifest_version": 2,
     "name": "Dark Reader",
-    "version": "4.9.109",
+    "version": "4.9.110",
     "author": "Alexander Shutau",
     "description": "__MSG_extension_description__",
     "default_locale": "en",
-    "action": {
+    "browser_action": {
         "default_title": "Dark Reader",
         "default_icon": {
             "38": "icons/dr_active_38.png",
@@ -19,8 +19,9 @@
         "128": "icons/dr_128.png"
     },
     "background": {
-  "service_worker": "background/index.js"
- },
+        "persistent": true,
+        "page": "background/index.html"
+    },
     "content_scripts": [
         {
             "matches": [

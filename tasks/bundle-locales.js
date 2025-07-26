@@ -10,11 +10,14 @@ import {readFile, writeFile} from './utils.js';
 
 const srcLocalesDir = 'src/_locales';
 
-/** @type {(filePath: string) => Promise<string>} */
-async function bundleLocale(filePath) {
+/** @typedef {Record<string, {message: string}>} LocaleMessages */
+
+/** @type {(filePath: string) => Promise<LocaleMessages>} */
+async function localeFileToJson(filePath) {
     let file = await readFile(filePath);
     file = file.replace(/^#.*?$/gm, '');
 
+    /** @type {LocaleMessages} */
     const messages = {};
 
     const regex = /@([a-z0-9_]+)/ig;
@@ -31,7 +34,39 @@ async function bundleLocale(filePath) {
         };
     }
 
-    return `${JSON.stringify(messages, null, 4)}\n`;
+    return messages;
+}
+
+/** @type {(localesDir: string, code: string) => Promise<string>} */
+async function mergeLocale(localesDir, code) {
+    /** @type {LocaleMessages} */
+    let result = {};
+
+    /** @type {(dir: string) => Promise<void>} */
+    const walk = async (dir) => {
+        const dirFiles = [];
+        const dirDirs = [];
+        const paths = await fs.readdir(dir);
+        for (const path of paths) {
+            const stat = await fs.stat(`${dir}/${path}`);
+            if (stat.isDirectory()) {
+                dirDirs.push(path);
+            } else {
+                dirFiles.push(path);
+            }
+        }
+        const localeFiles = dirFiles.filter((f) => f.split('.').at(-2) === code);
+        for (const localeFile of localeFiles) {
+            const messages = await localeFileToJson(`${dir}/${localeFile}`);
+            result = {...result, ...messages};
+        }
+        for (const folder of dirDirs) {
+            await walk(`${dir}/${folder}`);
+        }
+    };
+
+    await walk(localesDir);
+    return JSON.stringify(result, null, 4);
 }
 
 async function bundleLocales(srcLocalesDir, {platforms, debug}) {
@@ -41,7 +76,8 @@ async function bundleLocales(srcLocalesDir, {platforms, debug}) {
         if (!name.endsWith('.config')) {
             continue;
         }
-        const locale = await bundleLocale(`${absoluteSrcLocalesDir}/${name}`);
+        const code = /** @type {string} */(name.split('.').at(-2));
+        const locale = await mergeLocale(absoluteSrcLocalesDir, code);
         const fileName = name.substring(name.lastIndexOf('/') + 1);
         await writeFiles(locale, fileName, {platforms, debug});
     }
@@ -67,7 +103,8 @@ export function createBundleLocalesTask(srcLocalesDir) {
         const localesSrcDir = absolutePath(srcLocalesDir);
         for (const file of changedFiles) {
             const fileName = file.substring(file.lastIndexOf(path.sep) + 1);
-            const locale = await bundleLocale(`${localesSrcDir}/${fileName}`);
+            const code = /** @type {string} */(fileName.split('.').at(-2));
+            const locale = await mergeLocale(localesSrcDir, code);
             await writeFiles(locale, fileName, {platforms, debug: true});
         }
         reload.reload({type: reload.FULL});

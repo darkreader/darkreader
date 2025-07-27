@@ -4,6 +4,7 @@ import type {ViewProps} from '../../../definitions';
 
 import {ClearSiteList} from './clear-site-list';
 import {SiteList} from './site-list';
+import {ExportSiteList} from './export-site-list';
 
 export function SiteListTab(props: ViewProps): Malevic.Child {
     const {settings} = props.data;
@@ -30,5 +31,7 @@ export function SiteListTab(props: ViewProps): Malevic.Child {
             onChange={onSiteListChange}
         />
         <ClearSiteList {...props} />
+        {/* Export sites */}
+        <ExportSiteList {...props} />
     </div>;
 }

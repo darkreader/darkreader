@@ -33,7 +33,10 @@ async function translateEnMessage(messageId) {
             found = true;
             const enMessage = /** @type {string} */(enMessages.get(messageId));
             for (const locale of supportedLocales) {
-                if (locale === 'en') continue;
+                if (locale === 'en') {
+                    continue;
+                }
+
                 await timeout(1000);
 
                 const locFile = `${enFile.slice(0, enFile.lastIndexOf('en.config'))}${locale}.config`;
@@ -47,7 +50,11 @@ async function translateEnMessage(messageId) {
                 await writeFile(locFile, output);
                 log(`${locale}: ${translated}`);
             }
-        } 
+        }
+    }
+
+    if (!found) {
+        throw new Error(`Could not find message ${messageId}.`);
     }
 
     log.ok('Translation done');
@@ -67,7 +74,9 @@ async function translateNewEnMessages() {
         const enMessages = parseLocale(enContent);
 
         for (const locale of supportedLocales) {
-            if (locale === 'en') continue;
+            if (locale === 'en') {
+                continue;
+            }
 
             /** @type {Map<string, string>} */
             let locMessages = new Map();
@@ -179,7 +188,7 @@ async function getLocaleFiles(locale) {
             const p = `${dir}/${e}`;
             const stat = await fs.stat(p);
             if (stat.isDirectory()) {
-                walk(p)
+                walk(p);
             }
         }
     };

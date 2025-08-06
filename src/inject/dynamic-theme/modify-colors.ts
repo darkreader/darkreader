@@ -37,6 +37,7 @@ export const themeCacheKeys: Array<keyof Theme> = [
     'brightness',
     'contrast',
     'grayscale',
+    "transparency",
     'sepia',
     'darkSchemeBackgroundColor',
     'darkSchemeTextColor',
@@ -185,6 +186,7 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA): HSLA {
 }
 
 function _modifyBackgroundColor(rgb: RGBA, theme: Theme) {
+    rgb.a = theme.transparency / 100.0;
     if (theme.mode === 0) {
         if (__PLUS__) {
             const poles = getBackgroundPoles(theme);
@@ -204,6 +206,7 @@ export function modifyBackgroundColor(rgb: RGBA, theme: Theme, shouldRegisterCol
     if (!shouldRegisterColorVariable) {
         return _modifyBackgroundColor(rgb, theme);
     }
+
     return modifyAndRegisterColor('background', rgb, theme, _modifyBackgroundColor);
 }
 

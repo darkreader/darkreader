@@ -57,6 +57,19 @@ export default function FilterSettings({data, actions}: ExtWrapper, ...children:
         />
     );
 
+
+    const transparency = (
+        <UpDown
+            value={theme.transparency}
+            min={0}
+            max={100}
+            step={5}
+            default={0}
+            name={getLocalMessage('transparency')}
+            onChange={(value) => setConfig({grayscale: value})}
+        />
+    );
+
     const sepia = (
         <UpDown
             value={theme.sepia}
@@ -74,6 +87,7 @@ export default function FilterSettings({data, actions}: ExtWrapper, ...children:
             <ModeToggle mode={theme.mode} onChange={(mode) => setConfig({mode})} />
             {brightness}
             {contrast}
+            {data.settings.allowTransparency ? transparency : ""}
             {sepia}
             {grayscale}
             <CustomSettingsToggle data={data} actions={actions} />

@@ -62,6 +62,7 @@ export interface Theme {
     mode: FilterMode;
     brightness: number;
     contrast: number;
+    transparency: number; /* Note: only applicable if enabled in the advanced options */
     grayscale: number;
     sepia: number;
     useFont: boolean;
@@ -122,6 +123,7 @@ export interface UserSettings {
     enableForProtectedPages: boolean;
     enableContextMenus: boolean;
     detectDarkTheme: boolean;
+    allowTransparency: boolean;
 }
 
 export interface TimeSettings {

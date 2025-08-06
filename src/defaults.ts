@@ -23,6 +23,7 @@ export const DEFAULT_THEME: Theme = {
     mode: 1,
     brightness: 100,
     contrast: 100,
+    transparency : 1, 
     grayscale: 0,
     sepia: 0,
     useFont: false,
@@ -107,4 +108,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     enableForProtectedPages: false,
     enableContextMenus: false,
     detectDarkTheme: true,
+    allowTransparency: false
 };

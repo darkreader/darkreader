@@ -1,5 +1,6 @@
 import BackgroundColor from './background-color';
 import Brightness from './brightness';
+import Transparency from "./transparency"
 import ColorSchemeDropDown from './color-scheme';
 import Contrast from './contrast';
 import {ExportTheme} from './export-theme';
@@ -21,6 +22,7 @@ export {
     BackgroundColor,
     Brightness,
     Contrast,
+    Transparency,
     ColorSchemeDropDown,
     ExportTheme,
     FontPicker,

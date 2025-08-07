@@ -8,6 +8,7 @@ import {isURLEnabled, isURLInList} from '../../../../utils/url';
 import {
     BackgroundColor,
     Brightness,
+    Transparency,
     ColorSchemeDropDown,
     Contrast,
     ExportTheme,
@@ -34,8 +35,11 @@ interface ThemeGroupProps {
     theme: Theme;
     change: (theme: Partial<Theme>) => void;
 }
+interface MainGroupProps extends ThemeGroupProps{
+    viewProps: ViewProps;
+}
 
-function MainGroup({theme, change}: ThemeGroupProps) {
+function MainGroup({theme, change, viewProps}: MainGroupProps) {
     return (
         <Array>
             <Brightness
@@ -45,6 +49,11 @@ function MainGroup({theme, change}: ThemeGroupProps) {
             <Contrast
                 value={theme.contrast}
                 onChange={(v) => change({contrast: v})}
+            />
+            <Transparency
+                value={theme.transparency}
+                onChange={(v) => change({transparency: v})}
+                show={true}
             />
             <Sepia
                 value={theme.sepia}
@@ -174,8 +183,8 @@ export default function ThemePage(props: ViewProps) {
         <section class="m-section theme-page">
             <ThemePresetPicker {...props} />
             <Collapsible>
-                <Collapsible.Group id="main" label="Brightness, contrast, mode">
-                    <MainGroup theme={theme} change={change} />
+                <Collapsible.Group id="main" label="Brightness, contrast, mode, transparency">
+                    <MainGroup theme={theme} change={change} viewProps={props} />
                 </Collapsible.Group>
                 <Collapsible.Group id="colors" label="Colors">
                     <ColorsGroup theme={theme} change={change} colorSchemes={props.data.colorScheme} />

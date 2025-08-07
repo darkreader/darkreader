@@ -57,7 +57,7 @@ function getCacheId(rgb: RGBA, theme: Theme): string {
     return resultId;
 }
 
-function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, pole?: HSLA | null, anotherPole?: HSLA | null) => HSLA, poleColor?: string, anotherPoleColor?: string): string {
+function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, pole?: HSLA | null, anotherPole?: HSLA | null) => HSLA, poleColor?: string, anotherPoleColor?: string, ignoreAlpha?: boolean): string {
     let fnCache: Map<string, string>;
     if (colorModificationCache.has(modifyHSL)) {
         fnCache = colorModificationCache.get(modifyHSL)!;
@@ -69,14 +69,18 @@ function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, po
     if (fnCache.has(id)) {
         return fnCache.get(id)!;
     }
+    let originalAlpha = rgb.a;
+    if (ignoreAlpha) rgb.a = 1;
 
     const hsl = rgbToHSL(rgb);
     const pole = poleColor == null ? null : parseToHSLWithCache(poleColor);
     const anotherPole = anotherPoleColor == null ? null : parseToHSLWithCache(anotherPoleColor);
     const modified = modifyHSL(hsl, pole, anotherPole);
-    const {r, g, b, a} = hslToRGB(modified);
+    let {r, g, b, a} = hslToRGB(modified);
     const matrix = createFilterMatrix({...theme, mode: 0});
     const [rf, gf, bf] = applyColorMatrix([r, g, b], matrix);
+
+    if (ignoreAlpha) a = originalAlpha;
 
     const color = (a === 1 ?
         rgbToHexString({r: rf, g: gf, b: bf}) :
@@ -108,10 +112,10 @@ function modifyAndRegisterColor(
     return registerColor(type, rgb, value);
 }
 
-function modifyLightSchemeColor(rgb: RGBA, theme: Theme): string {
+function modifyLightSchemeColor(rgb: RGBA, theme: Theme, ignoreAlpha?: boolean): string {
     const poleBg = getBgPole(theme);
     const poleFg = getFgPole(theme);
-    return modifyColorWithCache(rgb, theme, modifyLightModeHSL, poleFg, poleBg);
+    return modifyColorWithCache(rgb, theme, modifyLightModeHSL, poleFg, poleBg, ignoreAlpha);
 }
 
 function modifyLightModeHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA): HSLA {
@@ -186,20 +190,20 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA): HSLA {
 }
 
 function _modifyBackgroundColor(rgb: RGBA, theme: Theme) {
-    rgb.a = theme.transparency / 100.0;
+    rgb.a = theme.transparency / 100;
     if (theme.mode === 0) {
         if (__PLUS__) {
             const poles = getBackgroundPoles(theme);
-            return modifyColorWithCache(rgb, theme, modifyLightSchemeColorExtended, poles[0], poles[1]);
+            return modifyColorWithCache(rgb, theme, modifyLightSchemeColorExtended, poles[0], poles[1], true);
         }
-        return modifyLightSchemeColor(rgb, theme);
+        return modifyLightSchemeColor(rgb, theme, true);
     }
     if (__PLUS__) {
         const poles = getBackgroundPoles(theme);
-        return modifyColorWithCache(rgb, theme, modifyBgColorExtended, poles[0], poles[1]);
+        return modifyColorWithCache(rgb, theme, modifyBgColorExtended, poles[0], poles[1], true);
     }
     const pole = getBgPole(theme);
-    return modifyColorWithCache(rgb, theme, modifyBgHSL, pole);
+    return modifyColorWithCache(rgb, theme, modifyBgHSL, pole, undefined, true);
 }
 
 export function modifyBackgroundColor(rgb: RGBA, theme: Theme, shouldRegisterColorVariable = true): string {

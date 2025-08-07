@@ -66,7 +66,7 @@ export default function FilterSettings({data, actions}: ExtWrapper, ...children:
             step={5}
             default={0}
             name={getLocalMessage('transparency')}
-            onChange={(value) => setConfig({grayscale: value})}
+            onChange={(value) => setConfig({transparency: value})}
         />
     );
 

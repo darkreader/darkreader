@@ -7,17 +7,20 @@ import {formatPercent} from './format';
 import ThemeControl from './theme-control';
 
 export default function Transparency(props: {show: boolean; value: number; onChange: (v: number) => void}) {
-    if (!props.show) return null;
+    if (!props.show) {
+        return null;
+    }
+
     return (
         <ThemeControl label={getLocalMessage('transparency')}>
-                <Slider
-                    value={props.value}
-                    min={0}
-                    max={100}
-                    step={1}
-                    formatValue={formatPercent}
-                    onChange={props.onChange}
-                />
-            </ThemeControl>
+            <Slider
+                value={props.value}
+                min={0}
+                max={100}
+                step={1}
+                formatValue={formatPercent}
+                onChange={props.onChange}
+            />
+        </ThemeControl>
     );
 }

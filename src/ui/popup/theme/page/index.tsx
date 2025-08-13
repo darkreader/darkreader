@@ -39,7 +39,7 @@ interface MainGroupProps extends ThemeGroupProps{
     viewProps: ViewProps;
 }
 
-function MainGroup({theme, change, viewProps}: MainGroupProps) {
+function MainGroup({theme, change}: MainGroupProps) {
     return (
         <Array>
             <Brightness

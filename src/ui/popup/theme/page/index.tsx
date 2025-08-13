@@ -183,7 +183,7 @@ export default function ThemePage(props: ViewProps) {
         <section class="m-section theme-page">
             <ThemePresetPicker {...props} />
             <Collapsible>
-                <Collapsible.Group id="main" label="Brightness, contrast, mode, transparency">
+                <Collapsible.Group id="main" label="Brightness, contrast, mode">
                     <MainGroup theme={theme} change={change} viewProps={props} />
                 </Collapsible.Group>
                 <Collapsible.Group id="colors" label="Colors">

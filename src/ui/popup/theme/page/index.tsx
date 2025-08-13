@@ -53,7 +53,7 @@ function MainGroup({theme, change, viewProps}: MainGroupProps) {
             <Transparency
                 value={theme.transparency}
                 onChange={(v) => change({transparency: v})}
-                show={true}
+                show={theme.allowTransparency}
             />
             <Sepia
                 value={theme.sepia}

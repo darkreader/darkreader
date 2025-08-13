@@ -22,7 +22,7 @@ function ThemeControls(props: {theme: Theme; view: ViewProps; onChange: (theme: 
             <Transparency
                 value={theme.transparency}
                 onChange={(v) => onChange({transparency: v})}
-                show={view.data.settings.allowTransparency}
+                show={view.data.settings.theme.allowTransparency}
             />
 
             <Scheme

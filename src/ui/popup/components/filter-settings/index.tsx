@@ -87,7 +87,7 @@ export default function FilterSettings({data, actions}: ExtWrapper, ...children:
             <ModeToggle mode={theme.mode} onChange={(mode) => setConfig({mode})} />
             {brightness}
             {contrast}
-            {data.settings.allowTransparency ? transparency : ""}
+            {theme.allowTransparency ? transparency : ""}
             {sepia}
             {grayscale}
             <CustomSettingsToggle data={data} actions={actions} />

@@ -62,6 +62,8 @@ export interface Theme {
     mode: FilterMode;
     brightness: number;
     contrast: number;
+    allowTransparency: boolean;
+    transparency: number; /* Note: only applicable if enabled */
     grayscale: number;
     sepia: number;
     useFont: boolean;

@@ -64,6 +64,8 @@ export interface Theme {
     contrast: number;
     allowTransparency: boolean;
     transparency: number; /* Note: only applicable if enabled */
+    allowTransparentSelections : boolean;
+    allowTransparentScrollbars : boolean;
     grayscale: number;
     sepia: number;
     useFont: boolean;

@@ -24,6 +24,8 @@ export const DEFAULT_THEME: Theme = {
     brightness: 100,
     contrast: 100,
     allowTransparency: false,
+    allowTransparentSelections: false,
+    allowTransparentScrollbars: false,
     transparency : 100,
     grayscale: 0,
     sepia: 0,

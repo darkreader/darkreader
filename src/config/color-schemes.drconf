@@ -102,6 +102,14 @@ text: #1f1b24
 
 ================================
 
+Matte Black
+
+DARK
+background: #181a1b
+text: #e8e6e3
+
+================================
+
 Night Owl
 
 DARK
@@ -138,6 +146,14 @@ text: #383a42
 
 ================================
 
+Osaka Jade
+
+DARK
+background: #111c18
+text: #f6f5dd
+
+================================
+
 Oxocarbon
 
 DARK
@@ -159,6 +175,14 @@ text: #e0def4
 LIGHT
 background: #faf4ed
 text: #575279
+
+================================
+
+Ristretto
+
+DARK
+background: #2c2421
+text: #d5c4a1
 
 ================================
 

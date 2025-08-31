@@ -1,18 +1,18 @@
 // @ts-check
 import fs from 'node:fs/promises';
 
-import {readFile, writeFile, httpsRequest, timeout, log} from './utils.js';
+import {readFile, writeFile, fileExists, httpsRequest, timeout, log} from './utils.js';
 
 // To use this tool:
 // 1. Edit a line in en.config.
-// 2. Run `npm run translate-line 123` where 123 is a line number starting from 1.
+// 2. Run `npm run translate-en-message message_id`.
 // 3. The line will be translated and written into other locales.
 // TODO: If necessary, new @id and empty lines should be copied as well.
 // TODO: Serbian translates into Cyrillic, but it is somehow possible to do Latin.
 
 /** @typedef {{locale: string; file: string; messages: Map<string, string>}} LocaleFile */
 
-const dir = 'src/_locales';
+const LOCALES_ROOT = 'src/_locales';
 
 /**
  * Translates `en` locale message for all locales
@@ -21,36 +21,40 @@ const dir = 'src/_locales';
 async function translateEnMessage(messageId) {
     log(`Translating message ${messageId}`);
 
-    const locales = await getAllLocales();
-    const enLocale = locales.find((l) => l.locale === 'en');
-    const otherLocales = locales.filter((l) => l.locale !== 'en');
+    const supportedLocales = await getSupportedLocales();
+    const enFiles = await getLocaleFiles('en');
 
-    if (!enLocale) {
-        throw new Error('Could not find English (en) locale.');
-    }
-    const message = enLocale.messages.get(messageId);
-    if (!message) {
-        throw new Error(`Could not find message ${message}.`);
-    }
+    let found = false;
 
-    for (const loc of otherLocales) {
-        await timeout(1000);
+    for (const enFile of enFiles) {
+        const enContent = await readFile(enFile);
+        const enMessages = parseLocale(enContent);
+        if (enMessages.has(messageId)) {
+            found = true;
+            const enMessage = /** @type {string} */(enMessages.get(messageId));
+            for (const locale of supportedLocales) {
+                if (locale === 'en') {
+                    continue;
+                }
 
-        /** @type {Map<string, string>} */
-        const result = new Map();
-        const translated = await translate(message, loc.locale);
-        log(`${loc.locale}: ${translated}`);
-        for (const id of enLocale.messages.keys()) {
-            if (id === messageId) {
-                result.set(id, translated);
-            } else {
-                result.set(id, loc.messages.get(id) ?? '');
+                await timeout(1000);
+
+                const locFile = `${enFile.slice(0, enFile.lastIndexOf('en.config'))}${locale}.config`;
+                const locContent = await readFile(locFile);
+                const locMessages = parseLocale(locContent);
+
+                const translated = await translate(enMessage, locale);
+                locMessages.set(messageId, translated);
+
+                const output = stringifyLocale(locMessages);
+                await writeFile(locFile, output);
+                log(`${locale}: ${translated}`);
             }
         }
+    }
 
-        const content = stringifyLocale(result);
-        await writeFile(`${dir}/${loc.file}`, content);
-        log(`${loc.locale}: ${translated}`);
+    if (!found) {
+        throw new Error(`Could not find message ${messageId}.`);
     }
 
     log.ok('Translation done');
@@ -62,31 +66,36 @@ async function translateEnMessage(messageId) {
 async function translateNewEnMessages() {
     log('Translating new lines');
 
-    const locales = await getAllLocales();
-    const enLocale = locales.find((l) => l.locale === 'en');
-    const otherLocales = locales.filter((l) => l.locale !== 'en');
+    const supportedLocales = await getSupportedLocales();
+    const enFiles = await getLocaleFiles('en');
 
-    if (!enLocale) {
-        throw new Error('Could not find English (en) locale.');
-    }
+    for (const enFile of enFiles) {
+        const enContent = await readFile(enFile);
+        const enMessages = parseLocale(enContent);
 
-    for (const loc of otherLocales) {
-        /** @type {Map<string, string>} */
-        const result = new Map();
-        for (const id of enLocale.messages.keys()) {
-            if (loc.messages.has(id)) {
-                result.set(id, loc.messages.get(id) ?? '');
-            } else {
-                await timeout(1000);
-                const message = enLocale.messages.get(id) ?? '';
-                const translated = await translate(message, loc.locale);
-                result.set(id, translated);
-                log(`${loc.locale}: ${translated}`);
+        for (const locale of supportedLocales) {
+            if (locale === 'en') {
+                continue;
             }
-        }
 
-        const content = stringifyLocale(result);
-        await writeFile(`${dir}/${loc.file}`, content);
+            /** @type {Map<string, string>} */
+            let locMessages = new Map();
+            const locFile = `${enFile.slice(0, enFile.lastIndexOf('en.config'))}${locale}.config`;
+            if (await fileExists(locFile)) {
+                const locContent = await readFile(locFile);
+                locMessages = parseLocale(locContent);
+            }
+
+            for (const messageId of enMessages.keys()) {
+                const enMessage = /** @type {string} */(enMessages.get(messageId));
+                const translated = await translate(enMessage, locale);
+                locMessages.set(messageId, translated);
+                log(`${locale}: ${translated}`);
+            }
+
+            const output = stringifyLocale(locMessages);
+            await writeFile(locFile, output);
+        }
     }
 
     log.ok('Translation done');
@@ -144,25 +153,49 @@ function stringifyLocale(messages) {
 }
 
 /**
- * @returns {Promise<LocaleFile[]>}
+ * @returns {Promise<string[]>}
  */
-async function getAllLocales() {
-    const fileList = await fs.readdir(dir);
+async function getSupportedLocales() {
+    const fileList = await fs.readdir(LOCALES_ROOT);
 
-    /** @type {LocaleFile[]} */
+    /** @type {string[]} */
     const locales = [];
 
     for (const file of fileList) {
-        if (!file.endsWith('.config')) {
-            continue;
+        if (file.endsWith('.config')) {
+            const locale = file.substring(0, file.lastIndexOf('.config'));
+            locales.push(locale);
         }
-        const locale = file.substring(0, file.lastIndexOf('.config'));
-        const content = await readFile(`${dir}/${file}`);
-        const messages = parseLocale(content);
-        locales.push({locale, file, messages});
     }
 
     return locales;
+}
+
+/**
+ * @returns {Promise<string[]>}
+ */
+async function getLocaleFiles(locale) {
+    /** @type {string[]} */
+    const results = [];
+
+    /** @type {(dir: string) => Promise<void>} */
+    const walk = async (dir) => {
+        const entries = await fs.readdir(dir);
+        const matched = entries.filter((f) => f === `${locale}.config` || f.endsWith(`.${locale}.config`));
+        results.push(...matched);
+
+        for (const e of entries) {
+            const p = `${dir}/${e}`;
+            const stat = await fs.stat(p);
+            if (stat.isDirectory()) {
+                walk(p);
+            }
+        }
+    };
+
+    await walk(LOCALES_ROOT);
+
+    return results;
 }
 
 /**

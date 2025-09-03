@@ -166,6 +166,14 @@ text: #393939
 
 ================================
 
+Ristretto
+
+DARK
+background: #2c2421
+text: #d5c4a1
+
+================================
+
 Rosé Pine
 
 DARK
@@ -175,14 +183,6 @@ text: #e0def4
 LIGHT
 background: #faf4ed
 text: #575279
-
-================================
-
-Ristretto
-
-DARK
-background: #2c2421
-text: #d5c4a1
 
 ================================
 

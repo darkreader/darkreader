@@ -44,6 +44,6 @@
       "world": "ISOLATED"
     }
   ],
-  "permissions": ["alarms", "fontSettings", "scripting", "storage"],
+  "permissions": ["alarms", "scripting", "storage"],
   "host_permissions": ["*://*/*"]
 }

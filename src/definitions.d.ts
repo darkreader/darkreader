@@ -124,7 +124,6 @@ export interface UserSettings {
   previewNewestDesign: boolean;
   enableForPDF: boolean;
   enableForProtectedPages: boolean;
-  enableContextMenus: boolean;
   detectDarkTheme: boolean;
 }
 

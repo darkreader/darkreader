@@ -11,8 +11,6 @@ import type {DevtoolsProps} from '../types';
 import {ConfigEditor} from './config-editor';
 import {DynamicModeEditor} from './dynamic-mode-editor';
 
-declare const __PLUS__: boolean;
-
 export default function Body(props: DevtoolsProps): Malevic.Child {
     const {data, actions, devtools} = props;
     const context = getContext();
@@ -31,20 +29,15 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
     }
 
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Enable design prototype';
-    const previewNewestButtonText = data.settings.previewNewestDesign ? 'Switch to old design' : 'Preview new design';
 
     function toggleDesign(): void {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign, previewNewestDesign: false});
     }
 
-    function toggleNewestDesign(): void {
-        actions.changeSettings({previewNewestDesign: !data.settings.previewNewestDesign, previewNewDesign: false});
-    }
-
     return (
         <body>
             <header>
-                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
+                <h1 id="title">Lean Dark+</h1>
                 <h1 id="title">Developer Tools</h1>
             </header>
             <TabPanel activeTabId={store.activeTabId} onTabChange={onTabChange}>
@@ -69,8 +62,7 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
                     <div class="buttons">
-                        {isMobile || (__PLUS__ && !data.settings.previewNewDesign) ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
-                        {__PLUS__ ? <Button class="preview-design-button" onclick={toggleNewestDesign}>{previewNewestButtonText}</Button> : null}
+                        {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
                     </div>
                 </TabPanel.Tab>
             </TabPanel>

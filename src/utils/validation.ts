@@ -293,7 +293,6 @@ export function validateSettings(
         isBoolean,
         DEFAULT_SETTINGS
     );
-    validateProperty(settings, 'enableContextMenus', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'detectDarkTheme', isBoolean, DEFAULT_SETTINGS);
 
     return {errors, settings};

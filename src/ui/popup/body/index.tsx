@@ -15,9 +15,9 @@ interface IndexStore {
 
 function Logo() {
     return (
-        <a class="m-logo" target="_blank" rel="noopener noreferrer">
-      Midnight Surf
-        </a>
+        <h1>
+      Lean Dark+
+        </h1>
     );
 }
 

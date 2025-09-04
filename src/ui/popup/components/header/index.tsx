@@ -102,9 +102,7 @@ function Header(props: HeaderProps) {
 
     return (
         <header class="header">
-            <a class="header__logo" target="_blank" rel="noopener noreferrer">
-        Midnight Surf{' '}
-            </a>
+            <h2>Lean Dark+</h2>
             <div class="header__control header__site-toggle">
                 <SiteToggle data={data} actions={actions} />
                 <span

@@ -40,11 +40,7 @@ export default function Body(props: BodyProps): Malevic.Child {
     return (
         <body>
             <header>
-                <img
-                    id="logo"
-                    src="../assets/images/darkreader-type.svg"
-                    alt="Dark Reader"
-                />
+                <h1 id="title">Lean Dark+</h1>
                 <h1 id="title">Settings</h1>
             </header>
             <TabPanel

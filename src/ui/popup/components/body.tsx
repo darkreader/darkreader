@@ -16,10 +16,7 @@ import Loader from './loader';
 import MoreSettings from './more-settings';
 import SiteListSettings from './site-list-settings';
 
-import {PlusBody} from '@plus/popup/plus-body';
-
 declare const __THUNDERBIRD__: boolean;
-declare const __PLUS__: boolean;
 
 interface BodyProps {
   data: ExtensionData;
@@ -56,16 +53,6 @@ function Body(
                 <Loader complete={false} />
             </body>
         );
-    }
-
-    const v = props.installation?.version?.split('.').map((p) => parseInt(p));
-    const n = v && v.length >= 3 ? v[0] * 1e6 + v[1] * 1e3 + v[2] : 0;
-
-    if (
-        __PLUS__ &&
-    (props.data.settings.previewNewestDesign || (isMobile && n && n >= 4009093))
-    ) {
-        return <PlusBody {...props} fonts={props.fonts} />;
     }
 
     if (isMobile || props.data.settings.previewNewDesign) {
@@ -132,7 +119,6 @@ function Body(
         <MoreSettings
             data={props.data}
             actions={props.actions}
-            fonts={props.fonts}
         />
     );
 

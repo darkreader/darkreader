@@ -1,6 +1,6 @@
 {
   "name": "LeanDark+",
-  "version": "4.9.111",
+  "version": "1.0.0",
   "description": "Fast Dark mode for every website",
   "scripts": {
     "api": "node --max-old-space-size=3072 tasks/cli.js build --api",
@@ -13,6 +13,7 @@
     "debug:watch:mv3": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --chrome-mv3",
     "dependencies:upgrade": "node tasks/dependencies.js",
     "lint": "eslint -- src/**/*.ts src/**/*.tsx tasks/**/*.js eslint.config.js index.d.ts",
+    "fix": "npx eslint --fix -- src/**/*.ts src/**/*.tsx tasks/**/*.js eslint.config.js index.d.ts",
     "lint:bundle": "(node ./tasks/check-exists.js ./build/debug/chrome || node tasks/build.js --debug --api --chrome) && eslint -- 'build/debug/chrome/**/*.js' 'darkreader.js' 'darkreader.mjs'",
     "release": "npm run lint && node tasks/cli.js build --release",
     "translate-en-message": "node ./tasks/translate.js --message",
@@ -23,7 +24,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/darkreader/darkreader.git"
+    "url": "https://github.com/moodynooby/modern-darkreader.git"
   },
   "author": "Manas",
   "license": "MIT",

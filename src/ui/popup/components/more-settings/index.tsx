@@ -2,20 +2,18 @@ import {m} from 'malevic';
 
 import type {ExtWrapper, Theme} from '../../../../definitions';
 import {getLocalMessage} from '../../../../utils/locales';
-import {isFirefox} from '../../../../utils/platform';
 import {isURLInList} from '../../../../utils/url';
-import {Button, Toggle} from '../../../controls';
+import {Button} from '../../../controls';
 import {SettingsIcon} from '../../../icons';
 import {openExtensionPage} from '../../../utils';
 import CustomSettingsToggle from '../custom-settings-toggle';
 import EngineSwitch from '../engine-switch';
-import FontSettings from '../font-settings';
 
 async function openSettings() {
     await openExtensionPage('options');
 }
 
-export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts: string[]}) {
+export default function MoreSettings({data, actions}: ExtWrapper) {
     const tab = data.activeTab;
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
     const theme = custom ? custom.theme : data.settings.theme;
@@ -31,9 +29,6 @@ export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts
 
     return (
         <section class="more-settings">
-            <div class="more-settings__section">
-                <FontSettings config={theme} fonts={fonts} onChange={setConfig} />
-            </div>
             <div class="more-settings__section">
                 <EngineSwitch engine={theme.engine} onChange={(engine) => setConfig({engine})} />
             </div>
@@ -53,19 +48,6 @@ export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts
                     </p>
                 )}
             </div>
-            {isFirefox ? (
-                <div class="more-settings__section">
-                    <Toggle
-                        checked={data.settings.changeBrowserTheme}
-                        labelOn={getLocalMessage('custom_browser_theme_on')}
-                        labelOff={getLocalMessage('custom_browser_theme_off')}
-                        onChange={(checked) => actions.changeSettings({changeBrowserTheme: checked})}
-                    />
-                    <p class="more-settings__description">
-                        {getLocalMessage('change_browser_theme')}
-                    </p>
-                </div>
-            ) : null}
             <div class="more-settings__section">
                 <Button onclick={openSettings} class="more-settings__settings-button">
                     <span class="more-settings__settings-button__wrapper">

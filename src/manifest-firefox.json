@@ -31,9 +31,10 @@
     "alarms",
     "storage",
     "tabs",
-    "<all_urls>"
+    "<all_urls>",
+    "theme"  
   ],
-  "optional_permissions": [    "theme",     "contextMenus"
+  "optional_permissions": [    
 
 ]
 }

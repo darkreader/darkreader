@@ -3,27 +3,8 @@
 @more-settings-line-height: 2 * @size-border + @size-control-inner + @size-text-small-height;
 
 .header {
-    display: grid;
-    grid:
-        "logo logo"
-        "site-toggle app-toggle"
-        / 5.5fr 4.5fr;
-    grid-gap: @indent-small;
+    display: flex;
     width: 100%;
-
-    &__logo {
-        background-image: url('../assets/images/darkreader-type.svg');
-        background-size: 100%;
-        grid-area: logo;
-        height: @popup-content-width / 10;
-        outline: none;
-        text-indent: -999rem;
-        width: @popup-content-width;
-
-        &:hover {
-            filter: brightness(1.05);
-        }
-    }
 
     &__control {
         display: flex;

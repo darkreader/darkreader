@@ -82,10 +82,6 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             if (entry.src === 'src/ui/popup/index.tsx') {
                 break;
             }
-            replace = {
-                'chrome.fontSettings.getFontList': `chrome['font' + 'Settings']['get' + 'Font' + 'List']`,
-                'chrome.fontSettings': `chrome['font' + 'Settings']`,
-            };
             break;
         case PLATFORM.CHROMIUM_MV3:
             replace = {

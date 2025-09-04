@@ -16,12 +16,12 @@ interface IconOptions {
 export default class IconManager {
     private static readonly ICON_PATHS = {
         activeDark: {
-            19: '../icons/dr_active_19.png',
-            38: '../icons/dr_active_38.png',
+            16: '../icons/dr_16.png',
+            48: '../icons/dr_48.png',
         },
         activeLight: {
-            19: '../icons/dr_active_light_19.png',
-            38: '../icons/dr_active_light_38.png',
+            16: '../icons/dr_active_light_16.png',
+            48: '../icons/dr_active_light_48.png',
         },
         // Temporary disable the gray icon
         /*

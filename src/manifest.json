@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "Lean Dark+",
-  "version": "1.5.3",
+  "version": "1.6",
   "author": " Manas Doshi",
   "description": "__MSG_extension_description__",
   "default_locale": "en",

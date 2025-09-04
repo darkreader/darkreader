@@ -1,7 +1,7 @@
 {
   "browser_specific_settings": {
     "gecko": {
-      "id": "{036a55b4-5e72-4d05-a06c-cba2d2c22154}",
+      "id": "{036a55b4-5e72-4d05-a06c-cba2d2c21354}",
       "strict_min_version": "78.0"
     },
     "gecko_android": {}
@@ -29,11 +29,11 @@
   ],
   "permissions": [
     "alarms",
-    "contextMenus",
     "storage",
     "tabs",
-    "theme",
     "<all_urls>"
   ],
-  "optional_permissions": []
+  "optional_permissions": [    "theme",     "contextMenus"
+
+]
 }

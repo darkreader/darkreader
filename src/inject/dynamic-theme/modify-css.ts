@@ -1,5 +1,6 @@
 import type {Theme} from '../../definitions';
-import {parseColorWithCache, rgbToHSL, hslToString, RGBA} from '../../utils/color';
+import type {RGBA} from '../../utils/color';
+import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';

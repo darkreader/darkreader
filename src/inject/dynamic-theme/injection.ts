@@ -4,7 +4,7 @@ const hostsBreakingOnStylePosition = [
     'zhale.me',
 ];
 
-const mode = hostsBreakingOnStylePosition.includes(location.hostname) ? 'away' : 'next'
+const mode = hostsBreakingOnStylePosition.includes(location.hostname) ? 'away' : 'next';
 
 export function getStyleInjectionMode() {
     return mode;

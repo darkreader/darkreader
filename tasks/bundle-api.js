@@ -50,7 +50,6 @@ async function bundleAPIModule({debug, watch}, moduleType, dest) {
                 __FIREFOX_MV2__: false,
                 __THUNDERBIRD__: false,
                 __TEST__: false,
-                __PLUS__: false,
             }),
         ].filter(Boolean),
     });

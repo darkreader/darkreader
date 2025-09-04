@@ -20,7 +20,6 @@ export default tslint.config({
         'darkreader.js',
         'darkreader.mjs',
         'node_modules/**',
-        'tests/coverage/**',
         '**/compatibility.js',
     ],
     extends: [
@@ -171,23 +170,14 @@ export default tslint.config({
                 target: './src/inject/',
                 from: './src/api/',
             }, {
-                target: './src/inject/',
-                from: './tests/',
-            }, {
                 target: './src/background/',
                 from: './src/ui/',
-            }, {
-                target: './src/background/',
-                from: './tests/',
             }, {
                 target: './src/ui/',
                 from: './src/inject/',
             }, {
                 target: './src/ui/',
                 from: './src/background/',
-            }, {
-                target: './src/ui/',
-                from: './tests/',
             }, {
                 target: './src/generators/',
                 from: './src/inject/',

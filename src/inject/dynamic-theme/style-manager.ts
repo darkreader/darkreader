@@ -329,7 +329,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                     corsCopy = createCORSCopy(
                         fullCSSText,
                         inMode === 'next' ?
-                            (cc) =>  element.parentNode!.insertBefore(cc, element.nextSibling) :
+                            (cc) => element.parentNode!.insertBefore(cc, element.nextSibling) :
                             injectStyleAway,
                     );
                     if (corsCopy) {

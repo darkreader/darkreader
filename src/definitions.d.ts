@@ -114,7 +114,6 @@ export interface UserSettings {
   enabledByDefault: boolean;
   enabledFor: string[];
   disabledFor: string[];
-  changeBrowserTheme: boolean;
   syncSettings: boolean;
   syncSitesFixes: boolean;
   automation: Automation;

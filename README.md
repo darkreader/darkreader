@@ -1,6 +1,7 @@
 # Lean Dark+
 
 **Lean Dark+** is a minimalist dark mode extension engineered for fast, low‑distraction browsing with **reduced eyestrain** and **lightweight performance** at its core.
+[Download fromm addons](https://addons.mozilla.org/en-US/firefox/addon/len-dek/)
 
 ## What’s new
 

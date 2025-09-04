@@ -203,7 +203,6 @@ export function validateSettings(
     validateArray(settings, 'disabledFor', isNonEmptyString);
 
     validateProperty(settings, 'enabledByDefault', isBoolean, DEFAULT_SETTINGS);
-    validateProperty(settings, 'changeBrowserTheme', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSettings', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSitesFixes', isBoolean, DEFAULT_SETTINGS);
     validateProperty(

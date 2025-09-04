@@ -9,8 +9,7 @@
     -moz-user-select: none;
     user-select: none;
     width: 100%;
-    border-radius: 30px;
-
+    border-radius: 10px;
 
     &__selected {
         align-items: center;
@@ -28,8 +27,7 @@
         position: absolute;
         text-align: center;
         width: 100%;
-        border-radius: 30px;
-
+        border-radius: 10px;
 
         &__text {
             display: inline-block;
@@ -37,8 +35,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
     }
 
@@ -53,8 +50,7 @@
         overflow: hidden;
         position: absolute;
         width: 100%;
-        border-radius: 30px;
-
+        border-radius: 10px;
         &__item {
             align-items: center;
             background-color: @color-control-back;
@@ -64,13 +60,11 @@
             min-height: @dropdown-item-height;
             text-align: center;
             width: 100%;
-            border-radius: 30px;
-            
+            border-radius: 10px;            
             &:hover {
                 background-color: @color-control-hover;
                 transition: background-color @time-fast;
-                border-radius: 30px;
-
+                border-radius: 10px;
             }
 
 
@@ -78,8 +72,7 @@
                 overflow: hidden;
                 visibility: hidden;
                 white-space: nowrap;
-                border-radius: 30px;
-
+                border-radius: 10px;
             }
         }
     }
@@ -88,13 +81,11 @@
         display: inline-block;
         margin-top: (@dropdown-height - @dropdown-item-active-height) / 2;
         z-index: 1;
-        border-radius: 30px;
-
+        border-radius: 10px;
 
         &__item {
             min-height: @dropdown-item-active-height;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
     }
 
@@ -102,8 +93,7 @@
         height: @dropdown-item-active-height;
         margin-top: (@dropdown-height - @dropdown-item-active-height) / 2;
         z-index: 2;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 }
 

@@ -26,7 +26,6 @@ import UIHighlights from './ui-highlights';
 import UserStorage from './user-storage';
 import {getCommands, canInjectScript} from './utils/extension-api';
 import {logInfo, logWarn} from './utils/log';
-import {setWindowTheme, resetWindowTheme} from './window-theme';
 
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
@@ -463,13 +462,6 @@ export class Extension {
             const promise = UserStorage.saveSyncSetting(UserStorage.settings.syncSettings);
             promises.push(promise);
         }
-        if (Extension.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
-            if ($settings.changeBrowserTheme) {
-                setWindowTheme(UserStorage.settings.theme);
-            } else {
-                resetWindowTheme();
-            }
-        }
         const promise = Extension.onSettingsChanged(onlyUpdateActiveTab);
         promises.push(promise);
         await Promise.all(promises);
@@ -477,11 +469,6 @@ export class Extension {
 
     private static setTheme($theme: Partial<Theme>) {
         UserStorage.set({theme: {...UserStorage.settings.theme, ...$theme}});
-
-        if (Extension.isExtensionSwitchedOn() && UserStorage.settings.changeBrowserTheme) {
-            setWindowTheme(UserStorage.settings.theme);
-        }
-
         Extension.onSettingsChanged();
     }
 
@@ -544,14 +531,6 @@ export class Extension {
             IconManager.setIcon({isActive: true, colorScheme: UserStorage.settings.theme.mode ? 'dark' : 'light'});
         } else {
             IconManager.setIcon({isActive: false, colorScheme: UserStorage.settings.theme.mode ? 'dark' : 'light'});
-        }
-
-        if (UserStorage.settings.changeBrowserTheme) {
-            if (Extension.isExtensionSwitchedOn() && Extension.autoState !== 'scheme-light') {
-                setWindowTheme(UserStorage.settings.theme);
-            } else {
-                resetWindowTheme();
-            }
         }
     }
 

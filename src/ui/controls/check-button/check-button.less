@@ -3,18 +3,15 @@
 .check-button {
     .checkbox {
         width: calc(100% - 2 * @size-border);
-        border-radius: 30px;
-
+        border-radius: 10px;
 
         &__checkmark {
             background-color: @color-control-active;
-            border-radius: 30px;
-
+            border-radius: 10px;
             &::before,
             &::after {
                 display: none;
-                border-radius: 30px;
-
+                border-radius: 10px;
             }
         }
 
@@ -26,14 +23,12 @@
             justify-content: center;
             -moz-user-select: none;
             user-select: none;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
 
         &__input:checked ~ * {
             color: @color-control-fore;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
 
         &__input:checked ~ .checkbox__checkmark {
@@ -41,8 +36,7 @@
             background-position: center;
             background-repeat: no-repeat;
             background-size: 1rem;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
     }
 
@@ -54,7 +48,6 @@
         -moz-user-select: none;
         user-select: none;
         width: 100%;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 }

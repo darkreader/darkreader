@@ -11,7 +11,7 @@ import {compose} from '../../utils';
 import NewBody from '../body';
 
 import FilterSettings from './filter-settings';
-import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
+import {Header} from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
 import SiteListSettings from './site-list-settings';
@@ -159,19 +159,6 @@ function Body(
                     'Site list': getLocalMessage('site_list'),
                     More: getLocalMessage('more'),
                 }}
-            />
-
-            <MoreSiteSettings
-                data={props.data}
-                actions={props.actions}
-                isExpanded={state.moreSiteSettingsOpen}
-                onClose={toggleMoreSiteSettings}
-            />
-            <MoreToggleSettings
-                data={props.data}
-                actions={props.actions}
-                isExpanded={state.moreToggleSettingsOpen}
-                onClose={toggleMoreToggleSettings}
             />
         </body>
     );

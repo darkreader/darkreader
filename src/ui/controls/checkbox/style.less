@@ -11,19 +11,16 @@
     height: @size-control-inner;
     transition: background-color @time-slow;
     width: @size-control-inner;
-    border-radius: 30px;
-
+    border-radius: 10px;
     &:hover {
         background-color: @color-control-hover;
         transition: background-color @time-fast;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 
     &__input {
         display: none;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 
     &__checkmark {
@@ -31,8 +28,7 @@
         height: 100%;
         position: relative;
         width: @size-control-inner;
-        border-radius: 30px;
-
+        border-radius: 10px;
 
         &::before,
         &::after {
@@ -45,21 +41,18 @@
             top: @size-control-inner * 0.425;
             transition: all @time-fast;
             width: @size-control-inner * 0.75;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
 
         &::before {
             transform: skewY(45deg);
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
 
 
         &::after {
             transform: skewY(-45deg);
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
     }
 
@@ -67,22 +60,19 @@
         &::before,
         &::after {
             background-color: @color-control-fore;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
 
         &::before {
             top: @size-control-inner * 0.55;
             width: @size-control-inner * 0.25;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
 
         &::after {
             left: @size-control-inner * 0.375;
             width: @size-control-inner * 0.5;
-            border-radius: 30px;
-
+            border-radius: 10px;
         }
     }
 }

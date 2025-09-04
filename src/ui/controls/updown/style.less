@@ -6,8 +6,7 @@
     flex-direction: column;
     -moz-user-select: none;
     user-select: none;
-    border-radius: 30px;
-
+    border-radius: 10px;
     &__line {
         display: flex;
         flex-direction: row;
@@ -70,8 +69,7 @@
         &:hover,
         &:active {
             background-color: @color-control-back;
-            border-radius: 30px;
-        }
+            border-radius: 10px;        }
     }
 
     &__button--disabled &__icon {
@@ -104,20 +102,17 @@
     transition: background-color @time-slow;
     -moz-user-select: none;
     user-select: none;
-    border-radius: 30px;
-
+    border-radius: 10px;
 
     &:hover {
         background-color: @color-control-hover;
         transition: background-color @time-fast;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 
     &--clickable {
         cursor: pointer;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 
     &__value {
@@ -127,8 +122,7 @@
         position: absolute;
         top: 0;
         transition: width @time-fast;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 
     &__label {
@@ -139,7 +133,6 @@
         position: relative;
         white-space: nowrap;
         z-index: 1;
-        border-radius: 30px;
-
+        border-radius: 10px;
     }
 }

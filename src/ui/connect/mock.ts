@@ -32,7 +32,6 @@ export function getMockData(
             disabledFor: [],
             syncSitesFixes: false,
             enabledByDefault: true,
-            changeBrowserTheme: false,
             enableForPDF: true,
             enableForProtectedPages: false,
             syncSettings: true,

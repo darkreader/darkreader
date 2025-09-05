@@ -3,13 +3,6 @@ import {getContext} from 'malevic/dom';
 
 import type {ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
-import {
-    AdvancedIcon,
-    KeyboardIcon,
-    ListIcon,
-    SettingsIcon,
-    WatchIcon,
-} from '../../icons';
 import {AdvancedTab} from '../advanced/advanced-tab';
 import {AutomationTab} from '../automation/automation-tab';
 import {GeneralTab} from '../general/general-tab';
@@ -27,16 +20,6 @@ export default function Body(props: BodyProps): Malevic.Child {
         store.activeTabId = tabId;
         context.refresh();
     }
-
-    const now = new Date();
-    const autoIcon = (
-        <WatchIcon
-            hours={now.getHours()}
-            minutes={now.getMinutes()}
-            color="currentColor"
-        />
-    );
-
     return (
         <body>
             <header>
@@ -50,7 +33,6 @@ export default function Body(props: BodyProps): Malevic.Child {
                 <TabPanel.Tab
                     id="general"
                     label="General"
-                    icon={<SettingsIcon />}
                     iconClass="settings-icon-general"
                 >
                     <GeneralTab {...props} />
@@ -58,7 +40,6 @@ export default function Body(props: BodyProps): Malevic.Child {
                 <TabPanel.Tab
                     id="site-list"
                     label="Site List"
-                    icon={<ListIcon />}
                     iconClass="settings-icon-list"
                 >
                     <SiteListTab {...props} />
@@ -66,7 +47,6 @@ export default function Body(props: BodyProps): Malevic.Child {
                 <TabPanel.Tab
                     id="automation"
                     label="Automation"
-                    icon={autoIcon}
                     iconClass="settings-icon-auto"
                 >
                     <AutomationTab {...props} />
@@ -74,7 +54,6 @@ export default function Body(props: BodyProps): Malevic.Child {
                 <TabPanel.Tab
                     id="hotkeys"
                     label="Hotkeys"
-                    icon={<KeyboardIcon />}
                     iconClass="settings-icon-hotkeys"
                 >
                     <HotkeysTab {...props} />
@@ -82,7 +61,6 @@ export default function Body(props: BodyProps): Malevic.Child {
                 <TabPanel.Tab
                     id="advanced"
                     label="Advanced"
-                    icon={<AdvancedIcon />}
                     iconClass="settings-icon-advanced"
                 >
                     <AdvancedTab {...props} />

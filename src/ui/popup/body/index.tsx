@@ -15,9 +15,9 @@ interface IndexStore {
 
 function Logo() {
     return (
-        <h1>
+        <p class="Logo">
       Lean Dark+
-        </h1>
+        </p>
     );
 }
 

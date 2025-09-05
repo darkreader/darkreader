@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "minimum_chrome_version": "106.0.0.0",
   "action": {
-    "default_title": "Midnight Surf",
+    "default_title": "Lean Dark+",
     "default_icon": {
       "38": "icons/dr_48.png",
       "19": "icons/dr_16.png"

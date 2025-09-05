@@ -1,6 +1,5 @@
 export enum MessageTypeUItoBG {
   GET_DATA = 'ui-bg-get-data',
-  GET_DEVTOOLS_DATA = 'ui-bg-get-devtools-data',
   SUBSCRIBE_TO_CHANGES = 'ui-bg-subscribe-to-changes',
   UNSUBSCRIBE_FROM_CHANGES = 'ui-bg-unsubscribe-from-changes',
   CHANGE_SETTINGS = 'ui-bg-change-settings',

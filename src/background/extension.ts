@@ -1,4 +1,4 @@
-import type {ExtensionData, Theme, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
+import type {ExtensionData, Theme, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDetectorHintsFor} from '../generators/detector-hints';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
@@ -17,7 +17,6 @@ import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChan
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 
 import ConfigManager from './config-manager';
-import DevTools from './devtools';
 import IconManager from './icon-manager';
 import type {ExtensionAdapter} from './messenger';
 import Messenger from './messenger';
@@ -74,7 +73,6 @@ export class Extension {
         }
         Extension.initialized = true;
 
-        DevTools.init(Extension.onSettingsChanged);
         Messenger.init(Extension.getMessengerAdapter());
         TabManager.init({
             getConnectionMessage: Extension.getConnectionMessage,
@@ -241,19 +239,10 @@ export class Extension {
             collect: async () => {
                 return await Extension.collectData();
             },
-            collectDevToolsData: async () => {
-                return await Extension.collectDevToolsData();
-            },
             changeSettings: Extension.changeSettings,
             setTheme: Extension.setTheme,
             toggleActiveTab: Extension.toggleActiveTab,
             loadConfig: ConfigManager.load,
-            applyDevDynamicThemeFixes: DevTools.applyDynamicThemeFixes,
-            resetDevDynamicThemeFixes: DevTools.resetDynamicThemeFixes,
-            applyDevInversionFixes: DevTools.applyInversionFixes,
-            resetDevInversionFixes: DevTools.resetInversionFixes,
-            applyDevStaticThemes: DevTools.applyStaticThemes,
-            resetDevStaticThemes: DevTools.resetStaticThemes,
             hideHighlights: UIHighlights.hideHighlights,
         };
     }
@@ -351,23 +340,6 @@ export class Extension {
             forcedScheme: Extension.autoState === 'scheme-dark' ? 'dark' : Extension.autoState === 'scheme-light' ? 'light' : null,
             activeTab,
             uiHighlights,
-        };
-    }
-
-    static async collectDevToolsData(): Promise<DevToolsData> {
-        const [
-            dynamicFixesText,
-            filterFixesText,
-            staticThemesText,
-        ] = await Promise.all([
-            DevTools.getDynamicThemeFixesText(),
-            DevTools.getInversionFixesText(),
-            DevTools.getStaticThemesText(),
-        ]);
-        return {
-            dynamicFixesText,
-            filterFixesText,
-            staticThemesText,
         };
     }
 

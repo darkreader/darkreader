@@ -165,16 +165,6 @@ if (__WATCH__) {
 }
 
 if (__TEST__) {
-    // Open popup and DevTools pages
-    chrome.tabs.create({
-        url: chrome.runtime.getURL('/ui/popup/index.html'),
-        active: false,
-    });
-    chrome.tabs.create({
-        url: chrome.runtime.getURL('/ui/devtools/index.html'),
-        active: false,
-    });
-
     let testTabId: number | null = null;
     if (__FIREFOX_MV2__) {
         chrome.tabs.create(

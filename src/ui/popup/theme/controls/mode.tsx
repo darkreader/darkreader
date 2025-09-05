@@ -3,15 +3,10 @@ import {m} from 'malevic';
 import {ThemeEngine} from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
-import {openExtensionPage} from '../../../utils';
 
 import ThemeControl from './theme-control';
 
 export default function Mode(props: {mode: ThemeEngine; onChange: (mode: ThemeEngine) => void}) {
-    async function openCSSEditor() {
-        await openExtensionPage('stylesheet-editor');
-    }
-
     const modes = [
         {id: ThemeEngine.dynamicTheme, content: getLocalMessage('engine_dynamic')},
         {id: ThemeEngine.cssFilter, content: getLocalMessage('engine_filter')},
@@ -25,13 +20,6 @@ export default function Mode(props: {mode: ThemeEngine; onChange: (mode: ThemeEn
                     selected={modes.find((m) => m.id === props.mode)!.id}
                     options={modes}
                     onChange={props.onChange}
-                />
-                <span
-                    class={{
-                        'static-edit-button': true,
-                        'static-edit-button--hidden': props.mode !== ThemeEngine.staticTheme,
-                    }}
-                    onclick={openCSSEditor}
                 />
             </div>
         </ThemeControl>

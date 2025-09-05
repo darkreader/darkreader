@@ -68,22 +68,6 @@ const htmlEntries = [
         hasCompatibilityCheck: false,
         reloadType: reload.UI,
     },
-    {
-        title: 'Dark Reader developer tools',
-        path: 'ui/devtools/index.html',
-        hasLoader: false,
-        hasStyleSheet: true,
-        hasCompatibilityCheck: false,
-        reloadType: reload.UI,
-    },
-    {
-        title: 'Dark Reader CSS editor',
-        path: 'ui/stylesheet-editor/index.html',
-        hasLoader: false,
-        hasStyleSheet: true,
-        hasCompatibilityCheck: false,
-        reloadType: reload.UI,
-    },
 ];
 
 async function writeEntry({path, title, hasLoader, hasStyleSheet, hasCompatibilityCheck}, {debug, platform}) {

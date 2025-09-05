@@ -16,7 +16,6 @@ export function makeChromiumHappy(): void {
         if (![
             // Messenger
             MessageTypeUItoBG.GET_DATA,
-            MessageTypeUItoBG.GET_DEVTOOLS_DATA,
             MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES,
             MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES,
             MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES,

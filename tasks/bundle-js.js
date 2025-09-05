@@ -48,11 +48,6 @@ const jsEntries = [
         platform: PLATFORM.CHROMIUM_MV3,
     },
     {
-        src: 'src/ui/devtools/index.tsx',
-        dest: 'ui/devtools/index.js',
-        reloadType: reload.UI,
-    },
-    {
         src: 'src/ui/options/index.tsx',
         dest: 'ui/options/index.js',
         reloadType: reload.UI,
@@ -60,11 +55,6 @@ const jsEntries = [
     {
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
-        reloadType: reload.UI,
-    },
-    {
-        src: 'src/ui/stylesheet-editor/index.tsx',
-        dest: 'ui/stylesheet-editor/index.js',
         reloadType: reload.UI,
     },
 ];

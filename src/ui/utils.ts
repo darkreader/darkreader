@@ -142,12 +142,8 @@ export async function getFontList(): Promise<string[]> {
     });
 }
 
-type ExtensionPage = 'devtools' | 'options' | 'stylesheet-editor';
+type ExtensionPage = 'options' ;
 
-// TODO(Anton): There must be a better way to do this
-// This function ping-pongs a message to possible DevTools popups.
-// This function should have reasonable performance since it sends
-// messages only to popups and not regular windows.
 async function getExtensionPageTabMV3(): Promise<chrome.tabs.Tab | null> {
     return new Promise((resolve) => {
         chrome.windows.getAll({

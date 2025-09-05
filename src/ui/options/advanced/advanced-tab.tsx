@@ -2,7 +2,6 @@ import {m} from 'malevic';
 
 import type {ViewProps} from '../../../definitions';
 
-import {DevTools} from './devtools';
 import {EnableForProtectedPages} from './enable-for-protected-pages';
 import {ExportSettings} from './export-settings';
 import {ImportSettings} from './import-settings';
@@ -18,6 +17,5 @@ export function AdvancedTab(props: ViewProps): Malevic.Child {
         <ImportSettings {...props} />
         <ExportSettings {...props} />
         <ResetSettings {...props} />
-        <DevTools />
     </div>;
 }

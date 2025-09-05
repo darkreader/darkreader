@@ -64,11 +64,6 @@ export function getMockData(
             addSite: 'Alt+Shift+A',
             toggle: 'Alt+Shift+D',
         },
-        devtools: {
-            dynamicFixesText: '',
-            filterFixesText: '',
-            staticThemesText: '',
-        },
         colorScheme: {
             dark: {
                 Default: {

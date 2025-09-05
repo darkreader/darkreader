@@ -28,12 +28,6 @@ export interface ExtensionData {
   uiHighlights: string[];
 }
 
-export interface DevToolsData {
-  dynamicFixesText: string;
-  filterFixesText: string;
-  staticThemesText: string;
-}
-
 export interface TabData {
   type: MessageTypeBGtoCS;
   data?: any;
@@ -45,12 +39,6 @@ export interface ExtensionActions {
   setShortcut(command: string, shortcut: string): Promise<string | null>;
   toggleActiveTab(): void;
   loadConfig(options: { local: boolean }): void;
-  applyDevDynamicThemeFixes(text: string): Promise<void>;
-  resetDevDynamicThemeFixes(): void;
-  applyDevInversionFixes(text: string): Promise<void>;
-  resetDevInversionFixes(): void;
-  applyDevStaticThemes(text: string): Promise<void>;
-  resetDevStaticThemes(): void;
   hideHighlights(ids: string[]): void;
 }
 

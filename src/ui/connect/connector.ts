@@ -3,7 +3,6 @@ import type {
     ExtensionActions,
     Theme,
     UserSettings,
-    DevToolsData,
     MessageUItoBG,
     MessageBGtoUI,
 } from '../../definitions';
@@ -68,17 +67,6 @@ export default class Connector implements ExtensionActions {
             );
         }
         return await this.sendRequest<ExtensionData>(MessageTypeUItoBG.GET_DATA);
-    }
-
-    async getDevToolsData(): Promise<DevToolsData> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<DevToolsData>(
-                MessageTypeUItoBG.GET_DEVTOOLS_DATA
-            );
-        }
-        return await this.sendRequest<DevToolsData>(
-            MessageTypeUItoBG.GET_DEVTOOLS_DATA
-        );
     }
 
     private onChangesReceived = ({type, data}: MessageBGtoUI) => {
@@ -149,63 +137,6 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<MessageUItoBG>({
             type: MessageTypeUItoBG.LOAD_CONFIG,
             data: options,
-        });
-    }
-
-    async applyDevDynamicThemeFixes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(
-                MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES,
-                text
-            );
-        }
-        return await this.sendRequest<void>(
-            MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES,
-            text
-        );
-    }
-
-    resetDevDynamicThemeFixes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({
-            type: MessageTypeUItoBG.RESET_DEV_DYNAMIC_THEME_FIXES,
-        });
-    }
-
-    async applyDevInversionFixes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(
-                MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES,
-                text
-            );
-        }
-        return await this.sendRequest<void>(
-            MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES,
-            text
-        );
-    }
-
-    resetDevInversionFixes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({
-            type: MessageTypeUItoBG.RESET_DEV_INVERSION_FIXES,
-        });
-    }
-
-    async applyDevStaticThemes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(
-                MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES,
-                text
-            );
-        }
-        return await this.sendRequest<void>(
-            MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES,
-            text
-        );
-    }
-
-    resetDevStaticThemes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({
-            type: MessageTypeUItoBG.RESET_DEV_STATIC_THEMES,
         });
     }
 

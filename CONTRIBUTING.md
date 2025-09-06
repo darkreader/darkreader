@@ -68,7 +68,9 @@ To quickly access the DarkReader developer tools, you can copy and paste its URL
 - For Chrome: `chrome-extension://eimadpbcbfnmbkopoojfekhnkhdbieeh/ui/devtools/index.html`
 
 ### Manually navigating to Dev Tools
-You can also open the developer tools through a multi-step process in the extension UI:
+You can also find the developer tools through the extension popup window:
+
+https://github.com/user-attachments/assets/76a5d9bc-7553-4e50-acf5-5a9051cec152
 
 - Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.

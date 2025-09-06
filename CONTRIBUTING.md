@@ -62,13 +62,25 @@ In **Dynamic mode**, if the page looks partially dark and bright, it is consider
 
 In **Filter mode**, it is a common practice to invert elements on the page that are already dark.
 
+### Shortcuts for opening Dev Tools
+To quickly access the DarkReader developer tools, you can copy and paste its URL directly into your address bar:
+- For Firefox: `moz-extension://61cdf967-90af-41f4-be3d-80b84f6983b0/ui/devtools/index.html`
+- For Chrome: `chrome-extension://eimadpbcbfnmbkopoojfekhnkhdbieeh/ui/devtools/index.html`
+
+### Manually navigating to Dev Tools
+You can also open the developer tools through a multi-step process in the extension UI:
+
 - Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
 - Pick an incorrectly inverted element.
 - Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (for example, if it has `class="icon small"`, the selector may look like `.icon`).
-- Click **Dark Reader icon**.
-- Click **Open developer tools** (at the bottom of the Dark Reader popup).
-- Edit or add a block containing the URL and selectors to invert.
+- Click **Dark Reader icon** to open the extension popup window.
+- Switch to the **More** tab.
+- Click the **⛭ All settings** button at the bottom.
+- Switch to the **Advanced** section on the left.
+- Click the **🛠️ Dev tools** button at the bottom.
+- (Optional but helpful) Switch to the **Per Site Editor** tab at the bottom and type in the domain name you wish to update or add.
+- Edit or add a block containing the URL and selectors to invert, using the [rules below](#editor--rule-syntax).
 - Click **Apply**.
 - Check how it looks both in **Light** and **Dark** mode.
 - If the **fix works** open **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config) file** or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config) file**.
@@ -81,6 +93,9 @@ In **Filter mode**, it is a common practice to invert elements on the page that 
 - If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
 - When you see a **green checkmark** then everything is fine.
 - A Dark Reader developer will **review** and merge your changes, making them available.
+
+
+## Editor & Rule Syntax
 
 ```CSS
 dynamic-theme-fixes.config

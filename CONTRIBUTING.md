@@ -1,91 +1,71 @@
-<h2 align="center">Contributions</h2>
 
-<p align="center">You can contribute to and help Dark Reader in many ways. Read on below to learn how and thank you in advance.</p>
+# Contributing to Dark Reader
 
-## Sponsor
+Thank you for your interest in contributing to Dark Reader! There are several ways you can help improve the project. Below are clear, concise instructions for each contribution type.
 
-<a href="https://opencollective.com/darkreader/donate" target="_blank" rel="noreferrer noopener"> <img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 /></a>
+## 1. Sponsor Development
 
-Sponsor the development of Dark Reader.
+Support Dark Reader by sponsoring its development:  
 
-## Translation
+[<img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 />](https://opencollective.com/darkreader/donate)
 
-[Improve or suggest](https://github.com/darkreader/darkreader/tree/main/src/_locales) a translation. See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
+## 2. Improve Translations
 
-## Disabling Dark Reader on your site
+Help translate Dark Reader into new languages or improve existing translations:  
+- Edit translations in the [src/_locales](https://github.com/darkreader/darkreader/tree/main/src/_locales) directory.  
+- Refer to the [language codes](https://developer.chrome.com/webstore/i18n#localeTable) we support.  
+- Submit your changes via a pull request (see "Submitting Changes" below).
 
-Website pages can request Dark Reader to disable itself by embedding a "Dark Reader lock". The "lock" is a `<meta>` tag with `name` attribute set to `darkreader-lock` which is a child of `<head>` tag in the document.
+## 3. Disable Dark Reader on Your Website
 
-### Disabling Dark Reader statically
+If your website is already dark or incompatible with Dark Reader, you can disable Dark Reader by adding a `<meta>` tag to your HTML `<head>`:  
 
-Add `<meta name="darkreader-lock">` within your HTML document in `<head>` like so:
 ```html
-<head>
-    <meta name="darkreader-lock">
-</head>
+<meta name="darkreader-lock">
 ```
 
-### Disabling Dark Reader dynamically
-
-Add the "lock" dynamically like so (assuming browser already parsed enough of the document to create a `head` attribute):
+**Dynamically (JavaScript):**  
 ```js
 const lock = document.createElement('meta');
 lock.name = 'darkreader-lock';
 document.head.appendChild(lock);
 ```
 
-## Adding a website that is already dark
+## 4. Add a Dark Website to the Exclusion List
 
-If a website is **already dark** and meets the following requirements:
+If a website is **already dark** by default and meets these criteria:  
+- Entire site (all subpages) is dark, regardless of system theme.  
+- URL is the direct website address (no redirects).  
+- Website is complete (no "under construction" or placeholder pages).  
 
-- The entire website, including all subpages, is dark by default, regardless of the system's preferred color scheme.
-- The URL is the actual website address. No redirects of any kind are allowed.
-- The website is complete and finished. Any website in the design or development phase or any other incomplete status is not permitted. These statuses can include any placeholder web pages or verbiage about coming soon, the website being under construction, the website having moved, etc.
+Add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/main/src/config/dark-sites.config) file:  
+- Edit the file, maintaining **alphabetical order**.  
+- Submit your changes via a pull request (see "Submitting Changes" below).
 
-Then you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/main/src/config/dark-sites.config) file**.
+## 5. Fix Incorrect Styling on Websites
 
-**Please maintain the alphabetical order of the websites listed in this file.**
+If elements on a website are not styled correctly (e.g., wrong colors, inverted images), you can fix them by editing one of these files:  
+- **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config)** (for Dynamic Theme mode).  
+- **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config)** (for Filter/Filter+ modes).  
 
-## Fixing incorrect inversions
+### Steps to Fix Styling
+1. Open browser Dev Tools (`F12` in Chrome, `Ctrl+Shift+C` in Firefox).  
+2. Use the **element picker** to select the problematic element.  
+3. Identify a [CSS selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) for the element (e.g., `.icon` for `class="icon small"`).  
+4. Open the Dark Reader extension popup and click **Open developer tools**.  
+5. Add or edit a block for the website’s URL with your fix (see examples below).  
+6. Test in both **Light** and **Dark** modes.  
+7. If the fix works, edit the appropriate config file:  
+   - Maintain **alphabetical order** by URL.  
+   - Use short selectors and preserve code style.  
+   - Include a **brief description** of the fix.  
+8. Submit your changes via a pull request (see "Submitting Changes" below).  
+9. **Include screenshots** showing the issue **before** and **after** your fix.
 
-If any **element** on a web page is **not inverted or styled correctly**, you can fix it by specifying the appropriate [**CSS selector**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors). Use the [**dynamic-theme-fixes.config**](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config) file for Dynamic Theme mode and the [**inversion-fixes.config**](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config) file for Filter and Filter+ modes.
+### Example Fixes
 
-**Please maintain the alphabetical order of the websites listed, use short selectors, and preserve the code style in these files.**
-
-You can learn how to create a fix for the appropriate mode below.
-
-## How to use the Dev Tools
-
-The Dev Tools help you **fix minor issues** on a web page. These can include a dark icon on a dark background, removing a bright background, adding a white background to a transparent image, etc.
-
-In **Dynamic mode**, if the page looks partially dark and bright, it is considered a bug.
-
-In **Filter mode**, it is a common practice to invert elements on the page that are already dark.
-
-- Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
-- Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
-- Pick an incorrectly inverted element.
-- Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (for example, if it has `class="icon small"`, the selector may look like `.icon`).
-- Click **Dark Reader icon**.
-- Click **Open developer tools** (at the bottom of the Dark Reader popup).
-- Edit or add a block containing the URL and selectors to invert.
-- Click **Apply**.
-- Check how it looks both in **Light** and **Dark** mode.
-- If the **fix works** open **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config) file** or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config) file**.
-- Click **Edit** (login to GitHub first).
-- **Insert your fix** there. Preserve **alphabetic order** by URL.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- GitHub actions will run tests to make sure it has the right code style.
-- If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- A Dark Reader developer will **review** and merge your changes, making them available.
-
-```CSS
-dynamic-theme-fixes.config
-================================
-
+**Dynamic Theme Mode (dynamic-theme-fixes.config):**  
+```css
 example.com
 
 INVERT
@@ -93,8 +73,8 @@ INVERT
 
 CSS
 .wrong-element-colors {
-    background-color: ${white} !important;
-    color: ${black} !important;
+    background-color: var(--darkreader-neutral-background) !important;
+    color: var(--darkreader-neutral-text) !important;
 }
 
 IGNORE INLINE STYLE
@@ -104,62 +84,8 @@ IGNORE IMAGE ANALYSIS
 .logo
 ```
 
-| Rule | Description | Notes / Examples |
-|---|---|---|
-| **INVERT** | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
-| **CSS** | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
-| **IGNORE&nbsp;INLINE&nbsp;STYLE** | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
-| **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |  |
-
-## Adding a new color scheme
-
-If you can add a new _popular_ or _unique_ but usable predefined color scheme to Dark Reader, you can add it to the `src/config/color-schemes.drconf` file. Please use the following steps to add a new color scheme:
-
-- Open **[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/main/src/config/color-schemes.drconf) file**.
-- Click **Edit** (login to GitHub first).
-- **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- GitHub actions will run tests to make sure it has the right code style.
-- If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- A Dark Reader developer will **review** and merge your changes, making them available.
-
-## Dynamic variables
-
-When making a fix for background or text colors, instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`), please use CSS variables that are generated based on the user settings:
-
-```CSS
-dynamic-theme-fixes.config
-================================
-example.com
-
-CSS
-.logo {
-    background-color: var(--darkreader-neutral-background) !important;
-}
-.footer > p {
-    color: var(--darkreader-neutral-text) !important;
-}
-
-```
-
-Here is a full table of available CSS variables:
-
-| Variable | Description | Use |
-|---|---|---|
-| **`--darkreader-neutral-background`** | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>the wrong background color. |
-| **`--darkreader-neutral-text`** | Neutral text color that <br>corresponds to the user's settings. | Used for elements with the wrong text color. |
-| **`--darkreader-selection-background`** | The background color setting <br>defined by the user. | The user's Background Color setting. |
-| **`--darkreader-selection-text`** | The text color setting <br>defined by the user. | The user's Text Color setting. |
-
-## Fixes for Filter and Filter+ mode
-
-```CSS
-inversion-fixes.config
-================================
-
+**Filter/Filter+ Modes (inversion-fixes.config):**  
+```css
 example.com
 
 INVERT
@@ -179,42 +105,69 @@ CSS
 }
 ```
 
-- Filter and Filter+ work by inverting the entire web page and reverting necessary elements (images, videos, etc.) listed in the `INVERT` section.
-- If an inverted element contains images or other content that becomes incorrectly displayed, use the `NO INVERT` rule.
-- `REMOVE BG` removes the background image from an element and forces a black background.
+### CSS Variables for Dynamic Mode
+Use these variables instead of hardcoded colors:  
+| Variable | Description | Use Case |
+|---|---|---|
+| `--darkreader-neutral-background` | Neutral background color | Fix wrong background colors |
+| `--darkreader-neutral-text` | Neutral text color | Fix wrong text colors |
+| `--darkreader-selection-background` | User-defined background color | Match user’s background setting |
+| `--darkreader-selection-text` | User-defined text color | Match user’s text setting |
 
-## Adding new features or fixing bugs
+### Rules for Fixes
+| Rule | Description | Notes |
+|---|---|---|
+| **INVERT** | Inverts specified elements | Dynamic Mode: Use for dark images invisible on dark backgrounds |
+| **CSS** | Adds custom CSS | Use `!important` for each property. Dynamic Mode supports `${COLOR}` (e.g., `${white}` becomes `${black}` in dark mode) |
+| **IGNORE INLINE STYLE** | Ignores inline styles | Prevents changes to `style` attributes |
+| **IGNORE IMAGE ANALYSIS** | Skips background image analysis | Use for images that don’t need inversion |
+| **NO INVERT** | Prevents inversion of child elements | Filter/Filter+: Use for content inside inverted elements |
+| **REMOVE BG** | Removes background image | Filter/Filter+: Forces a black background |
 
-If you would like to **add a new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
+## 6. Add a New Color Scheme
 
-To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS version.
-Install development dependencies by running `npm install` in the project root folder.
-Then execute `npm run debug`.
+To add a popular or unique color scheme:  
+- Edit the [color-schemes.drconf](https://github.com/darkreader/darkreader/blob/main/src/config/color-schemes.drconf) file.  
+- Add your scheme in **alphabetical order** by name.  
+- Include a **brief description** of the scheme.  
+- Submit your changes via a pull request (see "Submitting Changes" below).
 
-#### Chrome and Edge
+## 7. Develop New Features or Fix Bugs
 
-- Open the `chrome://extensions` page.
-- Disable the official Dark Reader version.
-- Enable the **Developer mode**.
-- Click **Load unpacked extension** button.
-- Navigate to the project's `build/debug/chrome` folder.
+To contribute code (e.g., new features or bug fixes):  
+1. Check for an existing issue or submit a new one on [GitHub Issues](https://github.com/darkreader/darkreader/issues).  
+2. Discuss with contributors and get approval.  
+3. Set up the development environment:  
+   - Install [Node.js](https://nodejs.org/) (LTS version).  
+   - Run `npm install` in the project root.  
+   - Run `npm run debug` to build the extension.  
+4. Load the extension for testing:  
+   **Chrome/Edge:**  
+   - Go to `chrome://extensions`, enable **Developer mode**, and load the `build/debug/chrome` folder.  
+   **Firefox:**  
+   - Go to `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on**, and select `build/debug/firefox/manifest.json`.  
+5. For live reloading, run `npm run debug:watch`.  
+6. Preserve code style by running `npm run code-style`.  
+7. Run tests with `npm test`.  
+8. Submit your changes via a pull request (see "Submitting Changes" below).
 
-#### Firefox
+## Submitting Changes
 
-- Open the `about:addons` page.
-- Disable the official Dark Reader version.
-- Open the `about:debugging#addons` page.
-- Click the **Load Temporary Add-on** button.
-- Open the `build/debug/firefox/manifest.json` file.
-
-If you execute `npm run debug:watch` instead of `npm run debug`, it will automatically recompile after making any code changes.
+1. Fork the Dark Reader repository and create a branch for your changes.  
+2. Commit your changes with a clear message (e.g., “Fix inversion for example.com”).  
+3. Push your branch and create a pull request on GitHub.  
+4. Ensure your pull request includes:  
+   - A **description** of what you changed and why.  
+   - **Screenshots** (for styling fixes) showing **before** and **after**.  
+5. GitHub Actions will run tests to check code style.  
+   - If tests fail (red cross), click **Details** to fix issues and update your pull request.  
+   - If tests pass (green checkmark), your pull request is ready for review.  
+6. A Dark Reader developer will review and merge your changes.
 
 ## Tips
+- Use a text editor like [Visual Studio Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/).  
+- Preserve code style (run `npm run code-style` to format automatically).  
+- Test thoroughly in both **Light** and **Dark** modes.  
+- Be patient during the review process, and respond to feedback promptly.
 
-You can use any text editor or web IDE (for example, [Visual Studio Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/)) for editing the code.
-
-**Please preserve the code style** (for example, whitespaces, etc.). It can be done automatically by executing `npm run code-style`.
-
-Run tests by executing `npm test` to verify it will pass.
-
-If your code is ready to be reviewed and merged, you can submit a **pull request** and wait for a **review**.
+Thank you for contributing to Dark Reader!

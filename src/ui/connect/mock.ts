@@ -15,6 +15,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 mode: 1,
                 brightness: 110,
                 contrast: 90,
+                transparency: 100,
+                allowTransparency: false,
                 grayscale: 20,
                 sepia: 10,
                 useFont: false,

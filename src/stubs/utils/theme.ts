@@ -21,5 +21,9 @@ export function modifyLightSchemeColorExtended({h, s, l, a}: HSLA, _pole1: HSLA,
     return {h, s, l, a};
 }
 
+export function activateTheme(_p1: string, _p2: string): Promise<boolean> {
+    return new Promise((resolve) => resolve(false));
+}
+
 export function extendThemeCacheKeys(_keys: Array<keyof Theme>) {
 }

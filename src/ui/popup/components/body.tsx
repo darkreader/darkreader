@@ -185,6 +185,8 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
                             const result = await activate(activationEmail, activationKey);
                             if (result) {
                                 context.refresh();
+                            } else {
+                                props.actions.changeSettings({previewNewestDesign: true});
                             }
                         });
                     }}>

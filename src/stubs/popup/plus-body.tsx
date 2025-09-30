@@ -1,4 +1,4 @@
-import {ExtensionActions, ExtensionData} from 'definitions';
+import type {ExtensionActions, ExtensionData} from 'definitions';
 import {m} from 'malevic';
 
 export function PlusBody(): Malevic.Child {

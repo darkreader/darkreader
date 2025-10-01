@@ -56,7 +56,7 @@ async function start() {
     }
 
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
+    window.addEventListener('unload', () => connector.disconnect());
 
     const [data, fonts, installation] = await Promise.all([
         connector.getData(),
@@ -67,7 +67,7 @@ async function start() {
     connector.subscribeToChanges((data) => renderBody(data, fonts, installation, connector));
 }
 
-addEventListener('load', start, {passive: true});
+window.addEventListener('load', start);
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);

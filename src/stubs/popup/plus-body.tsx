@@ -1,4 +1,3 @@
-import type {ExtensionActions, ExtensionData} from 'definitions';
 import {m} from 'malevic';
 
 export function PlusBody(): Malevic.Child {
@@ -15,8 +14,4 @@ export function shouldUseAltUI() {
 
 export function initAltUI(): Promise<void> {
     return new Promise((resolve) => resolve());
-}
-
-export function renderAltUI(_data: ExtensionData, _actions: ExtensionActions) {
-    return <body></body>;
 }

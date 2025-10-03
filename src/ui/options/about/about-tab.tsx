@@ -36,10 +36,10 @@ export function AboutTab(props: ViewProps & AboutTabProps): Malevic.Child {
             <div>
                 <a href={`${HOMEPAGE_URL}/plus/`} target="_blank" rel="noopener noreferrer">{getLocalMessage('pay_for_using')}</a>
             </div>
-        ) : (
+        ) : props.data.uiHighlights.includes('anniversary') ? (
             <div>
                 <a href={DONATE_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('pay_for_using')}</a>
             </div>
-        )}
+        ) : null}
     </div>;
 }

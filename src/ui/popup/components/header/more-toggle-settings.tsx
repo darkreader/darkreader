@@ -185,14 +185,16 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <p class="header__more-settings__description">
                     {getLocalMessage('extension_toggle_shortcut')}
                 </p>
-                <div class="header__more-settings__donate">
-                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                        <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
-                    </a>
-                    <p class="header__more-settings__description">
-                        {getLocalMessage('support_out_work')}
-                    </p>
-                </div>
+                {data.uiHighlights.includes('anniversary') ? (
+                    <div class="header__more-settings__donate">
+                        <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                            <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
+                        </a>
+                        <p class="header__more-settings__description">
+                            {getLocalMessage('support_out_work')}
+                        </p>
+                    </div>
+                ) : null}
             </div>
         </div>
     );

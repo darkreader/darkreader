@@ -2,6 +2,8 @@ import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, Me
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
+import {HOMEPAGE_URL} from '../utils/links';
+import {activateTheme} from '@plus/utils/theme';
 
 import {writeEnabledForHost} from './cache';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
@@ -12,6 +14,7 @@ import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {logWarn, logInfoCollapsed} from './utils/log';
 
 declare const __DEBUG__: boolean;
+declare const __PLUS__: boolean;
 declare const __TEST__: boolean;
 
 let unloaded = false;
@@ -209,6 +212,16 @@ if (!__THUNDERBIRD__) {
     addEventListener('pagehide', onPageHide, {passive: true});
     addEventListener('freeze', onFreeze, {passive: true});
     addEventListener('resume', onResume, {passive: true});
+}
+
+if (__PLUS__) {
+    if (location.origin === HOMEPAGE_URL) {
+        document.addEventListener('__darkreader_activate__', async (e: CustomEvent) => {
+            const {email, key} = e.detail;
+            const result = await activateTheme(email, key);
+            document.dispatchEvent(new CustomEvent('__darkreader_activationResult__', {detail: {result}}));
+        }, {once: true});
+    }
 }
 
 if (__TEST__) {

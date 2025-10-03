@@ -48,7 +48,7 @@ if (typeof chrome.runtime.sendMessage === 'function') {
 }
 
 if (!chrome.runtime.onMessage) {
-    chrome.runtime.onMessage = {} as any;
+    (chrome.runtime as any).onMessage = {} as any;
 }
 if (typeof chrome.runtime.onMessage.addListener === 'function') {
     const nativeAddListener = chrome.runtime.onMessage.addListener;

@@ -52,6 +52,15 @@ main {
 
 .settings-tab {
     max-width: 16rem;
+
+    .button,
+    .textbox {
+        width: calc(100% - 2 * @size-border);
+    }
+
+    a {
+        color: @color-fore;
+    }
 }
 
 .settings-tab > :not(:first-child) {
@@ -64,6 +73,16 @@ main {
         height: 75%;
         width: 75%;
     }
+}
+
+.activation__error {
+    color: @color-error;
+    max-width: 16rem;
+}
+
+.activation-tab--checking {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 @media screen and (max-width: 30rem) {

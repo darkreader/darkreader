@@ -1,6 +1,8 @@
 const hostsBreakingOnStylePosition = [
+    'www.berlingske.dk',
     'www.bloomberg.com',
     'www.diffusioneshop.com',
+    'www.weekendavisen.dk',
     'zhale.me',
 ];
 

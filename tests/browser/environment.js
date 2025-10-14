@@ -92,13 +92,13 @@ export default class CustomJestEnvironment extends TestEnvironment {
         // Explanation of these options:
         // https://pptr.dev/guides/chrome-extensions
         return await launch({
-            executablePath,
-            headless: false,
             args: [
-                `--disable-extensions-except=${extensionDir}`,
-                `--load-extension=${extensionDir}`,
                 '--show-component-extension-options',
             ],
+            enableExtensions: [extensionDir],
+            executablePath,
+            headless: false,
+            pipe: true,
         });
     }
 

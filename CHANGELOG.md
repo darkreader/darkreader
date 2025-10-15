@@ -1,3 +1,10 @@
+# 4.9.112 (October 15, 2025)
+
+- Fixed handling fallback values of undefined CSS variables.
+- Fixed error when Dark Reader styles were removed.
+- Simplified mobile user interface for Edge.
+- One-click activation for new UI in Edge.
+
 # 4.9.110 (July 16, 2025)
 
 - Fixed breaking certain websites (Bloomberg).

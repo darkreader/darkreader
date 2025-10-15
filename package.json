@@ -26,6 +26,7 @@
     "test:chrome-mv3": "node tasks/cli.js build --debug --test --chrome-mv3 && jest --config=tests/browser/jest.config.chrome-mv3.mjs --runInBand",
     "test:ci": "npm run test:unit",
     "test:coverage": "jest --config=tests/unit/jest.config.mjs --coverage",
+    "test:edge": "node tasks/cli.js build --debug --test --plus && jest --config=tests/browser/jest.config.mjs --runInBand",
     "test:firefox": "node tasks/cli.js build --debug --test --firefox-mv2 && jest --config=tests/browser/jest.config.firefox.mjs --runInBand",
     "test:inject": "node --max-old-space-size=3072 node_modules/.bin/karma start ./tests/inject/karma.conf.cjs",
     "test:inject:debug": "node --max-old-space-size=3072 node_modules/.bin/karma start ./tests/inject/karma.conf.cjs --debug",

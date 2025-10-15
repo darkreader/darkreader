@@ -103,6 +103,7 @@ function getParams(args) {
         '--chrome': PLATFORM.CHROMIUM_MV2,
         '--chrome-mv2': PLATFORM.CHROMIUM_MV2,
         '--chrome-mv3': PLATFORM.CHROMIUM_MV3,
+        '--chrome-plus': PLATFORM.CHROMIUM_MV2_PLUS,
         '--firefox': PLATFORM.FIREFOX_MV2,
         '--firefox-mv2': PLATFORM.FIREFOX_MV2,
         '--firefox-mv3': PLATFORM.FIREFOX_MV3,

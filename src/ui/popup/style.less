@@ -242,9 +242,8 @@ footer {
     }
 
     .donate-link {
-        background-color: @color-control-back;
-        background-image: linear-gradient(135deg, #954d6d, transparent 10%, transparent 90%, #31367d);
-        border: @size-border solid @color-border;
+        background-color: @color-control-hover;
+        background-image: linear-gradient(135deg, #954d63, transparent 10%, transparent 90%, #314d7d);
         box-shadow: none;
         box-sizing: border-box;
         grid-area: button;
@@ -252,7 +251,7 @@ footer {
         width: 100%;
 
         &:hover {
-            background-color: @color-control-hover;
+            background-color: mix(@color-control-hover, @color-control-active);
             box-shadow: none;
         }
     }
@@ -342,7 +341,8 @@ footer {
 
 .footer-help-link {
     align-items: center;
-    background-color: @color-control-active;
+    background-color: @color-control-back;
+    border: @size-border solid @color-border;
     color: @color-control-fore;
     cursor: pointer;
     display: inline-flex;
@@ -354,10 +354,10 @@ footer {
     transition: all @time-fast;
 
     &::before {
-        background-color: @color-control-fore;
+        background-color: @color-control-active;
         border-radius: 50%;
         box-sizing: border-box;
-        color: @color-control-active;
+        color: @color-control-fore;
         content: "?";
         display: inline-block;
         font-weight: bold;
@@ -369,7 +369,7 @@ footer {
     }
 
     &:hover {
-        box-shadow: 0 0 @indent-large @color-control-active;
+        background-color: @color-control-hover;
     }
 }
 

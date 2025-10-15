@@ -11,6 +11,8 @@ import Body from './components/body';
 import {fixNotClosingPopupOnNavigation} from './utils/issues';
 import {initAltUI, shouldUseAltUI} from '@plus/popup/plus-body';
 
+declare const __PLUS__: boolean;
+
 function renderBody(data: ExtensionData, fonts: string[], installation: {date: number; version: string}, actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
         if (!document.documentElement.classList.contains('preview')) {
@@ -45,7 +47,7 @@ async function getInstallationData() {
 }
 
 async function start() {
-    if (shouldUseAltUI()) {
+    if (__PLUS__ && shouldUseAltUI()) {
         return await initAltUI();
     }
 

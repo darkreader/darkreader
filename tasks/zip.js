@@ -42,9 +42,10 @@ async function archiveDirectory({dir, dest, date, mode}) {
  */
 async function getLastCommitTime() {
     // We need to offset the user's time zone since yazl can not represent time zone in produced archive
+    // If called outside of the git tree, make sure we don't pass a negative date.
     return new Promise((resolve) =>
         exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(
-            (Number(stdout) + (new Date()).getTimezoneOffset() * 60) * 1000
+            Math.max(0, Number(stdout) + (new Date()).getTimezoneOffset() * 60) * 1000
         ))));
 }
 

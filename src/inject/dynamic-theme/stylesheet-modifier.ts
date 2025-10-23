@@ -51,6 +51,9 @@ export function createStyleSheetModifier(): StyleSheetModifier {
         if (isMediaRule(rule.parentRule)) {
             cssText = `${rule.parentRule.media.mediaText} { ${cssText} }`;
         }
+        if (isLayerRule(rule.parentRule)) {
+            cssText = `${rule.parentRule.name} { ${cssText} }`;
+        }
         return getHashCode(cssText);
     }
 

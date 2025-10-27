@@ -68,18 +68,18 @@
   "devDependencies": {
     "@eslint/compat": "1.4.0",
     "@eslint/eslintrc": "3.3.1",
-    "@eslint/js": "9.37.0",
+    "@eslint/js": "9.38.0",
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-replace": "6.0.2",
-    "@rollup/plugin-typescript": "12.1.4",
-    "@stylistic/eslint-plugin": "5.4.0",
-    "@types/chrome": "0.1.24",
+    "@rollup/plugin-typescript": "12.3.0",
+    "@stylistic/eslint-plugin": "5.5.0",
+    "@types/chrome": "0.1.26",
     "@types/eslint": "9.6.1",
-    "@types/jasmine": "5.1.10",
+    "@types/jasmine": "5.1.12",
     "@types/jest": "30.0.0",
     "@types/karma": "6.3.9",
     "@types/karma-coverage": "2.0.3",
-    "@types/node": "24.7.2",
+    "@types/node": "24.9.1",
     "@types/ws": "8.18.1",
     "chokidar": "4.0.3",
     "eslint-plugin-compat": "6.0.2",
@@ -99,18 +99,18 @@
     "karma-spec-reporter": "0.0.36",
     "less": "4.4.2",
     "prettier": "3.6.2",
-    "puppeteer-core": "24.24.1",
-    "rollup": "4.52.4",
+    "puppeteer-core": "24.26.1",
+    "rollup": "4.52.5",
     "rollup-plugin-istanbul": "5.0.0",
     "ts-jest": "29.4.5",
     "tslib": "2.8.1",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.46.1",
+    "typescript-eslint": "8.46.2",
     "ws": "8.18.3",
     "yazl": "3.3.1"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.52.4",
-    "@rollup/rollup-win32-x64-msvc": "4.52.4"
+    "@rollup/rollup-linux-x64-gnu": "4.52.5",
+    "@rollup/rollup-win32-x64-msvc": "4.52.5"
   }
 }

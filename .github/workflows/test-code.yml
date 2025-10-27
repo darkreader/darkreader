@@ -23,7 +23,7 @@ on:
       node_version:
         description: 'NodeJS version'
         required: true
-        default: '18.x'
+        default: '22.x'
 
 jobs:
   test:
@@ -38,7 +38,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version || '18.x' }}
+          node-version: ${{ inputs.node_version || '22.x' }}
           cache: npm
 
       - name: Install npm dependencies

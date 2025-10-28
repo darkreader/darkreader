@@ -40,6 +40,7 @@ async function bundleAPIModule({debug, watch}, moduleType, dest) {
                 sourceMap: debug ? true : false,
                 inlineSources: debug ? true : false,
                 noEmitOnError: watch ? false : true,
+                outDir: absolutePath('.'),
                 cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : undefined,
             }),
             rollupPluginReplace({

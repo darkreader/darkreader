@@ -705,7 +705,8 @@ function isFallbackResolved(modified: string) {
                 fallback.startsWith('hsl(') ||
                 fallback.startsWith('hsla(') ||
                 fallback.startsWith('var(--darkreader-bg--') ||
-                fallback.match(/^var\(--darkreader-background-[0-9a-z]+, #[0-9a-z]+\)$/)
+                fallback.startsWith('var(--darkreader-background-') ||
+                (hasDoubleNestedBrackets && fallback.includes('var(--darkreader-background-'))
             );
         }
         return fallback.match(/^(#[0-9a-f]+)|([a-z]+)$/i);

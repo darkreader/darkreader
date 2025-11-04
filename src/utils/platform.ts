@@ -19,6 +19,8 @@ declare global {
     }
 }
 
+declare const __PLUS__: boolean;
+
 const isNavigatorDefined = typeof navigator !== 'undefined';
 const userAgent = isNavigatorDefined ? (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) ?
     navigator.userAgentData.brands.map((brand) => `${brand.brand.toLowerCase()} ${brand.version}`).join(' ') : navigator.userAgent.toLowerCase()
@@ -38,7 +40,7 @@ export const isEdge = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX_MV2_
 export const isSafari = !__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && !__FIREFOX_MV2__ && !__THUNDERBIRD__ && userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
-export const isMobile = (isNavigatorDefined && navigator.userAgentData) ? navigator.userAgentData.mobile : userAgent.includes('mobile');
+export const isMobile = (isNavigatorDefined && navigator.userAgentData) ? navigator.userAgentData.mobile : (userAgent.includes('mobile') || (__PLUS__ && userAgent.includes('edgios')));
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
 export const isMatchMediaChangeEventListenerSupported = __CHROMIUM_MV3__ || (
     typeof MediaQueryList === 'function' &&

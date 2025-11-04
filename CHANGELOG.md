@@ -1,3 +1,10 @@
+# 4.9.113 (November 4, 2025)
+
+- Fixed processing unresolved nested CSS variables fallbacks.
+- Fixed handling same CSS rules inside different @layer rules.
+- Fixed mobile user interface in Edge.
+- Fixed Firefox build in different timezones.
+
 # 4.9.112 (October 15, 2025)
 
 - Fixed handling fallback values of undefined CSS variables.

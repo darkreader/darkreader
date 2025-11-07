@@ -173,6 +173,11 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             if (emptyIsWhereSelector || viewTransitionSelector) {
                 selectorText = '.darkreader-unsupported-selector';
             }
+            // ::picker(select) becomes ::picker,
+            // but cannot be parsed later (Chrome bug)
+            if (isChromium && selectorText.endsWith('::picker')) {
+                selectorText = selectorText.replaceAll('::picker', '::picker(select)');
+            }
 
             let ruleText = `${selectorText} {`;
             for (const dec of declarations) {

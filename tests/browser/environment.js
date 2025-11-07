@@ -370,7 +370,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
                     const message = JSON.parse(data);
                     if (message.id === null && message.data && message.data.type === 'background' && message.data.extensionOrigin) {
                         // This is the initial message which contains extension's URL origin
-                        // and signals that extenstion is ready
+                        // and signals that extension is ready
                         this.extensionOrigin = message.data.extensionOrigin;
                         this.extensionStartListeners.forEach((ready) => ready());
                         ws.on('close', () => backgroundSocket = null);

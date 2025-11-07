@@ -613,7 +613,7 @@ describe('State manager utility', () => {
         expect(setCount).toEqual(1);
         promises2.all('pending');
 
-        // During data race the JS-world data does not get overwriten
+        // During data race the JS-world data does not get overwritten
         expect(parent).toEqual({
             data: 'new',
         });

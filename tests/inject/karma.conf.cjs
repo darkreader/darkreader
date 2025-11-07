@@ -1,5 +1,5 @@
 /**
- * This file is necessary because Karma does not support configutation
+ * This file is necessary because Karma does not support configuration
  * via ES modules. This file is a CommonJS module which wraps a regular
  * ES module.
  */

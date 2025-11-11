@@ -9,7 +9,7 @@ import {readCSSFetchCache, writeCSSFetchCache} from '../cache';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
 
-import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath, ignoredMedia} from './css-rules';
 import {getStyleInjectionMode, injectStyleAway} from './injection';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
@@ -76,7 +76,7 @@ export function shouldManageStyle(element: Node | null): boolean {
             )
         ) &&
         !element.classList.contains('darkreader') &&
-        element.media.toLowerCase() !== 'print' &&
+        !ignoredMedia.includes(element.media.toLowerCase()) &&
         !element.classList.contains('stylus')
     );
 }

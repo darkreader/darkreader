@@ -39,9 +39,15 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
 }
 
 export const ignoredMedia = [
+    'aural',
+    'braille',
+    'embossed',
+    'handheld',
     'print',
     'projection',
     'speech',
+    'tty',
+    'tv',
 ];
 
 // These properties are not iterable

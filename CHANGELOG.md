@@ -1,3 +1,9 @@
+# 4.9.114 (November 12, 2025)
+
+- Fixed compatibility with Chrome 144.
+- Fixed handling CSS for deprecated media.
+- Fixed breaking on ::picker selector.
+
 # 4.9.113 (November 4, 2025)
 
 - Fixed processing unresolved nested CSS variables fallbacks.

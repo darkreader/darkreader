@@ -26,6 +26,8 @@ const VAR_TYPE_TEXT_COLOR = 1 << 1;
 const VAR_TYPE_BORDER_COLOR = 1 << 2;
 const VAR_TYPE_BG_IMG = 1 << 3;
 
+const shouldSetDefaultColor = !location.hostname.startsWith('www.ebay.');
+
 export class VariablesStore {
     private varTypes = new Map<string, number>();
     private rulesQueue = new Set<CSSRuleList | CSSRule[]>();
@@ -243,7 +245,9 @@ export class VariablesStore {
         }
         if (property === 'background-color' || (isSimpleConstructedColor && property === 'background')) {
             return (theme) => {
-                const defaultFallback = tryModifyBgColor(isConstructedColor ? '255, 255, 255' : '#ffffff', theme);
+                const defaultFallback = shouldSetDefaultColor ?
+                    tryModifyBgColor(isConstructedColor ? '255, 255, 255' : '#ffffff', theme) :
+                    'transparent';
                 return replaceCSSVariablesNames(
                     sourceValue,
                     (v) => wrapBgColorVariableName(v),

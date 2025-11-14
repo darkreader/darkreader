@@ -1,3 +1,8 @@
+# 4.9.115 (November 14, 2025)
+
+- Fixed eBay issue (transparent color for unresolved variables).
+- Improved dark theme detection.
+
 # 4.9.114 (November 12, 2025)
 
 - Fixed compatibility with Chrome 144.

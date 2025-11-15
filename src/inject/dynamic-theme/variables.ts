@@ -26,7 +26,7 @@ const VAR_TYPE_TEXT_COLOR = 1 << 1;
 const VAR_TYPE_BORDER_COLOR = 1 << 2;
 const VAR_TYPE_BG_IMG = 1 << 3;
 
-const shouldSetDefaultColor = !location.hostname.startsWith('www.ebay.');
+const shouldSetDefaultColor = !location.hostname.startsWith('www.ebay.') && !location.hostname.startsWith('pay.ebay.');
 
 export class VariablesStore {
     private varTypes = new Map<string, number>();

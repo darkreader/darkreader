@@ -309,7 +309,22 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boo
     return false;
 }
 
+const LOOP_DETECTION_THRESHOLD = 1000;
+const MAX_LOOP_CYCLES = 10;
+const elementsLastChanges = new WeakMap<Node, number>();
+const elementsLoopCycles = new WeakMap<Node, number>();
+
 export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+    if (elementsLastChanges.has(element)) {
+        if (Date.now() - elementsLastChanges.get(element)! < LOOP_DETECTION_THRESHOLD) {
+            const cycles = elementsLoopCycles.get(element) ?? 0;
+            elementsLoopCycles.set(element, cycles + 1);
+        }
+        if ((elementsLoopCycles.get(element) ?? 0) >= MAX_LOOP_CYCLES) {
+            return;
+        }
+    }
+
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -522,4 +537,6 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         element.removeAttribute(overrides[cssProp].dataAttr);
     });
     inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));
+
+    elementsLastChanges.set(element, Date.now());
 }

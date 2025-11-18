@@ -6,7 +6,7 @@ const COLOR_SCHEME_META_SELECTOR = 'meta[name="color-scheme"]';
 
 function hasBuiltInDarkTheme() {
     const rootStyle = getComputedStyle(document.documentElement);
-    if (rootStyle.filter.includes('invert(1)')) {
+    if (rootStyle.filter.includes('invert(1)') || rootStyle.colorScheme === 'dark') {
         return true;
     }
 

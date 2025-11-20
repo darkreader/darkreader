@@ -36,7 +36,7 @@ function renderBody(data: ExtensionData, fonts: string[], installation: {date: n
 
 async function getInstallationData() {
     return new Promise<any>((resolve) => {
-        chrome.storage.local.get({installation: {}}, (data) => {
+        chrome.storage.local.get<Record<string, any>>({installation: {}}, (data) => {
             if (data?.installation?.version) {
                 resolve(data.installation);
             } else {

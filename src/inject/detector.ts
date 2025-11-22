@@ -77,7 +77,11 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
     }
 
     const drSheets = Array.from(document.styleSheets).filter((s) => (s.ownerNode as HTMLElement)?.classList.contains('darkreader'))
-        .concat(Array.isArray(document.adoptedStyleSheets) ? document.adoptedStyleSheets.filter((s) => (s.cssRules?.[0] as CSSStyleRule)?.selectorText?.startsWith('#__darkreader')) : []);
+        .concat(
+            Array.isArray(document.adoptedStyleSheets) ? Array.from(document.adoptedStyleSheets).filter(
+                (s) => (s.cssRules?.[0] as CSSStyleRule)?.selectorText?.startsWith('#__darkreader')
+            ) : [],
+        );
     drSheets.forEach((sheet) => sheet.disabled = true);
 
     const darkThemeDetected = hasBuiltInDarkTheme();

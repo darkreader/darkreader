@@ -1,3 +1,10 @@
+# 4.9.116 (November 22, 2025)
+
+- Improved dark theme detection.
+- Prevent high CPU usage due to inline style conflicts.
+- Fixed error messages in Firefox.
+- Fixed eBay buttons.
+
 # 4.9.115 (November 14, 2025)
 
 - Fixed eBay issue (transparent color for unresolved variables).

@@ -314,6 +314,29 @@ const MAX_LOOP_CYCLES = 10;
 const elementsLastChanges = new WeakMap<Node, number>();
 const elementsLoopCycles = new WeakMap<Node, number>();
 
+const SMALL_SVG_THRESHOLD = 32;
+const svgNodesRoots = new WeakMap<Node, SVGSVGElement | null>();
+const svgRootSizeTestResults = new WeakMap<SVGSVGElement, boolean>();
+
+function getSVGElementRoot(svgElement: SVGElement): SVGSVGElement | null {
+    if (!svgElement) {
+        return null;
+    }
+
+    if (svgNodesRoots.has(svgElement)) {
+        return svgNodesRoots.get(svgElement)!
+    }
+
+    if (svgElement instanceof SVGSVGElement) {
+        return svgElement;
+    }
+
+    const parent = svgElement.parentNode as SVGElement;
+    const root = getSVGElementRoot(parent!);
+    svgNodesRoots.set(svgElement, root);
+    return root;
+}
+
 export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
     if (elementsLastChanges.has(element)) {
         if (Date.now() - elementsLastChanges.get(element)! < LOOP_DETECTION_THRESHOLD) {
@@ -471,7 +494,6 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
 
     if (isSVGElement) {
         if (element.hasAttribute('fill')) {
-            const SMALL_SVG_LIMIT = 32;
             const value = element.getAttribute('fill')!;
             if (value !== 'none') {
                 if (!(element instanceof SVGTextElement)) {
@@ -480,8 +502,25 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
                     // and it will cause a layout of unstyled content which results in white flashes.
                     // Therefore, check if the DOM is at the `complete` readystate.
                     const handleSVGElement = () => {
-                        const {width, height} = element.getBoundingClientRect();
-                        const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+                        let isSVGSmall = false;
+                        const root = getSVGElementRoot(element);
+                        if (!root) {
+                            return;
+                        }
+                        if (svgRootSizeTestResults.has(root)) {
+                            isSVGSmall = svgRootSizeTestResults.get(root)!;
+                        } else {
+                            const svgBounds = root.getBoundingClientRect();
+                            isSVGSmall = svgBounds.width * svgBounds.height <= Math.pow(SMALL_SVG_THRESHOLD, 2);
+                            svgRootSizeTestResults.set(root, isSVGSmall);
+                        }
+                        let isBg: boolean;
+                        if (isSVGSmall) {
+                            isBg = false;
+                        } else {
+                            const {width, height} = element.getBoundingClientRect();
+                            isBg = (width > SMALL_SVG_THRESHOLD || height > SMALL_SVG_THRESHOLD);
+                        }
                         setCustomProp('fill', isBg ? 'background-color' : 'color', value);
                     };
 

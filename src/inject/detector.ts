@@ -76,6 +76,17 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
         return;
     }
 
+    const rootClassName = document.documentElement.className.toLocaleLowerCase();
+    if (
+        rootClassName.includes('dark') ||
+        rootClassName.includes('night') ||
+        document.documentElement.dataset.theme === 'dark' ||
+        document.documentElement.dataset.bsTheme === 'dark'
+    ) {
+        callback(true);
+        return;
+    }
+
     const drSheets = Array.from(document.styleSheets).filter((s) => (s.ownerNode as HTMLElement)?.classList.contains('darkreader'))
         .concat(
             Array.isArray(document.adoptedStyleSheets) ? Array.from(document.adoptedStyleSheets).filter(

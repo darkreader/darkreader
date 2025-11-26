@@ -81,8 +81,7 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
         rootClassName.includes('dark') ||
         rootClassName.includes('night') ||
         document.body?.className.toLocaleLowerCase().includes('dark') ||
-        document.documentElement.dataset.theme === 'dark' ||
-        document.documentElement.dataset.bsTheme === 'dark'
+        document.documentElement.dataset.theme?.toLocaleLowerCase() === 'dark'
     ) {
         callback(true);
         return;

@@ -53,10 +53,28 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
     });
 }
 
+function shouldExcludeHint(hint: DetectorHint) {
+    if (hint.target === 'html' || hint.target === 'body') {
+        const match = hint.match[0]?.toLocaleLowerCase() ?? '';
+        if (
+            (match.startsWith('.') && match.includes('dark')) ||
+            match === '[data-theme="dark"]'
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function getDetectorHintsFor(url: string, text: string, index: SitePropsIndex<DetectorHint>): DetectorHint[] | null {
     const fixes = getSitesFixesFor(url, text, index, detectorParserOptions);
 
     if (fixes.length === 0) {
+        return null;
+    }
+
+    // Hints like ".dark" or [data-theme="dark"] are irrelevant
+    if (fixes.filter((hint) => shouldExcludeHint(hint)).length === 0) {
         return null;
     }
 

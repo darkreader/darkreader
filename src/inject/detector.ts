@@ -77,10 +77,12 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
     }
 
     const rootClassName = document.documentElement.className.toLocaleLowerCase();
+    const bodyClassName = document.body.className?.toLocaleLowerCase() ?? '';
+    const rootDataTheme = document.documentElement.dataset.theme?.toLocaleLowerCase() ?? '';
     if (
         rootClassName.includes('dark') ||
-        document.body?.className.toLocaleLowerCase().includes('dark') ||
-        document.documentElement.dataset.theme?.toLocaleLowerCase() === 'dark'
+        bodyClassName.includes('dark') ||
+        rootDataTheme === 'dark'
     ) {
         callback(true);
         return;

@@ -102,7 +102,12 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
     }
 
-    if (cssText.includes('background-color: ;') && !style.getPropertyValue('background')) {
+    if (
+        (
+            cssText.includes('background-color: ;') ||
+            cssText.includes('background-image: ;')
+        ) && !style.getPropertyValue('background')
+    ) {
         handleEmptyShorthand('background', style, iterate);
     }
     if (cssText.includes('border-') && cssText.includes('-color: ;') && !style.getPropertyValue('border')) {
@@ -131,6 +136,7 @@ function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, ite
             }
         } else if (shorthand === 'background') {
             iterate('background-color', '#ffffff');
+            iterate('background-image', 'none');
         }
     }
 }

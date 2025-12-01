@@ -9,7 +9,7 @@ import {readCSSFetchCache, writeCSSFetchCache} from '../cache';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
 
-import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath, ignoredMedia} from './css-rules';
 import {getStyleInjectionMode, injectStyleAway} from './injection';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
@@ -76,7 +76,7 @@ export function shouldManageStyle(element: Node | null): boolean {
             )
         ) &&
         !element.classList.contains('darkreader') &&
-        element.media.toLowerCase() !== 'print' &&
+        !ignoredMedia.includes(element.media.toLowerCase()) &&
         !element.classList.contains('stylus')
     );
 }
@@ -445,7 +445,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 force,
                 isAsyncCancelled,
             });
-            isOverrideEmpty = syncStyle!.sheet!.cssRules.length === 0;
+            isOverrideEmpty = !syncStyle!.sheet || syncStyle!.sheet!.cssRules.length === 0;
             if (sheetModifier.shouldRebuildStyle()) {
                 // "update" function schedules rebuilding the style
                 // ideally to wait for link loading, because some sites put links any time,

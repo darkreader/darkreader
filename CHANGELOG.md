@@ -1,3 +1,35 @@
+# 4.9.116 (November 22, 2025)
+
+- Improved dark theme detection.
+- Prevent high CPU usage due to inline style conflicts.
+- Fixed error messages in Firefox.
+- Fixed eBay buttons.
+
+# 4.9.115 (November 14, 2025)
+
+- Fixed eBay issue (transparent color for unresolved variables).
+- Improved dark theme detection.
+
+# 4.9.114 (November 12, 2025)
+
+- Fixed compatibility with Chrome 144.
+- Fixed handling CSS for deprecated media.
+- Fixed breaking on ::picker selector.
+
+# 4.9.113 (November 4, 2025)
+
+- Fixed processing unresolved nested CSS variables fallbacks.
+- Fixed handling same CSS rules inside different @layer rules.
+- Fixed mobile user interface in Edge.
+- Fixed Firefox build in different timezones.
+
+# 4.9.112 (October 15, 2025)
+
+- Fixed handling fallback values of undefined CSS variables.
+- Fixed error when Dark Reader styles were removed.
+- Simplified mobile user interface for Edge.
+- One-click activation for new UI in Edge.
+
 # 4.9.110 (July 16, 2025)
 
 - Fixed breaking certain websites (Bloomberg).

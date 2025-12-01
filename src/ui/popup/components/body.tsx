@@ -181,10 +181,12 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
                         Activate the latest features
                     </span>
                     <a class="ui-upgrade__button" target="_blank" rel="noopener noreferrer" onclick={() => {
-                        chrome.storage.local.get({activationEmail: '', activationKey: ''}, async ({activationEmail, activationKey}) => {
+                        chrome.storage.local.get<Record<string, any>>({activationEmail: '', activationKey: ''}, async ({activationEmail, activationKey}) => {
                             const result = await activate(activationEmail, activationKey);
                             if (result) {
                                 context.refresh();
+                            } else {
+                                props.actions.changeSettings({previewNewestDesign: true});
                             }
                         });
                     }}>

@@ -21,9 +21,9 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
         } else if (isMediaRule(rule)) {
             const media = Array.from(rule.media);
             const isScreenOrAllOrQuery = media.some((m) => m.startsWith('screen') || m.startsWith('all') || m.startsWith('('));
-            const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
+            const isNotScreen = !isScreenOrAllOrQuery && media.some((m) => ignoredMedia.some((i) => m.startsWith(i)));
 
-            if (isScreenOrAllOrQuery || !isPrintOrSpeech) {
+            if (isScreenOrAllOrQuery || !isNotScreen) {
                 iterateCSSRules(rule.cssRules, iterate, onImportError);
             }
         } else if (isSupportsRule(rule)) {
@@ -37,6 +37,18 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
         }
     });
 }
+
+export const ignoredMedia = [
+    'aural',
+    'braille',
+    'embossed',
+    'handheld',
+    'print',
+    'projection',
+    'speech',
+    'tty',
+    'tv',
+];
 
 // These properties are not iterable
 // when they depend on variables

@@ -26,6 +26,8 @@ const VAR_TYPE_TEXT_COLOR = 1 << 1;
 const VAR_TYPE_BORDER_COLOR = 1 << 2;
 const VAR_TYPE_BG_IMG = 1 << 3;
 
+const shouldSetDefaultColor = !location.hostname.startsWith('www.ebay.') && !location.hostname.includes('.ebay.');
+
 export class VariablesStore {
     private varTypes = new Map<string, number>();
     private rulesQueue = new Set<CSSRuleList | CSSRule[]>();
@@ -243,7 +245,9 @@ export class VariablesStore {
         }
         if (property === 'background-color' || (isSimpleConstructedColor && property === 'background')) {
             return (theme) => {
-                const defaultFallback = tryModifyBgColor(isConstructedColor ? '255, 255, 255' : '#ffffff', theme);
+                const defaultFallback = shouldSetDefaultColor ?
+                    tryModifyBgColor(isConstructedColor ? '255, 255, 255' : '#ffffff', theme) :
+                    'transparent';
                 return replaceCSSVariablesNames(
                     sourceValue,
                     (v) => wrapBgColorVariableName(v),
@@ -296,8 +300,7 @@ export class VariablesStore {
                 if (unknownVars.size > 0) {
                     // web.dev and voice.google.com issue where the variable is never defined, but the fallback is.
                     // TODO: Return a fallback value along with a way to subscribe for a change.
-                    const isFallbackResolved = modified.match(/^var\(.*?, ((var\(--darkreader-bg--.*\))|(#[0-9A-Fa-f]+)|([a-z]+)|(rgba?\(.+\))|(hsla?\(.+\)))\)$/);
-                    if (isFallbackResolved) {
+                    if (isFallbackResolved(modified)) {
                         return modified;
                     }
                     return new Promise<string>((resolve) => {
@@ -684,6 +687,36 @@ function isConstructedColorVar(value: string) {
         value.match(/^\s*(rgb|hsl)a?\(/) ||
         value.match(/^(((\d{1,3})|(var\([\-_A-Za-z0-9]+\))),?\s*?){3}$/)
     );
+}
+
+function isFallbackResolved(modified: string) {
+    if (modified.startsWith('var(') && modified.endsWith(')')) {
+        const hasNestedBrackets = modified.endsWith('))');
+        const hasDoubleNestedBrackets = modified.endsWith(')))');
+        const lastOpenBracketIndex = hasNestedBrackets ? modified.lastIndexOf('(') : -1;
+        const firstOpenBracketIndex = hasDoubleNestedBrackets ? modified.lastIndexOf('(', lastOpenBracketIndex - 1) : lastOpenBracketIndex;
+
+        const commaIndex = modified.lastIndexOf(',', hasNestedBrackets ? firstOpenBracketIndex : modified.length);
+        if (commaIndex < 0 || modified[commaIndex + 1] !== ' ') {
+            return false;
+        }
+
+        const fallback = modified.slice(commaIndex + 2, modified.length - 1);
+        if (hasNestedBrackets) {
+            return (
+                fallback.startsWith('rgb(') ||
+                fallback.startsWith('rgba(') ||
+                fallback.startsWith('hsl(') ||
+                fallback.startsWith('hsla(') ||
+                fallback.startsWith('var(--darkreader-bg--') ||
+                fallback.startsWith('var(--darkreader-background-') ||
+                (hasDoubleNestedBrackets && fallback.includes('var(--darkreader-background-'))
+            );
+        }
+        return fallback.match(/^(#[0-9a-f]+)|([a-z]+)$/i);
+    }
+
+    return false;
 }
 
 const textColorProps = [

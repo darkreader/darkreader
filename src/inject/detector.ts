@@ -6,7 +6,7 @@ const COLOR_SCHEME_META_SELECTOR = 'meta[name="color-scheme"]';
 
 function hasBuiltInDarkTheme() {
     const rootStyle = getComputedStyle(document.documentElement);
-    if (rootStyle.filter.includes('invert(1)')) {
+    if (rootStyle.filter.includes('invert(1)') || rootStyle.colorScheme === 'dark') {
         return true;
     }
 
@@ -76,7 +76,24 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
         return;
     }
 
-    const drSheets = Array.from(document.styleSheets).filter((s) => (s.ownerNode as HTMLElement)?.classList.contains('darkreader'));
+    const rootClassName = document.documentElement.className.toLocaleLowerCase();
+    const bodyClassName = document.body.className?.toLocaleLowerCase() ?? '';
+    const rootDataTheme = document.documentElement.dataset.theme?.toLocaleLowerCase() ?? '';
+    if (
+        rootClassName.includes('dark') ||
+        bodyClassName.includes('dark') ||
+        rootDataTheme === 'dark'
+    ) {
+        callback(true);
+        return;
+    }
+
+    const drSheets = Array.from(document.styleSheets).filter((s) => (s.ownerNode as HTMLElement)?.classList.contains('darkreader'))
+        .concat(
+            Array.isArray(document.adoptedStyleSheets) ? Array.from(document.adoptedStyleSheets).filter(
+                (s) => (s.cssRules?.[0] as CSSStyleRule)?.selectorText?.startsWith('#__darkreader')
+            ) : [],
+        );
     drSheets.forEach((sheet) => sheet.disabled = true);
 
     const darkThemeDetected = hasBuiltInDarkTheme();

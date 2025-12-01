@@ -258,7 +258,7 @@ function writeInstallationVersion(
     storage: chrome.storage.SyncStorageArea | chrome.storage.LocalStorageArea,
     details: chrome.runtime.InstalledDetails,
 ) {
-    storage.get({installation: {version: ''}}, (data) => {
+    storage.get<Record<string, any>>({installation: {version: ''}}, (data) => {
         if (data?.installation?.version) {
             return;
         }

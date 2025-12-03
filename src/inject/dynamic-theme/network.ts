@@ -6,7 +6,7 @@ interface FetchRequest {
     url: string;
     responseType: 'data-url' | 'text';
     mimeType?: string;
-    origin?: string;
+    origin: string;
 }
 
 const resolvers = new Map<string, (data: string) => void>();
@@ -16,12 +16,16 @@ export async function bgFetch(request: FetchRequest): Promise<string> {
     if ((window as any).DarkReader?.Plugins?.fetch) {
         return (window as any).DarkReader.Plugins.fetch(request);
     }
+    const parsedURL = new URL(request.url);
+    if (parsedURL.origin !== request.origin && shouldIgnoreCors(parsedURL)) {
+        throw new Error('Cross-origin limit reached');
+    }
     return new Promise<string>((resolve, reject) => {
         const id = generateUID();
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
         chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.FETCH, data: request, id});
-    });
+    }); 
 }
 
 chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) => {
@@ -37,3 +41,21 @@ chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) =>
         }
     }
 });
+
+const ipV4RegExp = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+const MAX_CORS_DOMAINS = 16;
+let corsDomainsCounter = 0;
+
+function shouldIgnoreCors(url: URL) {
+    const host = url.hostname;
+    if (
+        host === 'localhost' ||
+        host.startsWith('[') ||
+        host.match(ipV4RegExp) ||
+        host.endsWith('.local') ||
+        ++corsDomainsCounter >= MAX_CORS_DOMAINS
+    ) {
+        return true;
+    }
+    return false;
+}

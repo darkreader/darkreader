@@ -603,7 +603,9 @@ async function loadText(url: string) {
     } else {
         text = await bgFetch({url, responseType: 'text', mimeType: 'text/css', origin: location.origin});
     }
-    writeCSSFetchCache(url, text);
+    if (parsedURL.origin === location.origin) {
+        writeCSSFetchCache(url, text);
+    }
     return text;
 }
 

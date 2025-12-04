@@ -25,7 +25,7 @@ export async function bgFetch(request: FetchRequest): Promise<string> {
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
         chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.FETCH, data: request, id});
-    }); 
+    });
 }
 
 chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) => {

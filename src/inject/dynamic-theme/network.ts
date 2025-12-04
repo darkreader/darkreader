@@ -44,16 +44,19 @@ chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) =>
 
 const ipV4RegExp = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
 const MAX_CORS_DOMAINS = 16;
-let corsDomainsCounter = 0;
+const corsDomains = new Set<string>();
 
 function shouldIgnoreCors(url: URL) {
     const host = url.hostname;
+    if (!corsDomains.has(host)) {
+        corsDomains.add(host);
+    }
     if (
+        corsDomains.size >= MAX_CORS_DOMAINS ||
         host === 'localhost' ||
         host.startsWith('[') ||
-        host.match(ipV4RegExp) ||
         host.endsWith('.local') ||
-        ++corsDomainsCounter >= MAX_CORS_DOMAINS
+        host.match(ipV4RegExp)
     ) {
         return true;
     }

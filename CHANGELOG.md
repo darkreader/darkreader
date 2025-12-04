@@ -1,3 +1,10 @@
+# 4.9.117 (December 3, 2025)
+
+- Improved dark theme detection.
+- Optimized SVG image analysis.
+- CSS variables support improvements.
+- Applied cross-origin request limitations.
+
 # 4.9.116 (November 22, 2025)
 
 - Improved dark theme detection.

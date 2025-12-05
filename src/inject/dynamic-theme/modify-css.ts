@@ -167,7 +167,8 @@ export function getSelectionColor(theme: Theme): {backgroundColorSelection: stri
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {
-        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, {...theme, grayscale: 0});
+        const allowTransparency = theme.allowTransparency && theme.allowTransparentSelections;
+        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, {...theme, grayscale: 0, allowTransparency: allowTransparency});
         foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, {...theme, grayscale: 0});
     } else {
         const rgb = parseColorWithCache(theme.selectionColor)!;
@@ -200,7 +201,8 @@ function getModifiedScrollbarStyle(theme: Theme) {
     let colorTrack: string;
     let colorThumb: string;
     if (theme.scrollbarColor === 'auto') {
-        colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, theme);
+        const allowTransparency = theme.allowTransparency && theme.allowTransparentScrollbars;
+        colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, {...theme, allowTransparency: allowTransparency});
         colorThumb = modifyBackgroundColor({r: 176, g: 176, b: 176}, theme);
     } else {
         const rgb = parseColorWithCache(theme.scrollbarColor)!;

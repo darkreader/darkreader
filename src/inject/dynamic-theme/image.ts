@@ -1,12 +1,13 @@
+import type {Theme} from '../../definitions';
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
-import {bgFetch} from './network';
-import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
+import AsyncQueue from '../../utils/async-queue';
 import {getSRGBLightness} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
 import {getHashCode} from '../../utils/text';
-import type {Theme} from '../../definitions';
+import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
 import {logWarn} from '../utils/log';
-import AsyncQueue from '../../utils/async-queue';
+
+import {bgFetch} from './network';
 
 export interface ImageDetails {
     src: string;
@@ -22,6 +23,7 @@ export interface ImageDetails {
 const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string): Promise<ImageDetails> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise<ImageDetails>(async (resolve, reject) => {
         try {
             const dataURL = url.startsWith('data:') ? url : await getDataURL(url);
@@ -53,7 +55,7 @@ async function getDataURL(url: string): Promise<string> {
     if (parsedURL.origin === location.origin) {
         return await loadAsDataURL(url);
     }
-    return await bgFetch({url, responseType: 'data-url'});
+    return await bgFetch({url, responseType: 'data-url', origin: location.origin});
 }
 
 async function tryCreateImageBitmap(blob: Blob) {

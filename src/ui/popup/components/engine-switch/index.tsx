@@ -1,7 +1,8 @@
 import {m} from 'malevic';
-import {MultiSwitch} from '../../../controls';
+
 import {ThemeEngine} from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
+import {MultiSwitch} from '../../../controls';
 import {openExtensionPage} from '../../../utils';
 
 const engineNames: Array<[ThemeEngine, string]> = [

@@ -1,6 +1,6 @@
-import {logWarn} from '../utils/log';
 import type {DynamicThemeFix} from '../../definitions';
 import {isURLInList} from '../../utils/url';
+import {logWarn} from '../utils/log';
 
 /**
  * Note: This function's behavior is identical to what we had for a long time, but it's slightly odd:

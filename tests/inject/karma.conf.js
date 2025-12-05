@@ -3,13 +3,15 @@
 
 import fs from 'node:fs';
 import os from 'node:os';
-import rollupPluginIstanbul from 'rollup-plugin-istanbul';
+
 import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from '@rollup/plugin-typescript';
+import rollupPluginIstanbul from 'rollup-plugin-istanbul';
 import typescript from 'typescript';
 
-import {createEchoServer} from './support/echo-server.js';
 import {absolutePath} from '../../tasks/paths.js';
+
+import {createEchoServer} from './support/echo-server.js';
 
 /**
  * @param {Partial<LocalConfig>} config
@@ -20,7 +22,7 @@ export function configureKarma(config, env) {
     const headless = config.headless || Boolean(env.KARMA_HEADLESS) || false;
 
     /** @type {ConfigOptions} */
-    let options = {
+    const options = {
         failOnFailingTestSuite: true,
         failOnEmptyTestSuite: true,
         basePath: '../..',
@@ -55,6 +57,7 @@ export function configureKarma(config, env) {
                     __CHROMIUM_MV2__: false,
                     __CHROMIUM_MV3__: false,
                     __THUNDERBIRD__: false,
+                    __PLUS__: false,
                     __PORT__: '-1',
                     __TEST__: true,
                     __WATCH__: false,

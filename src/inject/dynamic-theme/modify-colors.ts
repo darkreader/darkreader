@@ -1,12 +1,16 @@
-import type {Theme} from '../definitions';
-import type {RGBA, HSLA} from '../utils/color';
-import {parseToHSLWithCache, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
-import {scale} from '../utils/math';
-import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
+import {extendThemeCacheKeys, getBackgroundPoles, getTextPoles, modifyBgColorExtended, modifyFgColorExtended, modifyLightSchemeColorExtended} from '@plus/utils/theme';
+import type {Theme} from '../../definitions';
+import {applyColorMatrix, createFilterMatrix} from '../../generators/utils/matrix';
+import {getRegisteredColor, registerColor} from '../../inject/dynamic-theme/palette';
+import type {RGBA, HSLA} from '../../utils/color';
+import {parseToHSLWithCache, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../../utils/color';
+import {scale} from '../../utils/math';
 
 interface ColorFunction {
     (hsl: HSLA): HSLA;
 }
+
+declare const __PLUS__: boolean;
 
 function getBgPole(theme: Theme) {
     const isDarkScheme = theme.mode === 1;
@@ -27,7 +31,19 @@ export function clearColorModificationCache(): void {
 }
 
 const rgbCacheKeys: Array<keyof RGBA> = ['r', 'g', 'b', 'a'];
-const themeCacheKeys: Array<keyof Theme> = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
+
+export const themeCacheKeys: Array<keyof Theme> = [
+    'mode',
+    'brightness',
+    'contrast',
+    'grayscale',
+    'sepia',
+    'darkSchemeBackgroundColor',
+    'darkSchemeTextColor',
+    'lightSchemeBackgroundColor',
+    'lightSchemeTextColor',
+];
+extendThemeCacheKeys(themeCacheKeys);
 
 function getCacheId(rgb: RGBA, theme: Theme): string {
     let resultId = '';
@@ -58,7 +74,7 @@ function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, po
     const anotherPole = anotherPoleColor == null ? null : parseToHSLWithCache(anotherPoleColor);
     const modified = modifyHSL(hsl, pole, anotherPole);
     const {r, g, b, a} = hslToRGB(modified);
-    const matrix = createFilterMatrix(theme);
+    const matrix = createFilterMatrix({...theme, mode: 0});
     const [rf, gf, bf] = applyColorMatrix([r, g, b], matrix);
 
     const color = (a === 1 ?
@@ -75,6 +91,20 @@ function noopHSL(hsl: HSLA): HSLA {
 
 export function modifyColor(rgb: RGBA, theme: Theme): string {
     return modifyColorWithCache(rgb, theme, noopHSL);
+}
+
+function modifyAndRegisterColor(
+    type: 'background' | 'text' | 'border',
+    rgb: RGBA,
+    theme: Theme,
+    modifier: (rgb: RGBA, theme: Theme) => string,
+) {
+    const registered = getRegisteredColor(type, rgb);
+    if (registered) {
+        return registered;
+    }
+    const value = modifier(rgb, theme);
+    return registerColor(type, rgb, value);
 }
 
 function modifyLightSchemeColor(rgb: RGBA, theme: Theme): string {
@@ -94,7 +124,7 @@ function modifyLightModeHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA): HSL
     }
 
     let hx = h;
-    let sx = l;
+    let sx = s;
     if (isNeutral) {
         if (isDark) {
             hx = poleFg.h;
@@ -154,12 +184,27 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA): HSLA {
     return {h: hx, s, l: lx, a};
 }
 
-export function modifyBackgroundColor(rgb: RGBA, theme: Theme): string {
+function _modifyBackgroundColor(rgb: RGBA, theme: Theme) {
     if (theme.mode === 0) {
+        if (__PLUS__) {
+            const poles = getBackgroundPoles(theme);
+            return modifyColorWithCache(rgb, theme, modifyLightSchemeColorExtended, poles[0], poles[1]);
+        }
         return modifyLightSchemeColor(rgb, theme);
     }
+    if (__PLUS__) {
+        const poles = getBackgroundPoles(theme);
+        return modifyColorWithCache(rgb, theme, modifyBgColorExtended, poles[0], poles[1]);
+    }
     const pole = getBgPole(theme);
-    return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyBgHSL, pole);
+    return modifyColorWithCache(rgb, theme, modifyBgHSL, pole);
+}
+
+export function modifyBackgroundColor(rgb: RGBA, theme: Theme, shouldRegisterColorVariable = true): string {
+    if (!shouldRegisterColorVariable) {
+        return _modifyBackgroundColor(rgb, theme);
+    }
+    return modifyAndRegisterColor('background', rgb, theme, _modifyBackgroundColor);
 }
 
 const MIN_FG_LIGHTNESS = 0.55;
@@ -205,12 +250,27 @@ function modifyFgHSL({h, s, l, a}: HSLA, pole: HSLA): HSLA {
     return {h: hx, s, l: lx, a};
 }
 
-export function modifyForegroundColor(rgb: RGBA, theme: Theme): string {
+function _modifyForegroundColor(rgb: RGBA, theme: Theme) {
     if (theme.mode === 0) {
+        if (__PLUS__) {
+            const poles = getTextPoles(theme);
+            return modifyColorWithCache(rgb, theme, modifyLightSchemeColorExtended, poles[0], poles[1]);
+        }
         return modifyLightSchemeColor(rgb, theme);
     }
+    if (__PLUS__) {
+        const poles = getTextPoles(theme);
+        return modifyColorWithCache(rgb, theme, modifyFgColorExtended, poles[0], poles[1]);
+    }
     const pole = getFgPole(theme);
-    return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyFgHSL, pole);
+    return modifyColorWithCache(rgb, theme, modifyFgHSL, pole);
+}
+
+export function modifyForegroundColor(rgb: RGBA, theme: Theme, shouldRegisterColorVariable = true): string {
+    if (!shouldRegisterColorVariable) {
+        return _modifyForegroundColor(rgb, theme);
+    }
+    return modifyAndRegisterColor('text', rgb, theme, _modifyForegroundColor);
 }
 
 function modifyBorderHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA): HSLA {
@@ -235,13 +295,20 @@ function modifyBorderHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA): HSLA {
     return {h: hx, s: sx, l: lx, a};
 }
 
-export function modifyBorderColor(rgb: RGBA, theme: Theme): string {
+function _modifyBorderColor(rgb: RGBA, theme: Theme) {
     if (theme.mode === 0) {
         return modifyLightSchemeColor(rgb, theme);
     }
     const poleFg = getFgPole(theme);
     const poleBg = getBgPole(theme);
-    return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyBorderHSL, poleFg, poleBg);
+    return modifyColorWithCache(rgb, theme, modifyBorderHSL, poleFg, poleBg);
+}
+
+export function modifyBorderColor(rgb: RGBA, theme: Theme, shouldRegisterColorVariable = true): string {
+    if (!shouldRegisterColorVariable) {
+        return _modifyBorderColor(rgb, theme);
+    }
+    return modifyAndRegisterColor('border', rgb, theme, _modifyBorderColor);
 }
 
 export function modifyShadowColor(rgb: RGBA, theme: Theme): string {

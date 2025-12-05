@@ -1,6 +1,7 @@
-import {MessageTypeCStoBG, MessageTypeBGtoCS} from '../utils/message';
 import type {MessageBGtoCS} from '../definitions';
+import {MessageTypeCStoBG, MessageTypeBGtoCS} from '../utils/message';
 import {readResponseAsDataURL} from '../utils/network';
+
 import {callFetchMethod} from './fetch';
 
 if (!window.chrome) {
@@ -47,7 +48,7 @@ if (typeof chrome.runtime.sendMessage === 'function') {
 }
 
 if (!chrome.runtime.onMessage) {
-    chrome.runtime.onMessage = {} as any;
+    (chrome.runtime as any).onMessage = {} as any;
 }
 if (typeof chrome.runtime.onMessage.addListener === 'function') {
     const nativeAddListener = chrome.runtime.onMessage.addListener;

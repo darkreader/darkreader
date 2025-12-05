@@ -11,21 +11,26 @@ import {pathExists, copyFile, getPaths} from './utils.js';
 /** @type {CopyEntry[]} */
 const copyEntries = [
     {
-        path: 'config/**/*.{config,drconf}',
+        path: 'config',
         reloadType: reload.FULL,
     },
     {
-        path: 'icons/**/*.*',
+        path: 'icons',
         reloadType: reload.FULL,
     },
     {
-        path: 'ui/assets/**/*.*',
+        path: 'ui/assets',
         reloadType: reload.UI,
     },
     {
         path: 'ui/popup/compatibility.js',
         reloadType: reload.UI,
         platforms: [PLATFORM.CHROMIUM_MV2],
+    },
+    {
+        path: 'plus/assets',
+        reloadType: reload.UI,
+        platforms: [PLATFORM.CHROMIUM_MV2_PLUS],
     },
 ];
 

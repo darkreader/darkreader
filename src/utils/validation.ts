@@ -1,5 +1,6 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import type {UserSettings, Theme, ThemePreset, CustomSiteConfig, TimeSettings, LocationSettings, Automation} from '../definitions';
+
 import {AutomationMode} from './automation';
 
 function isBoolean(x: any): x is boolean {
@@ -178,6 +179,7 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
     }, DEFAULT_SETTINGS);
 
     validateProperty(settings, 'previewNewDesign', isBoolean, DEFAULT_SETTINGS);
+    validateProperty(settings, 'previewNewestDesign', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'enableForPDF', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'enableForProtectedPages', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'enableContextMenus', isBoolean, DEFAULT_SETTINGS);

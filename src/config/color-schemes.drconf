@@ -54,6 +54,18 @@ text: #5b6971
 
 ================================
 
+Github Modern
+
+DARK
+background: #0d1117
+text: #c9d1d9
+
+LIGHT
+background: #ffffff
+text: #24292f
+
+================================
+
 Gruvbox
 
 DARK
@@ -78,6 +90,38 @@ text: #1e4887
 
 ================================
 
+Material You
+
+DARK
+background: #1f1b24
+text: #e3e3e3
+
+LIGHT
+background: #fefbff
+text: #1f1b24
+
+================================
+
+Matte Black
+
+DARK
+background: #181a1b
+text: #e8e6e3
+
+================================
+
+Night Owl
+
+DARK
+background: #011627
+text: #d6deeb
+
+LIGHT
+background: #fbfbfb
+text: #403f53
+
+================================
+
 Nord
 
 DARK
@@ -99,6 +143,34 @@ text: #abb2bf
 LIGHT
 background: #fafafa
 text: #383a42
+
+================================
+
+Osaka Jade
+
+DARK
+background: #111c18
+text: #f6f5dd
+
+================================
+
+Oxocarbon
+
+DARK
+background: #161616
+text: #f2f4f8
+
+LIGHT
+background: #f2f4f8
+text: #393939
+
+================================
+
+Ristretto
+
+DARK
+background: #2c2421
+text: #d5c4a1
 
 ================================
 

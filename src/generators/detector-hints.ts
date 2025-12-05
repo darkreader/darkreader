@@ -1,6 +1,7 @@
 import type {DetectorHint} from '../definitions';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
+
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
 import type {SitePropsIndex, SitesFixesParserOptions} from './utils/parse';
@@ -10,6 +11,7 @@ const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
     'MATCH': 'match',
     'NO DARK THEME': 'noDarkTheme',
     'SYSTEM THEME': 'systemTheme',
+    'IFRAME': 'iframe',
 };
 
 const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {

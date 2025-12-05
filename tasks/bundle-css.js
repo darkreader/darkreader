@@ -1,6 +1,8 @@
 // @ts-check
-import less from 'less';
 import path from 'node:path';
+
+import less from 'less';
+
 import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
@@ -30,10 +32,21 @@ const cssEntries = [
     },
 ];
 
-async function bundleCSSEntry(entry) {
+async function bundleCSSEntry(entry, plus) {
     const src = absolutePath(entry.src);
     const srcDir = path.dirname(src);
-    const input = await readFile(src);
+
+    let input = await readFile(src);
+    if (!plus) {
+        const startToken = '/* @plus-start */';
+        const endToken = '/* @plus-end */';
+        const startIndex = input.indexOf(startToken);
+        const endIndex = input.indexOf(endToken, startIndex);
+        if (startIndex >= 0 && endIndex >= 0) {
+            input = input.substring(0, startIndex) + input.substring(endIndex + endToken.length);
+        }
+    }
+
     const output = await less.render(input, {paths: [srcDir], math: 'always'});
     entry.watchFiles = output.imports;
     return output.css;
@@ -78,8 +91,13 @@ export function createBundleCSSTask(cssEntries) {
 
     const bundleCSS = async ({platforms, debug}) => {
         for (const entry of cssEntries) {
-            const css = await bundleCSSEntry(entry);
-            await writeFiles(entry.dest, platforms, debug, css);
+            for (const platform in platforms) {
+                if (!platforms[platform]) {
+                    continue;
+                }
+                const css = await bundleCSSEntry(entry, platform === PLATFORM.CHROMIUM_MV2_PLUS);
+                await writeFiles(entry.dest, {[platform]: true}, debug, css);
+            }
         }
     };
 
@@ -92,7 +110,7 @@ export function createBundleCSSTask(cssEntries) {
             });
         });
         for (const entry of entries) {
-            const css = await bundleCSSEntry(entry);
+            const css = await bundleCSSEntry(entry, true);
             await writeFiles(entry.dest, platforms, true, css);
         }
 

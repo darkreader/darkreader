@@ -1,6 +1,6 @@
 import {evalMath} from './math-eval';
-import {getParenthesesRange} from './text';
 import {isSystemDarkModeEnabled} from './media-query';
+import {getParenthesesRange} from './text';
 
 export interface RGBA {
     r: number;
@@ -30,8 +30,11 @@ export function parseColorWithCache($color: string): RGBA | null {
         $color = lowerCalcExpression($color);
     }
     const color = parse($color);
-    color && rgbaParseCache.set($color, color);
-    return color;
+    if (color) {
+        rgbaParseCache.set($color, color);
+        return color;
+    }
+    return null;
 }
 
 export function parseToHSLWithCache(color: string): HSLA | null {
@@ -148,10 +151,32 @@ const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
 
+const supportedColorFuncs = [
+    'color',
+    'color-mix',
+    'hwb',
+    'lab',
+    'lch',
+    'oklab',
+    'oklch',
+];
+
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
+    if (c.includes('(from ')) {
+        if (c.indexOf('(from') !== c.lastIndexOf('(from')) {
+            return null;
+        }
+        return domParseColor(c);
+    }
 
     if (c.match(rgbMatch)) {
+        if (c.startsWith('rgb(#') || c.startsWith('rgba(#')) {
+            if (c.lastIndexOf('rgb') > 0) {
+                return null;
+            }
+            return domParseColor(c);
+        }
         return parseRGB(c);
     }
 
@@ -171,11 +196,16 @@ export function parse($color: string): RGBA | null {
         return getSystemColor(c);
     }
 
-    if ($color === 'transparent') {
+    if (c === 'transparent') {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    if ((c.startsWith('color(') || c.startsWith('color-mix(')) && c.endsWith(')')) {
+    if (
+        c.endsWith(')') &&
+        supportedColorFuncs.some(
+            (fn) => c.startsWith(fn) && c[fn.length] === '(' && c.lastIndexOf(fn) === 0
+        )
+    ) {
         return domParseColor(c);
     }
 
@@ -247,16 +277,22 @@ function getNumbersFromString(str: string, range: number[], units: {[unit: strin
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
-function parseRGB($rgb: string): RGBA {
+function parseRGB($rgb: string): RGBA | null {
     const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
+    if (r == null || g == null || b == null || a == null) {
+        return null;
+    }
     return {r, g, b, a};
 }
 
 const hslRange = [360, 1, 1, 1];
 const hslUnits = {'%': 100, 'deg': 360, 'rad': 2 * Math.PI, 'turn': 1};
 
-function parseHSL($hsl: string): RGBA {
+function parseHSL($hsl: string): RGBA | null {
     const [h, s, l, a = 1] = getNumbersFromString($hsl, hslRange, hslUnits);
+    if (h == null || s == null || l == null || a == null) {
+        return null;
+    }
     return hslToRGB({h, s, l, a});
 }
 

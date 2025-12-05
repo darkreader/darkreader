@@ -1,6 +1,6 @@
-import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, Theme, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI} from '../../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../../utils/message';
+import {isFirefox} from '../../utils/platform';
 
 declare const browser: {
     commands: {
@@ -148,6 +148,14 @@ export default class Connector implements ExtensionActions {
 
     resetDevStaticThemes(): void {
         chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_STATIC_THEMES});
+    }
+
+    startActivation(email: string, key: string): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.START_ACTIVATION, data: {email, key}});
+    }
+
+    resetActivation(): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_ACTIVATION});
     }
 
     async hideHighlights(ids: string[]): Promise<void> {

@@ -1,37 +1,27 @@
-import {readFile as fsReadFile, readdir as fsReadDir} from 'node:fs';
+import fs from 'node:fs/promises';
+
 import {rootPath} from '../../support/test-utils';
 
-function readDir(dir: string) {
-    return new Promise<string[]>((resolve, reject) => {
-        fsReadDir(dir, (err, files) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(files);
-        });
-    });
-}
+async function testLocalesDir(dir: string) {
+    const entries = await fs.readdir(rootPath(dir));
+    const files: string[] = [];
+    const folders: string[] = [];
+    for (const path of entries) {
+        const stat = await fs.stat(rootPath(dir, path));
+        if (stat.isDirectory()) {
+            folders.push(path);
+        } else {
+            files.push(path);
+        }
+    }
 
-function readLocale(name: string) {
-    return new Promise<string>((resolve, reject) => {
-        fsReadFile(rootPath('src/_locales', name), {encoding: 'utf-8'}, (err, data) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(data);
-        });
-    });
-}
-
-test('Locales', async () => {
-    const files = await readDir(rootPath('src/_locales'));
-    const enLocale = await readLocale('en.config');
+    const enLocaleFile = files.find((f) => f === 'en.config' || f.endsWith('.en.config'))!;
+    const enLocale = await fs.readFile(`${dir}/${enLocaleFile}`, 'utf8');
     const enLines = enLocale.split('\n');
     const locales: string[] = [];
+
     for (const file of files) {
-        const locale = await readLocale(file);
+        const locale = await fs.readFile(`${dir}/${file}`, 'utf8');
         locales.push(locale);
     }
 
@@ -62,4 +52,12 @@ test('Locales', async () => {
 
     // No extra whitespace
     expect(compareLinesToEnLocale((en, loc) => loc.trim() === loc)).toBe(true);
+
+    for (const subDir of folders) {
+        await testLocalesDir(`${dir}/${subDir}`);
+    }
+}
+
+test('Locales', async () => {
+    await testLocalesDir('src/_locales');
 });

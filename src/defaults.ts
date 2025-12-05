@@ -1,10 +1,12 @@
-import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
+import {extendThemeDefaults} from '@plus/defaults';
 import type {Theme, UserSettings} from './definitions';
 import {ThemeEngine} from './generators/theme-engines';
-import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
 import {AutomationMode} from './utils/automation';
+import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
+import {isMacOS, isWindows, isCSSColorSchemePropSupported, isEdge, isMobile} from './utils/platform';
 
 declare const __CHROMIUM_MV3__: boolean;
+declare const __PLUS__: boolean;
 
 export const DEFAULT_COLORS = {
     darkScheme: {
@@ -32,13 +34,17 @@ export const DEFAULT_THEME: Theme = {
     darkSchemeTextColor: DEFAULT_COLORS.darkScheme.text,
     lightSchemeBackgroundColor: DEFAULT_COLORS.lightScheme.background,
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
-    scrollbarColor: isMacOS ? '' : 'auto',
+    scrollbarColor: '',
     selectionColor: 'auto',
     styleSystemControls: __CHROMIUM_MV3__ ? false : !isCSSColorSchemePropSupported,
     lightColorScheme: 'Default',
     darkColorScheme: 'Default',
     immediateModify: false,
 };
+
+if (__PLUS__) {
+    extendThemeDefaults(DEFAULT_THEME);
+}
 
 export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
     light: {
@@ -55,13 +61,27 @@ export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
     },
 };
 
+const filterModeSites = [
+    '*.officeapps.live.com',
+    '*.sharepoint.com',
+    'docs.google.com',
+    'onedrive.live.com',
+];
+
 export const DEFAULT_SETTINGS: UserSettings = {
     schemeVersion: 0,
     enabled: true,
     fetchNews: true,
     theme: DEFAULT_THEME,
     presets: [],
-    customThemes: [],
+    customThemes: filterModeSites.map((url) => {
+        const engine: ThemeEngine = ThemeEngine.cssFilter;
+        return {
+            url: [url],
+            theme: {...DEFAULT_THEME, engine},
+            builtIn: true,
+        };
+    }),
     enabledByDefault: true,
     enabledFor: [],
     disabledFor: [],
@@ -69,8 +89,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
     syncSettings: true,
     syncSitesFixes: false,
     automation: {
-        enabled: false,
-        mode: AutomationMode.NONE,
+        enabled: isEdge && isMobile ? true : false,
+        mode: isEdge && isMobile ? AutomationMode.SYSTEM : AutomationMode.NONE,
         behavior: 'OnOff',
     },
     time: {
@@ -82,8 +102,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
         longitude: null,
     },
     previewNewDesign: false,
+    previewNewestDesign: false,
     enableForPDF: true,
     enableForProtectedPages: false,
     enableContextMenus: false,
-    detectDarkTheme: false,
+    detectDarkTheme: true,
 };

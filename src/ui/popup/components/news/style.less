@@ -47,6 +47,24 @@
 
         &__text {
             line-height: @size-text-large-height;
+
+            &__phone-icon {
+                color: @color-fore;
+                display: none;
+                height: 1rem;
+                margin: 0 0.25rem;
+                position: relative;
+                top: 0.125rem;
+                width: 1rem;
+            }
+
+            &__dark-reader {
+                font-weight: bold;
+            }
+
+            &__mobile {
+                color: @color-control-fore;
+            }
         }
     }
 
@@ -154,6 +172,63 @@
             font-weight: bold;
         }
     }
+
+    &__mobile {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        gap: @indent-small;
+        padding-bottom: @size-border;
+
+        &__left {
+            display: flex;
+            flex: auto;
+            flex-direction: column;
+            gap: @indent-small;
+        }
+
+        &__right {
+            display: flex;
+            flex: none;
+        }
+
+        &__learn-more-container {
+            align-items: center;
+            display: flex;
+            flex-direction: row;
+            gap: @indent-small;
+        }
+
+        &__logos {
+            display: flex;
+            flex-direction: row;
+            flex: none;
+            gap: 0.25rem;
+        }
+
+        &__learn-more {
+            color: @color-fore;
+            font-weight: bold;
+            transition: color @time-slow;
+
+            &:hover {
+                color: @color-control-fore;
+            }
+        }
+    }
+
+    &__qr-code {
+        border-radius: 5%;
+        display: inline-block;
+        height: 5rem;
+        width: 5rem;
+    }
+
+    &__os-icon {
+        display: inline-block;
+        height: 1.25rem;
+        width: 1.25rem;
+    }
 }
 
 .news-button {
@@ -178,5 +253,18 @@
         right: -@size-text-small-height / 3;
         top: -@size-text-small-height / 3;
         z-index: 3;
+    }
+
+    &__phone-icon {
+        display: inline-block;
+        height: 1rem;
+        width: 1rem;
+    }
+
+    &__wrapper {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
     }
 }

@@ -1,4 +1,5 @@
 import {getUILanguage} from './locales';
+import {isEdge, isMobile} from './platform';
 
 export const HOMEPAGE_URL = 'https://darkreader.org';
 export const BLOG_URL = 'https://darkreader.org/blog/';
@@ -32,6 +33,9 @@ const helpLocales = [
 ];
 
 export function getHelpURL(): string {
+    if (isEdge && isMobile) {
+        return `${HELP_URL}/mobile/`;
+    }
     const locale = getUILanguage();
     const matchLocale = helpLocales.find((hl) => hl === locale) || helpLocales.find((hl) => locale.startsWith(hl)) || 'en';
     return `${HELP_URL}/${matchLocale}/`;

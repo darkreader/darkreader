@@ -1,14 +1,19 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import Connector from '../connect/connector';
-import Body from './components/body';
-import {fixNotClosingPopupOnNavigation} from './utils/issues';
+
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
-import {isMobile, isFirefox} from '../../utils/platform';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
+import {isMobile, isFirefox} from '../../utils/platform';
+import Connector from '../connect/connector';
 import {getFontList, saveFile} from '../utils';
 
-function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
+import Body from './components/body';
+import {fixNotClosingPopupOnNavigation} from './utils/issues';
+import {initAltUI, shouldUseAltUI} from '@plus/popup/plus-body';
+
+declare const __PLUS__: boolean;
+
+function renderBody(data: ExtensionData, fonts: string[], installation: {date: number; version: string}, actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
         if (!document.documentElement.classList.contains('preview')) {
             document.documentElement.classList.add('preview');
@@ -25,23 +30,40 @@ function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActi
     }
 
     sync(document.body, (
-        <Body data={data} actions={actions} fonts={fonts} />
+        <Body data={data} actions={actions} fonts={fonts} installation={installation} />
     ));
 }
 
-async function start() {
-    const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
-
-    const [data, fonts] = await Promise.all([
-        connector.getData(),
-        getFontList(),
-    ]);
-    renderBody(data, fonts, connector);
-    connector.subscribeToChanges((data) => renderBody(data, fonts, connector));
+async function getInstallationData() {
+    return new Promise<any>((resolve) => {
+        chrome.storage.local.get<Record<string, any>>({installation: {}}, (data) => {
+            if (data?.installation?.version) {
+                resolve(data.installation);
+            } else {
+                resolve({});
+            }
+        });
+    });
 }
 
-addEventListener('load', start, {passive: true});
+async function start() {
+    if (__PLUS__ && shouldUseAltUI()) {
+        return await initAltUI();
+    }
+
+    const connector = new Connector();
+    window.addEventListener('unload', () => connector.disconnect());
+
+    const [data, fonts, installation] = await Promise.all([
+        connector.getData(),
+        getFontList(),
+        getInstallationData(),
+    ]);
+    renderBody(data, fonts, installation, connector);
+    connector.subscribeToChanges((data) => renderBody(data, fonts, installation, connector));
+}
+
+window.addEventListener('load', start);
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);

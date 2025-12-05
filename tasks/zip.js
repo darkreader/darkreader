@@ -1,7 +1,9 @@
 // @ts-check
-import fs from 'node:fs';
 import {exec} from 'node:child_process';
+import fs from 'node:fs';
+
 import yazl from 'yazl';
+
 import {getDestDir} from './paths.js';
 import {PLATFORM} from './platform.js';
 import {createTask} from './task.js';
@@ -40,9 +42,10 @@ async function archiveDirectory({dir, dest, date, mode}) {
  */
 async function getLastCommitTime() {
     // We need to offset the user's time zone since yazl can not represent time zone in produced archive
+    // If called outside of the git tree, make sure we don't pass a negative date.
     return new Promise((resolve) =>
         exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(
-            (Number(stdout) + (new Date()).getTimezoneOffset() * 60) * 1000
+            Math.max(0, Number(stdout) + (new Date()).getTimezoneOffset() * 60) * 1000
         ))));
 }
 
@@ -55,7 +58,7 @@ async function zip({platforms, debug, version}) {
     const promises = [];
     const date = await getLastCommitTime();
     /** @type {Array<import('./types.js').PlatformId>} */
-    const chromePlatforms = [PLATFORM.CHROMIUM_MV2, PLATFORM.CHROMIUM_MV3];
+    const chromePlatforms = [PLATFORM.CHROMIUM_MV2, PLATFORM.CHROMIUM_MV3, PLATFORM.CHROMIUM_MV2_PLUS];
     const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const platform of enabledPlatforms) {
         const format = chromePlatforms.includes(platform) ? 'zip' : 'xpi';

@@ -1,5 +1,6 @@
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
+
 import {prepareCSPMV3} from '../../../src/utils/csp';
 
 describe('Check that CSP matches expected one', () => {

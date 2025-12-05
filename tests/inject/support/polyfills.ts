@@ -7,7 +7,7 @@ if (!chrome.hasOwnProperty('runtime')) {
 if (!chrome.runtime.hasOwnProperty('onMessage')) {
     type AnyFunction = () => void;
     const listeners = new Set<AnyFunction>();
-    chrome.runtime.onMessage = {
+    (chrome.runtime as any).onMessage = {
         addListener: (listener: AnyFunction) => {
             listeners.add(listener);
         },

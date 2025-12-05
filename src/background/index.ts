@@ -1,14 +1,16 @@
-import {Extension} from './extension';
-import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript, keepListeningToEvents} from '../background/utils/extension-api';
 import type {ColorScheme, DebugMessageBGtoCS, DebugMessageBGtoUI, DebugMessageCStoBG, ExtensionData, News, UserSettings} from '../definitions';
+import {getHelpURL, UNINSTALL_URL} from '../utils/links';
+import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query';
 import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG} from '../utils/message';
+import {isFirefox} from '../utils/platform';
+
+import {Extension} from './extension';
 import {makeChromiumHappy} from './make-chromium-happy';
+import {setNewsForTesting} from './newsmaker';
 import {ASSERT} from './utils/log';
 import {sendLog} from './utils/sendLog';
-import {isFirefox} from '../utils/platform';
-import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query';
-import {setNewsForTesting} from './newsmaker';
+
 
 type TestMessage = {
     type: 'getManifest';
@@ -191,7 +193,7 @@ if (__TEST__) {
                 case 'getChromeStorage': {
                     const keys = message.data.keys;
                     const region = message.data.region;
-                    chrome.storage[region].get(keys, respond);
+                    chrome.storage[region].get(keys as any, respond);
                     break;
                 }
                 case 'setNews':
@@ -251,3 +253,24 @@ if (__DEBUG__ && __LOG__) {
 }
 
 makeChromiumHappy();
+
+function writeInstallationVersion(
+    storage: chrome.storage.SyncStorageArea | chrome.storage.LocalStorageArea,
+    details: chrome.runtime.InstalledDetails,
+) {
+    storage.get<Record<string, any>>({installation: {version: ''}}, (data) => {
+        if (data?.installation?.version) {
+            return;
+        }
+        storage.set({installation: {
+            date: Date.now(),
+            reason: details.reason,
+            version: details.previousVersion ?? chrome.runtime.getManifest().version,
+        }});
+    });
+}
+
+chrome.runtime.onInstalled.addListener((details) => {
+    writeInstallationVersion(chrome.storage.local, details);
+    writeInstallationVersion(chrome.storage.sync, details);
+});

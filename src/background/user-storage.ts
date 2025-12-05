@@ -1,11 +1,14 @@
+import {ThemeEngine} from '../generators/theme-engines';
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
-import {debounce} from '../utils/debounce';
-import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
+import {debounce} from '../utils/debounce';
+import {PromiseBarrier} from '../utils/promise-barrier';
+import {isURLMatched} from '../utils/url';
+import {validateSettings} from '../utils/validation';
+
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, removeSyncStorage, removeLocalStorage} from './utils/extension-api';
 import {logWarn} from './utils/log';
-import {PromiseBarrier} from '../utils/promise-barrier';
-import {validateSettings} from '../utils/validation';
+
 
 const SAVE_TIMEOUT = 1000;
 
@@ -29,6 +32,9 @@ export default class UserStorage {
         settings.customThemes.forEach((site) => {
             site.theme = {...DEFAULT_THEME, ...site.theme};
         });
+        if (settings.customThemes.length === 0) {
+            settings.customThemes = DEFAULT_SETTINGS.customThemes;
+        }
     }
 
     // migrateAutomationSettings migrates old automation settings to the new interface.
@@ -73,6 +79,17 @@ export default class UserStorage {
         return settings;
     }
 
+    private static migrateBuiltInSVGFilterToCSSFilter(settings: UserSettings): void {
+        settings?.customThemes?.forEach((c) => {
+            if (
+                c?.theme?.engine === ThemeEngine.svgFilter &&
+                (c.builtIn || c.url?.includes('docs.google.com'))
+            ) {
+                c.theme.engine = ThemeEngine.cssFilter;
+            }
+        });
+    }
+
     private static async loadSettingsFromStorage(): Promise<UserSettings> {
         if (UserStorage.loadBarrier) {
             return await UserStorage.loadBarrier.entry();
@@ -110,6 +127,7 @@ export default class UserStorage {
         }
         if (!local.syncSettings) {
             UserStorage.migrateAutomationSettings(local);
+            UserStorage.migrateBuiltInSVGFilterToCSSFilter(local);
             UserStorage.fillDefaults(local);
             UserStorage.loadBarrier.resolve(local);
             return local;
@@ -129,6 +147,7 @@ export default class UserStorage {
         syncCfgErrors.forEach((err) => logWarn(err));
 
         UserStorage.migrateAutomationSettings($sync);
+        UserStorage.migrateBuiltInSVGFilterToCSSFilter($sync);
         UserStorage.fillDefaults($sync);
 
         UserStorage.loadBarrier.resolve($sync);

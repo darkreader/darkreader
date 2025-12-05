@@ -1,9 +1,10 @@
-import {logInfo} from './utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
-import ConfigManager from './config-manager';
 import {isFirefox} from '../utils/platform';
+
+import ConfigManager from './config-manager';
+import {logInfo} from './utils/log';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separately.
@@ -23,7 +24,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
             return this.cache[key];
         }
         return new Promise<string | null>((resolve) => {
-            chrome.storage.local.get(key, (result) => {
+            chrome.storage.local.get<Record<string, any>>(key, (result) => {
                 // If cache received a new value (from call to set())
                 // before we retrieved the old value from storage,
                 // return the new value.

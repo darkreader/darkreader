@@ -1,8 +1,10 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import Body from './components/body';
-import Connector from '../connect/connector';
+
 import type {DevToolsData, ExtensionData} from '../../definitions';
+import Connector from '../connect/connector';
+
+import Body from './components/body';
 
 declare const __CHROMIUM_MV3__: boolean;
 

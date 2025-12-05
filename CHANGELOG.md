@@ -1,3 +1,160 @@
+# 4.9.117 (December 3, 2025)
+
+- Improved dark theme detection.
+- Optimized SVG image analysis.
+- CSS variables support improvements.
+- Applied cross-origin request limitations.
+
+# 4.9.116 (November 22, 2025)
+
+- Improved dark theme detection.
+- Prevent high CPU usage due to inline style conflicts.
+- Fixed error messages in Firefox.
+- Fixed eBay buttons.
+
+# 4.9.115 (November 14, 2025)
+
+- Fixed eBay issue (transparent color for unresolved variables).
+- Improved dark theme detection.
+
+# 4.9.114 (November 12, 2025)
+
+- Fixed compatibility with Chrome 144.
+- Fixed handling CSS for deprecated media.
+- Fixed breaking on ::picker selector.
+
+# 4.9.113 (November 4, 2025)
+
+- Fixed processing unresolved nested CSS variables fallbacks.
+- Fixed handling same CSS rules inside different @layer rules.
+- Fixed mobile user interface in Edge.
+- Fixed Firefox build in different timezones.
+
+# 4.9.112 (October 15, 2025)
+
+- Fixed handling fallback values of undefined CSS variables.
+- Fixed error when Dark Reader styles were removed.
+- Simplified mobile user interface for Edge.
+- One-click activation for new UI in Edge.
+
+# 4.9.110 (July 16, 2025)
+
+- Fixed breaking certain websites (Bloomberg).
+- Fixed Google Maps inversion.
+
+# 4.9.109 (July 7, 2025)
+
+- Fixed API bundle error.
+
+# 4.9.108 (July 3, 2025)
+
+- Fixed crash when parsing invalid complex colors (Linkedin issue).
+- Fixed breaking when CSS @import can't be loaded.
+- Fixed compatibility with certain extensions.
+- Fixed processing background with variables defined later.
+- Detect dark theme in certain iframes.
+- Ability to hide payment messages.
+
+# 4.9.106 (May 6, 2025)
+
+- Google Docs: use Filter mode instead of Filter+ by default.
+- Added support for nested CSS rules.
+- Fixed duplicate CSS files requests.
+- Fixed ShadowDOM static style injection.
+- Fixed style injection causing freeze for certain websites.
+- Fixed handling "initial" CSS color value.
+
+# 4.9.105 (February 25, 2025)
+
+- API: Fixed breaking ES5 builds.
+
+# 4.9.104 (February 19, 2025)
+
+- API: ES Module bundle.
+
+# 4.9.103 (February 17, 2025)
+
+- Added support for more color spaces (Tailwind 4 issues).
+- Support variables in shorthand border properties of inline styles.
+- Fixed colors after style overrides were removed (Pinterest issue).
+- Fixed dark theme detection in background tabs.
+- Fixed numeric color variables.
+- Fixed same-origin CSS loading optimization.
+
+# 4.9.102 (February 10, 2025)
+
+- MV3: Fixed background cache performance.
+
+# 4.9.101 (February 7, 2025)
+
+- Fixed processing stylesheets with multiple CSS imports.
+
+# 4.9.100 (January 29, 2025)
+
+- Improved performace of checking available background images.
+- Optimized image analysis caching.
+- Fixed processing style sheets with incorrect imports.
+- Fixed image analysis when extension is re-enabled.
+- Fixed theme update optimization.
+
+# 4.9.99 (December 13, 2024)
+
+- Firefox: Fixed console error.
+
+# 4.9.98 (December 13, 2024)
+
+- Firefox: Fixed custom browser theme.
+
+# 4.9.97 (December 10, 2024)
+
+- Analyze only background images present on a web page.
+- Optimized rebuilding theme after configuration changes.
+- Cache image analysis results and CSS requests.
+- Improved relative CSS colors support.
+- Fixed handling custom CSS properties in inline SVGs.
+- Firefox: Optimized adopted style sheets workaround (Reddit issue).
+
+# 4.9.96 (October 29, 2024)
+
+- Dark theme detection improvements.
+- Fixed overriding styles in Shadow DOM of built-in elements.
+- Firefox: Fix breaking Microsoft Teams.
+- Prevent dark content flashes for disabled websites.
+- Fixed loading styles with imports from same domain.
+
+# 4.9.95 (October 2, 2024)
+
+- Fixed Google Calendar scroll bars.
+- Fixed automation panel.
+- Added links to mobile apps.
+
+# 4.9.94 (September 24, 2024)
+
+- API: Fixed TypeScript builds.
+- Updated experimental design for Microsoft Edge for Android.
+
+# 4.9.93 (September 20, 2024)
+
+- Experimental design for Microsoft Edge for Android.
+
+# 4.9.92 (September 10, 2024)
+
+- Detect website's dark theme by default.
+- Use Filter mode for particular websites by default (Google Docs, Microsoft Office).
+- Restored scrollbar colors.
+- Fixed breaking on default selection color.
+
+# 4.9.90 (September 1, 2024)
+
+- Fixed "Aw, Snap" in Google Search (Chrome and Edge on Windows).
+
+# 4.9.89 (August 23, 2024)
+
+- Removed www part from website URLs.
+- Enabled automation and dark theme detection by default for mobile version.
+- Fixed colors for static site fixes.
+- Apply ignored image selectors for gradients.
+
 # 4.9.88 (July 11, 2024)
 
 - Fixed breaking browser panels.

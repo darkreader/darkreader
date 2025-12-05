@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+
 import type {ViewProps, MessageCStoUI, MessageUItoCS} from '../../../../definitions';
 import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../../utils/message';
 import {getURLHostOrProtocol} from '../../../../utils/url';

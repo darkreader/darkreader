@@ -1,9 +1,10 @@
 import {m} from 'malevic';
+import {getContext} from 'malevic/dom';
+
 import type {UserSettings, ViewProps} from '../../../definitions';
+import {validateSettings} from '../../../utils/validation';
 import {Button, ControlGroup, MessageBox} from '../../controls';
 import {openFile} from '../../utils';
-import {getContext} from 'malevic/dom';
-import {validateSettings} from '../../../utils/validation';
 
 export function ImportSettings(props: ViewProps): Malevic.Child {
     const context = getContext();
@@ -25,6 +26,24 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
             onOK={hideDialog}
             onCancel={hideDialog}
             hideCancel={true}
+        />
+    ) : null;
+
+    function showWarningDialog() {
+        context.store.isWarningDialogVisible = true;
+        context.refresh();
+    }
+
+    function hideWarningDialog() {
+        context.store.isWarningDialogVisible = false;
+        context.refresh();
+    }
+
+    const warningDialog = context.store.isWarningDialogVisible ? (
+        <MessageBox
+            caption="Warning! Your current settings will be overwritten. Click OK to proceed."
+            onOK={importSettings}
+            onCancel={hideWarningDialog}
         />
     ) : null;
 
@@ -52,11 +71,12 @@ export function ImportSettings(props: ViewProps): Malevic.Child {
         <ControlGroup>
             <ControlGroup.Control>
                 <Button
-                    onclick={importSettings}
+                    onclick={showWarningDialog}
                     class="advanced__import-settings-button"
                 >
                     Import Settings
                     {dialog}
+                    {warningDialog}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>

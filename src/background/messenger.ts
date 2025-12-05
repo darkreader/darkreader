@@ -1,8 +1,12 @@
-import {isFirefox} from '../utils/platform';
 import type {ExtensionData, Theme, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
+import {HOMEPAGE_URL} from '../utils/links';
+import {isFirefox} from '../utils/platform';
+
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT} from './utils/log';
+
+declare const __PLUS__: boolean;
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -19,6 +23,8 @@ export interface ExtensionAdapter {
     resetDevInversionFixes: () => void;
     applyDevStaticThemes: (text: string) => Error;
     resetDevStaticThemes: () => void;
+    startActivation: (email: string, key: string) => Promise<void>;
+    resetActivation: () => Promise<void>;
     hideHighlights: (ids: string[]) => Promise<void>;
 }
 
@@ -48,7 +54,13 @@ export default class Messenger {
             chrome.runtime.getURL('/ui/options/index.html'),
             chrome.runtime.getURL('/ui/stylesheet-editor/index.html'),
         ];
-        if (allowedSenderURL.includes(sender.url!)) {
+        if (
+            allowedSenderURL.includes(sender.url!) || (
+                __PLUS__ &&
+                message.type === MessageTypeUItoBG.CHANGE_SETTINGS &&
+                sender.url?.startsWith(`${HOMEPAGE_URL}/plus/activate/`)
+            )
+        ) {
             Messenger.onUIMessage(message as MessageUItoBG, sendResponse);
             return ([
                 MessageTypeUItoBG.GET_DATA,
@@ -163,6 +175,12 @@ export default class Messenger {
             }
             case MessageTypeUItoBG.RESET_DEV_STATIC_THEMES:
                 Messenger.adapter.resetDevStaticThemes();
+                break;
+            case MessageTypeUItoBG.START_ACTIVATION:
+                Messenger.adapter.startActivation(data.email, data.key);
+                break;
+            case MessageTypeUItoBG.RESET_ACTIVATION:
+                Messenger.adapter.resetActivation();
                 break;
             case MessageTypeUItoBG.HIDE_HIGHLIGHTS:
                 Messenger.adapter.hideHighlights(data);

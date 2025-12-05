@@ -1,7 +1,8 @@
 import {m} from 'malevic';
-import {CheckBox, UpDown, Select} from '../../../controls';
-import {getLocalMessage} from '../../../../utils/locales';
+
 import type {Theme} from '../../../../definitions';
+import {getLocalMessage} from '../../../../utils/locales';
+import {CheckBox, UpDown, Select} from '../../../controls';
 
 interface FontSettingsProps {
     config: Theme;
@@ -20,7 +21,12 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                     />
                     <Select
                         value={config.fontFamily}
-                        onChange={(value) => onChange({fontFamily: value})}
+                        onChange={(value) =>
+                            onChange({
+                                fontFamily: value,
+                                useFont: true,
+                            })
+                        }
                         options={fonts.reduce((map, font) => {
                             map[font] = (
                                 <div style={{'font-family': font}}>

@@ -1,15 +1,20 @@
-import {createOrUpdateStyle, removeStyle} from './style';
-import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
-import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
-import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logWarn, logInfoCollapsed} from './utils/log';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
-import {collectCSS} from './dynamic-theme/css-collection';
 import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
+import {HOMEPAGE_URL} from '../utils/links';
+import {activateTheme} from '@plus/utils/theme';
+
+import {writeEnabledForHost} from './cache';
+import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
+import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
+import {collectCSS} from './dynamic-theme/css-collection';
+import {createOrUpdateStyle, removeStyle} from './style';
+import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
+import {logWarn, logInfoCollapsed} from './utils/log';
 
 declare const __DEBUG__: boolean;
+declare const __PLUS__: boolean;
 declare const __TEST__: boolean;
 
 let unloaded = false;
@@ -97,6 +102,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             const {css, detectDarkTheme, detectorHints} = message.data;
             removeDynamicTheme();
             createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
+            writeEnabledForHost(true);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -112,6 +118,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
+            writeEnabledForHost(true);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -127,6 +134,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             const {theme, fixes, isIFrame, detectDarkTheme, detectorHints} = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
+            writeEnabledForHost(true);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -151,6 +159,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
+            writeEnabledForHost(false);
             break;
         default:
             break;
@@ -193,6 +202,7 @@ function onResume() {
 }
 
 function onDarkThemeDetected() {
+    writeEnabledForHost(false);
     sendMessage({type: MessageTypeCStoBG.DARK_THEME_DETECTED});
 }
 
@@ -202,6 +212,16 @@ if (!__THUNDERBIRD__) {
     addEventListener('pagehide', onPageHide, {passive: true});
     addEventListener('freeze', onFreeze, {passive: true});
     addEventListener('resume', onResume, {passive: true});
+}
+
+if (__PLUS__) {
+    if (location.origin === HOMEPAGE_URL) {
+        document.addEventListener('__darkreader_activate__', async (e: CustomEvent) => {
+            const {email, key} = e.detail;
+            const result = await activateTheme(email, key);
+            document.dispatchEvent(new CustomEvent('__darkreader_activationResult__', {detail: {result}}));
+        }, {once: true});
+    }
 }
 
 if (__TEST__) {

@@ -6,7 +6,7 @@ const COLOR_SCHEME_META_SELECTOR = 'meta[name="color-scheme"]';
 
 function hasBuiltInDarkTheme() {
     const rootStyle = getComputedStyle(document.documentElement);
-    if (rootStyle.filter.includes('invert(1)')) {
+    if (rootStyle.filter.includes('invert(1)') || rootStyle.colorScheme === 'dark') {
         return true;
     }
 
@@ -27,14 +27,26 @@ function hasBuiltInDarkTheme() {
             }
             processedElements.add(element);
             const style = element === document.documentElement ? rootStyle : getComputedStyle(element);
-            const bgColor = parseColorWithCache(style.backgroundColor)!;
+            const bgColor = parseColorWithCache(style.backgroundColor);
+            if (!bgColor) {
+                return false;
+            }
+            if (bgColor.r === 24 && bgColor.g === 26 && bgColor.b === 27) {
+                // For some websites changes to CSSStyleSheet.disabled and HTMLStyleElement.textContent
+                // are not being applied synchronously. For example https://zorin.com/
+                // Probably a browser bug. Treat as not having a dark theme.
+                return false;
+            }
             if (bgColor.a === 1) {
                 const bgLightness = getSRGBLightness(bgColor.r, bgColor.g, bgColor.b);
                 if (bgLightness > 0.5) {
                     return false;
                 }
             } else {
-                const textColor = parseColorWithCache(style.color)!;
+                const textColor = parseColorWithCache(style.color);
+                if (!textColor) {
+                    return false;
+                }
                 const textLightness = getSRGBLightness(textColor.r, textColor.g, textColor.b);
                 if (textLightness < 0.5) {
                     return false;
@@ -43,8 +55,14 @@ function hasBuiltInDarkTheme() {
         }
     }
 
-    const rootColor = parseColorWithCache(rootStyle.backgroundColor)!;
-    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor)! : {r: 0, g: 0, b: 0, a: 0};
+    const rootColor = parseColorWithCache(rootStyle.backgroundColor);
+    if (!rootColor) {
+        return false;
+    }
+    const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor) : {r: 0, g: 0, b: 0, a: 0};
+    if (!bodyColor) {
+        return false;
+    }
     const rootLightness = (1 - rootColor.a!) + rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
     const finalLightness = (1 - bodyColor.a!) * rootLightness + bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
     return finalLightness < 0.5;
@@ -58,12 +76,26 @@ function runCheck(callback: (hasDarkTheme: boolean) => void) {
         return;
     }
 
-    const drStyles = document.querySelectorAll('.darkreader') as NodeListOf<HTMLStyleElement & {disabled: boolean}>;
-    drStyles.forEach((style) => style.disabled = true);
+    if (
+        document.documentElement.classList.contains('dark') ||
+        document.body?.classList.contains('dark') ||
+        document.documentElement.dataset.theme?.toLocaleLowerCase() === 'dark'
+    ) {
+        callback(true);
+        return;
+    }
+
+    const drSheets = Array.from(document.styleSheets).filter((s) => (s.ownerNode as HTMLElement)?.classList.contains('darkreader'))
+        .concat(
+            Array.isArray(document.adoptedStyleSheets) ? Array.from(document.adoptedStyleSheets).filter(
+                (s) => (s.cssRules?.[0] as CSSStyleRule)?.selectorText?.startsWith('#__darkreader')
+            ) : [],
+        );
+    drSheets.forEach((sheet) => sheet.disabled = true);
 
     const darkThemeDetected = hasBuiltInDarkTheme();
 
-    drStyles.forEach((style) => style.disabled = false);
+    drSheets.forEach((sheet) => sheet.disabled = false);
     callback(darkThemeDetected);
 }
 
@@ -86,12 +118,21 @@ let observer: MutationObserver | null;
 let readyStateListener: (() => void) | null;
 
 function canCheckForStyle() {
-    return (
+    if (!(
         document.body &&
         document.body.scrollHeight > 0 &&
         document.body.clientHeight > 0 &&
+        document.body.childElementCount > 0 &&
         hasSomeStyle()
-    );
+    )) {
+        return false;
+    }
+    for (const child of document.body.children) {
+        if (child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE' && child.tagName !== 'LINK') {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void, hints: DetectorHint[]): void {

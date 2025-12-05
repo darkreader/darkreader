@@ -1,5 +1,7 @@
 import {m} from 'malevic';
+
 import type {ViewProps} from '../../../definitions';
+
 import {ClearSiteList} from './clear-site-list';
 import {SiteList} from './site-list';
 

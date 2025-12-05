@@ -1,17 +1,21 @@
-import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
+import type {Theme} from '../../definitions';
+import {parseColorWithCache, rgbToHSL, hslToString, RGBA} from '../../utils/color';
+import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
+import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';
+import {isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
-import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
+import {readImageDetailsCache, writeImageDetailsCache} from '../cache';
+import {logWarn, logInfo} from '../utils/log';
+
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from './modify-colors';
+import {getSheetScope} from './style-scope';
 import type {CSSVariableModifier, VariablesStore} from './variables';
-import {logWarn, logInfo} from '../utils/log';
-import type {Theme} from '../../definitions';
-import {isFirefox, isCSSColorSchemePropSupported, isLayerRuleSupported} from '../../utils/platform';
-import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
-import {parseGradient} from '../../utils/css-text/parse-gradient';
+
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -20,7 +24,7 @@ export type CSSValueModifier = (theme: Theme) => string | Promise<string | null>
 export interface CSSValueModifierResult {
     result: string;
     matchesLength: number;
-    unparseableMatchesLength: number;
+    unparsableMatchesLength: number;
 }
 
 export type CSSValueModifierWithInfo = (theme: Theme) => CSSValueModifierResult;
@@ -97,6 +101,10 @@ function joinSelectors(...selectors: string[]) {
     return selectors.filter(Boolean).join(', ');
 }
 
+const hostsWithOddScrollbars = [
+    'calendar.google.com',
+];
+
 export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean): string {
     const lines: string[] = [];
     if (!isIFrame) {
@@ -111,7 +119,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(`    color-scheme: dark !important;`);
         lines.push('}');
         lines.push('iframe {');
-        lines.push(`    color-scheme: initial;`);
+        lines.push(`    color-scheme: dark !important;`);
         lines.push('}');
     }
     const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button, dialog' : '');
@@ -142,7 +150,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (theme.scrollbarColor) {
+    if (theme.scrollbarColor && !hostsWithOddScrollbars.includes(location.hostname)) {
         lines.push(getModifiedScrollbarStyle(theme));
     }
     if (theme.selectionColor) {
@@ -189,55 +197,23 @@ function getModifiedSelectionStyle(theme: Theme) {
 }
 
 function getModifiedScrollbarStyle(theme: Theme) {
-    const lines: string[] = [];
     let colorTrack: string;
-    let colorIcons: string;
     let colorThumb: string;
-    let colorThumbHover: string;
-    let colorThumbActive: string;
-    let colorCorner: string;
     if (theme.scrollbarColor === 'auto') {
         colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, theme);
-        colorIcons = modifyForegroundColor({r: 96, g: 96, b: 96}, theme);
         colorThumb = modifyBackgroundColor({r: 176, g: 176, b: 176}, theme);
-        colorThumbHover = modifyBackgroundColor({r: 144, g: 144, b: 144}, theme);
-        colorThumbActive = modifyBackgroundColor({r: 96, g: 96, b: 96}, theme);
-        colorCorner = modifyBackgroundColor({r: 255, g: 255, b: 255}, theme);
     } else {
         const rgb = parseColorWithCache(theme.scrollbarColor)!;
         const hsl = rgbToHSL(rgb);
-        const isLight = hsl.l > 0.5;
-        const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
         const darken = (darker: number) => ({...hsl, l: clamp(hsl.l - darker, 0, 1)});
         colorTrack = hslToString(darken(0.4));
-        colorIcons = hslToString(isLight ? darken(0.4) : lighten(0.4));
         colorThumb = hslToString(hsl);
-        colorThumbHover = hslToString(lighten(0.1));
-        colorThumbActive = hslToString(lighten(0.2));
-        colorCorner = hslToString(darken(0.5));
     }
-    lines.push('::-webkit-scrollbar {');
-    lines.push(`    background-color: ${colorTrack};`);
-    lines.push(`    color: ${colorIcons};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb {');
-    lines.push(`    background-color: ${colorThumb};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:hover {');
-    lines.push(`    background-color: ${colorThumbHover};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:active {');
-    lines.push(`    background-color: ${colorThumbActive};`);
-    lines.push('}');
-    lines.push('::-webkit-scrollbar-corner {');
-    lines.push(`    background-color: ${colorCorner};`);
-    lines.push('}');
-    if (isFirefox) {
-        lines.push('* {');
-        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
-        lines.push('}');
-    }
-    return lines.join('\n');
+    return [
+        `* {`,
+        `    scrollbar-color: ${colorThumb} ${colorTrack};`,
+        `}`,
+    ].join('\n');
 }
 
 export function getModifiedFallbackStyle(theme: Theme, {strict}: {strict: boolean}): string {
@@ -285,10 +261,18 @@ const unparsableColors = new Set([
 ]);
 
 function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier | null {
-    if (unparsableColors.has(value.toLowerCase())) {
+    if (
+        unparsableColors.has(value.toLowerCase()) &&
+        !(prop === 'color' && value === 'initial')
+    ) {
         return value;
     }
-    const rgb = parseColorWithCache(value);
+    let rgb: RGBA | null = null;
+    if (prop === 'color' && value === 'initial') {
+        rgb = {r: 0, g: 0, b: 0, a: 1};
+    } else {
+        rgb = parseColorWithCache(value);
+    }
     if (!rgb) {
         logWarn("Couldn't parse color", value);
         return null;
@@ -313,6 +297,7 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
 
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails | null) => void>>();
+let didTryLoadCache = false;
 
 function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     if (!selectorText || selectors.length === 0) {
@@ -324,7 +309,17 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
-        if (ruleSelectors.some((s) => s === ignoredSelector)) {
+        if (ignoredSelector.startsWith('^')) {
+            const beginning = ignoredSelector.slice(1);
+            if (ruleSelectors.some((s) => s.startsWith(beginning))) {
+                return true;
+            }
+        } else if (ignoredSelector.endsWith('$')) {
+            const ending = ignoredSelector.slice(0, ignoredSelector.length - 1);
+            if (ruleSelectors.some((s) => s.endsWith(ending))) {
+                return true;
+            }
+        } else if (ruleSelectors.some((s) => s === ignoredSelector)) {
             return true;
         }
     }
@@ -340,6 +335,38 @@ interface BgImageMatches {
     hasComma?: boolean;
 }
 
+const imageSelectorQueue = new Map<string, Array<() => void>>();
+const imageSelectorValues = new Map<string, string>();
+const imageSelectorNodeQueue = new Set<Element>();
+let imageSelectorQueueFrameId: number | null = null;
+let classObserver: MutationObserver | null = null;
+
+export function checkImageSelectors(node: Element | Document | ShadowRoot): void {
+    for (const [selector, callbacks] of imageSelectorQueue) {
+        if (node.querySelector(selector) || (node instanceof Element && node.matches(selector))) {
+            imageSelectorQueue.delete(selector);
+            callbacks.forEach((cb) => cb());
+        }
+    }
+    if (!classObserver) {
+        classObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                imageSelectorNodeQueue.add(mutation.target as Element);
+                if (!imageSelectorQueueFrameId) {
+                    imageSelectorQueueFrameId = requestAnimationFrame(() => {
+                        imageSelectorNodeQueue.forEach((element) => {
+                            checkImageSelectors(element);
+                        });
+                        imageSelectorNodeQueue.clear();
+                        imageSelectorQueueFrameId = null;
+                    });
+                }
+            });
+        });
+        classObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class'], subtree: true});
+    }
+}
+
 export function getBgImageModifier(
     value: string,
     rule: CSSStyleRule,
@@ -347,6 +374,10 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier | null {
     try {
+        if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
+            return value;
+        }
+
         const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
 
@@ -405,21 +436,46 @@ export function getBgImageModifier(
         };
 
         const getURLModifier = (urlValue: string) => {
-            if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
-                return null;
+            if (!didTryLoadCache) {
+                didTryLoadCache = true;
+                readImageDetailsCache(imageDetailsCache);
             }
+
             let url = getCSSURLValue(urlValue);
             const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;
+            const ownerNode = parentStyleSheet?.ownerNode;
+            const scope = (parentStyleSheet && getSheetScope(parentStyleSheet)) ?? document;
             const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
-                parentStyleSheet?.ownerNode?.baseURI || location.origin;
+                ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
             return async (theme: Theme): Promise<string | null> => {
                 if (isURLEmpty) {
                     return "url('')";
                 }
+
+                let selector = rule.selectorText;
+                if (selector) {
+                    if (selector.includes('::before')) {
+                        selector = selector.replaceAll('::before', '');
+                    }
+                    if (selector.includes('::after')) {
+                        selector = selector.replaceAll('::after', '');
+                    }
+                    if (!scope.querySelector(selector)) {
+                        await new Promise<void>((resolve) => {
+                            if (imageSelectorQueue.has(selector)) {
+                                imageSelectorQueue.get(selector)!.push(resolve);
+                            } else {
+                                imageSelectorQueue.set(selector, [resolve]);
+                                imageSelectorValues.set(selector, urlValue);
+                            }
+                        });
+                    }
+                }
+
                 let imageDetails: ImageDetails | null = null;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url)!;
@@ -438,6 +494,12 @@ export function getBgImageModifier(
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
                             imageDetailsCache.set(url, imageDetails);
+                            if (!url.startsWith('data:')) {
+                                const parsedURL = new URL(url);
+                                if (parsedURL.origin === location.origin) {
+                                    writeImageDetailsCache(url, imageDetails);
+                                }
+                            }
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);
                         }
@@ -573,7 +635,7 @@ export function getShadowModifierWithInfo(value: string): CSSValueModifierWithIn
             const modified = modifiers.map((modify) => modify(theme)).join('');
             return {
                 matchesLength: colorMatches.length,
-                unparseableMatchesLength: notParsed,
+                unparsableMatchesLength: notParsed,
                 result: modified,
             };
         };
@@ -604,7 +666,7 @@ export function getScrollbarColorModifier(value: string): string | CSSValueModif
         return null;
     }
 
-    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(thumb, theme)}`;
+    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(track, theme)}`;
 }
 
 export function getColorSchemeModifier(): CSSValueModifier {
@@ -641,4 +703,7 @@ export function cleanModificationCache(): void {
     imageDetailsCache.clear();
     cleanImageProcessingCache();
     awaitingForImageLoading.clear();
+    imageSelectorQueue.clear();
+    classObserver?.disconnect();
+    classObserver = null;
 }

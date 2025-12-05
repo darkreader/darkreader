@@ -113,7 +113,6 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
 
     private listeners: Set<() => void>;
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
         this.localStorageKey = localStorageKey;
         this.parent = parent;
@@ -219,11 +218,12 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
                 // Need to wait for active read operation to end
                 this.logWarn('StateManager.saveState was called before StateManager.loadState() resolved. Possible data race! Loading data instead.');
                 return this.barrier!.entry();
-            case StateManagerImplState.READY:
+            case StateManagerImplState.READY: {
                 this.meta = StateManagerImplState.SAVING;
                 const entry = this.barrier!.entry();
                 this.saveStateInternal();
                 return entry;
+            }
             case StateManagerImplState.SAVING:
                 // Another save is in progress
                 this.meta = StateManagerImplState.SAVING_OVERRIDE;
@@ -256,6 +256,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
                 case StateManagerImplState.ONCHANGE_RACE:
                     this.meta = StateManagerImplState.RECOVERY;
                     this.loadStateInternal();
+                // eslint-disable-next-line no-fallthrough
                 case StateManagerImplState.RECOVERY:
                     this.meta = StateManagerImplState.READY;
                     this.applyState(data[this.localStorageKey]);
@@ -267,11 +268,12 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
 
     async loadState(): Promise<void> {
         switch (this.meta) {
-            case StateManagerImplState.INITIAL:
+            case StateManagerImplState.INITIAL: {
                 this.meta = StateManagerImplState.LOADING;
                 const entry = this.barrier!.entry();
                 this.loadStateInternal();
                 return entry;
+            }
             case StateManagerImplState.READY:
                 return;
             case StateManagerImplState.SAVING:

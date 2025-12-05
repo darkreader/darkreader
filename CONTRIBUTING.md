@@ -56,31 +56,48 @@ You can learn how to create a fix for the appropriate mode below.
 
 ## How to use the Dev Tools
 
-The Dev Tools help you **fix minor issues** on a web page. These can include a dark icon on a dark background, removing a bright background, adding a white background to a transparent image, etc.
+Dark Reader includes its own developer tools, allowing easier modification of its rules and quicker previews. The Dev Tools help you **fix minor issues** on a web page. These can include a dark icon on a dark background, removing a bright background, adding a white background to a transparent image, etc.
 
-In **Dynamic mode**, if the page looks partially dark and bright, it is considered a bug.
+Common use cases:
+
+In **Dynamic mode**, if the page looks partially dark and bright, it is considered a bug. Individual elements or containers might need to be tweaked.
 
 In **Filter mode**, it is a common practice to invert elements on the page that are already dark.
 
+The Dev Tools can help you fix these and other rule bugs.
+
+### Navigating to the Dark Reader Dev Tools
+
+#### Video walkthrough:
+https://github.com/user-attachments/assets/76a5d9bc-7553-4e50-acf5-5a9051cec152
+
+#### Step-by-step instructions:
 - Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
 - Pick an incorrectly inverted element.
 - Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (for example, if it has `class="icon small"`, the selector may look like `.icon`).
-- Click **Dark Reader icon**.
-- Click **Open developer tools** (at the bottom of the Dark Reader popup).
-- Edit or add a block containing the URL and selectors to invert.
+- Click **Dark Reader icon** to open the extension popup window.
+- Switch to the **More** tab.
+- Click the **⛭ All settings** button at the bottom.
+- Switch to the **Advanced** section on the left.
+- Click the **🛠️ Dev tools** button at the bottom.
+- (Optional but helpful) Switch to the **Per Site Editor** tab at the bottom and type in the domain name you wish to update or add.
+- Edit or add a block containing the URL and selectors to invert, using the [rules below](#editor--rule-syntax).
 - Click **Apply**.
-- Check how it looks both in **Light** and **Dark** mode.
-- If the **fix works** open **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config) file** or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config) file**.
+- Check how the site looks both in **Light** and **Dark** mode.
+- If the **fix works**, open **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config)** or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config)**.
 - Click **Edit** (login to GitHub first).
-- **Insert your fix** there. Preserve **alphabetic order** by URL.
+- **Insert your fix** there (copying and pasting it from the Dev Tools). Preserve **alphabetic order** by URL.
 - Provide a **short description** of what you have done.
 - Click **Propose file change**.
 - Review your changes. Click **Create pull request**.
-- GitHub actions will run tests to make sure it has the right code style.
+- Once you create the pull request, GitHub Actions will run tests behind the scenes to make sure your submission has the right code style. This will take a few minutes.
 - If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- A Dark Reader developer will **review** and merge your changes, making them available.
+- When you see a **green checkmark**, then everything is fine.
+- A Dark Reader developer will **review** and merge your changes, making them available to all Dark Reader users.
+
+
+## Editor & Rule Syntax
 
 ```CSS
 dynamic-theme-fixes.config

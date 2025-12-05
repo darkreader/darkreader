@@ -20,6 +20,9 @@
         "strictNullChecks": true,
         "jsx": "react",
         "jsxFactory": "m",
-        "noEmit": true
+        "noEmit": true,
+        "paths": {
+            "@plus/*": ["./stubs/*"]
+        }
     }
 }

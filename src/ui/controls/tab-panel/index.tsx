@@ -1,5 +1,7 @@
 import {m} from 'malevic';
+
 import Button from '../button';
+
 import Tab from './tab';
 
 interface TabPanelProps {

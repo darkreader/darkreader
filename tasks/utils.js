@@ -1,5 +1,6 @@
 // @ts-check
 import {exec} from 'node:child_process';
+import {accessSync} from 'node:fs';
 import fs from 'node:fs/promises';
 import https from 'node:https';
 import path from 'node:path';
@@ -52,6 +53,19 @@ export const log = Object.assign((/** @type {string} */text) => logWithTime(text
 export async function pathExists(dest) {
     try {
         await fs.access(dest);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+/**
+ * @param {string} dest
+ * @returns {boolean}
+ */
+export function pathExistsSync(dest) {
+    try {
+        accessSync(dest);
         return true;
     } catch (err) {
         return false;

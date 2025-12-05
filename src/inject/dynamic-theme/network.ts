@@ -9,6 +9,8 @@ interface FetchRequest {
     origin: string;
 }
 
+declare const __TEST__: boolean;
+
 const resolvers = new Map<string, (data: string) => void>();
 const rejectors = new Map<string, (reason?: any) => void>();
 
@@ -47,6 +49,9 @@ const MAX_CORS_DOMAINS = 16;
 const corsDomains = new Set<string>();
 
 function shouldIgnoreCors(url: URL) {
+    if (__TEST__) {
+        return false;
+    }
     const host = url.hostname;
     if (!corsDomains.has(host)) {
         corsDomains.add(host);

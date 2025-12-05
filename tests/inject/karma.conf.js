@@ -46,7 +46,9 @@ export function configureKarma(config, env) {
         rollupPreprocessor: {
             plugins: [
                 rollupPluginTypescript({
+                    rootDir: absolutePath('.'),
                     typescript,
+                    outDir: 'build/tests',
                     tsconfig: absolutePath('tests/inject/tsconfig.json'),
                     cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),

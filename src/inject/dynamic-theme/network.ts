@@ -45,23 +45,60 @@ chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) =>
 });
 
 const ipV4RegExp = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
-const MAX_CORS_DOMAINS = 16;
-const corsDomains = new Set<string>();
+const MAX_CORS_HOSTS = 16;
+const corsHosts = new Set<string>();
+const localAliases = [
+    '127-0-0-1.org.uk',
+    '42foo.com',
+    'domaincontrol.com',
+    'fbi.com',
+    'fuf.me',
+    'lacolhost.com',
+    'local.sisteminha.com',
+    'localfabriek.nl',
+    'localhost',
+    'localhst.co.uk',
+    'localmachine.info',
+    'localmachine.name',
+    'localtest.me',
+    'lvh.me',
+    'mouse-potato.com',
+    'nip.io',
+    'sslip.io',
+    'vcap.me',
+    'xip.io',
+    'yoogle.com',
+];
+const localSubDomains = [
+    '.corp',
+    '.direct',
+    '.home',
+    '.internal',
+    '.intranet',
+    '.lan',
+    '.local',
+    '.localdomain',
+    '.test',
+    '.zz',
+    ...localAliases.map((alias) => `.${alias}`),
+];
 
 function shouldIgnoreCors(url: URL) {
     if (__TEST__) {
         return false;
     }
-    const host = url.hostname;
-    if (!corsDomains.has(host)) {
-        corsDomains.add(host);
+    const {host, hostname, port, protocol} = url;
+    if (!corsHosts.has(host)) {
+        corsHosts.add(host);
     }
     if (
-        corsDomains.size >= MAX_CORS_DOMAINS ||
-        host === 'localhost' ||
-        host.startsWith('[') ||
-        host.endsWith('.local') ||
-        host.match(ipV4RegExp)
+        corsHosts.size >= MAX_CORS_HOSTS ||
+        protocol !== 'https:' ||
+        port !== '' ||
+        localAliases.includes(hostname) ||
+        localSubDomains.some((sub) => hostname.endsWith(sub)) ||
+        hostname.startsWith('[') ||
+        hostname.match(ipV4RegExp)
     ) {
         return true;
     }

@@ -1,3 +1,8 @@
+# 4.9.118 (December 8, 2025)
+
+- Improved RGB colors support in CSS variables.
+- Extended cross-origin request limitations.
+
 # 4.9.117 (December 3, 2025)
 
 - Improved dark theme detection.

@@ -47,6 +47,7 @@ chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) =>
 const ipV4RegExp = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
 const MAX_CORS_HOSTS = 16;
 const corsHosts = new Set<string>();
+const checkedHosts = new Set<string>();
 const localAliases = [
     '127-0-0-1.org.uk',
     '42foo.com',
@@ -91,6 +92,9 @@ function shouldIgnoreCors(url: URL) {
     if (!corsHosts.has(host)) {
         corsHosts.add(host);
     }
+    if (checkedHosts.has(host)) {
+        return false;
+    }
     if (
         corsHosts.size >= MAX_CORS_HOSTS ||
         protocol !== 'https:' ||
@@ -102,5 +106,6 @@ function shouldIgnoreCors(url: URL) {
     ) {
         return true;
     }
+    checkedHosts.add(host);
     return false;
 }

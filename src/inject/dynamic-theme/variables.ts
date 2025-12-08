@@ -731,15 +731,17 @@ function isTextColorProperty(property: string) {
     return textColorProps.includes(property);
 }
 
-// [number] [number] [number]
-const rawRGBSpaceRegex = /^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})$/;
+// [number] [number] [number] / [number]
+const rawRGBSpaceRegex = /^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*(\/\s*\d+\.?\d*)?$/;
 // [number], [number], [number]
 const rawRGBCommaRegex = /^(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})$/;
 
 function parseRawColorValue(input: string) {
     const match = input.match(rawRGBSpaceRegex) ?? input.match(rawRGBCommaRegex);
     if (match) {
-        const color = `rgb(${match[1]}, ${match[2]}, ${match[3]})`;
+        const color = match[4] ?
+            `rgb(${match[1]} ${match[2]} ${match[3]} / ${match[4]})` :
+            `rgb(${match[1]}, ${match[2]}, ${match[3]})`;
         return {isRaw: true, color};
     }
     return {isRaw: false, color: input};

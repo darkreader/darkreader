@@ -337,6 +337,8 @@ function getSVGElementRoot(svgElement: SVGElement): SVGSVGElement | null {
     return root;
 }
 
+const inlineStringValueCache = new Map<string, Map<string, string>>();
+
 export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
     if (elementsLastChanges.has(element)) {
         if (Date.now() - elementsLastChanges.get(element)! < LOOP_DETECTION_THRESHOLD) {
@@ -361,6 +363,12 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
     const unsetProps = new Set(Object.keys(overrides));
 
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
+        const cachedStringValue = inlineStringValueCache.get(modifierCSSProp)?.get(cssVal);
+        if (cachedStringValue) {
+            setStaticValue(cachedStringValue);
+            return;
+        }
+
         const mod = getModifiableCSSDeclaration(
             modifierCSSProp,
             cssVal,
@@ -420,6 +428,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         const value = typeof mod.value === 'function' ? mod.value(theme) : mod.value;
         if (typeof value === 'string') {
             setStaticValue(value);
+            if (!inlineStringValueCache.has(modifierCSSProp)) {
+                inlineStringValueCache.set(modifierCSSProp, new Map());
+            }
+            inlineStringValueCache.get(modifierCSSProp)!.set(cssVal, value);
         } else if (value instanceof Promise) {
             setAsyncValue(value, cssVal);
         } else if (typeof value === 'object') {

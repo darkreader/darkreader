@@ -2,12 +2,12 @@ import {m} from 'malevic';
 
 import type {Theme, ViewProps} from '../../../definitions';
 import {Button} from '../../controls';
-import {Brightness, Contrast, Scheme, Mode} from '../theme/controls';
+import {Brightness, Contrast, Transparency, Scheme, Mode} from '../theme/controls';
 import ThemePresetPicker from '../theme/preset-picker';
 import {getCurrentThemePreset} from '../theme/utils';
 
-function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) => void}) {
-    const {theme, onChange} = props;
+function ThemeControls(props: {theme: Theme; view: ViewProps; onChange: (theme: Partial<Theme>) => void}) {
+    const {theme, view, onChange} = props;
     return (
         <section class="m-section m-theme-controls">
             <Brightness
@@ -18,6 +18,13 @@ function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) =
                 value={theme.contrast}
                 onChange={(v) => onChange({contrast: v})}
             />
+
+            <Transparency
+                value={theme.transparency}
+                onChange={(v) => onChange({transparency: v})}
+                show={view.data.settings.theme.allowTransparency}
+            />
+
             <Scheme
                 isDark={theme.mode === 1}
                 onChange={(isDark) => onChange({mode: isDark ? 1 : 0})}
@@ -42,6 +49,7 @@ export default function ThemeGroup(props: ViewProps & {onThemeNavClick: () => vo
                 <ThemeControls
                     theme={preset.theme}
                     onChange={preset.change}
+                    view={props}
                 />
                 <Button class="theme-group__more-button" onclick={props.onThemeNavClick}>
                     See all options

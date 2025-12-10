@@ -23,6 +23,10 @@ export const DEFAULT_THEME: Theme = {
     mode: 1,
     brightness: 100,
     contrast: 100,
+    allowTransparency: false,
+    allowTransparentSelections: false,
+    allowTransparentScrollbars: false,
+    transparency : 100,
     grayscale: 0,
     sepia: 0,
     useFont: false,
@@ -106,5 +110,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     enableForPDF: true,
     enableForProtectedPages: false,
     enableContextMenus: false,
-    detectDarkTheme: true,
+    detectDarkTheme: true
 };

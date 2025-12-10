@@ -10,11 +10,13 @@ import {ImportSettings} from './import-settings';
 import {ResetSettings} from './reset-settings';
 import {SyncConfig} from './sync-config';
 import {SyncSettings} from './sync-settings';
+import {TransparencySettings} from './transparency-settings';
 
 export function AdvancedTab(props: ViewProps): Malevic.Child {
     return <div class="settings-tab">
         <SyncSettings {...props} />
         <SyncConfig {...props} />
+        <TransparencySettings {...props} />
         <EnableForProtectedPages {...props} />
         <ContextMenus {...props} />
         <ImportSettings {...props} />

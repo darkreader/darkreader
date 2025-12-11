@@ -507,7 +507,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
     if (isSVGElement) {
         if (element.hasAttribute('fill')) {
             const value = element.getAttribute('fill')!;
-            if (value !== 'none') {
+            if (value !== 'none' && value !== 'currentColor') {
                 if (!(element instanceof SVGTextElement)) {
                     // getBoundingClientRect forces a layout change. And when it happens and
                     // the DOM is not in the `complete` readystate, it will cause the layout to be drawn

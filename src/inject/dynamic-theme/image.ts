@@ -18,6 +18,7 @@ export interface ImageDetails {
     isLight: boolean;
     isTransparent: boolean;
     isLarge: boolean;
+    useViewBox?: boolean;
 }
 
 const imageManager = new AsyncQueue();
@@ -29,8 +30,24 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
             const dataURL = url.startsWith('data:') ? url : await getDataURL(url);
             const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadAsBlob(url);
             let image: ImageBitmap | HTMLImageElement;
+            let useViewBox = false;
             if (dataURL.startsWith('data:image/svg+xml')) {
                 image = await loadImage(dataURL);
+                const commaIndex = dataURL.indexOf(',');
+                if (commaIndex >= 0) {
+                    let svgText = dataURL.slice(commaIndex + 1);
+                    const encoding = dataURL.slice(0, commaIndex).split(';')[1];
+                    if (encoding === 'base64') {
+                        svgText = atob(svgText);
+                    }
+                    if (svgText.startsWith('<svg ')) {
+                        const closingIndex = svgText.indexOf('>');
+                        const svgOpening = svgText.slice(0, closingIndex + 1).toLocaleLowerCase();
+                        if (svgOpening.includes('viewbox') && !svgOpening.includes('width') && !svgOpening.includes('height')) {
+                            useViewBox = true;
+                        }
+                    }
+                }
             } else {
                 image = await tryCreateImageBitmap(blob) ?? await loadImage(dataURL);
             }
@@ -41,6 +58,7 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                     dataURL: analysis.isLarge ? '' : dataURL,
                     width: image.width,
                     height: image.height,
+                    useViewBox,
                     ...analysis,
                 });
             });
@@ -231,13 +249,14 @@ document.addEventListener('securitypolicyviolation', onCSPError);
 
 const objectURLs = new Set<string>();
 
-export function getFilteredImageURL({dataURL, width, height}: ImageDetails, theme: Theme): string {
+export function getFilteredImageURL({dataURL, width, height, useViewBox}: ImageDetails, theme: Theme): string {
     if (dataURL.startsWith('data:image/svg+xml')) {
         dataURL = escapeXML(dataURL);
     }
     const matrix = getSVGFilterMatrixValue(theme);
+    const size = useViewBox ? `viewBox="0 0 ${width} ${height}"` : `width="${width}" height="${height}"`;
     const svg = [
-        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${width} ${height}">`,
+        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ${size}>`,
         '<defs>',
         '<filter id="darkreader-image-filter">',
         `<feColorMatrix type="matrix" values="${matrix}" />`,

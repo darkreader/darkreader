@@ -27,12 +27,11 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<ImageDetails>(async (resolve, reject) => {
         try {
-            const dataURL = url.startsWith('data:') ? url : await getDataURL(url);
+            let dataURL = url.startsWith('data:') ? url : await getDataURL(url);
             const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadAsBlob(url);
             let image: ImageBitmap | HTMLImageElement;
             let useViewBox = false;
             if (dataURL.startsWith('data:image/svg+xml')) {
-                image = await loadImage(dataURL);
                 const commaIndex = dataURL.indexOf(',');
                 if (commaIndex >= 0) {
                     let svgText = dataURL.slice(commaIndex + 1);
@@ -45,9 +44,20 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                         const svgOpening = svgText.slice(0, closingIndex + 1).toLocaleLowerCase();
                         if (svgOpening.includes('viewbox') && !svgOpening.includes('width') && !svgOpening.includes('height')) {
                             useViewBox = true;
+
+                            // Explicitly set size due to unexpected drawImage() behavior
+                            const viewboxIndex = svgOpening.indexOf('viewbox="');
+                            const viewboxCloseIndex = svgOpening.indexOf('viewbox="', viewboxIndex + 9);
+                            const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex - 1).split(' ').map((x) => parseFloat(x));
+                            if (viewBox.length === 4 && !viewBox.some((x) => isNaN(x))) {
+                                const width = viewBox[2] - viewBox[0];
+                                const height = viewBox[3] - viewBox[1];
+                                dataURL = `data:image/svg+xml;base64,${btoa(`<svg width="${width}" height="${height}" ${svgText.slice(5)}`)}`;
+                            }
                         }
                     }
                 }
+                image = await loadImage(dataURL);
             } else {
                 image = await tryCreateImageBitmap(blob) ?? await loadImage(dataURL);
             }

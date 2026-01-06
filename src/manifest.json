@@ -1,12 +1,12 @@
 {
     "manifest_version": 2,
-    "name": "Dark Reader",
+    "name": "Dark Reader for Alloy",
     "version": "4.9.118",
     "author": "Alexander Shutau",
     "description": "__MSG_extension_description__",
     "default_locale": "en",
     "browser_action": {
-        "default_title": "Dark Reader",
+        "default_title": "Dark Reader for Alloy",
         "default_icon": {
             "38": "icons/dr_active_38.png",
             "19": "icons/dr_active_19.png"

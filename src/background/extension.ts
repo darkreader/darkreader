@@ -363,7 +363,7 @@ export class Extension {
             Extension.registeredContextMenus = false;
             chrome.contextMenus.create({
                 id: 'DarkReader-top',
-                title: 'Dark Reader',
+                title: 'Dark Reader for Alloy',
             }, () => {
                 if (chrome.runtime.lastError) {
                     // Failed to create the context menu

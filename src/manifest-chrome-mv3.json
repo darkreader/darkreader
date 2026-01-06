@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "minimum_chrome_version": "106.0.0.0",
     "action": {
-        "default_title": "Dark Reader",
+        "default_title": "Dark Reader - Fabric",
         "default_icon": {
             "38": "icons/dr_active_38.png",
             "19": "icons/dr_active_19.png"
@@ -21,7 +21,19 @@
     "content_scripts": [
         {
             "matches": [
-                "<all_urls>"
+                "https://*.fabric.microsoft.com/*",
+                "https://*.powerbi.com/*",
+                "https://*.pbidedicated.windows.net/*",
+                "https://*.pbidedicated.windows-int.net/*",
+                "https://*.analysis.windows.net/*",
+                "https://*.asazure.windows.net/*",
+                "https://*.trafficmanager.net/*",
+                "https://*.powerapps.com/*",
+                "https://gatewayadminportal.azure.com/*",
+                "https://gatewayadminportal-msit.azure.com/*",
+                "https://gatewayadminportal-prod.azure.com/*",
+                "https://gatewayadminportal-int.azure.com/*",
+                "https://gatewayadminportal-test.azure.com/*"
             ],
             "js": [
                 "inject/proxy.js"
@@ -33,7 +45,19 @@
         },
         {
             "matches": [
-                "<all_urls>"
+                "https://*.fabric.microsoft.com/*",
+                "https://*.powerbi.com/*",
+                "https://*.pbidedicated.windows.net/*",
+                "https://*.pbidedicated.windows-int.net/*",
+                "https://*.analysis.windows.net/*",
+                "https://*.asazure.windows.net/*",
+                "https://*.trafficmanager.net/*",
+                "https://*.powerapps.com/*",
+                "https://gatewayadminportal.azure.com/*",
+                "https://gatewayadminportal-msit.azure.com/*",
+                "https://gatewayadminportal-prod.azure.com/*",
+                "https://gatewayadminportal-int.azure.com/*",
+                "https://gatewayadminportal-test.azure.com/*"
             ],
             "js": [
                 "inject/fallback.js",
@@ -46,7 +70,19 @@
         },
         {
             "matches": [
-                "<all_urls>"
+                "https://*.fabric.microsoft.com/*",
+                "https://*.powerbi.com/*",
+                "https://*.pbidedicated.windows.net/*",
+                "https://*.pbidedicated.windows-int.net/*",
+                "https://*.analysis.windows.net/*",
+                "https://*.asazure.windows.net/*",
+                "https://*.trafficmanager.net/*",
+                "https://*.powerapps.com/*",
+                "https://gatewayadminportal.azure.com/*",
+                "https://gatewayadminportal-msit.azure.com/*",
+                "https://gatewayadminportal-prod.azure.com/*",
+                "https://gatewayadminportal-int.azure.com/*",
+                "https://gatewayadminportal-test.azure.com/*"
             ],
             "js": [
                 "inject/color-scheme-watcher.js"
@@ -64,6 +100,18 @@
         "storage"
     ],
     "host_permissions": [
-        "*://*/*"
+        "https://*.fabric.microsoft.com/*",
+        "https://*.powerbi.com/*",
+        "https://*.pbidedicated.windows.net/*",
+        "https://*.pbidedicated.windows-int.net/*",
+        "https://*.analysis.windows.net/*",
+        "https://*.asazure.windows.net/*",
+        "https://*.trafficmanager.net/*",
+        "https://*.powerapps.com/*",
+        "https://gatewayadminportal.azure.com/*",
+        "https://gatewayadminportal-msit.azure.com/*",
+        "https://gatewayadminportal-prod.azure.com/*",
+        "https://gatewayadminportal-int.azure.com/*",
+        "https://gatewayadminportal-test.azure.com/*"
     ]
 }

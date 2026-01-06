@@ -104,17 +104,11 @@ function getParams(args) {
         '--chrome-mv2': PLATFORM.CHROMIUM_MV2,
         '--chrome-mv3': PLATFORM.CHROMIUM_MV3,
         '--chrome-plus': PLATFORM.CHROMIUM_MV2_PLUS,
-        '--firefox': PLATFORM.FIREFOX_MV2,
-        '--firefox-mv2': PLATFORM.FIREFOX_MV2,
-        '--firefox-mv3': PLATFORM.FIREFOX_MV3,
-        '--thunderbird': PLATFORM.THUNDERBIRD,
     };
     const platforms = {
         [PLATFORM.CHROMIUM_MV2]: false,
         [PLATFORM.CHROMIUM_MV2_PLUS]: false,
         [PLATFORM.CHROMIUM_MV3]: false,
-        [PLATFORM.FIREFOX_MV2]: false,
-        [PLATFORM.THUNDERBIRD]: false,
     };
     let allPlatforms = true;
     for (const arg of args) {
@@ -129,12 +123,6 @@ function getParams(args) {
     }
     if (allPlatforms) {
         Object.keys(platforms).forEach((platform) => platforms[platform] = true);
-    }
-
-    // TODO(Anton): remove me
-    if (platforms[PLATFORM.FIREFOX_MV3]) {
-        platforms[PLATFORM.FIREFOX_MV3] = false;
-        console.log('Firefox MV3 build is not supported yet');
     }
 
     if (!pathExistsSync('./src/plus/')) {

@@ -23,7 +23,6 @@ import SiteListSettings from './site-list-settings';
 
 import {PlusBody, activate} from '@plus/popup/plus-body';
 
-declare const __THUNDERBIRD__: boolean;
 declare const __PLUS__: boolean;
 
 interface BodyProps {
@@ -230,10 +229,7 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
             <TabPanel
                 activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
-                tabs={__THUNDERBIRD__ ? {
-                    'Filter': filterTab,
-                    'More': moreTab,
-                } : {
+                tabs={{
                     'Filter': filterTab,
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />

@@ -1,5 +1,3 @@
-declare const __THUNDERBIRD__: boolean;
-
 export function fixNotClosingPopupOnNavigation(): void {
     // This event listener must not be passive since it calls e.preventDefault()
     document.addEventListener('click', (e) => {
@@ -13,9 +11,7 @@ export function fixNotClosingPopupOnNavigation(): void {
         if (target && target.hasAttribute('href')) {
             chrome.tabs.create({url: target.getAttribute('href')!});
             e.preventDefault();
-            if (!__THUNDERBIRD__) {
-                window.close();
-            }
+            window.close();
         }
     });
 }

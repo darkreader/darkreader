@@ -7,9 +7,8 @@ import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterM
 import {ThemeEngine} from '../generators/theme-engines';
 import {AutomationMode} from '../utils/automation';
 import {debounce} from '../utils/debounce';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
-import {MessageTypeBGtoCS} from '../utils/message';
-import {isFirefox} from '../utils/platform';
+import {isSystemDarkModeEnabled} from '../utils/media-query';
+import {MessageTypeBGtoCS, MessageTypeCStoBG} from '../utils/message';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
 import {getActiveTab} from '../utils/tabs';
@@ -45,7 +44,6 @@ interface SystemColorState extends Record<string, unknown> {
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __PLUS__: boolean;
-declare const __THUNDERBIRD__: boolean;
 
 export class Extension {
     private static autoState: AutomationState = '';
@@ -87,6 +85,19 @@ export class Extension {
             onColorSchemeChange: Extension.onColorSchemeChange,
         });
 
+        // Listen for toggle messages from content scripts (floating toggle button)
+        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            if (message.type === MessageTypeCStoBG.TOGGLE_ENABLED) {
+                Extension.changeSettings({
+                    enabled: !Extension.isExtensionSwitchedOn(),
+                    automation: {...UserStorage.settings.automation, ...{enabled: false}},
+                });
+                sendResponse({enabled: Extension.isExtensionSwitchedOn()});
+                return true;
+            }
+            return false;
+        });
+
         Extension.startBarrier = new PromiseBarrier();
         Extension.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, Extension, {
             autoState: '',
@@ -97,13 +108,7 @@ export class Extension {
         chrome.alarms.onAlarm.addListener(Extension.alarmListener);
 
         if (chrome.commands) {
-            // Firefox Android does not support chrome.commands
-            if (isFirefox) {
-                // Firefox may not register onCommand listener on extension startup so we need to use setTimeout
-                setTimeout(() => chrome.commands.onCommand.addListener(async (command) => Extension.onCommand(command as Command, null, null, null)));
-            } else {
-                chrome.commands.onCommand.addListener(async (command, tab) => Extension.onCommand(command as Command, tab && tab.id! || null, 0, null));
-            }
+            chrome.commands.onCommand.addListener(async (command, tab) => Extension.onCommand(command as Command, tab && tab.id! || null, 0, null));
         }
 
         if (chrome.permissions.onRemoved) {
@@ -175,9 +180,6 @@ export class Extension {
                 isAutoDark = Extension.wasLastColorSchemeDark === null
                     ? isSystemDarkModeEnabled()
                     : Extension.wasLastColorSchemeDark;
-                if (isFirefox) {
-                    runColorSchemeChangeDetector(Extension.onColorSchemeChange);
-                }
                 break;
             case AutomationMode.LOCATION: {
                 const {latitude, longitude} = UserStorage.settings.location;
@@ -255,9 +257,7 @@ export class Extension {
         Extension.onAppToggle();
         logInfo('loaded', UserStorage.settings);
 
-        if (__THUNDERBIRD__) {
-            TabManager.registerMailDisplayScript();
-        } else if (!__CHROMIUM_MV3__ || Extension.isFirstLoad) {
+        if (!__CHROMIUM_MV3__ || Extension.isFirstLoad) {
             TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
@@ -722,17 +722,6 @@ export class Extension {
                     };
                 }
                 case ThemeEngine.svgFilter: {
-                    if (isFirefox) {
-                        return {
-                            type: MessageTypeBGtoCS.ADD_CSS_FILTER,
-                            data: {
-                                css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
-                                detectDarkTheme,
-                                detectorHints,
-                                theme,
-                            },
-                        };
-                    }
                     return {
                         type: MessageTypeBGtoCS.ADD_SVG_FILTER,
                         data: {

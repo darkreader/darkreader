@@ -77,16 +77,6 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
 
     let replace = {};
     switch (platform) {
-        case PLATFORM.FIREFOX_MV2:
-        case PLATFORM.THUNDERBIRD:
-            if (entry.src === 'src/ui/popup/index.tsx') {
-                break;
-            }
-            replace = {
-                'chrome.fontSettings.getFontList': `chrome['font' + 'Settings']['get' + 'Font' + 'List']`,
-                'chrome.fontSettings': `chrome['font' + 'Settings']`,
-            };
-            break;
         case PLATFORM.CHROMIUM_MV3:
             replace = {
                 'chrome.browserAction.setIcon': 'chrome.action.setIcon',
@@ -96,35 +86,13 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             break;
     }
 
-    // See comment below
-    // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-    const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
-
     const cacheId = `${entry.src}-${platform}-${debug}-${watch}-${log}-${test}`;
     const outDir = getDestDir({debug, platform});
 
     const bundle = await rollup.rollup({
         input: absolutePath(src),
         preserveSymlinks: true,
-        onwarn: (error) => {
-            // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-            if (error.code === 'EVAL' && !mustRemoveEval) {
-                return;
-            }
-
-            throw error;
-        },
         plugins: [
-            // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
-            // so we have to manually polyfill it via regular eval().
-            // This plugin is necessary to avoid (benign) warnings in the console during builds, it just replaces
-            // literally one occurrence of eval() in our code even before TypeScript even encounters it.
-            // With this plugin, warning appears only on Firefox test builds.
-            // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-            rollupPluginReplace({
-                preventAssignment: true,
-                'eval(': 'void(',
-            }),
             rollupPluginNodeResolve(),
             rollupPluginTypescript({
                 rootDir: absolutePath('.'),
@@ -153,8 +121,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                 __DEBUG__: debug,
                 __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV2_PLUS,
                 __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
-                __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
-                __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
+                __FIREFOX_MV2__: false,
+                __THUNDERBIRD__: false,
                 __PLUS__: platform === PLATFORM.CHROMIUM_MV2_PLUS,
                 __PORT__: watch ? String(PORT) : '-1',
                 __TEST__: test,

@@ -6,8 +6,6 @@ import {Button} from '../../../controls';
 
 import CheckmarkIcon from './checkmark-icon';
 
-declare const __THUNDERBIRD__: boolean;
-
 export function getSiteToggleData(props: ExtWrapper) {
     const {data, actions} = props;
     const tab = data.activeTab;
@@ -48,7 +46,7 @@ export default function SiteToggleButton(props: ExtWrapper) {
             class={{
                 'site-toggle': true,
                 'site-toggle--active': isSiteEnabled,
-                'site-toggle--disabled': __THUNDERBIRD__ || !toggleHasEffect,
+                'site-toggle--disabled': !toggleHasEffect,
             }}
             onclick={onSiteToggleClick}
         >

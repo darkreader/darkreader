@@ -1,22 +1,9 @@
-import {isFirefox, isEdge} from '../../utils/platform';
+import {isEdge} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
-import {isPDF} from '../../utils/url';
 
 export function canInjectScript(url: string | null | undefined): boolean {
     if (url === 'about:blank') {
         return false;
-    }
-    if (isFirefox) {
-        return Boolean(url
-            && !url.startsWith('about:')
-            && !url.startsWith('moz')
-            && !url.startsWith('view-source:')
-            && !url.startsWith('resource:')
-            && !url.startsWith('chrome:')
-            && !url.startsWith('jar:')
-            && !url.startsWith('https://addons.mozilla.org/')
-            && !isPDF(url)
-        );
     }
     if (isEdge) {
         return Boolean(url

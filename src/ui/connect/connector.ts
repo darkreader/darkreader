@@ -1,13 +1,5 @@
 import type {ExtensionData, ExtensionActions, Theme, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI} from '../../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../../utils/message';
-import {isFirefox} from '../../utils/platform';
-
-declare const browser: {
-    commands: {
-        update({name, shortcut}: chrome.commands.Command): Promise<void>;
-        getAll(): Promise<chrome.commands.Command[]>;
-    };
-};
 
 export default class Connector implements ExtensionActions {
     private changeSubscribers: Set<(data: ExtensionData) => void>;
@@ -28,33 +20,11 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: MessageTypeUItoBG, data?: string): Promise<T> {
-        return new Promise<T>((resolve, reject) => {
-            const dataPort = chrome.runtime.connect({name: type});
-            dataPort.onDisconnect.addListener(() => reject());
-            dataPort.onMessage.addListener(({data, error}) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve(data);
-                }
-                dataPort.disconnect();
-            });
-            data && dataPort.postMessage({data});
-        });
-    }
-
     async getData(): Promise<ExtensionData> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageTypeUItoBG.GET_DATA);
-        }
         return await this.sendRequest<ExtensionData>(MessageTypeUItoBG.GET_DATA);
     }
 
     async getDevToolsData(): Promise<DevToolsData> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<DevToolsData>(MessageTypeUItoBG.GET_DEVTOOLS_DATA);
-        }
         return await this.sendRequest<DevToolsData>(MessageTypeUItoBG.GET_DEVTOOLS_DATA);
     }
 
@@ -78,18 +48,7 @@ export default class Connector implements ExtensionActions {
      * @param shortcut The new shortcut pattern after the operation completes
      */
     async setShortcut(command: string, shortcut: string): Promise<string | null> {
-        if (isFirefox && typeof browser !== 'undefined' && browser.commands && browser.commands.update && browser.commands.getAll) {
-            try {
-                await browser.commands.update({name: command, shortcut});
-            } catch {
-                // Ignore this error
-            }
-            // Query the real shortcut to get the exact value displayed by Firefox on about:addons
-            // or in case user has non-standard keyboard layout
-            const commands = await browser.commands.getAll();
-            const cmd = commands.find((cmd) => cmd.name === command);
-            return cmd && cmd.shortcut || null;
-        }
+        // Chrome doesn't support programmatic shortcut updates
         return null;
     }
 
@@ -118,9 +77,6 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevDynamicThemeFixes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
-        }
         return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
     }
 
@@ -129,9 +85,6 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevInversionFixes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
-        }
         return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
     }
 
@@ -140,9 +93,6 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevStaticThemes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
-        }
         return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
     }
 

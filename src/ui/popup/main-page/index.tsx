@@ -5,6 +5,7 @@ import {NavButton} from '../../controls';
 
 import AppSwitch from './app-switch';
 import HelpGroup from './help';
+import QuickToggle from './quick-toggle';
 import SiteToggleGroup from './site-toggle';
 import ThemeGroup from './theme-group';
 
@@ -34,6 +35,9 @@ type MainPageProps = ViewProps & {
 export default function MainPage(props: MainPageProps) {
     return (
         <Array>
+            <section class="m-section">
+                <QuickToggle {...props} />
+            </section>
             <section class="m-section">
                 <SwitchGroup {...props} />
             </section>

@@ -3,7 +3,7 @@ import {sync} from 'malevic/dom';
 
 import type {ExtensionData, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
-import {isFirefox, isMobile} from '../../utils/platform';
+import {isMobile} from '../../utils/platform';
 import Connector from '../connect/connector';
 
 import Body from './body/body';
@@ -26,7 +26,6 @@ async function start(): Promise<void> {
 }
 
 document.documentElement.classList.toggle('mobile', isMobile);
-document.documentElement.classList.toggle('firefox', isFirefox);
 
 start();
 

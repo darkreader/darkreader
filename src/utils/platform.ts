@@ -1,7 +1,5 @@
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __FIREFOX_MV2__: boolean;
-declare const __THUNDERBIRD__: boolean;
 declare const __TEST__: boolean;
 
 interface UserAgentData {
@@ -31,13 +29,12 @@ const platform = isNavigatorDefined ? (navigator.userAgentData && typeof navigat
     : 'some platform';
 
 // Note: if you are using these constants in tests, make sure they are not compiled out by adding __TEST__ to them
-export const isChromium = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ || (!__FIREFOX_MV2__ && !__THUNDERBIRD__ && (userAgent.includes('chrome') || userAgent.includes('chromium')));
-export const isFirefox = __FIREFOX_MV2__ || __THUNDERBIRD__ || ((__TEST__ || (!__CHROMIUM_MV2__ && !__CHROMIUM_MV3__)) && (userAgent.includes('firefox') || userAgent.includes('thunderbird') || userAgent.includes('librewolf')));
-export const isVivaldi = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX_MV2__ && !__THUNDERBIRD__ && userAgent.includes('vivaldi'));
-export const isYaBrowser = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX_MV2__ && !__THUNDERBIRD__ && userAgent.includes('yabrowser'));
-export const isOpera = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX_MV2__ && !__THUNDERBIRD__ && (userAgent.includes('opr') || userAgent.includes('opera')));
-export const isEdge = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX_MV2__ && !__THUNDERBIRD__ && userAgent.includes('edg'));
-export const isSafari = !__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && !__FIREFOX_MV2__ && !__THUNDERBIRD__ && userAgent.includes('safari') && !isChromium;
+export const isChromium = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ || (userAgent.includes('chrome') || userAgent.includes('chromium'));
+export const isVivaldi = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && userAgent.includes('vivaldi');
+export const isYaBrowser = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && userAgent.includes('yabrowser');
+export const isOpera = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (userAgent.includes('opr') || userAgent.includes('opera'));
+export const isEdge = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && userAgent.includes('edg');
+export const isSafari = !__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
 export const isMobile = (isNavigatorDefined && navigator.userAgentData) ? navigator.userAgentData.mobile : (userAgent.includes('mobile') || (__PLUS__ && userAgent.includes('edgios')));
@@ -49,22 +46,14 @@ export const isMatchMediaChangeEventListenerSupported = __CHROMIUM_MV3__ || (
 export const isLayerRuleSupported = typeof CSSLayerBlockRule === 'function';
 // Return true if browser is known to have a bug with Media Queries, specifically Chromium on Linux and Kiwi on Android
 // We assume that if we are on Android, then we are running in Kiwi since it is the only mobile browser we can install Dark Reader in
-export const isMatchMediaChangeEventListenerBuggy = !__TEST__ && !__FIREFOX_MV2__ && !__THUNDERBIRD__ && (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (
+export const isMatchMediaChangeEventListenerBuggy = !__TEST__ && (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (
     ((isNavigatorDefined && navigator.userAgentData) && ['Linux', 'Android'].includes(navigator.userAgentData.platform))
     || platform.startsWith('linux'));
 // Note: make sure that this value matches manifest.json keys
-export const isNonPersistent = !__FIREFOX_MV2__ && !__THUNDERBIRD__ && (__CHROMIUM_MV3__ || isSafari);
+export const isNonPersistent = __CHROMIUM_MV3__ || isSafari;
 
 export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom(?:e|ium)(?:\/| )([^ ]+)/);
-    if (m && m[1]) {
-        return m[1];
-    }
-    return '';
-})();
-
-export const firefoxVersion = (() => {
-    const m = userAgent.match(/(?:firefox|librewolf)(?:\/| )([^ ]+)/);
     if (m && m[1]) {
         return m[1];
     }

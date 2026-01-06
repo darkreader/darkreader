@@ -1,5 +1,5 @@
 import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
 import {HOMEPAGE_URL} from '../utils/links';
@@ -12,19 +12,19 @@ import {collectCSS} from './dynamic-theme/css-collection';
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {logWarn, logInfoCollapsed} from './utils/log';
+import {createFloatingToggle, updateFloatingToggle, removeFloatingToggle} from './floating-toggle';
 
 declare const __DEBUG__: boolean;
 declare const __PLUS__: boolean;
 declare const __TEST__: boolean;
 
 let unloaded = false;
+let currentlyEnabled = true;
 
 let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __THUNDERBIRD__: boolean;
-declare const __FIREFOX_MV2__: boolean;
 
 // Identifier for this particular script instance. It is used as an alternative to chrome.runtime.MessageSender.documentId
 const scriptId = generateUID();
@@ -37,6 +37,12 @@ function cleanup() {
     cleanDynamicThemeCache();
     stopDarkThemeDetector();
     stopColorSchemeChangeDetector();
+    removeFloatingToggle();
+}
+
+function toggleDarkMode() {
+    // Send message to background to toggle
+    sendMessage({type: MessageTypeCStoBG.TOGGLE_ENABLED});
 }
 
 function sendMessageForTesting(uuid: string) {
@@ -103,6 +109,8 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeDynamicTheme();
             createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
             writeEnabledForHost(true);
+            currentlyEnabled = true;
+            createFloatingToggle(currentlyEnabled, toggleDarkMode);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -119,6 +127,8 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
             writeEnabledForHost(true);
+            currentlyEnabled = true;
+            createFloatingToggle(currentlyEnabled, toggleDarkMode);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -135,6 +145,8 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             writeEnabledForHost(true);
+            currentlyEnabled = true;
+            createFloatingToggle(currentlyEnabled, toggleDarkMode);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -160,6 +172,8 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             removeDynamicTheme();
             stopDarkThemeDetector();
             writeEnabledForHost(false);
+            currentlyEnabled = false;
+            updateFloatingToggle(false);
             break;
         default:
             break;
@@ -206,13 +220,9 @@ function onDarkThemeDetected() {
     sendMessage({type: MessageTypeCStoBG.DARK_THEME_DETECTED});
 }
 
-// Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.
-// And will currently error: `Promise rejected after context unloaded: Actor 'Conduits' destroyed before query 'RuntimeMessage' was resolved`
-if (!__THUNDERBIRD__) {
-    addEventListener('pagehide', onPageHide, {passive: true});
-    addEventListener('freeze', onFreeze, {passive: true});
-    addEventListener('resume', onResume, {passive: true});
-}
+addEventListener('pagehide', onPageHide, {passive: true});
+addEventListener('freeze', onFreeze, {passive: true});
+addEventListener('resume', onResume, {passive: true});
 
 if (__PLUS__) {
     if (location.origin === HOMEPAGE_URL) {
@@ -271,88 +281,4 @@ if (__TEST__) {
             id: null,
         }));
     };
-
-    // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-    if (__FIREFOX_MV2__) {
-        function expectPageStyles(data: any) {
-            const checkOne = (expectation: any) => {
-                const [selector, cssAttributeName, expectedValue] = expectation;
-                const selector_ = Array.isArray(selector) ? selector : [selector];
-                let element = document as any;
-                for (const part of selector_) {
-                    if (element instanceof HTMLIFrameElement) {
-                        element = element.contentDocument;
-                    }
-                    if (element.shadowRoot instanceof ShadowRoot) {
-                        element = element.shadowRoot;
-                    }
-                    if (part === 'document') {
-                        element = element.documentElement;
-                    } else {
-                        element = element.querySelector(part);
-                    }
-                    if (!element) {
-                        return `Could not find element ${part}`;
-                    }
-                }
-                const style = getComputedStyle(element);
-                if (style[cssAttributeName] !== expectedValue) {
-                    return `Got ${style[cssAttributeName]}`;
-                }
-            };
-
-            const errors: Array<[number, string]> = [];
-            const expectations = Array.isArray(data[0]) ? data : [data];
-            for (let i = 0; i < expectations.length; i++) {
-                const error = checkOne(expectations[i]);
-                if (error) {
-                    errors.push([i, error]);
-                }
-            }
-            return errors;
-        }
-
-        socket.onmessage = (e) => {
-            function respond(data: any) {
-                socket.send(JSON.stringify({id, data}));
-            }
-
-            const {id, data, type} = JSON.parse(e.data);
-            switch (type) {
-                case 'firefox-eval': {
-                    const result = eval(data);
-                    if (result instanceof Promise) {
-                        result.then(respond);
-                    } else {
-                        respond(result);
-                    }
-                    break;
-                }
-                case 'firefox-expectPageStyles': {
-                    // Styles may not have been applied to the document yet,
-                    // so we check once immediately and then on an interval.
-                    function checkPageStylesNow() {
-                        const errors = expectPageStyles(data);
-                        if (errors.length === 0) {
-                            respond([]);
-                            interval && clearInterval(interval);
-                        }
-                    }
-
-                    const interval: number = setInterval(checkPageStylesNow, 200);
-                    checkPageStylesNow();
-                    break;
-                }
-                case 'firefox-getColorScheme': {
-                    respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
-                    break;
-                }
-                case 'firefox-emulateColorScheme': {
-                    emulateColorScheme(data);
-                    respond(undefined);
-                    break;
-                }
-            }
-        };
-    }
 }

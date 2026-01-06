@@ -3,12 +3,11 @@ import {sync} from 'malevic/dom';
 
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
-import {isMobile, isFirefox} from '../../utils/platform';
+import {isMobile} from '../../utils/platform';
 import Connector from '../connect/connector';
 import {getFontList, saveFile} from '../utils';
 
 import Body from './components/body';
-import {fixNotClosingPopupOnNavigation} from './utils/issues';
 import {initAltUI, shouldUseAltUI} from '@plus/popup/plus-body';
 
 declare const __PLUS__: boolean;
@@ -66,11 +65,6 @@ async function start() {
 window.addEventListener('load', start);
 
 document.documentElement.classList.toggle('mobile', isMobile);
-document.documentElement.classList.toggle('firefox', isFirefox);
-
-if (isFirefox) {
-    fixNotClosingPopupOnNavigation();
-}
 
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {

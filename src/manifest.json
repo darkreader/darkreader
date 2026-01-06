@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "Dark Reader",
+    "name": "Dark Reader - Fabric",
     "version": "4.9.118",
     "author": "Alexander Shutau",
     "description": "__MSG_extension_description__",
@@ -25,7 +25,19 @@
     "content_scripts": [
         {
             "matches": [
-                "<all_urls>"
+                "https://*.fabric.microsoft.com/*",
+                "https://*.powerbi.com/*",
+                "https://*.pbidedicated.windows.net/*",
+                "https://*.pbidedicated.windows-int.net/*",
+                "https://*.analysis.windows.net/*",
+                "https://*.asazure.windows.net/*",
+                "https://*.trafficmanager.net/*",
+                "https://*.powerapps.com/*",
+                "https://gatewayadminportal.azure.com/*",
+                "https://gatewayadminportal-msit.azure.com/*",
+                "https://gatewayadminportal-prod.azure.com/*",
+                "https://gatewayadminportal-int.azure.com/*",
+                "https://gatewayadminportal-test.azure.com/*"
             ],
             "js": [
                 "inject/fallback.js",
@@ -41,7 +53,8 @@
         "fontSettings",
         "storage",
         "tabs",
-        "<all_urls>"
+        "https://*.fabric.microsoft.com/*",
+        "https://*.powerbi.com/*"
     ],
     "optional_permissions": [
         "contextMenus"

@@ -1,13 +1,11 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import type {MessageBGtoCS, MessageCStoBG, MessageUItoBG} from '../definitions';
 import {MessageTypeCStoBG, MessageTypeBGtoCS, MessageTypeUItoBG} from '../utils/message';
-import {isFirefox} from '../utils/platform';
 import {StateManager} from '../utils/state-manager';
 import {getActiveTab, queryTabs} from '../utils/tabs';
 import {getURLHostOrProtocol} from '../utils/url';
 import IconManager from './icon-manager';
 
-import {makeFirefoxHappy} from './make-firefox-happy';
 import {ASSERT, logInfo, logWarn} from './utils/log';
 import type {FileLoader} from './utils/network';
 import {createFileLoader} from './utils/network';
@@ -15,7 +13,6 @@ import {isPanel} from './utils/tab';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __THUNDERBIRD__: boolean;
 
 interface TabManagerOptions {
     getConnectionMessage: (tabURl: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) => Promise<MessageBGtoCS>;
@@ -73,9 +70,6 @@ export default class TabManager {
         TabManager.getTabMessage = getTabMessage;
 
         chrome.runtime.onMessage.addListener((message: MessageCStoBG | MessageUItoBG, sender, sendResponse): boolean => {
-            if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
-                return false;
-            }
             switch (message.type) {
                 case MessageTypeCStoBG.DOCUMENT_CONNECT: {
                     if (__CHROMIUM_MV3__ && isPanel(sender)) {
@@ -99,31 +93,18 @@ export default class TabManager {
                     if (isPanel(sender)) {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).
-                        if (isFirefox) {
-                            if (sender && sender.tab && typeof sender.tab.id === 'number') {
-                                chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab.id,
-                                    {
-                                        type: MessageTypeBGtoCS.UNSUPPORTED_SENDER,
-                                        scriptId: message.scriptId!,
-                                    },
-                                    {
-                                        frameId: sender && typeof sender.frameId === 'number' ? sender.frameId : undefined,
-                                    });
-                            }
-                        } else {
-                            sendResponse('unsupportedSender');
-                        }
+                        sendResponse('unsupportedSender');
                         return false;
                     }
 
                     const {frameId} = sender;
-                    const isTopFrame: boolean = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
+                    const isTopFrame: boolean = (frameId === 0 || message.data.isTopFrame);
                     const url = sender.url!;
                     const tabId = sender.tab!.id!;
                     const scriptId = message.scriptId!;
                     // Chromium 106+ may prerender frames resulting in top-level frames with chrome.runtime.MessageSender.tab.url
                     // set to chrome://newtab/ and positive chrome.runtime.MessageSender.frameId
-                    const tabURL = ((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && isTopFrame) ? url : sender.tab!.url!;
+                    const tabURL = isTopFrame ? url : sender.tab!.url!;
                     const documentId: string | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId || null);
 
                     TabManager.stateManager.loadState().then(() => {
@@ -161,7 +142,7 @@ export default class TabManager {
                     const frameId = sender.frameId!;
                     const url = sender.url!;
                     const documentId: string | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId! || null);
-                    const isTopFrame: boolean = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
+                    const isTopFrame: boolean = (frameId === 0 || message.data.isTopFrame);
                     TabManager.stateManager.loadState().then(() => {
                         if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                             const response = TabManager.getTabMessage(tabURL, url, isTopFrame);
@@ -208,7 +189,7 @@ export default class TabManager {
                 }
 
                 case MessageTypeCStoBG.FETCH: {
-                    // Using custom response due to Chrome and Firefox incompatibility
+                    // Using custom response due to Chrome incompatibility
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
                     // We do not need to use scriptId here since every request has a unique id already
@@ -216,14 +197,6 @@ export default class TabManager {
                         TabManager.sendDocumentMessage(sender.tab!.id!, sender.documentId!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, sender.frameId!);
                     };
 
-                    if (__THUNDERBIRD__) {
-                        // In thunderbird some CSS is loaded on a chrome:// URL.
-                        // Thunderbird restricted Add-ons to load those URL's.
-                        if ((message.data.url as string).startsWith('chrome://')) {
-                            sendResponse({data: null});
-                            return false;
-                        }
-                    }
                     const {url, responseType, mimeType, origin} = message.data;
                     if (!TabManager.fileLoader) {
                         TabManager.fileLoader = createFileLoader();
@@ -427,15 +400,6 @@ export default class TabManager {
                     });
                 }
             });
-    }
-
-    static async registerMailDisplayScript(): Promise<void> {
-        await (chrome as any).messageDisplayScripts.register({
-            js: [
-                {file: '/inject/fallback.js'},
-                {file: '/inject/index.js'},
-            ],
-        });
     }
 
     // sendMessage will send a tab messages to all active tabs and their frames.

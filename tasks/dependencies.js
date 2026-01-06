@@ -45,7 +45,7 @@ async function command(script) {
 }
 
 async function buildAll() {
-    await command('npm run build -- --release --api --chrome-mv2 --chrome-mv3 --firefox-mv2 --thunderbird');
+    await command('npm run build -- --release --api --chrome-mv2 --chrome-mv3');
 }
 
 async function patchPackage(outdated) {

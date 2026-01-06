@@ -2,7 +2,6 @@ import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {injectProxy} from '../../../src/inject/dynamic-theme/stylesheet-proxy';
-import {isFirefox} from '../../../src/utils/platform';
 import {stubChromeRuntimeGetURL} from '../support/background-stub';
 import {getJSEchoURL} from '../support/echo-client';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';
@@ -555,14 +554,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
-        if (isFirefox) {
-            expect(elementStyle.borderTopColor).toBe('rgb(179, 0, 0)');
-            expect(elementStyle.borderRightColor).toBe('rgb(179, 0, 0)');
-            expect(elementStyle.borderBottomColor).toBe('rgb(179, 0, 0)');
-            expect(elementStyle.borderLeftColor).toBe('rgb(179, 0, 0)');
-        } else {
-            expect(elementStyle.borderColor).toBe('rgb(179, 0, 0)');
-        }
+        expect(elementStyle.borderColor).toBe('rgb(179, 0, 0)');
     });
 
     it('should handle media variables', () => {
@@ -777,14 +769,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
-        if (isFirefox) {
-            expect(elementStyle.borderTopColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderRightColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
-        } else {
-            expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
-        }
+        expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
     });
 
     it('should handle variables with gradients', () => {
@@ -947,14 +932,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         const updatedStyle = getComputedStyle(container.querySelector('h1'));
         expect(updatedStyle.backgroundColor).toBe('rgb(0, 102, 0)');
         expect(updatedStyle.color).toBe('rgb(140, 255, 140)');
-        if (isFirefox) {
-            expect(updatedStyle.borderTopColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderRightColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
-        } else {
-            expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
-        }
+        expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
     });
 
     it('should handle variable type resolution when style changed', async () => {
@@ -1098,14 +1076,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         const elementStyle = getComputedStyle(container.querySelector('h1'));
         expect(elementStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(elementStyle.color).toBe('rgb(255, 255, 255)');
-        if (isFirefox) {
-            expect(elementStyle.borderTopColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderRightColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
-        } else {
-            expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
-        }
+        expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
 
         const anotherStyle = document.createElement('style');
         anotherStyle.textContent = multiline(
@@ -1119,14 +1090,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         const updatedStyle = getComputedStyle(container.querySelector('h1'));
         expect(updatedStyle.backgroundColor).toBe('rgb(204, 0, 0)');
         expect(updatedStyle.color).toBe('rgb(140, 255, 140)');
-        if (isFirefox) {
-            expect(updatedStyle.borderTopColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderRightColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
-        } else {
-            expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
-        }
+        expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
     });
 
     it('should not affect other declarations when dependency variable type resolved', async () => {
@@ -1146,14 +1110,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         const elementStyle = getComputedStyle(container.querySelector('h1'));
         expect(elementStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(elementStyle.color).toBe('rgb(255, 26, 26)');
-        if (isFirefox) {
-            expect(elementStyle.borderTopColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderRightColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
-            expect(elementStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
-        } else {
-            expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
-        }
+        expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
 
         const anotherStyle = document.createElement('style');
         anotherStyle.textContent = multiline(
@@ -1166,14 +1123,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         const updatedStyle = getComputedStyle(container.querySelector('h1'));
         expect(updatedStyle.backgroundColor).toBe('rgb(0, 102, 0)');
         expect(updatedStyle.color).toBe('rgb(255, 26, 26)');
-        if (isFirefox) {
-            expect(updatedStyle.borderTopColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderRightColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
-            expect(updatedStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
-        } else {
-            expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
-        }
+        expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
     });
 
     it('should add variables to root after the variable type is discovered', async () => {
@@ -1271,14 +1221,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         await timeout(0);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
 
-        if (isFirefox) {
-            expect(elementStyle.borderTopColor).toBe('rgb(91, 91, 91)');
-            expect(elementStyle.borderRightColor).toBe('rgb(91, 91, 91)');
-            expect(elementStyle.borderBottomColor).toBe('rgb(91, 91, 91)');
-            expect(elementStyle.borderLeftColor).toBe('rgb(91, 91, 91)');
-        } else {
-            expect(elementStyle.borderColor).toBe('rgb(91, 91, 91)');
-        }
+        expect(elementStyle.borderColor).toBe('rgb(91, 91, 91)');
     });
 
     it('should modify inline variable', () => {

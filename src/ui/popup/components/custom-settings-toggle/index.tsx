@@ -5,8 +5,6 @@ import {getLocalMessage} from '../../../../utils/locales';
 import {getURLHostOrProtocol, isURLInList} from '../../../../utils/url';
 import {Button} from '../../../controls';
 
-declare const __THUNDERBIRD__: boolean;
-
 export default function CustomSettingsToggle({data, actions}: ExtWrapper) {
     const tab = data.activeTab;
     const host = getURLHostOrProtocol(tab.url);
@@ -25,7 +23,7 @@ export default function CustomSettingsToggle({data, actions}: ExtWrapper) {
             class={{
                 'custom-settings-toggle': true,
                 'custom-settings-toggle--checked': isCustom,
-                'custom-settings-toggle--disabled': __THUNDERBIRD__ || tab.isProtected,
+                'custom-settings-toggle--disabled': tab.isProtected,
             }}
             onclick={(e) => {
                 if (isCustom) {

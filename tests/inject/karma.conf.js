@@ -55,10 +55,8 @@ export function configureKarma(config, env) {
                 rollupPluginReplace({
                     preventAssignment: true,
                     __DEBUG__: false,
-                    __FIREFOX_MV2__: false,
                     __CHROMIUM_MV2__: false,
                     __CHROMIUM_MV3__: false,
-                    __THUNDERBIRD__: false,
                     __PLUS__: false,
                     __PORT__: '-1',
                     __TEST__: true,

@@ -118,9 +118,6 @@ export function getConnectedBrowsers() {
         if (userAgent?.includes('Chrome') || userAgent?.includes('Chromium')) {
             browsers.add('chrome');
         }
-        if (userAgent?.includes('Firefox')) {
-            browsers.add('firefox');
-        }
     });
     return Array.from(browsers);
 }

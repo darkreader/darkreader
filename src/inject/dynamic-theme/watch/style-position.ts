@@ -96,16 +96,24 @@ export function watchForStylePositions(
 
         handleStyleOperations(root, {createdStyles, removedStyles, movedStyles});
 
+        const potentialHosts = new Set<Element>();
         additions.forEach((n) => {
-            const prevSibling = n.previousElementSibling;
-            if (prevSibling?.shadowRoot && !observedRoots.has(prevSibling)) {
-                // Some shadow roots could be created using templates
-                subscribeForShadowRootChanges(prevSibling);
-                deepObserve(prevSibling.shadowRoot);
+            if (n.parentElement) {
+                potentialHosts.add(n.parentElement);
+            }
+            if (n.previousElementSibling) {
+                potentialHosts.add(n.previousElementSibling);
             }
 
             deepObserve(n);
             collectUndefinedElements(n);
+        });
+        potentialHosts.forEach((el) => {
+            if (el.shadowRoot && !observedRoots.has(el)) {
+                // Some shadow roots could be created using templates
+                subscribeForShadowRootChanges(el);
+                deepObserve(el.shadowRoot);
+            }
         });
 
         // Firefox occasionally fails to reflect existence of a node in both CSS's view of the DOM (':not(:defined)'),

@@ -1,6 +1,6 @@
-import {push} from '../../../utils/array';
+import {forEach, push} from '../../../utils/array';
 import type {ElementsTreeOperations} from '../../utils/dom';
-import {iterateShadowHosts, createOptimizedTreeObserver} from '../../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, addDOMReadyListener} from '../../utils/dom';
 import {checkImageSelectors} from '../modify-css';
 import type {StyleElement} from '../style-manager';
 import {shouldManageStyle, getManageableStyles} from '../style-manager';
@@ -212,6 +212,16 @@ export function watchForStylePositions(
     });
     document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
+
+    addDOMReadyListener(() => {
+        // Some shadow roots could be created using templates
+        forEach(document.body.children, (el) => {
+            if (el.shadowRoot && !observedRoots.has(el)) {
+                subscribeForShadowRootChanges(el);
+                deepObserve(el.shadowRoot);
+            }
+        });
+    });
 }
 
 function resetObservers() {

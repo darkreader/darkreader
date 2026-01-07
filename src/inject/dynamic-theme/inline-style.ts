@@ -500,6 +500,9 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         let value = element.getAttribute('color')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
+        } else if (value.match(/^#?[0-9a-f]{4}$/i)) {
+            const hex = value.startsWith('#') ? value.substring(1) : value;
+            value = `#${hex}00`;
         }
         setCustomProp('color', 'color', value);
     }

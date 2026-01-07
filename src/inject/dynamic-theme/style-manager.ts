@@ -89,7 +89,12 @@ export function getManageableStyles(node: Node | null, results: StyleElement[] =
             (node as Element).querySelectorAll(STYLE_SELECTOR),
             (style: StyleElement) => getManageableStyles(style, results, false),
         );
-        if (deep) {
+        if (
+            deep && (
+                (node as Element).children?.length > 0 || 
+                (node as Element).shadowRoot
+            )
+        ) {
             iterateShadowHosts(node, (host) => getManageableStyles(host.shadowRoot, results, false));
         }
     }

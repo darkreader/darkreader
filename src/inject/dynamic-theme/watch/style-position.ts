@@ -97,6 +97,13 @@ export function watchForStylePositions(
         handleStyleOperations(root, {createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
+            const prevSibling = n.previousElementSibling;
+            if (prevSibling?.shadowRoot && !observedRoots.has(prevSibling)) {
+                // Some shadow roots could be created using templates
+                subscribeForShadowRootChanges(prevSibling);
+                deepObserve(prevSibling.shadowRoot);
+            }
+
             deepObserve(n);
             collectUndefinedElements(n);
         });

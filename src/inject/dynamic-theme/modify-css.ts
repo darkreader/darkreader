@@ -738,4 +738,5 @@ export function cleanModificationCache(): void {
     imageSelectorQueue.clear();
     classObserver?.disconnect();
     classObserver = null;
+    processedImageCount = 0;  // ADD THIS LINE
 }

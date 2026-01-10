@@ -298,6 +298,29 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails | null) => void>>();
 let didTryLoadCache = false;
+// Performance optimization: Limit image processing
+const MAX_IMAGES_TO_PROCESS = 50;
+let processedImageCount = 0;
+
+function shouldSkipImageProcessing(url: string): boolean {
+    // Reset counter periodically (every 5 seconds)
+    const now = Date.now();
+    if (!shouldSkipImageProcessing.lastReset || now - shouldSkipImageProcessing.lastReset > 5000) {
+        processedImageCount = 0;
+        shouldSkipImageProcessing.lastReset = now;
+    }
+    // Skip if we've hit the limit
+    if (processedImageCount >= MAX_IMAGES_TO_PROCESS) {
+        return true;
+    }
+    // Skip very large data URIs (> 10KB)
+    if (url.startsWith('data:') && url.length > 10000) {
+        return true;
+    }
+    
+    return false;
+}
+shouldSkipImageProcessing.lastReset = Date.now();
 
 function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     if (!selectorText || selectors.length === 0) {

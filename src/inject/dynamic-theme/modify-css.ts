@@ -478,6 +478,15 @@ export function getBgImageModifier(
                 if (isURLEmpty) {
                     return "url('')";
                 }
+            return async (theme: Theme): Promise<string | null> => {
+                // Performance: Skip if we've processed too many images
+                if (shouldSkipImageProcessing(url)) {
+                    return `url("${url}")`;
+                }
+                processedImageCount++;
+                if (isURLEmpty) {
+                    return "url('')";
+                }
 
                 let selector = rule.selectorText;
                 if (selector) {

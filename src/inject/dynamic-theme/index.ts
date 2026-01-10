@@ -258,9 +258,17 @@ function cleanFallbackStyle() {
 
 function createDynamicStyleOverrides() {
     cancelRendering();
+    
+    // Amazon performance: debounce rapid calls
+    const AMAZON_DOMAINS = ['amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es', 'amazon.ca', 'amazon.com.au', 'amazon.co.jp', 'amazon.in', 'amazon.com.br', 'amazon.com.mx'];
+    if (AMAZON_DOMAINS.some(d => location.hostname.includes(d))) {
+        if (createDynamicStyleOverrides.lastCall && Date.now() - createDynamicStyleOverrides.lastCall < 200) {
+            return; // Skip if called too frequently
+        }
+        createDynamicStyleOverrides.lastCall = Date.now();
+    }
 
     const allStyles = getManageableStyles(document);
-
     const newManagers = allStyles
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
@@ -331,6 +339,13 @@ function createDynamicStyleOverrides() {
             });
         };
 
+        document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange);
+        cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange));
+
+        document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
+    }
+}
+createDynamicStyleOverrides.lastCall = 0;
         document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange);
         cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange));
 

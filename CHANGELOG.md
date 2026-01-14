@@ -1,4 +1,4 @@
-# 4.9.119 (January 13, 2025)
+# 4.9.119 (January 14, 2026)
 
 - Optimized inline style changes.
 - Support Shadow DOM created from HTML templates.

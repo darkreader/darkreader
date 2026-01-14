@@ -1,3 +1,11 @@
+# 4.9.119 (January 13, 2025)
+
+- Optimized inline style changes.
+- Support Shadow DOM created from HTML templates.
+- Fixed Google Maps satellite view.
+- Fixed SVG icons with unset size or inherited colors.
+- Fixed font element color attribute values.
+
 # 4.9.118 (December 8, 2025)
 
 - Improved RGB colors support in CSS variables.

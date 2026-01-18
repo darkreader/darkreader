@@ -153,6 +153,16 @@ describe('IMAGE ANALYSIS', () => {
         expect(details.isLarge).toBe(false);
     });
 
+    it('should analyze viewbox-only, URI-encoded icon', async () => {
+        const details = await getImageDetails("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3e%3cpath fill='none' stroke-width='1.5' d='M1 1l6 6 6-6' stroke='%23545560'/%3e%3c/svg%3e");
+        expect(details.width).toBe(14);
+        expect(details.height).toBe(9);
+        expect(details.isDark).toBe(true);
+        expect(details.isLight).toBe(false);
+        expect(details.isTransparent).toBe(true);
+        expect(details.isLarge).toBe(false);
+    });
+
     it('should not analyze large image', async () => {
         const details = await getImageDetails(svgToDataURL(images.largeDarkImage));
         expect(details.width).toBe(1024);

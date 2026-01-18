@@ -39,20 +39,24 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                     if (encoding === 'base64') {
                         svgText = atob(svgText);
                     }
-                    if (svgText.startsWith('<svg ')) {
-                        const closingIndex = svgText.indexOf('>');
-                        const svgOpening = svgText.slice(0, closingIndex + 1).toLocaleLowerCase();
-                        if (svgOpening.includes('viewbox') && !svgOpening.includes('width') && !svgOpening.includes('height')) {
+                    else {
+                        svgText = decodeURIComponent(svgText);
+                    }
+                    const svgOpeningMatch = svgText.match(/^<svg( .*?)?>/);
+                    if (svgOpeningMatch) {
+                        const svgOpening = svgOpeningMatch[0];
+                        if (svgOpening.toLowerCase().includes('viewbox') && !svgOpening.includes('width') && !svgOpening.includes('height')) {
                             useViewBox = true;
 
                             // Explicitly set size due to unexpected drawImage() behavior
-                            const viewboxIndex = svgOpening.indexOf('viewbox="');
-                            const viewboxCloseIndex = svgOpening.indexOf('viewbox="', viewboxIndex + 9);
-                            const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex - 1).split(' ').map((x) => parseFloat(x));
-                            if (viewBox.length === 4 && !viewBox.some((x) => isNaN(x))) {
-                                const width = viewBox[2] - viewBox[0];
-                                const height = viewBox[3] - viewBox[1];
-                                dataURL = `data:image/svg+xml;base64,${btoa(`<svg width="${width}" height="${height}" ${svgText.slice(5)}`)}`;
+                            const viewboxMatch = svgOpening.match(/\bviewbox=('|")(.+)('|")/i);
+                            if (viewboxMatch) {
+                                const viewBox = viewboxMatch[2].split(' ').map((x) => parseFloat(x));
+                                if (viewBox.length === 4 && !viewBox.some((x) => isNaN(x))) {
+                                    const width = viewBox[2] - viewBox[0];
+                                    const height = viewBox[3] - viewBox[1];
+                                    dataURL = `data:image/svg+xml;base64,${btoa(`<svg width="${width}" height="${height}" ${svgText.slice(5)}`)}`;
+                                }
                             }
                         }
                     }

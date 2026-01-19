@@ -38,6 +38,8 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                     const encoding = dataURL.slice(0, commaIndex).split(';')[1];
                     if (encoding === 'base64') {
                         svgText = atob(svgText);
+                    } else if (svgText.startsWith('%3c')) {
+                        svgText = decodeURIComponent(svgText);
                     }
                     if (svgText.startsWith('<svg ')) {
                         const closingIndex = svgText.indexOf('>');

@@ -88,6 +88,8 @@ export function getModifiableCSSDeclaration(
         modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
     } else if (property.includes('shadow')) {
         modifier = getShadowModifier(value);
+    } else if (property === 'background-clip' && value !== 'initial') {
+        modifier = value;
     }
 
     if (!modifier) {

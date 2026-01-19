@@ -51,7 +51,7 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                             const viewboxIndex = svgOpening.indexOf('viewbox=');
                             const quote = svgOpening[viewboxIndex + 8];
                             const viewboxCloseIndex = svgOpening.indexOf(quote, viewboxIndex + 9);
-                            const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex - 1).split(' ').map((x) => parseFloat(x));
+                            const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex).split(' ').map((x) => parseFloat(x));
                             if (viewBox.length === 4 && !viewBox.some((x) => isNaN(x))) {
                                 const width = viewBox[2] - viewBox[0];
                                 const height = viewBox[3] - viewBox[1];

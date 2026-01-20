@@ -38,17 +38,20 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                     const encoding = dataURL.slice(0, commaIndex).split(';')[1];
                     if (encoding === 'base64') {
                         svgText = atob(svgText);
+                    } else if (svgText.startsWith('%3c')) {
+                        svgText = decodeURIComponent(svgText);
                     }
                     if (svgText.startsWith('<svg ')) {
                         const closingIndex = svgText.indexOf('>');
                         const svgOpening = svgText.slice(0, closingIndex + 1).toLocaleLowerCase();
-                        if (svgOpening.includes('viewbox') && !svgOpening.includes('width') && !svgOpening.includes('height')) {
+                        if (svgOpening.includes('viewbox=') && !svgOpening.includes('width=') && !svgOpening.includes('height=')) {
                             useViewBox = true;
 
                             // Explicitly set size due to unexpected drawImage() behavior
-                            const viewboxIndex = svgOpening.indexOf('viewbox="');
-                            const viewboxCloseIndex = svgOpening.indexOf('viewbox="', viewboxIndex + 9);
-                            const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex - 1).split(' ').map((x) => parseFloat(x));
+                            const viewboxIndex = svgOpening.indexOf('viewbox=');
+                            const quote = svgOpening[viewboxIndex + 8];
+                            const viewboxCloseIndex = svgOpening.indexOf(quote, viewboxIndex + 9);
+                            const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex).split(' ').map((x) => parseFloat(x));
                             if (viewBox.length === 4 && !viewBox.some((x) => isNaN(x))) {
                                 const width = viewBox[2] - viewBox[0];
                                 const height = viewBox[3] - viewBox[1];

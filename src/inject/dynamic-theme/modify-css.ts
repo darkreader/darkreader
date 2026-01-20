@@ -34,6 +34,7 @@ export interface ModifiableCSSDeclaration {
     value: string | CSSValueModifier | CSSVariableModifier;
     important: boolean;
     sourceValue: string;
+    specifics?: ModifiableCSSDeclaration[];
 }
 
 export interface ModifiableCSSRule {
@@ -55,6 +56,7 @@ export function getModifiableCSSDeclaration(
     isCancelled: (() => boolean) | null,
 ): ModifiableCSSDeclaration | null {
     let modifier: ModifiableCSSDeclaration['value'] | null = null;
+    let specifics: ModifiableCSSDeclaration[] | null = null;
     if (property.startsWith('--')) {
         modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
     } else if (value.includes('var(')) {
@@ -86,15 +88,31 @@ export function getModifiableCSSDeclaration(
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
+        ['background-position', 'background-repeat', 'background-size'].forEach((specProp) => {
+            const specVal = rule.style.getPropertyValue(specProp);
+            if (specProp && specVal !== 'initial') {
+                if (!specifics) {
+                    specifics = [];
+                }
+                const specPrior = getPriority(rule.style, specProp);
+                specifics.push({property: specProp, value: specVal, important: specPrior, sourceValue: specVal});
+            }
+        });
     } else if (property.includes('shadow')) {
         modifier = getShadowModifier(value);
+    } else if (property === 'background-clip' && value !== 'initial') {
+        modifier = value;
     }
 
     if (!modifier) {
         return null;
     }
 
-    return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+    const modDec: ModifiableCSSDeclaration = {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+    if (specifics) {
+        modDec.specifics = specifics;
+    }
+    return modDec;
 }
 
 function joinSelectors(...selectors: string[]) {

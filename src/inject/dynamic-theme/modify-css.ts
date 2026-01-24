@@ -1,5 +1,5 @@
 import type {Theme} from '../../definitions';
-import {parseColorWithCache, rgbToHSL, hslToString} from '../../utils/color';
+import {parseColorWithCache, rgbToHSL, hslToString, RGBA} from '../../utils/color';
 import type {ParsedGradient} from '../../utils/css-text/parse-gradient';
 import {parseGradient} from '../../utils/css-text/parse-gradient';
 import {clamp} from '../../utils/math';
@@ -34,6 +34,7 @@ export interface ModifiableCSSDeclaration {
     value: string | CSSValueModifier | CSSVariableModifier;
     important: boolean;
     sourceValue: string;
+    specifics?: ModifiableCSSDeclaration[];
 }
 
 export interface ModifiableCSSRule {
@@ -55,6 +56,7 @@ export function getModifiableCSSDeclaration(
     isCancelled: (() => boolean) | null,
 ): ModifiableCSSDeclaration | null {
     let modifier: ModifiableCSSDeclaration['value'] | null = null;
+    let specifics: ModifiableCSSDeclaration[] | null = null;
     if (property.startsWith('--')) {
         modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
     } else if (value.includes('var(')) {
@@ -86,15 +88,31 @@ export function getModifiableCSSDeclaration(
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
+        ['background-position', 'background-repeat', 'background-size'].forEach((specProp) => {
+            const specVal = rule.style.getPropertyValue(specProp);
+            if (specProp && specVal !== 'initial') {
+                if (!specifics) {
+                    specifics = [];
+                }
+                const specPrior = getPriority(rule.style, specProp);
+                specifics.push({property: specProp, value: specVal, important: specPrior, sourceValue: specVal});
+            }
+        });
     } else if (property.includes('shadow')) {
         modifier = getShadowModifier(value);
+    } else if (property === 'background-clip' && value !== 'initial') {
+        modifier = value;
     }
 
     if (!modifier) {
         return null;
     }
 
-    return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+    const modDec: ModifiableCSSDeclaration = {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+    if (specifics) {
+        modDec.specifics = specifics;
+    }
+    return modDec;
 }
 
 function joinSelectors(...selectors: string[]) {
@@ -261,10 +279,18 @@ const unparsableColors = new Set([
 ]);
 
 function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier | null {
-    if (unparsableColors.has(value.toLowerCase())) {
+    if (
+        unparsableColors.has(value.toLowerCase()) &&
+        !(prop === 'color' && value === 'initial')
+    ) {
         return value;
     }
-    const rgb = parseColorWithCache(value);
+    let rgb: RGBA | null = null;
+    if (prop === 'color' && value === 'initial') {
+        rgb = {r: 0, g: 0, b: 0, a: 1};
+    } else {
+        rgb = parseColorWithCache(value);
+    }
     if (!rgb) {
         logWarn("Couldn't parse color", value);
         return null;
@@ -486,7 +512,12 @@ export function getBgImageModifier(
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
                             imageDetailsCache.set(url, imageDetails);
-                            writeImageDetailsCache(url, imageDetails);
+                            if (!url.startsWith('data:')) {
+                                const parsedURL = new URL(url);
+                                if (parsedURL.origin === location.origin) {
+                                    writeImageDetailsCache(url, imageDetails);
+                                }
+                            }
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);
                         }
@@ -653,7 +684,7 @@ export function getScrollbarColorModifier(value: string): string | CSSValueModif
         return null;
     }
 
-    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(thumb, theme)}`;
+    return (theme) => `${modifyForegroundColor(thumb, theme)} ${modifyBackgroundColor(track, theme)}`;
 }
 
 export function getColorSchemeModifier(): CSSValueModifier {

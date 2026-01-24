@@ -1,6 +1,6 @@
-import {push} from '../../../utils/array';
+import {forEach, push} from '../../../utils/array';
 import type {ElementsTreeOperations} from '../../utils/dom';
-import {iterateShadowHosts, createOptimizedTreeObserver} from '../../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, addDOMReadyListener} from '../../utils/dom';
 import {checkImageSelectors} from '../modify-css';
 import type {StyleElement} from '../style-manager';
 import {shouldManageStyle, getManageableStyles} from '../style-manager';
@@ -96,9 +96,24 @@ export function watchForStylePositions(
 
         handleStyleOperations(root, {createdStyles, removedStyles, movedStyles});
 
+        const potentialHosts = new Set<Element>();
         additions.forEach((n) => {
+            if (n.parentElement) {
+                potentialHosts.add(n.parentElement);
+            }
+            if (n.previousElementSibling) {
+                potentialHosts.add(n.previousElementSibling);
+            }
+
             deepObserve(n);
             collectUndefinedElements(n);
+        });
+        potentialHosts.forEach((el) => {
+            if (el.shadowRoot && !observedRoots.has(el)) {
+                // Some shadow roots could be created using templates
+                subscribeForShadowRootChanges(el);
+                deepObserve(el.shadowRoot);
+            }
         });
 
         // Firefox occasionally fails to reflect existence of a node in both CSS's view of the DOM (':not(:defined)'),
@@ -212,6 +227,16 @@ export function watchForStylePositions(
     });
     document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
+
+    addDOMReadyListener(() => {
+        // Some shadow roots could be created using templates
+        forEach(document.body.children, (el) => {
+            if (el.shadowRoot && !observedRoots.has(el)) {
+                subscribeForShadowRootChanges(el);
+                deepObserve(el.shadowRoot);
+            }
+        });
+    });
 }
 
 function resetObservers() {

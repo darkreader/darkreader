@@ -18,6 +18,7 @@ export default tslint.config({
     ignores: [
         'build/**',
         'darkreader.js',
+        'darkreader.mjs',
         'node_modules/**',
         'tests/coverage/**',
         '**/compatibility.js',
@@ -124,7 +125,7 @@ export default tslint.config({
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
-        '@stylistic/func-call-spacing': ['error', 'never'],
+        '@stylistic/function-call-spacing': ['error', 'never'],
         '@stylistic/keyword-spacing': ['error', {
             after: true,
             before: true,
@@ -136,11 +137,11 @@ export default tslint.config({
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-redeclare': 'error',
         '@typescript-eslint/no-unused-expressions': 'off',
-        '@typescript-eslint/no-unused-vars': ['error', {caughtErrors: 'none'}],
+        '@typescript-eslint/no-unused-vars': ['error', {caughtErrors: 'none', argsIgnorePattern: '^_'}],
         '@stylistic/semi': ['error', 'always'],
 
         '@stylistic/quotes': ['error', 'single', {
-            allowTemplateLiterals: true,
+            allowTemplateLiterals: 'always',
             avoidEscape: true,
         }],
 
@@ -205,6 +206,7 @@ export default tslint.config({
 }, {
     files: [
         '**/darkreader.js',
+        '**/darkreader.mjs',
     ],
     extends: [
         eslintPluginCompat.config['flat/recommended'],

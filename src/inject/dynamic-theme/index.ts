@@ -15,6 +15,7 @@ import {logInfo, logWarn} from '../utils/log';
 import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {combineFixes, findRelevantFix} from './fixes';
+import {getStyleInjectionMode, injectStyleAway, removeStyleContainer} from './injection';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from './modify-colors';
@@ -41,14 +42,25 @@ let isIFrame: boolean | null = null;
 let ignoredImageAnalysisSelectors: string[] = [];
 let ignoredInlineSelectors: string[] = [];
 
+let staticStyleMap = new WeakMap<ParentNode, Map<string, HTMLStyleElement>>();
+
 function createOrUpdateStyle(className: string, root: ParentNode = document.head || document): HTMLStyleElement {
     let element: HTMLStyleElement | null = root.querySelector(`.${className}`);
-    if (!element) {
+    if (!staticStyleMap.has(root)) {
+        staticStyleMap.set(root, new Map());
+    }
+    const classMap = staticStyleMap.get(root)!;
+    if (element) {
+        classMap.set(className, element);
+    } else if (classMap.has(className)) {
+        element = classMap.get(className)!;
+    } else {
         element = document.createElement('style');
         element.classList.add('darkreader');
         element.classList.add(className);
         element.media = 'screen';
         element.textContent = '';
+        classMap.set(className, element);
     }
     return element;
 }
@@ -68,9 +80,9 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
 
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
-function setupNodePositionWatcher(node: Node, alias: string) {
+function setupNodePositionWatcher(node: Node, alias: string, callback?: () => void) {
     nodePositionWatchers.has(alias) && nodePositionWatchers.get(alias)!.stop();
-    nodePositionWatchers.set(alias, watchForNodePosition(node, 'head'));
+    nodePositionWatchers.set(alias, watchForNodePosition(node, 'head', callback));
 }
 
 function stopStylePositionWatchers() {
@@ -78,16 +90,24 @@ function stopStylePositionWatchers() {
     nodePositionWatchers.clear();
 }
 
+function injectStaticStyle(style: HTMLStyleElement, prevNode: Node | null, watchAlias: string, callback?: () => void) {
+    const mode = getStyleInjectionMode();
+    if (mode === 'next') {
+        document.head.insertBefore(style, prevNode ? prevNode.nextSibling : document.head.firstChild);
+        setupNodePositionWatcher(style, watchAlias, callback);
+    } else if (mode === 'away') {
+        injectStyleAway(style);
+    }
+}
+
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
     fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: true});
-    document.head.insertBefore(fallbackStyle, document.head.firstChild);
-    setupNodePositionWatcher(fallbackStyle, 'fallback');
+    injectStaticStyle(fallbackStyle, null, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     userAgentStyle.textContent = getModifiedUserAgentStyle(theme!, isIFrame!, theme!.styleSystemControls);
-    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
-    setupNodePositionWatcher(userAgentStyle, 'user-agent');
+    injectStaticStyle(userAgentStyle, fallbackStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     if (theme!.useFont || theme!.textStroke > 0) {
@@ -95,8 +115,7 @@ function createStaticStyleOverrides() {
     } else {
         textStyle.textContent = '';
     }
-    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
-    setupNodePositionWatcher(textStyle, 'text');
+    injectStaticStyle(textStyle, userAgentStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
@@ -111,18 +130,11 @@ function createStaticStyleOverrides() {
     } else {
         invertStyle.textContent = '';
     }
-    document.head.insertBefore(invertStyle, textStyle.nextSibling);
-    setupNodePositionWatcher(invertStyle, 'invert');
+    injectStaticStyle(invertStyle, textStyle, 'invert');
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     inlineStyle.textContent = getInlineOverrideStyle();
-    document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
-    setupNodePositionWatcher(inlineStyle, 'inline');
-
-    const overrideStyle = createOrUpdateStyle('darkreader--override');
-    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
-    document.head.appendChild(overrideStyle);
-    setupNodePositionWatcher(overrideStyle, 'override');
+    injectStaticStyle(inlineStyle, invertStyle, 'inline');
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
     const selectionColors = theme?.selectionColor ? getSelectionColor(theme) : null;
@@ -136,12 +148,11 @@ function createStaticStyleOverrides() {
         `   --darkreader-selection-text: ${selectionColors?.foregroundColorSelection ?? 'initial'};`,
         `}`,
     ].join('\n');
-    document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
-    setupNodePositionWatcher(variableStyle, 'variables');
+    injectStaticStyle(variableStyle, inlineStyle, 'variables', () => registerVariablesSheet(variableStyle.sheet!));
     registerVariablesSheet(variableStyle.sheet!);
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-    document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
+    injectStaticStyle(rootVarsStyle, variableStyle, 'root-vars');
 
     const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
     const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
@@ -155,6 +166,10 @@ function createStaticStyleOverrides() {
         document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
         proxyScript.remove();
     }
+
+    const overrideStyle = createOrUpdateStyle('darkreader--override');
+    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    injectStaticStyle(overrideStyle, document.head.lastChild, 'override');
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
@@ -231,7 +246,11 @@ function replaceCSSTemplates($cssText: string) {
 }
 
 function cleanFallbackStyle() {
-    const fallback = document.querySelector('.darkreader--fallback');
+    const fallback = (
+        staticStyleMap.get(document.head)?.get('darkreader--fallback') ||
+        staticStyleMap.get(document)?.get('darkreader--fallback') ||
+        document.querySelector('.darkreader--fallback')
+    );
     if (fallback) {
         fallback.textContent = '';
     }
@@ -330,7 +349,7 @@ function createManager(element: StyleElement) {
             loadingStyles.add(loadingStyleId);
             logInfo(`Current amount of styles loading: ${loadingStyles.size}`);
 
-            const fallbackStyle = document.querySelector('.darkreader--fallback')!;
+            const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             if (!fallbackStyle.textContent) {
                 fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: false});
             }
@@ -506,6 +525,7 @@ function stopWatchingForUpdates() {
 }
 
 let metaObserver: MutationObserver;
+let headObserver: MutationObserver | null = null;
 
 function addMetaListener() {
     metaObserver = new MutationObserver(() => {
@@ -716,11 +736,16 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
             fallbackStyle.textContent = getModifiedFallbackStyle(theme, {strict: true});
         }
 
-        const headObserver = new MutationObserver(() => {
+        headObserver?.disconnect();
+        headObserver = new MutationObserver(() => {
             if (document.head) {
-                headObserver.disconnect();
+                headObserver?.disconnect();
                 ready();
             }
+        });
+        cleaners.push(() => {
+            headObserver?.disconnect();
+            headObserver = null;
         });
         headObserver.observe(document, {childList: true, subtree: true});
     }
@@ -755,6 +780,7 @@ export function removeDynamicTheme(): void {
 
         restoreMetaThemeColor();
         selectors.forEach((selector) => removeNode(document.head.querySelector(selector)));
+        staticStyleMap = new WeakMap();
         removeProxy();
     }
     shadowRootsWithOverrides.forEach((root) => {
@@ -766,6 +792,7 @@ export function removeDynamicTheme(): void {
     loadingStyles.clear();
     cleanLoadingLinks();
     forEach(document.querySelectorAll('.darkreader'), removeNode);
+    removeStyleContainer();
 
     adoptedStyleManagers.forEach((manager) => manager.destroy());
     adoptedStyleManagers.splice(0);

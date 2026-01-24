@@ -71,8 +71,8 @@ describe('State manager utility', () => {
             fromStorage: 'fromDefault',
         }, {get, set}, noop, noop);
 
-        expect(getMock).not.toBeCalled();
-        expect(setMock).not.toBeCalled();
+        expect(getMock).not.toHaveBeenCalled();
+        expect(setMock).not.toHaveBeenCalled();
         expect(parent).toEqual({
             noSync: true,
             fromParent: 'fromParent',
@@ -80,8 +80,8 @@ describe('State manager utility', () => {
         });
 
         await stateManager.loadState();
-        expect(getMock).toBeCalled();
-        expect(setMock).not.toBeCalled();
+        expect(getMock).toHaveBeenCalled();
+        expect(setMock).not.toHaveBeenCalled();
         expect(parent).toEqual({
             noSync: true,
             fromParent: 'fromDefault',
@@ -90,7 +90,7 @@ describe('State manager utility', () => {
 
         parent.other = 'another';
         await stateManager.saveState();
-        expect(setMock).toBeCalled();
+        expect(setMock).toHaveBeenCalled();
         expect(storage[key]).toEqual({
             fromParent: 'fromDefault',
             fromStorage: 'fromDefault',
@@ -125,7 +125,7 @@ describe('State manager utility', () => {
             data: 'fromStorage',
         }, {get, set: setMock}, noop, noop);
 
-        expect(setMock).not.toBeCalled();
+        expect(setMock).not.toHaveBeenCalled();
         expect(parent).toEqual({
             noSync: true,
             data: 'fromParent',
@@ -152,7 +152,7 @@ describe('State manager utility', () => {
         await nextTick();
         promises.all('resolved');
         expect(getCount).toEqual(1);
-        expect(setMock).not.toBeCalled();
+        expect(setMock).not.toHaveBeenCalled();
     });
 
     test('State manager handles multiple concurrent saveState() calls', async () => {
@@ -572,7 +572,7 @@ describe('State manager utility', () => {
         expect(setCount).toEqual(0);
         promises.all('pending');
 
-        expect(c1).not.toBeCalled();
+        expect(c1).not.toHaveBeenCalled();
 
         modifyInternalState({
             data: 'fromStorageChange',
@@ -581,7 +581,7 @@ describe('State manager utility', () => {
         resolveGet();
 
         await nextTick();
-        expect(c1).toBeCalled();
+        expect(c1).toHaveBeenCalled();
         expect(parent).toEqual({
             data: 'fromStorageChange',
         });
@@ -628,12 +628,12 @@ describe('State manager utility', () => {
         expect(setCount).toEqual(1);
         promises2.all('pending');
 
-        expect(c2).not.toBeCalled();
+        expect(c2).not.toHaveBeenCalled();
 
         resolveGet();
 
         await nextTick();
-        expect(c2).toBeCalled();
+        expect(c2).toHaveBeenCalled();
         expect(parent).toEqual({
             data: 'new',
         });

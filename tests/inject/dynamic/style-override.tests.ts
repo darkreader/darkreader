@@ -42,9 +42,9 @@ describe('STYLE ELEMENTS', () => {
 
         expect(override.cssRules.length).toBe(2);
         expect((override.cssRules[0] as CSSStyleRule).selectorText).toBe('body');
-        expect((override.cssRules[0] as CSSStyleRule).style.getPropertyValue('background-color')).toBe('rgb(0, 0, 0)');
+        expect((override.cssRules[0] as CSSStyleRule).style.getPropertyValue('background-color')).toBe('var(--darkreader-background-ffffff, #000000)');
         expect((override.cssRules[1] as CSSStyleRule).selectorText).toBe('h1');
-        expect((override.cssRules[1] as CSSStyleRule).style.getPropertyValue('color')).toBe('rgb(255, 255, 255)');
+        expect((override.cssRules[1] as CSSStyleRule).style.getPropertyValue('color')).toBe('var(--darkreader-text-000000, #ffffff)');
     });
 
     it('should override User Agent style', async () => {
@@ -179,7 +179,7 @@ describe('STYLE ELEMENTS', () => {
         style.sheet.insertRule('strong { color: red }');
         style.sheet.insertRule('body { background-color: pink }');
         await timeout(0);
-        expect((style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText).toBe('body { background-color: rgb(50, 0, 9); }');
+        expect((style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText).toBe('body { background-color: var(--darkreader-background-ffc0cb, #320009); }');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(141, 141, 141)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(50, 0, 9)');

@@ -151,14 +151,30 @@ const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
 
+const supportedColorFuncs = [
+    'color',
+    'color-mix',
+    'hwb',
+    'lab',
+    'lch',
+    'oklab',
+    'oklch',
+];
+
 export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
-    if ($color.includes('(from ')) {
+    if (c.includes('(from ')) {
+        if (c.indexOf('(from') !== c.lastIndexOf('(from')) {
+            return null;
+        }
         return domParseColor(c);
     }
 
     if (c.match(rgbMatch)) {
         if (c.startsWith('rgb(#') || c.startsWith('rgba(#')) {
+            if (c.lastIndexOf('rgb') > 0) {
+                return null;
+            }
             return domParseColor(c);
         }
         return parseRGB(c);
@@ -180,11 +196,16 @@ export function parse($color: string): RGBA | null {
         return getSystemColor(c);
     }
 
-    if ($color === 'transparent') {
+    if (c === 'transparent') {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    if ((c.startsWith('color(') || c.startsWith('color-mix(')) && c.endsWith(')')) {
+    if (
+        c.endsWith(')') &&
+        supportedColorFuncs.some(
+            (fn) => c.startsWith(fn) && c[fn.length] === '(' && c.lastIndexOf(fn) === 0
+        )
+    ) {
         return domParseColor(c);
     }
 

@@ -8,6 +8,9 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
     forEach(rules, (rule) => {
         if (isStyleRule(rule)) {
             iterate(rule);
+            if (rule.cssRules?.length > 0) {
+                iterateCSSRules(rule.cssRules, iterate);
+            }
         } else if (isImportRule(rule)) {
             try {
                 iterateCSSRules(rule.styleSheet!.cssRules, iterate, onImportError);
@@ -18,9 +21,9 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
         } else if (isMediaRule(rule)) {
             const media = Array.from(rule.media);
             const isScreenOrAllOrQuery = media.some((m) => m.startsWith('screen') || m.startsWith('all') || m.startsWith('('));
-            const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
+            const isNotScreen = !isScreenOrAllOrQuery && media.some((m) => ignoredMedia.some((i) => m.startsWith(i)));
 
-            if (isScreenOrAllOrQuery || !isPrintOrSpeech) {
+            if (isScreenOrAllOrQuery || !isNotScreen) {
                 iterateCSSRules(rule.cssRules, iterate, onImportError);
             }
         } else if (isSupportsRule(rule)) {
@@ -34,6 +37,18 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
         }
     });
 }
+
+export const ignoredMedia = [
+    'aural',
+    'braille',
+    'embossed',
+    'handheld',
+    'print',
+    'projection',
+    'speech',
+    'tty',
+    'tv',
+];
 
 // These properties are not iterable
 // when they depend on variables
@@ -55,17 +70,6 @@ const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.ma
 }) : null;
 
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void): void {
-    forEach(style, (property) => {
-        const value = style.getPropertyValue(property).trim();
-        if (!value) {
-            return;
-        }
-        iterate(property, value);
-    });
-
-    // Bigger sites like gmail.com and google.com will love this optimization.
-    // As a side-effect, styles with a lot of `var(` will notice a maximum slowdown of ~50ms.
-    // Against the bigger sites that saves around ~150ms+ it's a good win.
     const cssText = style.cssText;
     if (cssText.includes('var(')) {
         if (isSafari) {
@@ -87,12 +91,25 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
     }
 
-    if (cssText.includes('background-color: ;') && !style.getPropertyValue('background')) {
+    if (
+        (
+            cssText.includes('background-color: ;') ||
+            cssText.includes('background-image: ;')
+        ) && !style.getPropertyValue('background')
+    ) {
         handleEmptyShorthand('background', style, iterate);
     }
     if (cssText.includes('border-') && cssText.includes('-color: ;') && !style.getPropertyValue('border')) {
         handleEmptyShorthand('border', style, iterate);
     }
+
+    forEach(style, (property) => {
+        const value = style.getPropertyValue(property).trim();
+        if (!value) {
+            return;
+        }
+        iterate(property, value);
+    });
 }
 
 // `rule.cssText` fails when the rule has both
@@ -116,6 +133,7 @@ function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, ite
             }
         } else if (shorthand === 'background') {
             iterate('background-color', '#ffffff');
+            iterate('background-image', 'none');
         }
     }
 }

@@ -15,6 +15,8 @@ export enum MessageTypeUItoBG {
     RESET_DEV_INVERSION_FIXES = 'ui-bg-reset-dev-inversion-fixes',
     APPLY_DEV_STATIC_THEMES = 'ui-bg-apply-dev-static-themes',
     RESET_DEV_STATIC_THEMES = 'ui-bg-reset-dev-static-themes',
+    START_ACTIVATION = 'ui-bg-start-activation',
+    RESET_ACTIVATION = 'ui-bg-reset-activation',
     COLOR_SCHEME_CHANGE = 'ui-bg-color-scheme-change',
     HIDE_HIGHLIGHTS = 'ui-bg-hide-highlights'
 }

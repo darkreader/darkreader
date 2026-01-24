@@ -21,7 +21,7 @@ import {MobileLinks, MobileLinksButton} from './news/mobile-links';
 import SiteListSettings from './site-list-settings';
 
 
-import {PlusBody} from '@plus/popup/plus-body';
+import {PlusBody, activate} from '@plus/popup/plus-body';
 
 declare const __THUNDERBIRD__: boolean;
 declare const __PLUS__: boolean;
@@ -159,21 +159,65 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
     }
 
     const filterTab = <FilterSettings data={props.data} actions={props.actions}>
-        <div class="birthday-container">
-            <i class="birthday-icon">🎉</i>
-            <span class="birthday-message">
-                {birthdayMessageSpec}
-            </span>
-            <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
-            </a>
-        </div>
+        {__PLUS__ ? (
+            props.data.uiHighlights.includes('anniversary') ? (
+                <div class="ui-upgrade">
+                    <i class="ui-upgrade__icon">
+                    </i>
+                    <span class="ui-upgrade__message">
+                        Support the development and get access to the latest features
+                    </span>
+                    <a class="ui-upgrade__button" href={`${HOMEPAGE_URL}/plus/`} target="_blank" rel="noopener noreferrer">
+                        <span class="ui-upgrade__button__text">
+                            Upgrade
+                        </span>
+                    </a>
+                </div>
+            ) : (
+                <div class="ui-upgrade">
+                    <i class="ui-upgrade__icon">
+                    </i>
+                    <span class="ui-upgrade__message">
+                        Activate the latest features
+                    </span>
+                    <a class="ui-upgrade__button" target="_blank" rel="noopener noreferrer" onclick={() => {
+                        chrome.storage.local.get<Record<string, any>>({activationEmail: '', activationKey: ''}, async ({activationEmail, activationKey}) => {
+                            const result = await activate(activationEmail, activationKey);
+                            if (result) {
+                                context.refresh();
+                            } else {
+                                props.actions.changeSettings({previewNewestDesign: true});
+                            }
+                        });
+                    }}>
+                        <span class="ui-upgrade__button__text">
+                            Enable new design
+                        </span>
+                    </a>
+                </div>
+            )
+        ) : props.data.uiHighlights.includes('anniversary') ? (
+            <div class="birthday-container">
+                <i class="birthday-icon">🎉</i>
+                <span class="birthday-message">
+                    {birthdayMessageSpec}
+                </span>
+                <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                    <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
+                </a>
+            </div>
+        ) : null}
     </FilterSettings>;
 
     const moreTab = <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />;
 
     return (
-        <body class={{'ext-disabled': !props.data.isEnabled}}>
+        <body
+            class={{
+                'ext-disabled': !props.data.isEnabled,
+                'ext-tall': __PLUS__ || props.data.uiHighlights.includes('anniversary'),
+            }}
+        >
             <Loader complete />
 
             <Header

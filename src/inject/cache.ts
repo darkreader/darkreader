@@ -26,7 +26,7 @@ export function writeEnabledForHost(value: boolean): void {
     }
 }
 
-let imageCacheTimeout: number = 0;
+let imageCacheTimeout: any = 0;
 const imageDetailsCacheQueue = new Map<string, ImageDetails>();
 const cachedImageUrls: string[] = [];
 

@@ -201,7 +201,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         });
     }
 
-    async function checkBlobURLSupport(): Promise<void> {
+    let blobURLAllowed: boolean | null = null;
+
+    function checkBlobURLSupport() {
+        if (blobURLAllowed != null) {
+            document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
+            return;
+        }
+
         const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>';
         const bytes = new Uint8Array(svg.length);
         for (let i = 0; i < svg.length; i++) {
@@ -209,22 +216,23 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         }
         const blob = new Blob([bytes], {type: 'image/svg+xml'});
         const objectURL = URL.createObjectURL(blob);
-        let blobURLAllowed: boolean;
-        try {
-            const image = new Image();
-            await new Promise<void>((resolve, reject) => {
-                image.onload = () => resolve();
-                image.onerror = () => reject();
-                image.src = objectURL;
-            });
+        const image = new Image();
+        image.onload = () => {
             blobURLAllowed = true;
-        } catch (err) {
+            sendBlobURLCheckResponse();
+        };
+        image.onerror = () => {
             blobURLAllowed = false;
-        }
+            sendBlobURLCheckResponse();
+        };
+        image.src = objectURL;
+    }
+
+    function sendBlobURLCheckResponse() {
         document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckResponse', {detail: {blobURLAllowed}}));
     }
 
-    documentEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport, {once: true});
+    documentEventListener('__darkreader__blobURLCheckRequest', checkBlobURLSupport);
 
     if (enableStyleSheetsProxy) {
         overrideProperty(Document, 'styleSheets', {
@@ -549,7 +557,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 }
             });
 
-            const nodes = sourceSheetNodes.get(sheet) ?? [];
+            const nodes = sourceSheetNodes.get(sheet) ?? new Set();
             nodes.forEach((node) => putOverride(node, override));
             relevantOverrides.add(override);
 

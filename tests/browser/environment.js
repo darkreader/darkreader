@@ -1,10 +1,9 @@
 import {TestEnvironment} from 'jest-environment-node';
 import {launch, connect} from 'puppeteer-core';
-import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
 
 import {generateHTMLCoverageReports} from './coverage.js';
-import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, chromeMV3ExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
+import {getChromePath, getFirefoxPath, chromeMV3ExtensionDebugDir, chromePlusExtensionDebugDir, firefoxExtensionDebugDir, getEdgePath} from './paths.js';
 import {createTestServer, generateRandomId} from './server.js';
 
 const TEST_SERVER_PORT = 8891;
@@ -66,10 +65,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
      */
     async launchBrowser() {
         let browser;
-        if (this.global.product === 'chrome') {
-            browser = await this.launchChrome({manifestVersion: 2});
+        if (this.global.product === 'edge') {
+            browser = await this.launchEdge();
         } else if (this.global.product === 'chrome-mv3') {
-            browser = await this.launchChrome({manifestVersion: 3});
+            browser = await this.launchChrome();
         } else if (this.global.product === 'firefox') {
             browser = await this.launchFirefox();
         }
@@ -79,11 +78,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
     }
 
     /**
-     * @param {{manifestVersion: number}} options
      * @returns {Promise<Browser>}
      */
-    async launchChrome({manifestVersion}) {
-        const extensionDir = manifestVersion === 3 ? chromeMV3ExtensionDebugDir : chromeExtensionDebugDir;
+    async launchChrome() {
+        const extensionDir = chromeMV3ExtensionDebugDir;
         let executablePath;
         try {
             executablePath = await getChromePath();
@@ -93,13 +91,35 @@ export default class CustomJestEnvironment extends TestEnvironment {
         // Explanation of these options:
         // https://pptr.dev/guides/chrome-extensions
         return await launch({
-            executablePath,
-            headless: false,
             args: [
-                `--disable-extensions-except=${extensionDir}`,
-                `--load-extension=${extensionDir}`,
                 '--show-component-extension-options',
             ],
+            enableExtensions: [extensionDir],
+            executablePath,
+            headless: false,
+            pipe: true,
+        });
+    }
+
+    /**
+     * @returns {Promise<Browser>}
+     */
+    async launchEdge() {
+        const extensionDir = chromePlusExtensionDebugDir;
+        let executablePath;
+        try {
+            executablePath = await getEdgePath();
+        } catch (e) {
+            console.error(e);
+        }
+        return await launch({
+            args: [
+                '--show-component-extension-options',
+            ],
+            enableExtensions: [extensionDir],
+            executablePath,
+            headless: false,
+            pipe: true,
         });
     }
 
@@ -129,6 +149,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
         // We need to manually launch Firefox via cmd.run() to install extension
         // because Firefox does not support installing via CLI arguments
         const firefox = await getFirefoxPath();
+        const {cmd} = await import('web-ext');
         await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
             firefox,
@@ -308,7 +329,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 return;
             }
             await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
-            if (global.product === 'chrome') {
+            if (global.product === 'edge') {
                 const page = await this.getChromiumMV2BackgroundPage();
                 await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
             }

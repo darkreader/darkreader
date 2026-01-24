@@ -1,3 +1,4 @@
+import {ThemeEngine} from '../generators/theme-engines';
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import type {UserSettings} from '../definitions';
 import {debounce} from '../utils/debounce';
@@ -78,6 +79,17 @@ export default class UserStorage {
         return settings;
     }
 
+    private static migrateBuiltInSVGFilterToCSSFilter(settings: UserSettings): void {
+        settings?.customThemes?.forEach((c) => {
+            if (
+                c?.theme?.engine === ThemeEngine.svgFilter &&
+                (c.builtIn || c.url?.includes('docs.google.com'))
+            ) {
+                c.theme.engine = ThemeEngine.cssFilter;
+            }
+        });
+    }
+
     private static async loadSettingsFromStorage(): Promise<UserSettings> {
         if (UserStorage.loadBarrier) {
             return await UserStorage.loadBarrier.entry();
@@ -115,6 +127,7 @@ export default class UserStorage {
         }
         if (!local.syncSettings) {
             UserStorage.migrateAutomationSettings(local);
+            UserStorage.migrateBuiltInSVGFilterToCSSFilter(local);
             UserStorage.fillDefaults(local);
             UserStorage.loadBarrier.resolve(local);
             return local;
@@ -134,6 +147,7 @@ export default class UserStorage {
         syncCfgErrors.forEach((err) => logWarn(err));
 
         UserStorage.migrateAutomationSettings($sync);
+        UserStorage.migrateBuiltInSVGFilterToCSSFilter($sync);
         UserStorage.fillDefaults($sync);
 
         UserStorage.loadBarrier.resolve($sync);

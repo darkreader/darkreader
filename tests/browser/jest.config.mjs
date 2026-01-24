@@ -19,7 +19,7 @@ const config = {
         __FIREFOX_MV2__: false,
         __THUNDERBIRD__: false,
         __TEST__: true,
-        product: 'chrome',
+        product: 'edge',
     },
     setupFilesAfterEnv: ['jest-extended/all'],
     collectCoverage: false,

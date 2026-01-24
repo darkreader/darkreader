@@ -9,6 +9,9 @@ import {getFontList, saveFile} from '../utils';
 
 import Body from './components/body';
 import {fixNotClosingPopupOnNavigation} from './utils/issues';
+import {initAltUI, shouldUseAltUI} from '@plus/popup/plus-body';
+
+declare const __PLUS__: boolean;
 
 function renderBody(data: ExtensionData, fonts: string[], installation: {date: number; version: string}, actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
@@ -33,7 +36,7 @@ function renderBody(data: ExtensionData, fonts: string[], installation: {date: n
 
 async function getInstallationData() {
     return new Promise<any>((resolve) => {
-        chrome.storage.local.get({installation: {}}, (data) => {
+        chrome.storage.local.get<Record<string, any>>({installation: {}}, (data) => {
             if (data?.installation?.version) {
                 resolve(data.installation);
             } else {
@@ -44,8 +47,12 @@ async function getInstallationData() {
 }
 
 async function start() {
+    if (__PLUS__ && shouldUseAltUI()) {
+        return await initAltUI();
+    }
+
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
+    window.addEventListener('unload', () => connector.disconnect());
 
     const [data, fonts, installation] = await Promise.all([
         connector.getData(),
@@ -56,7 +63,7 @@ async function start() {
     connector.subscribeToChanges((data) => renderBody(data, fonts, installation, connector));
 }
 
-addEventListener('load', start, {passive: true});
+window.addEventListener('load', start);
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);

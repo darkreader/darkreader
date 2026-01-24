@@ -11,6 +11,7 @@ const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
     'MATCH': 'match',
     'NO DARK THEME': 'noDarkTheme',
     'SYSTEM THEME': 'systemTheme',
+    'IFRAME': 'iframe',
 };
 
 const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {

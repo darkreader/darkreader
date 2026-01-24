@@ -23,6 +23,8 @@ export default class IconManager {
             19: '../icons/dr_active_light_19.png',
             38: '../icons/dr_active_light_38.png',
         },
+        // Temporary disable the gray icon
+        /*
         inactiveDark: {
             19: '../icons/dr_inactive_dark_19.png',
             38: '../icons/dr_inactive_dark_38.png',
@@ -31,6 +33,7 @@ export default class IconManager {
             19: '../icons/dr_inactive_light_19.png',
             38: '../icons/dr_inactive_light_38.png',
         },
+        */
     };
 
     private static readonly iconState: IconState = {
@@ -62,10 +65,16 @@ export default class IconManager {
         }
     }
 
-
     static setIcon({isActive = this.iconState.active, colorScheme = 'dark', tabId}: IconOptions): void {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
+            return;
+        }
+        // Temporary disable per-site icons
+        // eslint-disable-next-line no-empty
+        if (colorScheme === 'dark') {
+        }
+        if (tabId) {
             return;
         }
 
@@ -73,17 +82,26 @@ export default class IconManager {
 
         let path = this.ICON_PATHS.activeDark;
         if (isActive) {
-            path = colorScheme === 'dark' ? IconManager.ICON_PATHS.activeDark : IconManager.ICON_PATHS.activeLight;
+            // Temporary disable the gray icon
+            // path = colorScheme === 'dark' ? IconManager.ICON_PATHS.activeDark : IconManager.ICON_PATHS.activeLight;
+            path = IconManager.ICON_PATHS.activeDark;
         } else {
-            path = colorScheme === 'dark' ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
+            // Temporary disable the gray icon
+            // path = colorScheme === 'dark' ? IconManager.ICON_PATHS.inactiveDark : IconManager.ICON_PATHS.inactiveLight;
+            path = IconManager.ICON_PATHS.activeLight;
         }
 
+        // Temporary disable per-site icons
+        /*
         if (tabId) {
             chrome.browserAction.setIcon({tabId, path});
         } else {
             chrome.browserAction.setIcon({path});
             IconManager.handleUpdate();
         }
+        */
+        chrome.browserAction.setIcon({path});
+        IconManager.handleUpdate();
     }
 
     static showBadge(text: string): void {

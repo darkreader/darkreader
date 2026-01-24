@@ -1,3 +1,115 @@
+# 4.9.119 (January 14, 2026)
+
+- Optimized inline style changes.
+- Support Shadow DOM created from HTML templates.
+- Fixed Google Maps satellite view.
+- Fixed SVG icons with unset size or inherited colors.
+- Fixed font element color attribute values.
+
+# 4.9.118 (December 8, 2025)
+
+- Improved RGB colors support in CSS variables.
+- Extended cross-origin request limitations.
+
+# 4.9.117 (December 3, 2025)
+
+- Improved dark theme detection.
+- Optimized SVG image analysis.
+- CSS variables support improvements.
+- Applied cross-origin request limitations.
+
+# 4.9.116 (November 22, 2025)
+
+- Improved dark theme detection.
+- Prevent high CPU usage due to inline style conflicts.
+- Fixed error messages in Firefox.
+- Fixed eBay buttons.
+
+# 4.9.115 (November 14, 2025)
+
+- Fixed eBay issue (transparent color for unresolved variables).
+- Improved dark theme detection.
+
+# 4.9.114 (November 12, 2025)
+
+- Fixed compatibility with Chrome 144.
+- Fixed handling CSS for deprecated media.
+- Fixed breaking on ::picker selector.
+
+# 4.9.113 (November 4, 2025)
+
+- Fixed processing unresolved nested CSS variables fallbacks.
+- Fixed handling same CSS rules inside different @layer rules.
+- Fixed mobile user interface in Edge.
+- Fixed Firefox build in different timezones.
+
+# 4.9.112 (October 15, 2025)
+
+- Fixed handling fallback values of undefined CSS variables.
+- Fixed error when Dark Reader styles were removed.
+- Simplified mobile user interface for Edge.
+- One-click activation for new UI in Edge.
+
+# 4.9.110 (July 16, 2025)
+
+- Fixed breaking certain websites (Bloomberg).
+- Fixed Google Maps inversion.
+
+# 4.9.109 (July 7, 2025)
+
+- Fixed API bundle error.
+
+# 4.9.108 (July 3, 2025)
+
+- Fixed crash when parsing invalid complex colors (Linkedin issue).
+- Fixed breaking when CSS @import can't be loaded.
+- Fixed compatibility with certain extensions.
+- Fixed processing background with variables defined later.
+- Detect dark theme in certain iframes.
+- Ability to hide payment messages.
+
+# 4.9.106 (May 6, 2025)
+
+- Google Docs: use Filter mode instead of Filter+ by default.
+- Added support for nested CSS rules.
+- Fixed duplicate CSS files requests.
+- Fixed ShadowDOM static style injection.
+- Fixed style injection causing freeze for certain websites.
+- Fixed handling "initial" CSS color value.
+
+# 4.9.105 (February 25, 2025)
+
+- API: Fixed breaking ES5 builds.
+
+# 4.9.104 (February 19, 2025)
+
+- API: ES Module bundle.
+
+# 4.9.103 (February 17, 2025)
+
+- Added support for more color spaces (Tailwind 4 issues).
+- Support variables in shorthand border properties of inline styles.
+- Fixed colors after style overrides were removed (Pinterest issue).
+- Fixed dark theme detection in background tabs.
+- Fixed numeric color variables.
+- Fixed same-origin CSS loading optimization.
+
+# 4.9.102 (February 10, 2025)
+
+- MV3: Fixed background cache performance.
+
+# 4.9.101 (February 7, 2025)
+
+- Fixed processing stylesheets with multiple CSS imports.
+
+# 4.9.100 (January 29, 2025)
+
+- Improved performace of checking available background images.
+- Optimized image analysis caching.
+- Fixed processing style sheets with incorrect imports.
+- Fixed image analysis when extension is re-enabled.
+- Fixed theme update optimization.
+
 # 4.9.99 (December 13, 2024)
 
 - Firefox: Fixed console error.

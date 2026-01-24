@@ -1,4 +1,4 @@
-export type matrix5x5 = [
+export type Matrix5x5 = [
     [number, number, number, number, number],
     [number, number, number, number, number],
     [number, number, number, number, number],
@@ -6,7 +6,7 @@ export type matrix5x5 = [
     [number, number, number, number, number]
 ];
 
-export type matrix5x1 = [
+export type Matrix5x1 = [
     [number],
     [number],
     [number],
@@ -14,7 +14,7 @@ export type matrix5x1 = [
     [number]
 ];
 
-export type matrix = matrix5x5 | matrix5x1;
+export type Matrix = Matrix5x5 | Matrix5x1;
 
 export function scale(x: number, inLow: number, inHigh: number, outLow: number, outHigh: number): number {
     return (x - inLow) * (outHigh - outLow) / (inHigh - inLow) + outLow;
@@ -25,7 +25,7 @@ export function clamp(x: number, min: number, max: number): number {
 }
 
 // Note: the caller is responsible for ensuring that matrix dimensions make sense
-export function multiplyMatrices<M extends matrix>(m1: matrix5x5, m2: matrix5x5 | matrix5x1): M {
+export function multiplyMatrices<M extends Matrix>(m1: Matrix5x5, m2: Matrix5x5 | Matrix5x1): M {
     const result: number[][] = [];
     for (let i = 0, len = m1.length; i < len; i++) {
         result[i] = [];

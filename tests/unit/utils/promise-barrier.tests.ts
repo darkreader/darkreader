@@ -12,8 +12,8 @@ describe('Promise barrier utility', () => {
             const result = await barrier.entry();
             fn2(result);
         })();
-        expect(fn1).toBeCalled();
-        expect(fn2).not.toBeCalled();
+        expect(fn1).toHaveBeenCalled();
+        expect(fn2).not.toHaveBeenCalled();
 
         expect(barrier.isPending()).toBe(true);
         expect(barrier.isFulfilled()).toBe(false);
@@ -22,8 +22,8 @@ describe('Promise barrier utility', () => {
         expect(barrier.isFulfilled()).toBe(true);
         expect(barrier.isPending()).toBe(false);
         expect(barrier.isRejected()).toBe(false);
-        expect(fn1).toBeCalledTimes(1);
-        expect(fn2).toBeCalledWith(2);
+        expect(fn1).toHaveBeenCalledTimes(1);
+        expect(fn2).toHaveBeenCalledWith(2);
     });
 
     test('awaiting for barrier after it was settled', async () => {
@@ -38,7 +38,7 @@ describe('Promise barrier utility', () => {
         const fn1 = jest.fn();
         await (async () => fn1(await barrierFulfilled.entry()))();
         await promise1;
-        expect(fn1).toBeCalledWith('Hello World!');
+        expect(fn1).toHaveBeenCalledWith('Hello World!');
 
         const barrierRejected = new PromiseBarrier();
         const promise2 = barrierRejected.reject('rejection reason');
@@ -51,7 +51,7 @@ describe('Promise barrier utility', () => {
             }
         })();
         await promise2;
-        expect(fn2).toBeCalledWith('rejection reason');
+        expect(fn2).toHaveBeenCalledWith('rejection reason');
     });
 
     test('resolving multiple times', async () => {
@@ -71,7 +71,7 @@ describe('Promise barrier utility', () => {
         const fn1 = jest.fn();
         await (async () => fn1(await barrierFulfilled.entry()))();
 
-        expect(fn1).toBeCalledWith('Hello World!');
+        expect(fn1).toHaveBeenCalledWith('Hello World!');
     });
 
     test('rejecting multiple times', async () => {
@@ -94,6 +94,6 @@ describe('Promise barrier utility', () => {
             }
         })();
 
-        expect(fn2).toBeCalledWith('rejection reason');
+        expect(fn2).toHaveBeenCalledWith('rejection reason');
     });
 });

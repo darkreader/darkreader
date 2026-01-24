@@ -57,6 +57,27 @@ export async function getChromePath() {
 /**
  * @returns {Promise<string>}
  */
+export async function getEdgePath() {
+    if (process.platform === 'darwin') {
+        return '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
+    }
+    if (process.platform === 'win32') {
+        return winProgramFiles('Microsoft\\Edge\\Application\\msedge.exe');
+    }
+    const possibleLinuxPaths = ['microsoft-edge', 'microsoft-edge-stable'];
+    for (const possiblePath of possibleLinuxPaths) {
+        try {
+            return await linuxAppPath(possiblePath);
+        } catch (e) {
+            // ignore
+        }
+    }
+    throw new Error('Could not find Edge');
+}
+
+/**
+ * @returns {Promise<string>}
+ */
 export async function getFirefoxPath() {
     if (process.platform === 'darwin') {
         return '/Applications/Firefox Nightly.app/Contents/MacOS/firefox';
@@ -91,5 +112,6 @@ export async function getFirefoxPath() {
 }
 
 export const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
+export const chromePlusExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome-plus');
 export const chromeMV3ExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome-mv3');
 export const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');

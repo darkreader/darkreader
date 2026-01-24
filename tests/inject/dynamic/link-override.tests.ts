@@ -156,10 +156,10 @@ describe('LINK STYLES', () => {
         createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(50);
-        expect(selectTestStyleLink().nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(true);
+        expect(selectTestStyleLink().nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
         link.disabled = true;
         await timeout(0);
-        expect(selectTestStyleLink().nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(false);
+        expect(selectTestStyleLink().nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
     });
     it("Shouldn't wait on link that won't be loaded", async () => {
         const link = createStyleLink(null);

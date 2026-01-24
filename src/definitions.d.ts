@@ -44,6 +44,8 @@ export interface ExtensionActions {
     resetDevInversionFixes(): void;
     applyDevStaticThemes(text: string): Promise<void>;
     resetDevStaticThemes(): void;
+    startActivation(email: string, key: string): void;
+    resetActivation(): void;
     hideHighlights(ids: string[]): void;
 }
 
@@ -218,6 +220,7 @@ export interface DetectorHint {
     match: string[];
     noDarkTheme: boolean;
     systemTheme: boolean;
+    iframe: boolean;
 }
 
 export interface StaticTheme {

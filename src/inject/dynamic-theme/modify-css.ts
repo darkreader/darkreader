@@ -34,7 +34,6 @@ export interface ModifiableCSSDeclaration {
     value: string | CSSValueModifier | CSSVariableModifier;
     important: boolean;
     sourceValue: string;
-    specifics?: ModifiableCSSDeclaration[];
 }
 
 export interface ModifiableCSSRule {
@@ -63,7 +62,6 @@ export function getModifiableCSSDeclaration(
     isCancelled: (() => boolean) | null,
 ): ModifiableCSSDeclaration | null {
     let modifier: ModifiableCSSDeclaration['value'] | null = null;
-    let specifics: ModifiableCSSDeclaration[] | null = null;
     if (property.startsWith('--')) {
         modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
     } else if (value.includes('var(')) {
@@ -105,11 +103,7 @@ export function getModifiableCSSDeclaration(
         return null;
     }
 
-    const modDec: ModifiableCSSDeclaration = {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
-    if (specifics) {
-        modDec.specifics = specifics;
-    }
-    return modDec;
+    return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
 }
 
 function joinSelectors(...selectors: string[]) {

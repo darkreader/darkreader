@@ -47,6 +47,13 @@ function getPriority(ruleStyle: CSSStyleDeclaration, property: string) {
     return Boolean(ruleStyle && ruleStyle.getPropertyPriority(property));
 }
 
+const bgPropsToCopy = [
+    'background-clip',
+    'background-position',
+    'background-repeat',
+    'background-size',
+];
+
 export function getModifiableCSSDeclaration(
     property: string,
     value: string,
@@ -88,19 +95,9 @@ export function getModifiableCSSDeclaration(
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
-        ['background-position', 'background-repeat', 'background-size'].forEach((specProp) => {
-            const specVal = rule.style.getPropertyValue(specProp);
-            if (specProp && specVal !== 'initial') {
-                if (!specifics) {
-                    specifics = [];
-                }
-                const specPrior = getPriority(rule.style, specProp);
-                specifics.push({property: specProp, value: specVal, important: specPrior, sourceValue: specVal});
-            }
-        });
     } else if (property.includes('shadow')) {
         modifier = getShadowModifier(value);
-    } else if (property === 'background-clip' && value !== 'initial') {
+    } else if (bgPropsToCopy.includes(property) && value !== 'initial') {
         modifier = value;
     }
 

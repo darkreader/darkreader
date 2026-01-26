@@ -121,6 +121,26 @@ IGNORE IMAGE ANALYSIS
 .logo
 ```
 
+### URL
+
+The fix starts with the domain name, like `example.com`. The `www` part should be ommited.
+
+If the fix affects a particular sub domain, this exact subdomain should be defined like `sub.domain.com`.
+
+Some websites have different top level domains depending on location. A `*` can be used like `example.*`.
+
+If the same fix applies to a website (or similar websites) that can have multiple domain names or sub-domains,
+they can be listed on each line, starting with the most popular one:
+```
+example.com
+sub.example.com
+example.mirror.com
+```
+
+The use of `*` wildcard is discouraged, it can only be used as the last resort.
+
+For 
+
 | Rule | Description | Notes / Examples |
 |---|---|---|
 | **INVERT** | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |

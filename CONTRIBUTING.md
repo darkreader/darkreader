@@ -128,21 +128,6 @@ IGNORE IMAGE ANALYSIS
 | **IGNORE&nbsp;INLINE&nbsp;STYLE** | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
 | **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |  |
 
-## Adding a new color scheme
-
-If you can add a new _popular_ or _unique_ but usable predefined color scheme to Dark Reader, you can add it to the `src/config/color-schemes.drconf` file. Please use the following steps to add a new color scheme:
-
-- Open **[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/main/src/config/color-schemes.drconf) file**.
-- Click **Edit** (login to GitHub first).
-- **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- GitHub actions will run tests to make sure it has the right code style.
-- If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- A Dark Reader developer will **review** and merge your changes, making them available.
-
 ## Dynamic variables
 
 When making a fix for background or text colors, instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`), please use CSS variables that are generated based on the user settings:

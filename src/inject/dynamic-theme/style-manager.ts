@@ -38,6 +38,38 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
+let ignoredStylesheetURLPatterns: string[] = [];
+
+export function setIgnoredStylesheetURLs(patterns: string[]): void {
+    ignoredStylesheetURLPatterns = patterns || [];
+}
+
+// shouldIgnoreStylesheetURL checks if a stylesheet URL matches any ignored pattern
+function shouldIgnoreStylesheetURL(url: string): boolean {
+    if (!url || ignoredStylesheetURLPatterns.length === 0) {
+        return false;
+    }
+    for (const pattern of ignoredStylesheetURLPatterns) {
+        if (pattern.startsWith('^')) {
+            // Prefix match
+            if (url.startsWith(pattern.slice(1))) {
+                return true;
+            }
+        } else if (pattern.endsWith('$')) {
+            // Suffix match
+            if (url.endsWith(pattern.slice(0, -1))) {
+                return true;
+            }
+        } else {
+            // Contains match
+            if (url.includes(pattern)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // isFontsGoogleApiStyle returns is the given link element is a style from
 // google fonts.
 function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
@@ -72,7 +104,8 @@ export function shouldManageStyle(element: Node | null): boolean {
                 Boolean(element.href) &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
-                !isFontsGoogleApiStyle(element)
+                !isFontsGoogleApiStyle(element) &&
+                !shouldIgnoreStylesheetURL(element.href)
             )
         ) &&
         !element.classList.contains('darkreader') &&

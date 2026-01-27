@@ -68,22 +68,6 @@ function shouldIgnoreCSSURL(url: string): boolean {
     return false;
 }
 
-// isFontsGoogleApiStyle returns is the given link element is a style from
-// google fonts.
-function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
-    if (!element.href) {
-        return false;
-    }
-
-    try {
-        const elementURL = new URL(element.href);
-        return elementURL.hostname === 'fonts.googleapis.com';
-    } catch (err) {
-        logInfo(`Couldn't construct ${element.href} as URL`);
-        return false;
-    }
-}
-
 const hostsBreakingOnSVGStyleOverride = [
     'account.containerstore.com',
     'containerstore.com',
@@ -102,7 +86,6 @@ export function shouldManageStyle(element: Node | null): boolean {
                 Boolean(element.href) &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
-                !isFontsGoogleApiStyle(element) &&
                 !shouldIgnoreCSSURL(element.href)
             )
         ) &&

@@ -38,18 +38,18 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
-let ignoredStylesheetURLPatterns: string[] = [];
+let ignoredCSSURLPatterns: string[] = [];
 
-export function setIgnoredStylesheetURLs(patterns: string[]): void {
-    ignoredStylesheetURLPatterns = patterns || [];
+export function setIgnoredCSSURLs(patterns: string[]): void {
+    ignoredCSSURLPatterns = patterns || [];
 }
 
-// shouldIgnoreStylesheetURL checks if a stylesheet URL matches any ignored pattern
-function shouldIgnoreStylesheetURL(url: string): boolean {
-    if (!url || ignoredStylesheetURLPatterns.length === 0) {
+// shouldIgnoreCSSURL checks if a stylesheet URL matches any ignored pattern
+function shouldIgnoreCSSURL(url: string): boolean {
+    if (!url || ignoredCSSURLPatterns.length === 0) {
         return false;
     }
-    for (const pattern of ignoredStylesheetURLPatterns) {
+    for (const pattern of ignoredCSSURLPatterns) {
         if (pattern.startsWith('^')) {
             // Prefix match
             if (url.startsWith(pattern.slice(1))) {
@@ -60,11 +60,9 @@ function shouldIgnoreStylesheetURL(url: string): boolean {
             if (url.endsWith(pattern.slice(0, -1))) {
                 return true;
             }
-        } else {
+        } else if (url.includes(pattern)) {
             // Contains match
-            if (url.includes(pattern)) {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -105,7 +103,7 @@ export function shouldManageStyle(element: Node | null): boolean {
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
                 !isFontsGoogleApiStyle(element) &&
-                !shouldIgnoreStylesheetURL(element.href)
+                !shouldIgnoreCSSURL(element.href)
             )
         ) &&
         !element.classList.contains('darkreader') &&

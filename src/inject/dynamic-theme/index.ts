@@ -22,7 +22,7 @@ import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '.
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
 import {clearColorPalette, getColorPalette, registerVariablesSheet, releaseVariablesSheet} from './palette';
 import type {StyleElement, StyleManager} from './style-manager';
-import {manageStyle, getManageableStyles, cleanLoadingLinks, setIgnoredStylesheetURLs} from './style-manager';
+import {manageStyle, getManageableStyles, cleanLoadingLinks, setIgnoredCSSURLs} from './style-manager';
 import {injectProxy} from './stylesheet-proxy';
 import {variablesStore} from './variables';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
@@ -690,11 +690,11 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
-        setIgnoredStylesheetURLs(Array.isArray(fixes.ignoreCSSUrl) ? fixes.ignoreCSSUrl : []);
+        setIgnoredCSSURLs(Array.isArray(fixes.ignoreCSSUrl) ? fixes.ignoreCSSUrl : []);
     } else {
         ignoredImageAnalysisSelectors = [];
         ignoredInlineSelectors = [];
-        setIgnoredStylesheetURLs([]);
+        setIgnoredCSSURLs([]);
     }
 
     if (theme.immediateModify) {

@@ -164,7 +164,7 @@ declare namespace DarkReader {
          * - Prefix with ^: matches if URL starts with pattern (e.g., "^https://client.crisp")
          * - Suffix with $: matches if URL ends with pattern (e.g., ".css$")
          */
-        ignoreStylesheetURLs: string[];
+        ignoreCSSUrl: string[];
     }
 }
 

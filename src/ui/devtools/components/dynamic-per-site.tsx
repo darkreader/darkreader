@@ -66,7 +66,7 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
             css: '',
             ignoreImageAnalysis: [],
             ignoreInlineStyle: [],
-            ignoreStylesheetURLs: [],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         };

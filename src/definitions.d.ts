@@ -202,7 +202,7 @@ export interface DynamicThemeFix {
     css: string;
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
-    ignoreStylesheetURLs: string[];
+    ignoreCSSUrl: string[];
     disableStyleSheetsProxy: boolean;
     disableCustomElementRegistryProxy: boolean;
 }

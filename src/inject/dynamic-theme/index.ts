@@ -690,7 +690,7 @@ export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicTh
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
-        setIgnoredStylesheetURLs(Array.isArray(fixes.ignoreStylesheetURLs) ? fixes.ignoreStylesheetURLs : []);
+        setIgnoredStylesheetURLs(Array.isArray(fixes.ignoreCSSUrl) ? fixes.ignoreCSSUrl : []);
     } else {
         ignoredImageAnalysisSelectors = [];
         ignoredInlineSelectors = [];

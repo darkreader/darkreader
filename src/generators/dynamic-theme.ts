@@ -15,6 +15,7 @@ const dynamicThemeFixesCommands: { [key: string]: keyof DynamicThemeFix } = {
     'CSS': 'css',
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',
     'IGNORE IMAGE ANALYSIS': 'ignoreImageAnalysis',
+    'IGNORE CSS URL': 'ignoreCSSUrl',
 };
 
 export function parseDynamicThemeFixes(text: string): DynamicThemeFix[] {

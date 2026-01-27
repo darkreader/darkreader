@@ -110,9 +110,6 @@ export function createStyleSheetModifier(): StyleSheetModifier {
                 const mod = getModifiableCSSDeclaration(property, value, rule, variablesStore, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
-                    if (mod.specifics) {
-                        mod.specifics.forEach((ext) => modDecs.push(ext));
-                    }
                 }
             });
 

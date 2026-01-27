@@ -121,27 +121,32 @@ IGNORE IMAGE ANALYSIS
 .logo
 ```
 
+### URL
+
+The fix starts with the domain name, like `example.com`. The `www` part should be ommited.
+
+If the fix affects a particular sub domain, this exact subdomain should be defined like `sub.domain.com`.
+
+Some websites have different top level domains depending on location. A `*` can be used like `example.*`.
+
+If the same fix applies to a website (or similar websites) that can have multiple domain names or sub-domains,
+they can be listed on each line, starting with the most popular one:
+```
+example.com
+sub.example.com
+example.mirror.com
+```
+
+The use of `*` wildcard is discouraged, it can only be used as the last resort.
+
+For 
+
 | Rule | Description | Notes / Examples |
 |---|---|---|
 | **INVERT** | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
 | **CSS** | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
 | **IGNORE&nbsp;INLINE&nbsp;STYLE** | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
 | **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |  |
-
-## Adding a new color scheme
-
-If you can add a new _popular_ or _unique_ but usable predefined color scheme to Dark Reader, you can add it to the `src/config/color-schemes.drconf` file. Please use the following steps to add a new color scheme:
-
-- Open **[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/main/src/config/color-schemes.drconf) file**.
-- Click **Edit** (login to GitHub first).
-- **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- GitHub actions will run tests to make sure it has the right code style.
-- If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- A Dark Reader developer will **review** and merge your changes, making them available.
 
 ## Dynamic variables
 

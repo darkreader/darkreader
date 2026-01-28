@@ -277,14 +277,15 @@ const createRegExp = cachedFactory((pattern: string) => {
     }
 }, REGEXP_CACHE_SIZE);
 
+const wikiPDFPathRegexp = /^\/.*\/[a-z]+\:[^\:\/]+\.pdf/i;
+
 export function isPDF(url: string): boolean {
     try {
         const {hostname, pathname} = new URL(url);
         if (pathname.includes('.pdf')) {
             if (
-                (hostname.match(/(wikipedia|wikimedia)\.org$/i) && pathname.match(/^\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
-                (hostname.match(/timetravel\.mementoweb\.org$/i) && pathname.match(/^\/reconstruct/i) && pathname.match(/\.pdf$/i)) ||
-                (hostname.match(/dropbox\.com$/i) && pathname.match(/^\/s\//i) && pathname.match(/\.pdf$/i))
+                ((hostname.endsWith('.wikipedia.org') || hostname.endsWith('.wikipedia.org')) && pathname.match(wikiPDFPathRegexp)) ||
+                (hostname.endsWith('.dropbox.com') && pathname.startsWith('/s/') && (pathname.endsWith('.pdf') || pathname.endsWith('.PDF')))
             ) {
                 return false;
             }

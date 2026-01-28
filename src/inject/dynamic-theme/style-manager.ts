@@ -38,20 +38,34 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
-// isFontsGoogleApiStyle returns is the given link element is a style from
-// google fonts.
-function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
-    if (!element.href) {
-        return false;
-    }
+let ignoredCSSURLPatterns: string[] = [];
 
-    try {
-        const elementURL = new URL(element.href);
-        return elementURL.hostname === 'fonts.googleapis.com';
-    } catch (err) {
-        logInfo(`Couldn't construct ${element.href} as URL`);
+export function setIgnoredCSSURLs(patterns: string[]): void {
+    ignoredCSSURLPatterns = patterns || [];
+}
+
+// shouldIgnoreCSSURL checks if a stylesheet URL matches any ignored pattern
+function shouldIgnoreCSSURL(url: string): boolean {
+    if (!url || ignoredCSSURLPatterns.length === 0) {
         return false;
     }
+    for (const pattern of ignoredCSSURLPatterns) {
+        if (pattern.startsWith('^')) {
+            // Prefix match
+            if (url.startsWith(pattern.slice(1))) {
+                return true;
+            }
+        } else if (pattern.endsWith('$')) {
+            // Suffix match
+            if (url.endsWith(pattern.slice(0, -1))) {
+                return true;
+            }
+        } else if (url.includes(pattern)) {
+            // Contains match
+            return true;
+        }
+    }
+    return false;
 }
 
 const hostsBreakingOnSVGStyleOverride = [
@@ -72,7 +86,7 @@ export function shouldManageStyle(element: Node | null): boolean {
                 Boolean(element.href) &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
-                !isFontsGoogleApiStyle(element)
+                !shouldIgnoreCSSURL(element.href)
             )
         ) &&
         !element.classList.contains('darkreader') &&

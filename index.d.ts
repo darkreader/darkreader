@@ -157,6 +157,14 @@ declare namespace DarkReader {
          * who are using the Dark Reader API.
          */
         disableStyleSheetsProxy: boolean;
+        /**
+         * List of stylesheet URL patterns to ignore.
+         * Stylesheets matching these patterns will not be processed by Dark Reader.
+         * - Simple string: matches if URL contains the string (e.g., "crisp")
+         * - Prefix with ^: matches if URL starts with pattern (e.g., "^https://client.crisp")
+         * - Suffix with $: matches if URL ends with pattern (e.g., ".css$")
+         */
+        ignoreCSSUrl: string[];
     }
 }
 

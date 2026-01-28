@@ -9,6 +9,7 @@ describe('Select fixes via findRelevantFix()', () => {
         invert: [],
         ignoreImageAnalysis: [],
         ignoreInlineStyle: [],
+        ignoreCSSUrl: [],
         disableStyleSheetsProxy: false,
         disableCustomElementRegistryProxy: false,
     };
@@ -173,6 +174,7 @@ describe('Construct single fix via combineFixes()', () => {
         invert: [],
         ignoreImageAnalysis: [],
         ignoreInlineStyle: [],
+        ignoreCSSUrl: [],
         disableStyleSheetsProxy: false,
         disableCustomElementRegistryProxy: false,
     };

@@ -557,6 +557,7 @@ export function isURLInIndexedList(url: string, trie: URLTrie<any>) {
             if (isFinalPathNode) {
                 return node.pathNodes.get('')!;
             }
+            return null;
         }
 
         if (isFinalPathNode) {

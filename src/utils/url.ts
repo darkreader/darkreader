@@ -405,6 +405,8 @@ interface URLTrie<T = any> extends URLTrieNode<T> {
     regexps: Array<{regexp: RegExp; data: T}>;
 }
 
+export type URLTemplateIndex = URLTrie<boolean>;
+
 export function indexURLTemplateList<T = boolean>(list: string[], assign: ((pattern: string, index: number) => T) = () => true as T): URLTrie<T> {
     const trie: URLTrie<T> = {
         key: '',

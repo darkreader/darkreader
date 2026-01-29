@@ -1,4 +1,4 @@
-import {fullyQualifiedDomainMatchesWildcard, isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, isURLMatched} from '../../../src/utils/url';
+import {fullyQualifiedDomainMatchesWildcard, indexURLTemplateList, isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, isURLInIndexedList, isURLMatched} from '../../../src/utils/url';
 
 describe('Domain utilities', () => {
     test('Fully qualified domain', () => {
@@ -92,5 +92,81 @@ describe('Domain utilities', () => {
         expect(isURLMatched('https://[2001:0DB8:AC10:FE02::200E]/', '[2001:0DB8:AC10:FE01::200E]')).toEqual(false);
         expect(isURLMatched('https://[2001:0DB8:AC10:FE01::200E]:8080/', '[2001:0DB8:AC10:FE01::200E]:8080')).toEqual(true);
         expect(isURLMatched('https://[2001:0DB8:AC10:FE02::200E]:1024/', '[2001:0DB8:AC10:FE01::200E]:8080')).toEqual(false);
+    });
+
+    test('URL list index', () => {
+        const simplePatterns = [
+            'apple.com',
+            'google.com',
+        ];
+        let indexed = indexURLTemplateList(simplePatterns);
+        expect(isURLInIndexedList('https://apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://google.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.co.uk/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.com/maps', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://mail.google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.example.com/', indexed)).toEqual(false);
+
+        const wildcardPatterns = [
+            'apple.com',
+            'google.*',
+            '*.example.com',
+        ];
+        indexed = indexURLTemplateList(wildcardPatterns);
+        expect(isURLInIndexedList('https://apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://google.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.co.uk/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.com/maps', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://mail.google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://example.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.example.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://test.example.com/', indexed)).toEqual(true);
+
+        const pathPatterns = [
+            'apple.com',
+            'google.*/maps',
+        ];
+        indexed = indexURLTemplateList(pathPatterns);
+        expect(isURLInIndexedList('https://apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.co.uk/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.com/maps', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.com/maps/edit', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.co.uk/maps', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.com/mail', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://mail.google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.example.com/', indexed)).toEqual(false);
+
+        const mixedPatterns = [
+            'apple.com',
+            'google.*/maps',
+            'google.*.*/maps',
+            '*.example.com',
+            'office.com/*/edit',
+        ];
+        indexed = indexURLTemplateList(mixedPatterns);
+        expect(isURLInIndexedList('https://apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.apple.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.co.uk/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.google.com/maps', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.co.uk/maps', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.com/maps/edit', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.google.com/mail', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://mail.google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://example.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.example.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://test.example.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://long.test.example.com/', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.office.com/excel/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://www.office.com/excel/edit', indexed)).toEqual(true);
+        expect(isURLInIndexedList('https://www.office.com/excel/edit/2000', indexed)).toEqual(true);
     });
 });

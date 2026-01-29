@@ -111,8 +111,24 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     return matchURLPattern(url, urlTemplate);
 }
 
+interface PreparedURL {
+    hostParts: string[];
+    pathParts: string[];
+    port: string;
+    protocol: string;
+}
+
+interface PreparedPattern {
+    hostParts: string[];
+    pathParts: string[];
+    port: string;
+    protocol: string;
+    exactStart: boolean;
+    exactEnd: boolean;
+}
+
 const URL_CACHE_SIZE = 32;
-const prepareURL = cachedFactory((url: string) => {
+const prepareURL = cachedFactory((url: string): PreparedURL | null => {
     let parsed: URL;
     try {
         parsed = new URL(url);
@@ -134,7 +150,7 @@ const prepareURL = cachedFactory((url: string) => {
 }, URL_CACHE_SIZE);
 
 const URL_MATCH_CACHE_SIZE = 32 * 1024;
-const preparePattern = cachedFactory((pattern: string) => {
+const preparePattern = cachedFactory((pattern: string): PreparedPattern | null => {
     if (!pattern) {
         return null;
     }
@@ -205,7 +221,10 @@ const preparePattern = cachedFactory((pattern: string) => {
 function matchURLPattern(url: string, pattern: string) {
     const u = prepareURL(url);
     const p = preparePattern(pattern);
+    return matchPreparedURLPattern(u, p);
+}
 
+function matchPreparedURLPattern(u: PreparedURL | null, p: PreparedPattern | null) {
     if (
         !(u && p)
         || (p.hostParts.length > u.hostParts.length)
@@ -372,4 +391,203 @@ export function fullyQualifiedDomainMatchesWildcard(wildcard: string, candidate:
 
 export function isLocalFile(url: string): boolean {
     return Boolean(url) && url.startsWith('file:///');
+}
+
+interface URLTrieNode<T = any> {
+    key: string;
+    hostNodes: Map<string, URLTrieNode<T>>;
+    pathNodes: Map<string, URLTrieNode<T>>;
+    data: T | null;
+}
+
+interface URLTrie<T = any> extends URLTrieNode<T> {
+    hardPatterns: Array<{pattern: PreparedPattern; data: T}>;
+    regexps: Array<{regexp: RegExp; data: T}>;
+}
+
+export function indexURLTemplateList<T = boolean>(list: string[], assign: ((pattern: string, index: number) => T) = () => true as T): URLTrie<T> {
+    const trie: URLTrie<T> = {
+        key: '',
+        hostNodes: new Map(),
+        pathNodes: new Map(),
+        hardPatterns: [],
+        regexps: [],
+        data: null,
+    };
+
+    const templateIndices = new Map<PreparedPattern | RegExp, number>();
+
+    const patterns: PreparedPattern[] = [];
+    list.forEach((u, i) => {
+        if (isRegExp(u)) {
+            const r = createRegExp(u);
+            if (r) {
+                trie.regexps.push({regexp: r, data: assign(list[i], i)});
+            }
+        } else {
+            const p = preparePattern(u);
+            if (p) {
+                if (p.exactStart || p.exactEnd || (p.port && p.port !== '*') || p.protocol) {
+                    trie.hardPatterns.push({pattern: p, data: assign(list[i], i)});
+                    return;
+                }
+                patterns.push(p);
+                templateIndices.set(p, i);
+            }
+        }
+    });
+
+    patterns.forEach((pattern) => {
+        const listIndex = templateIndices.get(pattern)!;
+        const data = assign(list[listIndex], listIndex);
+
+        let node: URLTrieNode = trie;
+        pattern.hostParts.forEach((p) => {
+            const nodes = node.hostNodes;
+            if (nodes.has(p)) {
+                node = nodes.get(p)!;
+            } else {
+                node = {
+                    key: p,
+                    hostNodes: new Map(),
+                    pathNodes: new Map(),
+                    data: null,
+                };
+                nodes.set(p, node);
+            }
+        });
+        const lastHostNode: URLTrieNode = {
+            key: '',
+            hostNodes: new Map(),
+            pathNodes: new Map(),
+            data: null,
+        };
+        node.hostNodes.set('', lastHostNode);
+        node = lastHostNode;
+
+        if (pattern.pathParts.length === 0) {
+            node.data = data;
+            return;
+        }
+
+        pattern.pathParts.forEach((p) => {
+            const nodes = node.pathNodes;
+            if (nodes.has(p)) {
+                node = nodes.get(p)!;
+            } else {
+                node = {
+                    key: p,
+                    hostNodes: new Map(),
+                    pathNodes: new Map(),
+                    data: null,
+                };
+                nodes.set(p, node);
+            }
+        });
+        const lastPathNode: URLTrieNode = {
+            key: '',
+            hostNodes: new Map(),
+            pathNodes: new Map(),
+            data: null,
+        };
+        node.pathNodes.set('', lastPathNode);
+        lastPathNode.data = data;
+    });
+    return trie;
+}
+
+export function isURLInIndexedList(url: string, trie: URLTrie<any>) {
+    if (trie.regexps.some((r) => r.regexp.test(url))) {
+        return true;
+    }
+
+    const u = prepareURL(url);
+    if (!u) {
+        return false;
+    }
+
+    if (trie.hardPatterns.some((p) => matchPreparedURLPattern(u, p.pattern))) {
+        return true;
+    }
+
+    const matchHost = (node: URLTrieNode, index: number): URLTrieNode | null => {
+        const isFinalHostNode = node.hostNodes.has('');
+        if (index === u.hostParts.length) {
+            if (isFinalHostNode) {
+                return node.hostNodes.get('')!;
+            }
+            return null;
+        }
+
+        const value = u.hostParts[index];
+        if (isFinalHostNode) {
+            if (node.key === '*' || (index === u.hostParts.length - 1 && value === 'www')) {
+                return node.hostNodes.get('')!;
+            }
+            return null;
+        }
+
+        const nodes = node.hostNodes;
+        if (nodes.has('*')) {
+            const wildcardNode = nodes.get('*')!;
+            const result = matchHost(wildcardNode, index + 1);
+            if (result) {
+                return result;
+            }
+        }
+
+        if (nodes.has(value)) {
+            return matchHost(nodes.get(value)!, index + 1);
+        }
+
+        return null;
+    };
+
+    const matchedHostNode = matchHost(trie, 0);
+    if (!matchedHostNode) {
+        return false;
+    }
+    if (matchedHostNode.data != null) {
+        return true;
+    }
+
+    const matchPath = (node: URLTrieNode, index: number): URLTrieNode | null => {
+        const isFinalPathNode = node.pathNodes.has('');
+        if (index === u.pathParts.length) {
+            if (isFinalPathNode) {
+                return node.pathNodes.get('')!;
+            }
+            return null;
+        }
+
+        if (isFinalPathNode) {
+            if (node.key === '*' || index === u.pathParts.length - 1) {
+                return node.pathNodes.get('')!;
+            }
+            return null;
+        }
+
+        const nodes = node.pathNodes;
+        if (nodes.has('*')) {
+            const wildcardNode = nodes.get('*')!;
+            const result = matchPath(wildcardNode, index + 1);
+            if (result) {
+                return result;
+            }
+        }
+
+        const value = u.pathParts[index];
+        if (nodes.has(value)) {
+            return matchPath(nodes.get(value)!, index + 1);
+        }
+
+        return null;
+    };
+
+    const matchedPathNode = matchPath(matchedHostNode, 0);
+    if (matchedPathNode) {
+        return true;
+    }
+
+    return false;
 }

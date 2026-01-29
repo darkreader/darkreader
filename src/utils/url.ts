@@ -356,39 +356,6 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     return !isURLInDisabledList;
 }
 
-export function isFullyQualifiedDomain(candidate: string): boolean {
-    return /^[a-z0-9\.\-]+$/i.test(candidate) && candidate.indexOf('..') === -1;
-}
-
-export function isFullyQualifiedDomainWildcard(candidate: string): boolean {
-    if (!candidate.includes('*') || !/^[a-z0-9\.\-\*]+$/i.test(candidate)) {
-        return false;
-    }
-    const labels = candidate.split('.');
-    for (const label of labels) {
-        if (label !== '*' && !/^[a-z0-9\-]+$/i.test(label)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-export function fullyQualifiedDomainMatchesWildcard(wildcard: string, candidate: string): boolean {
-    const wildcardLabels = wildcard.toLowerCase().split('.');
-    const candidateLabels = candidate.toLowerCase().split('.');
-    if (candidateLabels.length < wildcardLabels.length) {
-        return false;
-    }
-    while (wildcardLabels.length) {
-        const wildcardLabel = wildcardLabels.pop();
-        const candidateLabel = candidateLabels.pop();
-        if (wildcardLabel !== '*' && wildcardLabel !== candidateLabel) {
-            return false;
-        }
-    }
-    return true;
-}
-
 export function isLocalFile(url: string): boolean {
     return Boolean(url) && url.startsWith('file:///');
 }

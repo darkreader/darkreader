@@ -400,7 +400,7 @@ interface URLTrieNode<T = any> {
     data: T | null;
 }
 
-interface URLTrie<T = any> extends URLTrieNode<T> {
+export interface URLTrie<T = any> extends URLTrieNode<T> {
     hardPatterns: Array<{pattern: PreparedPattern; data: T}>;
     regexps: Array<{regexp: RegExp; data: T}>;
 }
@@ -499,97 +499,119 @@ export function indexURLTemplateList<T = boolean>(list: string[], assign: ((patt
 }
 
 export function isURLInIndexedList(url: string, trie: URLTrie<any>) {
-    if (trie.regexps.some((r) => r.regexp.test(url))) {
-        return true;
+    const matches = getURLMatchesFromIndexedList(url, trie, true);
+    return matches.length > 0;
+}
+
+export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, breakOnFirstMatch = false): T[] {
+    const matches: T[] = [];
+
+    for (const r of trie.regexps) {
+        if (r.regexp.test(url)) {
+            matches.push(r.data);
+            if (breakOnFirstMatch) {
+                return matches;
+            }
+        }
     }
 
     const u = prepareURL(url);
     if (!u) {
-        return false;
+        return matches;
     }
 
-    if (trie.hardPatterns.some((p) => matchPreparedURLPattern(u, p.pattern))) {
-        return true;
-    }
-
-    const matchHost = (node: URLTrieNode, index: number): URLTrieNode | null => {
-        const isFinalHostNode = node.hostNodes.has('');
-        if (index === u.hostParts.length) {
-            if (isFinalHostNode) {
-                return node.hostNodes.get('')!;
+    for (const p of trie.hardPatterns) {
+        if (matchPreparedURLPattern(u, p.pattern)) {
+            matches.push(p.data);
+            if (breakOnFirstMatch) {
+                return matches;
             }
-            return null;
+        }
+    }
+
+    const matchHost = (node: URLTrieNode, index: number) => {
+        const finalHostNode = node.hostNodes.get('');
+        if (index === u.hostParts.length) {
+            if (finalHostNode) {
+                if (finalHostNode.data) {
+                    matches.push(finalHostNode.data);
+                    if (breakOnFirstMatch) {
+                        return;
+                    }
+                }
+                matchPath(finalHostNode, 0);
+            }
+            return;
         }
 
         const value = u.hostParts[index];
-        if (isFinalHostNode) {
+        if (finalHostNode) {
             if (node.key === '*' || (index === u.hostParts.length - 1 && value === 'www')) {
-                return node.hostNodes.get('')!;
+                if (finalHostNode.data) {
+                    matches.push(finalHostNode.data);
+                    if (breakOnFirstMatch) {
+                        return;
+                    }
+                }
+                matchPath(finalHostNode, 0);
             }
-            return null;
+            return;
         }
 
         const nodes = node.hostNodes;
-        if (nodes.has('*')) {
-            const wildcardNode = nodes.get('*')!;
-            const result = matchHost(wildcardNode, index + 1);
-            if (result) {
-                return result;
-            }
+        const wildcardNode = nodes.get('*');
+        if (wildcardNode) {
+            matchHost(wildcardNode, index + 1);
         }
 
-        if (nodes.has(value)) {
-            return matchHost(nodes.get(value)!, index + 1);
+        if (breakOnFirstMatch && matches.length > 0) {
+            return;
         }
 
-        return null;
+        const keyNode = nodes.get(value);
+        if (keyNode) {
+            matchHost(keyNode, index + 1);
+        }
     };
 
-    const matchedHostNode = matchHost(trie, 0);
-    if (!matchedHostNode) {
-        return false;
-    }
-    if (matchedHostNode.data != null) {
-        return true;
-    }
-
-    const matchPath = (node: URLTrieNode, index: number): URLTrieNode | null => {
-        const isFinalPathNode = node.pathNodes.has('');
+    const matchPath = (node: URLTrieNode, index: number) => {
+        const finalPathNode = node.pathNodes.get('');
         if (index === u.pathParts.length) {
-            if (isFinalPathNode) {
-                return node.pathNodes.get('')!;
+            if (finalPathNode && finalPathNode.data) {
+                matches.push(finalPathNode.data);
             }
-            return null;
+            return;
         }
 
-        if (isFinalPathNode) {
+        if (finalPathNode) {
             if (node.key === '*' || index === u.pathParts.length - 1) {
-                return node.pathNodes.get('')!;
+                if (finalPathNode.data) {
+                    matches.push(finalPathNode.data);
+                }
             }
-            return null;
+            return;
         }
 
         const nodes = node.pathNodes;
-        if (nodes.has('*')) {
-            const wildcardNode = nodes.get('*')!;
-            const result = matchPath(wildcardNode, index + 1);
-            if (result) {
-                return result;
-            }
+        const wildcardNode = nodes.get('*');
+        if (wildcardNode) {
+            matchPath(wildcardNode, index + 1);
+        }
+
+        if (breakOnFirstMatch && matches.length > 0) {
+            return;
         }
 
         const value = u.pathParts[index];
-        if (nodes.has(value)) {
-            return matchPath(nodes.get(value)!, index + 1);
+        const keyNode = nodes.get(value);
+        if (keyNode) {
+            matchPath(keyNode, index + 1);
         }
 
         return null;
     };
 
-    const matchedPathNode = matchPath(matchedHostNode, 0);
-    if (matchedPathNode) {
-        return true;
-    }
+    matchHost(trie, 0);
 
-    return false;
+    return matches;
 }

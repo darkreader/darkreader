@@ -539,30 +539,27 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
 
     const matchHost = (node: URLTrieNode, index: number) => {
         const finalHostNode = node.hostNodes.get('');
-        if (index === u.hostParts.length) {
-            if (finalHostNode) {
-                if (finalHostNode.data) {
-                    push(finalHostNode.data);
-                    if (breakOnFirstMatch) {
-                        return;
-                    }
+        const noMoreHostParts = index === u.hostParts.length;
+        const value = noMoreHostParts ? '' : u.hostParts[index];
+
+        if (
+            finalHostNode && (
+                noMoreHostParts ||
+                node.key === '*' ||
+                (index === u.hostParts.length - 1 && value === 'www')
+            )
+        ) {
+            if (finalHostNode.data) {
+                push(finalHostNode.data);
+                if (breakOnFirstMatch) {
+                    return;
                 }
-                matchPath(finalHostNode, 0);
             }
-            return;
+            matchPath(finalHostNode, 0);
         }
 
-        const value = u.hostParts[index];
-        if (finalHostNode) {
-            if (node.key === '*' || (index === u.hostParts.length - 1 && value === 'www')) {
-                if (finalHostNode.data) {
-                    push(finalHostNode.data);
-                    if (breakOnFirstMatch) {
-                        return;
-                    }
-                }
-                matchPath(finalHostNode, 0);
-            }
+        if (noMoreHostParts) {
+            return;
         }
 
         const nodes = node.hostNodes;
@@ -583,19 +580,17 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
 
     const matchPath = (node: URLTrieNode, index: number) => {
         const finalPathNode = node.pathNodes.get('');
-        if (index === u.pathParts.length) {
-            if (finalPathNode && finalPathNode.data) {
+        const noMorePathParts = index === u.pathParts.length;
+        const value = noMorePathParts ? '' : u.pathParts[index];
+
+        if (finalPathNode && (noMorePathParts || node.key === '*' || index === u.pathParts.length - 1)) {
+            if (finalPathNode.data) {
                 push(finalPathNode.data);
             }
-            return;
         }
 
-        if (finalPathNode) {
-            if (node.key === '*' || index === u.pathParts.length - 1) {
-                if (finalPathNode.data) {
-                    push(finalPathNode.data);
-                }
-            }
+        if (noMorePathParts) {
+            return;
         }
 
         const nodes = node.pathNodes;
@@ -608,7 +603,6 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
             return;
         }
 
-        const value = u.pathParts[index];
         const keyNode = nodes.get(value);
         if (keyNode) {
             matchPath(keyNode, index + 1);

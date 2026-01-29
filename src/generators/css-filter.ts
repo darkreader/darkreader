@@ -7,8 +7,7 @@ import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
-import type {SitePropsIndex} from './utils/parse';
-
+import type {SiteFixesIndex} from './utils/parse';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -44,13 +43,13 @@ export function hasFirefoxNewRootBehavior(): boolean {
     );
 }
 
-export default function createCSSFilterStyleSheet(config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
+export default function createCSSFilterStyleSheet(config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SiteFixesIndex): string {
     const filterValue = getCSSFilterValue(config)!;
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
     return cssFilterStyleSheetTemplate('html', filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
 }
 
-export function cssFilterStyleSheetTemplate(filterRoot: string, filterValue: string, reverseFilterValue: string, config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
+export function cssFilterStyleSheetTemplate(filterRoot: string, filterValue: string, reverseFilterValue: string, config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SiteFixesIndex): string {
     const fix = getInversionFixesFor(url, fixes, index);
 
     const lines: string[] = [];
@@ -192,17 +191,8 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
 * @param url Site URL.
 * @param inversionFixes List of inversion fixes.
 */
-export function getInversionFixesFor(url: string, fixes: string, index: SitePropsIndex<InversionFix>): InversionFix {
-    const inversionFixes = getSitesFixesFor<InversionFix>(url, fixes, index, {
-        commands: Object.keys(inversionFixesCommands),
-        getCommandPropName: (command) => inversionFixesCommands[command],
-        parseCommandValue: (command, value) => {
-            if (command === 'CSS') {
-                return value.trim();
-            }
-            return parseArray(value);
-        },
-    });
+export function getInversionFixesFor(url: string, fixes: string, index: SiteFixesIndex): InversionFix {
+    const inversionFixes = getSitesFixesFor(url, fixes, index, parseInversionFixes);
 
     const common = {
         url: inversionFixes[0].url,

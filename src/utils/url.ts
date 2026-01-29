@@ -504,11 +504,19 @@ export function isURLInIndexedList(url: string, trie: URLTrie<any>) {
 }
 
 export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, breakOnFirstMatch = false): T[] {
+    const found = new Set<T>();
     const matches: T[] = [];
+
+    const push = (data: T) => {
+        if (!found.has(data)) {
+            found.add(data);
+            matches.push(data);
+        }
+    };
 
     for (const r of trie.regexps) {
         if (r.regexp.test(url)) {
-            matches.push(r.data);
+            push(r.data);
             if (breakOnFirstMatch) {
                 return matches;
             }
@@ -522,7 +530,7 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
 
     for (const p of trie.hardPatterns) {
         if (matchPreparedURLPattern(u, p.pattern)) {
-            matches.push(p.data);
+            push(p.data);
             if (breakOnFirstMatch) {
                 return matches;
             }
@@ -534,7 +542,7 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
         if (index === u.hostParts.length) {
             if (finalHostNode) {
                 if (finalHostNode.data) {
-                    matches.push(finalHostNode.data);
+                    push(finalHostNode.data);
                     if (breakOnFirstMatch) {
                         return;
                     }
@@ -548,14 +556,13 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
         if (finalHostNode) {
             if (node.key === '*' || (index === u.hostParts.length - 1 && value === 'www')) {
                 if (finalHostNode.data) {
-                    matches.push(finalHostNode.data);
+                    push(finalHostNode.data);
                     if (breakOnFirstMatch) {
                         return;
                     }
                 }
                 matchPath(finalHostNode, 0);
             }
-            return;
         }
 
         const nodes = node.hostNodes;
@@ -578,7 +585,7 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
         const finalPathNode = node.pathNodes.get('');
         if (index === u.pathParts.length) {
             if (finalPathNode && finalPathNode.data) {
-                matches.push(finalPathNode.data);
+                push(finalPathNode.data);
             }
             return;
         }
@@ -586,10 +593,9 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
         if (finalPathNode) {
             if (node.key === '*' || index === u.pathParts.length - 1) {
                 if (finalPathNode.data) {
-                    matches.push(finalPathNode.data);
+                    push(finalPathNode.data);
                 }
             }
-            return;
         }
 
         const nodes = node.pathNodes;
@@ -607,8 +613,6 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
         if (keyNode) {
             matchPath(keyNode, index + 1);
         }
-
-        return null;
     };
 
     matchHost(trie, 0);

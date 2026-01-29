@@ -1,12 +1,12 @@
 import type {Theme, StaticTheme} from '../definitions';
 import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns, isURLInList} from '../utils/url';
+import {compareURLPatterns} from '../utils/url';
 
 import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
-import type {SitePropsIndex} from './utils/parse';
+import type {SiteFixesIndex} from './utils/parse';
 
 interface ThemeColors {
     [prop: string]: number[];
@@ -59,7 +59,7 @@ function mix(color1: number[], color2: number[], t: number): number[] {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: Theme, url: string, isTopFrame: boolean, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): string {
+export default function createStaticStylesheet(config: Theme, url: string, isTopFrame: boolean, staticThemes: string, staticThemesIndex: SiteFixesIndex): string {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         const [r, g, b, a] = color;
@@ -70,8 +70,14 @@ export default function createStaticStylesheet(config: Theme, url: string, isTop
         return t;
     }, {} as ThemeColors);
 
-    const commonTheme = getCommonTheme(staticThemes, staticThemesIndex);
-    const siteTheme = getThemeFor(url, staticThemes, staticThemesIndex);
+    const themes = getSitesFixesFor(url, staticThemes, staticThemesIndex, parseStaticThemes);
+
+    const commonTheme = themes.find((t) => t.url[0] === '*');
+    const siteTheme = themes.find((t) => t.url[0] !== '*');
+
+    if (!commonTheme || ! siteTheme) {
+        return '';
+    }
 
     const lines: string[] = [];
 
@@ -249,39 +255,4 @@ export function formatStaticThemes(staticThemes: StaticTheme[]): string {
             return !(Array.isArray(value) && value.length > 0);
         },
     });
-}
-
-function getCommonTheme(staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): StaticTheme {
-    const length = parseInt(staticThemesIndex.offsets.substring(4, 4 + 3), 36);
-    const staticThemeText = staticThemes.substring(0, length);
-    return parseStaticThemes(staticThemeText)[0];
-}
-
-function getThemeFor(url: string, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): Readonly<StaticTheme> | null {
-    const themes = getSitesFixesFor<StaticTheme>(url, staticThemes, staticThemesIndex, {
-        commands: Object.keys(staticThemeCommands),
-        getCommandPropName: (command) => staticThemeCommands[command],
-        parseCommandValue: (command, value) => {
-            if (command === 'NO COMMON') {
-                return true;
-            }
-            return parseArray(value);
-        },
-    });
-    const sortedBySpecificity = themes
-        .slice(1)
-        .map((theme) => {
-            return {
-                specificity: isURLInList(url, theme.url) ? theme.url[0].length : 0,
-                theme,
-            };
-        })
-        .filter(({specificity}) => specificity > 0)
-        .sort((a, b) => b.specificity - a.specificity);
-
-    if (sortedBySpecificity.length === 0) {
-        return null;
-    }
-
-    return sortedBySpecificity[0].theme;
 }

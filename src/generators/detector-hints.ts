@@ -4,7 +4,7 @@ import {compareURLPatterns} from '../utils/url';
 
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
-import type {SitePropsIndex, SitesFixesParserOptions} from './utils/parse';
+import type {SiteFixesIndex, SitesFixesParserOptions} from './utils/parse';
 
 const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
     'TARGET': 'target',
@@ -53,8 +53,8 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
     });
 }
 
-export function getDetectorHintsFor(url: string, text: string, index: SitePropsIndex<DetectorHint>): DetectorHint[] | null {
-    const fixes = getSitesFixesFor(url, text, index, detectorParserOptions);
+export function getDetectorHintsFor(url: string, text: string, index: SiteFixesIndex): DetectorHint[] | null {
+    const fixes = getSitesFixesFor(url, text, index, parseDetectorHints);
 
     if (fixes.length === 0) {
         return null;

@@ -37,6 +37,9 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                     let svgText = dataURL.slice(commaIndex + 1);
                     const encoding = dataURL.slice(0, commaIndex).split(';')[1];
                     if (encoding === 'base64') {
+                        if (svgText.includes('%')) {
+                            svgText = decodeURIComponent(svgText);
+                        }
                         svgText = atob(svgText);
                     } else if (svgText.startsWith('%3c')) {
                         svgText = decodeURIComponent(svgText);
@@ -320,7 +323,11 @@ function tryConvertDataURLToBlobSync(dataURL: string): Blob | null {
     if (encoding !== 'base64' || !mediaType) {
         return null;
     }
-    const characters = atob(dataURL.substring(commaIndex + 1));
+    let base64Content = dataURL.substring(commaIndex + 1);
+    if (base64Content.includes('%')) {
+        base64Content = decodeURIComponent(base64Content);
+    }
+    const characters = atob(base64Content);
     const bytes = new Uint8Array(characters.length);
     for (let i = 0; i < characters.length; i++) {
         bytes[i] = characters.charCodeAt(i);

@@ -75,7 +75,7 @@ export default function createStaticStylesheet(config: Theme, url: string, isTop
     const commonTheme = themes.find((t) => t.url[0] === '*');
     const siteTheme = themes.find((t) => t.url[0] !== '*');
 
-    if (!commonTheme || ! siteTheme) {
+    if (!commonTheme) {
         return '';
     }
 

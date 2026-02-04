@@ -314,7 +314,7 @@ export function getRGBValues(input: string): number[] | null {
                 }
                 if (floatDigitsCount > -1) {
                     floatDigitsCount++;
-                    result[channel] += d / Math.pow(10, floatDigitsCount);
+                    result[channel] += d / (10 ** floatDigitsCount);
                 } else {
                     digitsCount++;
                     if (digitsCount > 3) {

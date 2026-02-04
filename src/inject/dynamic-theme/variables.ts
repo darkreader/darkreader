@@ -732,9 +732,9 @@ function isTextColorProperty(property: string) {
 }
 
 // [number] [number] [number] / [number]
-const rawRGBSpaceRegex = /^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*(\/\s*\d+\.?\d*)?$/;
-// [number], [number], [number]
-const rawRGBCommaRegex = /^(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})$/;
+const rawRGBSpaceRegex = /^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})(\s*\/\s*\d*\.?\d*)?$/;
+// [number], [number], [number], [float.number]?
+const rawRGBCommaRegex = /^(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(\s*,\s*\d*\.?\d*)?$/;
 
 function parseRawColorValue(input: string) {
     const match = input.match(rawRGBSpaceRegex) ?? input.match(rawRGBCommaRegex);
@@ -763,7 +763,14 @@ function handleRawColorValue(
             // This should technically never fail(returning an empty string),
             // but just to be safe, we will return outputColor.
             const outputInRGB = parseColorWithCache(outputColor);
-            return outputInRGB ? `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` : outputColor;
+            return (
+                outputInRGB ? (
+                    Number.isNaN(outputInRGB.a) || outputInRGB.a === 1 ?
+                    `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` :
+                    `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}, ${outputInRGB.a}`
+                ) :
+                outputColor
+            );
         }
         return outputColor;
     }

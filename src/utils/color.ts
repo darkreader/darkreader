@@ -223,6 +223,7 @@ export function parse($color: string): RGBA | null {
 
 const C_0 = '0'.charCodeAt(0);
 const C_9 = '9'.charCodeAt(0);
+const C_e = 'e'.charCodeAt(0);
 const C_DOT = '.'.charCodeAt(0);
 const C_PLUS = '+'.charCodeAt(0);
 const C_MINUS = '-'.charCodeAt(0);
@@ -231,44 +232,52 @@ const C_COMMA = ','.charCodeAt(0);
 const C_SLASH = '/'.charCodeAt(0);
 const C_PERCENT = '%'.charCodeAt(0);
 
-function getNumbers($color: string) {
-    const numbers: string[] = [];
-    const searchStart = $color.indexOf('(') + 1;
-    const searchEnd = $color.length - 1;
+function getNumbersFromString(input: string, range: number[], units: {[unit: string]: number}) {
+    const numbers: number[] = [];
+    const searchStart = input.indexOf('(') + 1;
+    const searchEnd = input.length - 1;
     let numStart = -1;
+    let unitStart = -1;
+
+    const push = (matchEnd: number) => {
+        const numEnd = unitStart > -1 ? unitStart : matchEnd;
+        const $num = input.slice(numStart, numEnd);
+        const r = range[numbers.length];
+        let u = 1;
+        if (unitStart > -1) {
+            const unit = input.slice(unitStart, matchEnd);
+            if (units[unit]) {
+                u = r / units[unit];
+            }
+        }
+        let n = parseFloat($num) * u;
+        if (r > 1) {
+            n = Math.round(n);
+        }
+        numbers.push(n);
+        numStart = -1;
+        unitStart = -1;
+    };
+
     for (let i = searchStart; i < searchEnd; i++) {
-        const c = $color.charCodeAt(i);
-        if ((c >= C_0 && c <= C_9) || c === C_DOT || c === C_PLUS || c === C_MINUS) {
+        const c = input.charCodeAt(i);
+        const isNumChar = (c >= C_0 && c <= C_9) || c === C_DOT || c === C_PLUS || c === C_MINUS || c === C_e;
+        const isDelimiter = c === C_SPACE || c === C_COMMA || c === C_SLASH;
+        if (isNumChar) {
             if (numStart === -1) {
                 numStart = i;
             }
-        } else if (numStart > -1 && (c === C_SPACE || c === C_COMMA || c === C_SLASH)) {
-            numbers.push($color.substring(numStart, i));
-            numStart = -1;
+        } else if (numStart > -1 && !isDelimiter) {
+            if (unitStart === -1) {
+                unitStart = i;
+            }
+        } else if (numStart > -1 && isDelimiter) {
+            push(i);
         }
     }
     if (numStart > -1) {
-        numbers.push($color.substring(numStart, searchEnd));
+        push(searchEnd);
     }
-    return numbers;
-}
-
-function getNumbersFromString(str: string, range: number[], units: {[unit: string]: number}) {
-    const raw = getNumbers(str);
-    const unitsList = Object.entries(units);
-    const numbers = raw.map((r) => r.trim()).map((r, i) => {
-        let n: number;
-        const unit = unitsList.find(([u]) => r.endsWith(u));
-        if (unit) {
-            n = parseFloat(r.substring(0, r.length - unit[0].length)) / unit[1] * range[i];
-        } else {
-            n = parseFloat(r);
-        }
-        if (range[i] > 1) {
-            return Math.round(n);
-        }
-        return n;
-    });
     return numbers;
 }
 

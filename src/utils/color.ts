@@ -221,36 +221,34 @@ export function parse($color: string): RGBA | null {
     return null;
 }
 
+const C_0 = '0'.charCodeAt(0);
+const C_9 = '9'.charCodeAt(0);
+const C_DOT = '.'.charCodeAt(0);
+const C_PLUS = '+'.charCodeAt(0);
+const C_MINUS = '-'.charCodeAt(0);
+const C_SPACE = ' '.charCodeAt(0);
+const C_COMMA = ','.charCodeAt(0);
+const C_SLASH = '/'.charCodeAt(0);
+const C_PERCENT = '%'.charCodeAt(0);
+
 function getNumbers($color: string) {
     const numbers: string[] = [];
-    let prevPos = 0;
-    let isMining = false;
-    // Get the first `(`.
-    const startIndex = $color.indexOf('(');
-    $color = $color.substring(startIndex + 1, $color.length - 1);
-    for (let i = 0; i < $color.length; i++) {
-        const c = $color[i];
-        // Check if `c` is a digit.
-        if (c >= '0' && c <= '9' || c === '.' || c === '+' || c === '-') {
-            // Enable the mining flag.
-            isMining = true;
-        } else if (isMining && (c === ' ' || c === ',' || c === '/')) {
-            // isMining is true and we got a terminating
-            // character. So we can push the current number
-            // into the array.
-            numbers.push($color.substring(prevPos, i));
-            // Disable the mining flag.
-            isMining = false;
-            // Ensure the prevPos is correct.
-            prevPos = i + 1;
-        } else if (!isMining) {
-            // Ensure the prevPos is correct.
-            prevPos = i + 1;
+    const searchStart = $color.indexOf('(') + 1;
+    const searchEnd = $color.length - 1;
+    let numStart = -1;
+    for (let i = searchStart; i < searchEnd; i++) {
+        const c = $color.charCodeAt(i);
+        if ((c >= C_0 && c <= C_9) || c === C_DOT || c === C_PLUS || c === C_MINUS) {
+            if (numStart === -1) {
+                numStart = i;
+            }
+        } else if (numStart > -1 && (c === C_SPACE || c === C_COMMA || c === C_SLASH)) {
+            numbers.push($color.substring(numStart, i));
+            numStart = -1;
         }
     }
-    // Push the last number.
-    if (isMining) {
-        numbers.push($color.substring(prevPos, $color.length));
+    if (numStart > -1) {
+        numbers.push($color.substring(numStart, searchEnd));
     }
     return numbers;
 }
@@ -284,12 +282,12 @@ export function getRGBValues(input: string): number[] | null {
     let digitsCount = 0;
     let digitSequence = false;
     let floatDigitsCount = -1;
-    let delimiter = ' ';
+    let delimiter = C_SPACE;
     let channel = -1;
     let result: number[] | null = null;
     while (i < length) {
-        const c = input[i];
-        if ((c >= '0' && c <= '9') || c === '.') {
+        const c = input.charCodeAt(i);
+        if ((c >= C_0 && c <= C_9) || c === C_DOT) {
             if (!digitSequence) {
                 digitSequence = true;
                 digitsCount = 0;
@@ -302,13 +300,13 @@ export function getRGBValues(input: string): number[] | null {
                     return null;
                 }
             }
-            if (c === '.') {
+            if (c === C_DOT) {
                 if (floatDigitsCount > 0) {
                     return null;
                 }
                 floatDigitsCount = 0;
             } else {
-                const d = c.charCodeAt(0) - CHAR_CODE_0;
+                const d = c - CHAR_CODE_0;
                 if (!result) {
                     result = [0, 0, 0, 1];
                 }
@@ -323,25 +321,25 @@ export function getRGBValues(input: string): number[] | null {
                     result[channel] = result[channel] * 10 + d;
                 }
             }
-        } else if (c === '%') {
-            if (channel < 0 || channel > 3 || delimiter !== ' ' || !result) {
+        } else if (c === C_PERCENT) {
+            if (channel < 0 || channel > 3 || delimiter !== C_SPACE || !result) {
                 return null;
             }
             result[channel] = channel < 3 ? Math.round(result[channel] * 255 / 100) : (result[channel] / 100);
             digitSequence = false;
         } else {
             digitSequence = false;
-            if (c === ' ') {
+            if (c === C_SPACE) {
                 if (channel === 0) {
                     delimiter = c;
                 }
-            } else if (c === ',') {
+            } else if (c === C_COMMA) {
                 if (channel === -1) {
                     return null;
                 }
-                delimiter = ',';
-            } else if (c === '/') {
-                if (channel !== 2 || delimiter !== ' ') {
+                delimiter = C_COMMA;
+            } else if (c === C_SLASH) {
+                if (channel !== 2 || delimiter !== C_SPACE) {
                     return null;
                 }
             } else {

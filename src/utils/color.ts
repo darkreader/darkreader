@@ -277,6 +277,85 @@ function getNumbersFromString(str: string, range: number[], units: {[unit: strin
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
+export function getRGBValues(input: string): number[] | null {
+    const CHAR_CODE_0 = 48;
+    const length = input.length;
+    let i = 0;
+    let digitsCount = 0;
+    let digitSequence = false;
+    let floatDigitsCount = -1;
+    let delimiter = ' ';
+    let channel = -1;
+    let result: number[] | null = null;
+    while (i < length) {
+        const c = input[i];
+        if ((c >= '0' && c <= '9') || c === '.') {
+            if (!digitSequence) {
+                digitSequence = true;
+                digitsCount = 0;
+                floatDigitsCount = -1;
+                channel++;
+                if (channel === 3 && result) {
+                    result[3] = 0;
+                }
+                if (channel > 3) {
+                    return null;
+                }
+            }
+            if (c === '.') {
+                if (floatDigitsCount > 0) {
+                    return null;
+                }
+                floatDigitsCount = 0;
+            } else {
+                const d = c.charCodeAt(0) - CHAR_CODE_0;
+                if (!result) {
+                    result = [0, 0, 0, 1];
+                }
+                if (floatDigitsCount > -1) {
+                    floatDigitsCount++;
+                    result[channel] += d / Math.pow(10, floatDigitsCount);
+                } else {
+                    digitsCount++;
+                    if (digitsCount > 3) {
+                        return null;
+                    }
+                    result[channel] = result[channel] * 10 + d;
+                }
+            }
+        } else if (c === '%') {
+            if (channel < 0 || channel > 3 || delimiter !== ' ' || !result) {
+                return null;
+            }
+            result[channel] = channel < 3 ? Math.round(result[channel] * 255 / 100) : (result[channel] / 100);
+            digitSequence = false;
+        } else {
+            digitSequence = false;
+            if (c === ' ') {
+                if (channel === 0) {
+                    delimiter = c;
+                }
+            } else if (c === ',') {
+                if (channel === -1) {
+                    return null;
+                }
+                delimiter = ',';
+            } else if (c === '/') {
+                if (channel !== 2 || delimiter !== ' ') {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        i++;
+    }
+    if (channel < 2 || channel > 3) {
+        return null;
+    }
+    return result;
+}
+
 function parseRGB($rgb: string): RGBA | null {
     const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
     if (r == null || g == null || b == null || a == null) {

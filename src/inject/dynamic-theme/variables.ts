@@ -1,6 +1,6 @@
 import type {Theme} from '../../definitions';
 import type {RGBA} from '../../utils/color';
-import {parseColorWithCache} from '../../utils/color';
+import {getRGBValues, parseColorWithCache} from '../../utils/color';
 import {getParenthesesRange} from '../../utils/text';
 
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
@@ -405,8 +405,7 @@ export class VariablesStore {
         // Check if the value is either a raw value or a value that can be parsed
         // e.g. rgb, hsl.
         const isColor = Boolean(
-            value.match(rawRGBSpaceRegex) ||
-            value.match(rawRGBCommaRegex) ||
+            getRGBValues(value) ||
             parseColorWithCache(value)
         );
         if (isColor) {
@@ -731,17 +730,12 @@ function isTextColorProperty(property: string) {
     return textColorProps.includes(property);
 }
 
-// [number] [number] [number] / [number]
-const rawRGBSpaceRegex = /^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})(\s*\/\s*\d*\.?\d*)?$/;
-// [number], [number], [number], [float.number]?
-const rawRGBCommaRegex = /^(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(\s*,\s*\d*\.?\d*)?$/;
-
 function parseRawColorValue(input: string) {
-    const match = input.match(rawRGBSpaceRegex) ?? input.match(rawRGBCommaRegex);
-    if (match) {
-        const color = match[4] ?
-            `rgb(${match[1]} ${match[2]} ${match[3]} / ${match[4]})` :
-            `rgb(${match[1]}, ${match[2]}, ${match[3]})`;
+    const v = getRGBValues(input);
+    if (v) {
+        const color = v[3] < 1 ?
+            `rgb(${v[0]} ${v[1]} ${v[2]} / ${v[3]})` :
+            `rgb(${v[0]} ${v[1]} ${v[2]})`;
         return {isRaw: true, color};
     }
     return {isRaw: false, color: input};

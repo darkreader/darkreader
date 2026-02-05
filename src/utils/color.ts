@@ -242,15 +242,15 @@ function getNumbersFromString(input: string, range: number[], units: {[unit: str
     const push = (matchEnd: number) => {
         const numEnd = unitStart > -1 ? unitStart : matchEnd;
         const $num = input.slice(numStart, numEnd);
+        let n = parseFloat($num);
         const r = range[numbers.length];
-        let u = 1;
         if (unitStart > -1) {
             const unit = input.slice(unitStart, matchEnd);
-            if (units[unit]) {
-                u = r / units[unit];
+            const u = units[unit];
+            if (u != null) {
+                n *= r / u;
             }
         }
-        let n = parseFloat($num) * u;
         if (r > 1) {
             n = Math.round(n);
         }
@@ -267,12 +267,12 @@ function getNumbersFromString(input: string, range: number[], units: {[unit: str
             if (numStart === -1) {
                 numStart = i;
             }
-        } else if (numStart > -1 && !isDelimiter) {
-            if (unitStart === -1) {
+        } else if (numStart > -1) {
+            if (isDelimiter) {
+                push(i);
+            } else if (unitStart === -1) {
                 unitStart = i;
             }
-        } else if (numStart > -1 && isDelimiter) {
-            push(i);
         }
     }
     if (numStart > -1) {

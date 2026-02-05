@@ -382,23 +382,62 @@ function parseHSL($hsl: string): RGBA | null {
     return hslToRGB({h, s, l, a});
 }
 
+const C_A = 'A'.charCodeAt(0);
+const C_F = 'F'.charCodeAt(0);
+const C_a = 'a'.charCodeAt(0);
+const C_f = 'f'.charCodeAt(0);
+
 function parseHex($hex: string): RGBA | null {
-    const h = $hex.substring(1);
-    switch (h.length) {
-        case 3:
-        case 4: {
-            const [r, g, b] = [0, 1, 2].map((i) => parseInt(`${h[i]}${h[i]}`, 16));
-            const a = h.length === 3 ? 1 : (parseInt(`${h[3]}${h[3]}`, 16) / 255);
-            return {r, g, b, a};
-        }
-        case 6:
-        case 8: {
-            const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.substring(i, i + 2), 16));
-            const a = h.length === 6 ? 1 : (parseInt(h.substring(6, 8), 16) / 255);
-            return {r, g, b, a};
+    const length = $hex.length;
+    const digitCount = length - 1;
+    const isShort = digitCount === 3 || digitCount === 4;
+    const isLong = digitCount === 6 || digitCount === 8;
+    if (!isShort && !isLong) {
+        return null;
+    }
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    let a = 1;
+    for (let i = 1; i < length; i++) {
+        const c = $hex.charCodeAt(i);
+        const n = (
+            (c >= C_A && c <= C_F) ?
+                (c + 10 - C_A) :
+                (c >= C_a && c <= C_f) ?
+                    (c + 10 - C_a) :
+                    (c - C_0)
+        );
+        if (isShort) {
+            const v = n * 17;
+            if (i === 1) {
+                r = v;
+            } else if (i === 2) {
+                g = v;
+            } else if (i === 3) {
+                b = v;
+            } else if (i === 4) {
+                a = v / 255;
+            }
+        } else if (i === 1) {
+            r = n * 16;
+        } else if (i === 2) {
+            r += n;
+        } else if (i === 3) {
+            g = n * 16;
+        } else if (i === 4) {
+            g += n;
+        } else if (i === 5) {
+            b = n * 16;
+        } else if (i === 6) {
+            b += n;
+        } else if (i === 7) {
+            a = n * 16 / 255;
+        } else if (i === 8) {
+            a += n / 255;
         }
     }
-    return null;
+    return {r, g, b, a};
 }
 
 function getColorByName($color: string): RGBA {

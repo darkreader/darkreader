@@ -395,48 +395,38 @@ function parseHex($hex: string): RGBA | null {
     if (!isShort && !isLong) {
         return null;
     }
-    let r = 0;
-    let g = 0;
-    let b = 0;
-    let a = 1;
-    for (let i = 1; i < length; i++) {
+
+    const hex = (i: number) => {
         const c = $hex.charCodeAt(i);
-        const n = (
-            (c >= C_A && c <= C_F) ?
-                (c + 10 - C_A) :
-                (c >= C_a && c <= C_f) ?
-                    (c + 10 - C_a) :
-                    (c - C_0)
-        );
-        if (isShort) {
-            const v = n * 17;
-            if (i === 1) {
-                r = v;
-            } else if (i === 2) {
-                g = v;
-            } else if (i === 3) {
-                b = v;
-            } else if (i === 4) {
-                a = v / 255;
-            }
-        } else if (i === 1) {
-            r = n * 16;
-        } else if (i === 2) {
-            r += n;
-        } else if (i === 3) {
-            g = n * 16;
-        } else if (i === 4) {
-            g += n;
-        } else if (i === 5) {
-            b = n * 16;
-        } else if (i === 6) {
-            b += n;
-        } else if (i === 7) {
-            a = n * 16 / 255;
-        } else if (i === 8) {
-            a += n / 255;
+        if (c >= C_A && c <= C_F) {
+            return c + 10 - C_A;
+        }
+        if (c >= C_a && c <= C_f) {
+            return c + 10 - C_a;
+        }
+        return c - C_0;
+    };
+
+    let r: number;
+    let g: number;
+    let b: number;
+    let a = 1;
+    if (isShort) {
+        r = hex(1) * 17;
+        g = hex(2) * 17;
+        b = hex(3) * 17;
+        if (digitCount === 4) {
+            a = hex(4) * 17 / 255;
+        }
+    } else {
+        r = hex(1) * 16 + hex(2);
+        g = hex(3) * 16 + hex(4);
+        b = hex(5) * 16 + hex(6);
+        if (digitCount === 8) {
+            a = (hex(7) * 16 + hex(8)) / 255;
         }
     }
+
     return {r, g, b, a};
 }
 

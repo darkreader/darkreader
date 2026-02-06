@@ -303,7 +303,7 @@ export function isPDF(url: string): boolean {
         const {hostname, pathname} = new URL(url);
         if (pathname.includes('.pdf')) {
             if (
-                ((hostname.endsWith('.wikipedia.org') || hostname.endsWith('.wikipedia.org')) && pathname.match(wikiPDFPathRegexp)) ||
+                ((hostname.endsWith('.wikimedia.org') || hostname.endsWith('.wikipedia.org')) && pathname.match(wikiPDFPathRegexp)) ||
                 (hostname.endsWith('.dropbox.com') && pathname.startsWith('/s/') && (pathname.endsWith('.pdf') || pathname.endsWith('.PDF')))
             ) {
                 return false;

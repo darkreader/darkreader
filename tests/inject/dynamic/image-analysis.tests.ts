@@ -230,6 +230,7 @@ describe('IMAGE ANALYSIS', () => {
             css: '',
             ignoreInlineStyle: ['.'],
             ignoreImageAnalysis: ['*'],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         }];

@@ -39,6 +39,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         }];
@@ -56,6 +57,7 @@ describe('FIXES', () => {
             css: '.text { color: red }',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         }];
@@ -73,6 +75,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         }];

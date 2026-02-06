@@ -550,10 +550,8 @@ export function getURLMatchesFromIndexedList<T>(url: string, trie: URLTrie<T>, b
         const noMorePathParts = index === u.pathParts.length;
         const value = noMorePathParts ? '' : u.pathParts[index];
 
-        if (finalPathNode && (noMorePathParts || node.key === '*' || index === u.pathParts.length - 1)) {
-            if (finalPathNode.data) {
-                push(finalPathNode.data);
-            }
+        if (finalPathNode && finalPathNode.data) {
+            push(finalPathNode.data);
         }
 
         if (noMorePathParts) {

@@ -121,6 +121,7 @@ describe('Domain utilities', () => {
             'google.*.*/maps',
             '*.example.com',
             'office.com/*/edit',
+            'mail.google.*/mail',
         ];
         indexed = indexURLTemplateList(mixedPatterns);
         expect(isURLInIndexedList('https://apple.com/', indexed)).toEqual(true);
@@ -133,6 +134,7 @@ describe('Domain utilities', () => {
         expect(isURLInIndexedList('https://www.google.com/maps/edit', indexed)).toEqual(true);
         expect(isURLInIndexedList('https://www.google.com/mail', indexed)).toEqual(false);
         expect(isURLInIndexedList('https://mail.google.com/', indexed)).toEqual(false);
+        expect(isURLInIndexedList('https://mail.google.com/mail/u/0/', indexed)).toEqual(true);
         expect(isURLInIndexedList('https://example.com/', indexed)).toEqual(false);
         expect(isURLInIndexedList('https://www.example.com/', indexed)).toEqual(true);
         expect(isURLInIndexedList('https://test.example.com/', indexed)).toEqual(true);

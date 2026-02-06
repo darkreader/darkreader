@@ -326,6 +326,20 @@ export function isPDF(url: string): boolean {
     return false;
 }
 
+const indexedSiteLists = new WeakMap<string[], URLTemplateIndex>();
+
+function isInListOptimized(url: string, list: string[]) {
+    if (!url || list.length === 0) {
+        return false;
+    }
+    let index = indexedSiteLists.get(list);
+    if (!index) {
+        index = indexURLTemplateList(list);
+        indexedSiteLists.set(list, index);
+    }
+    return isURLInIndexedList(url, index);
+}
+
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true): boolean {
     if (isLocalFile(url) && !isAllowedFileSchemeAccess) {
         return false;
@@ -341,8 +355,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     if (isPDF(url)) {
         return userSettings.enableForPDF;
     }
-    const isURLInDisabledList = isURLInList(url, userSettings.disabledFor);
-    const isURLInEnabledList = isURLInList(url, userSettings.enabledFor);
+    const isURLInDisabledList = isInListOptimized(url, userSettings.disabledFor);
+    const isURLInEnabledList = isInListOptimized(url, userSettings.enabledFor);
 
     if (!userSettings.enabledByDefault) {
         return isURLInEnabledList;

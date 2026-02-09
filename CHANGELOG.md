@@ -1,3 +1,14 @@
+# 4.9.120 (February 9, 2026)
+
+- IGNORE CSS URL config property.
+- Optimized site list search.
+- Optimized fixes search.
+- Optimized color parsing.
+- Optimized PDF URL check.
+- Fixed overriding background size and position.
+- Fixed analyzing images with URL encoding.
+- Fixed analyzing SVG icons with unset size.
+
 # 4.9.119 (January 14, 2026)
 
 - Optimized inline style changes.

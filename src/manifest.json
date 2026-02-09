@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Dark Reader",
-    "version": "4.9.119",
+    "version": "4.9.120",
     "author": "Alexander Shutau",
     "description": "__MSG_extension_description__",
     "default_locale": "en",

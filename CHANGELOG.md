@@ -1,3 +1,7 @@
+# 4.9.121 (February 10, 2026)
+
+- Fixed sites fixes indexing.
+
 # 4.9.120 (February 9, 2026)
 
 - IGNORE CSS URL config property.

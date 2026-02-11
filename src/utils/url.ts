@@ -439,13 +439,16 @@ export function indexURLTemplateList<T = boolean>(list: string[], assign: ((patt
                 nodes.set(p, node);
             }
         });
-        const lastHostNode: URLTrieNode = {
-            key: '',
-            hostNodes: new Map(),
-            pathNodes: new Map(),
-            data: null,
-        };
-        node.hostNodes.set('', lastHostNode);
+        let lastHostNode = node.hostNodes.get('');
+        if (!lastHostNode) {
+            lastHostNode = {
+                key: '',
+                hostNodes: new Map(),
+                pathNodes: new Map(),
+                data: null,
+            };
+            node.hostNodes.set('', lastHostNode);
+        }
         node = lastHostNode;
 
         if (pattern.pathParts.length === 0) {
@@ -467,13 +470,16 @@ export function indexURLTemplateList<T = boolean>(list: string[], assign: ((patt
                 nodes.set(p, node);
             }
         });
-        const lastPathNode: URLTrieNode = {
-            key: '',
-            hostNodes: new Map(),
-            pathNodes: new Map(),
-            data: null,
-        };
-        node.pathNodes.set('', lastPathNode);
+        let lastPathNode = node.pathNodes.get('');
+        if (!lastPathNode) {
+            lastPathNode = {
+                key: '',
+                hostNodes: new Map(),
+                pathNodes: new Map(),
+                data: null,
+            };
+            node.pathNodes.set('', lastPathNode);
+        }
         lastPathNode.data = data;
     });
     return trie;

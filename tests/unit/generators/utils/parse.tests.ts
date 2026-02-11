@@ -350,6 +350,84 @@ test('Fixes appear only once', () => {
     ]);
 });
 
+test('Fixes for paths', () => {
+    interface TestFix {
+        url: string[];
+        directive: string;
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+    };
+
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        'example.com',
+        '',
+        'DIRECTIVE',
+        'no path',
+        '',
+        '====================',
+        '',
+        'example.com/bar',
+        '',
+        'DIRECTIVE',
+        'bar path',
+        '',
+        '====================',
+        '',
+        'example.com/foo',
+        '',
+        'DIRECTIVE',
+        'foo path',
+        '',
+        '====================',
+        '',
+        'example.com/foo/quox',
+        '',
+        'DIRECTIVE',
+        'foo/quox path',
+        '',
+    ].join('\n');
+
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const parse = (text: string) => parseSitesFixesConfig(text, options);
+    const index = indexSitesFixesConfig(config);
+
+    const fixes = getSitesFixesFor<TestFix>('https://www.example.com/foo/quox', config, index, parse);
+    expect(fixes).toEqual([
+        {
+            'url': ['*'],
+            'directive': 'hello world',
+        }, {
+            'url': [
+                'example.com',
+            ],
+            'directive': 'no path',
+        }, {
+            'url': [
+                'example.com/foo',
+            ],
+            'directive': 'foo path',
+        }, {
+            'url': [
+                'example.com/foo/quox',
+            ],
+            'directive': 'foo/quox path',
+        },
+    ]);
+});
+
 describe('Explicit wildcard domain patterns', () => {
     interface TestFix {
         url: string[];

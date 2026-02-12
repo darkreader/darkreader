@@ -7,7 +7,7 @@ import puppeteer from 'puppeteer-core';
 import {log} from './utils.js';
 
 const DNS_LOOKUP = true;
-const HTTPS_GET = true;
+const HTTPS_GET = false;
 const PUPPETEER = false;
 
 async function lookup(url) {
@@ -222,6 +222,7 @@ function patternToURL(pattern) {
 }
 
 const DARK_SITES_FILE = './src/config/dark-sites.config';
+const DETECTOR_HINTS_FILE = './src/config/detector-hints.config';
 
 async function cleanDarkSites() {
     const content = await fs.readFile(DARK_SITES_FILE, 'utf8');
@@ -231,10 +232,47 @@ async function cleanDarkSites() {
     await fs.writeFile(DARK_SITES_FILE, `${filtered.join('\n')}\n`);
 }
 
+async function cleanConfig(filePath) {
+    const content = await fs.readFile(filePath, 'utf8');
+    const blocks = content.split('================================');
+    const patterns = [];
+    const urlsPerBlock = blocks.map((b) => {
+        const urlStart = 0;
+        const urlEnd = b.indexOf('\n\n', urlStart + 1);
+        const urls = b.slice(urlStart, urlEnd).trim().split('\n');
+        patterns.push(...urls);
+        return new Set(urls);
+    });
+
+    const missing = new Set(await pingSites('DETECTOR HINTS', patterns));
+    for (let i = urlsPerBlock.length - 1; i >= 0; i--) {
+        const urls = urlsPerBlock[i];
+        urls.forEach((u) => {
+            if (missing.has(u)) {
+                urls.delete(u);
+                const blockLines = blocks[i].split('\n');
+                const lineIndex = blockLines.indexOf(u);
+                if (lineIndex < 0) {
+                    throw new Error(`Cannot find line ${u}`);
+                }
+                blocks[i] = blockLines.join('\n');
+            }
+        });
+        if (urls.size === 0) {
+            blocks.splice(i, 1);
+        }
+    }
+
+    await fs.writeFile(filePath, blocks.join('================================'));
+}
+
 async function run() {
     const args = process.argv.slice(2);
-    if (args.includes('dark-sites')) {
-        await cleanDarkSites();
+    // if (args.includes('dark-sites')) {
+    //     await cleanDarkSites();
+    // }
+    if (args.includes('detector-hints')) {
+        await cleanConfig(DETECTOR_HINTS_FILE);
     }
 }
 

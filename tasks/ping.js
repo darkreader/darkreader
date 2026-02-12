@@ -3,7 +3,7 @@
 import {exec} from 'child_process';
 import dns from 'dns/promises';
 import fs from 'fs/promises';
-import puppeteer from 'puppeteer-core';
+import {launch} from 'puppeteer-core';
 import {log} from './utils.js';
 
 const DNS_LOOKUP = true;
@@ -113,7 +113,7 @@ async function pingSites(title, patterns) {
 
     if (PUPPETEER) {
         const executablePath = await getChromePath();
-        browser = await puppeteer.launch({executablePath, headless: false});
+        browser = await launch({executablePath, headless: false});
         page = await browser.newPage();
     }
 

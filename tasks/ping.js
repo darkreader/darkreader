@@ -8,7 +8,7 @@ import {log} from './utils.js';
 
 const DNS_LOOKUP = true;
 const HTTPS_GET = true;
-const PUPPETEER = true;
+const PUPPETEER = false;
 
 async function lookup(url) {
     try {
@@ -41,12 +41,20 @@ async function ping(url) {
                 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
             },
         });
+        if (response.redirected) {
+            const u = new URL(url);
+            const r = new URL(response.url);
+            if (!((u.hostname === r.hostname && r.pathname.startsWith(u.pathname)) || (r.hostname === `www.${u.hostname}`))) {
+                return `REDIRECT ${response.url}`;
+            }
+            return response.status;
+        }
         return response.status;
     } catch (err) {
         if (err.name === 'AbortError') {
             return 'TIMEOUT';
         }
-        return err.code ?? 'ERR';
+        return err.cause ?? 'ERR';
     }
 }
 
@@ -143,7 +151,7 @@ async function pingSites(title, patterns) {
                 clearLineIfNeeded();
                 log.ok(`${status} ${url}`);
                 canClearPrevLine = true;
-            } else if (status > 200 && status <= 299) {
+            } else if ((status > 200 && status <= 299) || status === 403 || status === 429) {
                 clearLineIfNeeded();
                 log.warn(`${status} ${url}`);
                 canClearPrevLine = false;

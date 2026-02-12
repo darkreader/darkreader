@@ -9,7 +9,7 @@
     "build:firefox": "node --max-old-space-size=3072 tasks/cli.js build --release --firefox",
     "build:plus": "node --max-old-space-size=3072 tasks/cli.js build --plus --release",
     "code-style": "npm run lint",
-    "config-cleanup": "node tasks/ping.js dark-sites",
+    "config-cleanup": "node --max-http-header-size=131072 tasks/ping.js dark-sites",
     "debug": "node --max-old-space-size=3072 tasks/cli.js build --debug",
     "debug:watch": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --chrome --firefox",
     "debug:watch:mv3": "node --max-old-space-size=3072 tasks/cli.js build --debug --watch --chrome-mv3",

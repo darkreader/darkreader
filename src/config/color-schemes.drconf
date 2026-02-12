@@ -219,3 +219,39 @@ text: #a9b1d6
 LIGHT
 background: #d5d6db
 text: #343b58
+
+================================
+
+Ayu
+
+DARK
+background: #0f1419
+text: #bfbdb6
+
+LIGHT
+background: #fafafa
+text: #5c6166
+
+================================
+
+Monokai
+
+DARK
+background: #272822
+text: #f8f8f2
+
+LIGHT
+background: #f8f8f2
+text: #272822
+
+================================
+
+Palenight
+
+DARK
+background: #292d3e
+text: #a6accd
+
+LIGHT
+background: #f8f8f2
+text: #676e95

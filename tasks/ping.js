@@ -268,9 +268,9 @@ async function cleanConfig(filePath) {
 
 async function run() {
     const args = process.argv.slice(2);
-    // if (args.includes('dark-sites')) {
-    //     await cleanDarkSites();
-    // }
+    if (args.includes('dark-sites')) {
+        await cleanDarkSites();
+    }
     if (args.includes('detector-hints')) {
         await cleanConfig(DETECTOR_HINTS_FILE);
     }

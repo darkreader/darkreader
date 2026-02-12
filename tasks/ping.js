@@ -1,8 +1,14 @@
 // @ts-check
 
+import {exec} from 'child_process';
 import dns from 'dns/promises';
 import fs from 'fs/promises';
+import puppeteer from 'puppeteer-core';
 import {log} from './utils.js';
+
+const DNS_LOOKUP = true;
+const HTTPS_GET = true;
+const PUPPETEER = true;
 
 async function lookup(url) {
     try {
@@ -13,27 +19,95 @@ async function lookup(url) {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function ping(url) {
     try {
-        const response = await fetch(url, {redirect: 'follow'});
+        const response = await fetch(url, {
+            method: 'GET',
+            redirect: 'follow',
+            signal: AbortSignal.timeout(5000),
+            headers: {
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'accept-encoding': 'gzip, deflate, br, zstd',
+                'accept-language': 'en-US,en;q=0.9',
+                'priority': 'u=0, i',
+                'sec-ch-ua': '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': 'macOS',
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-site': 'none',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': '1',
+                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+            },
+        });
         return response.status;
     } catch (err) {
-        return 404;
+        if (err.name === 'AbortError') {
+            return 'TIMEOUT';
+        }
+        return err.code ?? 'ERR';
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function timeout(delay) {
-    await new Promise((resolve) => {
-        setTimeout(resolve, delay);
+/**
+ * @param {import('puppeteer-core').Page} page
+ * @param {string} url
+ * @returns {Promise<any>}
+ */
+async function visit(page, url) {
+    try {
+        const response = await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+            timeout: 5000,
+        });
+        return response?.status() ?? 'UNKNOWN';
+    } catch (err) {
+        if (err.name === 'TimeoutError') {
+            return 'TIMEOUT';
+        }
+        return 'ERR';
+    }
+}
+
+async function getChromePath() {
+    if (process.platform === 'darwin') {
+        return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    }
+    if (process.platform === 'win32') {
+        return `${process.env.PROGRAMFILES}\\Google\\Chrome\\Application\\chrome.exe`;
+    }
+    return await new Promise((resolve, reject) => {
+        exec('which google-chrome', (err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result.trim());
+            }
+        });
     });
 }
 
+// async function timeout(delay) {
+//     await new Promise((resolve) => {
+//         setTimeout(resolve, delay);
+//     });
+// }
+
 async function pingSites(title, patterns) {
     const failures = [];
-
     log(title);
+
+    /** @type {import('puppeteer-core').Browser | null} */
+    let browser = null;
+    /** @type {import('puppeteer-core').Page | null} */
+    let page = null;
+
+    if (PUPPETEER) {
+        const executablePath = await getChromePath();
+        browser = await puppeteer.launch({executablePath, headless: false});
+        page = await browser.newPage();
+    }
 
     let canClearPrevLine = false;
     const clearLineIfNeeded = () => {
@@ -45,22 +119,26 @@ async function pingSites(title, patterns) {
     for (const pattern of patterns) {
         const url = patternToURL(pattern);
         const host = (new URL(url)).hostname;
-        log(`... ${url}`);
-        const exists = await lookup(host);
-        log.clearLine();
-        if (exists) {
-            clearLineIfNeeded();
-            log.ok(`OK  ${host}`);
-            canClearPrevLine = true;
-            /*
-            let status = 0;
-            for (let i = 0; i < 3; i++) {
-                status = await ping(url);
-                if (status === 200) {
-                    break;
-                }
-                await timeout(1000);
+        if (DNS_LOOKUP) {
+            log(`... ${host}`);
+            const exists = await lookup(host);
+            log.clearLine();
+            if (exists) {
+                clearLineIfNeeded();
+                log.ok(`OK  ${host}`);
+                canClearPrevLine = true;
+            } else {
+                clearLineIfNeeded();
+                log.error(`DNS ${host}`);
+                canClearPrevLine = false;
+                failures.push(pattern);
+                continue;
             }
+        }
+        if (HTTPS_GET) {
+            log(`... ${url}`);
+            const status = await ping(url);
+            log.clearLine();
             if (status === 200) {
                 clearLineIfNeeded();
                 log.ok(`${status} ${url}`);
@@ -69,19 +147,31 @@ async function pingSites(title, patterns) {
                 clearLineIfNeeded();
                 log.warn(`${status} ${url}`);
                 canClearPrevLine = false;
+            } else if (PUPPETEER && page) {
+                const ps = await visit(page, url);
+                if (ps === 200) {
+                    clearLineIfNeeded();
+                    log.ok(`${ps} ${url}`);
+                    canClearPrevLine = true;
+                } else {
+                    clearLineIfNeeded();
+                    log.error(`${ps} ${url}`);
+                    canClearPrevLine = false;
+                    failures.push(pattern);
+                }
             } else {
                 clearLineIfNeeded();
                 log.error(`${status} ${url}`);
                 canClearPrevLine = false;
+                failures.push(pattern);
             }
-            */
-        } else {
-            clearLineIfNeeded();
-            log.error(`DNS ${host}`);
-            canClearPrevLine = false;
-            failures.push(pattern);
         }
     }
+
+    if (PUPPETEER && browser) {
+        await browser.close();
+    }
+
     clearLineIfNeeded();
     log('Done');
 

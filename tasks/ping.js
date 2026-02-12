@@ -151,7 +151,7 @@ async function pingSites(title, patterns) {
                 clearLineIfNeeded();
                 log.ok(`${status} ${url}`);
                 canClearPrevLine = true;
-            } else if ((status > 200 && status <= 299) || status === 403 || status === 429) {
+            } else if ((status > 200 && status <= 299) || status !== 404) {
                 clearLineIfNeeded();
                 log.warn(`${status} ${url}`);
                 canClearPrevLine = false;

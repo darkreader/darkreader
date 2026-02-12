@@ -13,6 +13,7 @@ async function lookup(url) {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function ping(url) {
     try {
         const response = await fetch(url, {redirect: 'follow'});
@@ -22,6 +23,7 @@ async function ping(url) {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function timeout(delay) {
     await new Promise((resolve) => {
         setTimeout(resolve, delay);
@@ -128,7 +130,7 @@ async function cleanDarkSites() {
     const patterns = content.split('\n').filter(Boolean);
     const missing = await pingSites('DARK SITES', patterns);
     const filtered = patterns.filter((s) => !missing.includes(s));
-    await fs.writeFile(DARK_SITES_FILE, filtered.join('\n') + '\n');
+    await fs.writeFile(DARK_SITES_FILE, `${filtered.join('\n')}\n`);
 }
 
 async function run() {

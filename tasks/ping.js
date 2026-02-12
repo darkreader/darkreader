@@ -7,15 +7,30 @@ import {launch} from 'puppeteer-core';
 import {log} from './utils.js';
 
 const DNS_LOOKUP = true;
-const HTTPS_GET = true;
+const HTTPS_GET = false;
 const PUPPETEER = false;
 
 const DARK_SITES_FILE = './src/config/dark-sites.config';
 const DETECTOR_HINTS_FILE = './src/config/detector-hints.config';
+const DYNAMIC_THEME_FIXES_FILE = './src/config/dynamic-theme-fixes.config';
 const INVERSION_FIXES_FILE = './src/config/inversion-fixes.config';
 
 const EXCEPTIONS = [
+    'aliexpress.*',
+    'alza.*',
+    'canvas.*',
+    'gitlab.*',
+    'imap:',
+    'jenkins.*',
+    'jira.*',
     'lightning.force.com',
+    'mailbox:',
+    'polarion.*',
+    'pop3:',
+    'realtek.com',
+    'usos.*',
+    'usosweb.*',
+    'westlaw.com',
 ];
 
 async function lookup(url) {
@@ -133,7 +148,7 @@ async function pingSites(title, patterns) {
     };
 
     for (const pattern of patterns) {
-        if (pattern === '*' || EXCEPTIONS.includes(pattern)) {
+        if (pattern === '*' || EXCEPTIONS.some((ex) => pattern.includes(ex))) {
             continue;
         }
 
@@ -283,6 +298,9 @@ async function run() {
     }
     if (args.includes('detector-hints')) {
         await cleanConfig('DETECTOR HINTS', DETECTOR_HINTS_FILE);
+    }
+    if (args.includes('dynamic-theme-fixes')) {
+        await cleanConfig('DYNAMIC THEME FIXES', DYNAMIC_THEME_FIXES_FILE);
     }
     if (args.includes('inversion-fixes')) {
         await cleanConfig('INVERSION FIXES', INVERSION_FIXES_FILE);

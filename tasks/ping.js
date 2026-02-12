@@ -10,6 +10,14 @@ const DNS_LOOKUP = true;
 const HTTPS_GET = false;
 const PUPPETEER = false;
 
+const DARK_SITES_FILE = './src/config/dark-sites.config';
+const DETECTOR_HINTS_FILE = './src/config/detector-hints.config';
+const INVERSION_FIXES_FILE = './src/config/inversion-fixes.config';
+
+const EXCEPTIONS = [
+    'lightning.force.com',
+];
+
 async function lookup(url) {
     try {
         const lu = await dns.lookup(url);
@@ -125,6 +133,10 @@ async function pingSites(title, patterns) {
     };
 
     for (const pattern of patterns) {
+        if (pattern === '*' || EXCEPTIONS.includes(pattern)) {
+            continue;
+        }
+
         const url = patternToURL(pattern);
         const host = (new URL(url)).hostname;
         if (DNS_LOOKUP) {
@@ -143,6 +155,7 @@ async function pingSites(title, patterns) {
                 continue;
             }
         }
+
         if (HTTPS_GET) {
             log(`... ${url}`);
             const status = await ping(url);
@@ -221,9 +234,6 @@ function patternToURL(pattern) {
     return `https://${host}/${path}`;
 }
 
-const DARK_SITES_FILE = './src/config/dark-sites.config';
-const DETECTOR_HINTS_FILE = './src/config/detector-hints.config';
-
 async function cleanDarkSites() {
     const content = await fs.readFile(DARK_SITES_FILE, 'utf8');
     const patterns = content.split('\n').filter(Boolean);
@@ -232,7 +242,7 @@ async function cleanDarkSites() {
     await fs.writeFile(DARK_SITES_FILE, `${filtered.join('\n')}\n`);
 }
 
-async function cleanConfig(filePath) {
+async function cleanConfig(title, filePath) {
     const content = await fs.readFile(filePath, 'utf8');
     const blocks = content.split('================================');
     const patterns = [];
@@ -244,7 +254,7 @@ async function cleanConfig(filePath) {
         return new Set(urls);
     });
 
-    const missing = new Set(await pingSites('DETECTOR HINTS', patterns));
+    const missing = new Set(await pingSites(title, patterns));
     for (let i = urlsPerBlock.length - 1; i >= 0; i--) {
         const urls = urlsPerBlock[i];
         urls.forEach((u) => {
@@ -272,7 +282,10 @@ async function run() {
         await cleanDarkSites();
     }
     if (args.includes('detector-hints')) {
-        await cleanConfig(DETECTOR_HINTS_FILE);
+        await cleanConfig('DETECTOR HINTS', DETECTOR_HINTS_FILE);
+    }
+    if (args.includes('inversion-fixes')) {
+        await cleanConfig('INVERSION FIXES', INVERSION_FIXES_FILE);
     }
 }
 

@@ -7,7 +7,7 @@ import {launch} from 'puppeteer-core';
 import {log} from './utils.js';
 
 const DNS_LOOKUP = true;
-const HTTPS_GET = false;
+const HTTPS_GET = true;
 const PUPPETEER = false;
 
 const DARK_SITES_FILE = './src/config/dark-sites.config';
@@ -20,6 +20,7 @@ const EXCEPTIONS = [
     'alza.*',
     'canvas.*',
     'gitlab.*',
+    'googleusercontent.com',
     'imap:',
     'jenkins.*',
     'jira.*',

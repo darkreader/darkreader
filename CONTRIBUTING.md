@@ -240,3 +240,65 @@ You can use any text editor or web IDE (for example, [Visual Studio Code](https:
 Run tests by executing `npm test` to verify it will pass.
 
 If your code is ready to be reviewed and merged, you can submit a **pull request** and wait for a **review**.
+
+## Architectural Diagram
+
+```mermaid
+flowchart TD
+
+    A[Src] 
+
+    Inject[Inject] 
+    UI[UI] 
+    API[API] 
+    _Locals[_locals] 
+
+    Background[Background] 
+    Config[Config] 
+    Generators[Generators] 
+    Icons[Icons] 
+    Stubs[Stubs] 
+    General_Utils[Utils] 
+
+    Utils_for_background[Utils for Background] 
+    Utils_for_generators[Utils for Generators] 
+
+    Background --> |Helper Functions for things like platform detection, caching, and logging|Utils_for_background 
+
+    UI1[Assets] 
+    UI2[Connect] 
+    UI3[Controls] 
+    UI4[Devtools] 
+    UI5[Icons] 
+    UI6[Options] 
+    UI7[Popup] 
+    UI8[Stylesheet-Editor] 
+
+    Inject1[Dynamic-Themes] 
+    Inject11[Watch] 
+
+    A --> |Change Website|Inject 
+    A --> |Customize Darkreader Locally|UI 
+    A --> |APIs for theme management, messaging, fetch, and CSS export|API 
+    A --> |Language Translations|_Locals 
+    A --> |Background tasks like getting website-specific changes, starting the extension, icon state, managing UI highlights, MV2 and MV3 management, and updates about Darkreader|Background 
+    A --> |Default themes and customized CSS rules for specific websites|Config 
+    A --> |Dark Reader UI images in .png format|Icons 
+    A --> |Start of popup built with malevic|Stubs 
+    A --> |Automated stylesheet creation and formatting for Websites|Generators 
+    A --> |"A collection of general utilities including array operations, caching, color manipulation (RGB/HSLA), Darkreader link handling, matrix operations, website data retrieval, tab state management, URL interpretation, and more"|General_Utils 
+
+    Generators --> |Formats CSS, creates matrices to change image colors, and parses site configurations by URLs|Utils_for_generators 
+
+    UI --> |Images and Fonts|UI1 
+    UI --> |Bridge UI and Webpage|UI2 
+    UI --> |UI Components|UI3 
+    UI --> |Devtool Components|UI4 
+    UI --> |Configs for Images|UI5 
+    UI --> |Options Components|UI6 
+    UI --> |Popup Components|UI7 
+    UI --> |Edit CSS of website|UI8 
+
+    Inject --> |Manipulation of CSS for Dynamic Theme Switching|Inject1 
+    Inject1 --> |Monitor Changes in Doc Style|Inject11 
+```

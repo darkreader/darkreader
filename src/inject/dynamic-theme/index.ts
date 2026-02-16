@@ -297,6 +297,8 @@ function createDynamicStyleOverrides() {
     handleAdoptedStyleSheets(document);
     variablesStore.matchVariablesAndDependents();
 
+    tryInvertChromePDF();
+
     if (isFirefox) {
         type NodeSheet = {
             sheetId: number;
@@ -619,6 +621,27 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
 
     const relevantFixIndex = findRelevantFix(documentURL, fixes);
     return relevantFixIndex ? combineFixes([fixes[0], fixes[relevantFixIndex]]) : fixes[0];
+}
+
+function tryInvertChromePDF() {
+    if (!document.body || !chrome.dom) {
+        return;
+    }
+
+    const root = chrome.dom.openOrClosedShadowRoot(document.body);
+    if (!root || !root.querySelector('link[href$="/pdf_embedder.css"]')) {
+        return;
+    }
+
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync('[type="application/pdf"] { filter: invert(1) contrast(0.9); }');
+    root.adoptedStyleSheets.push(sheet);
+    cleaners.push(() => {
+        const index = root.adoptedStyleSheets.indexOf(sheet);
+        if (index >= 0) {
+            root.adoptedStyleSheets.splice(index, 1);
+        }
+    });
 }
 
 /**

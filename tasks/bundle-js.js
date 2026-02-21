@@ -72,6 +72,15 @@ const jsEntries = [
 /** @type {Record<string, any>} */
 const rollupCache = {};
 
+function replaceDownloadLink() {
+    const link = document.querySelector('.flex.h-full.items-center.whitespace-nowrap.rounded-l-xl.pl-6.pr-3.text-white.hover\\:bg-primaryLighter.hover\\:text-white.hover\\:no-underline');
+    if (link) {
+        link.href = 'javascript:void(0)';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', replaceDownloadLink);
+
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
 

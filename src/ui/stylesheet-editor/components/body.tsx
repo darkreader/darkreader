@@ -1,67 +1,54 @@
-import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
+import { m } from 'malevic';
+import { getContext } from 'malevic/dom';
 
-import type {ExtWrapper} from '../../../definitions';
-import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
-import {Button, MessageBox, Overlay} from '../../controls';
+import type { ExtWrapper } from '../../../definitions';
+import { getURLHostOrProtocol, isURLInList } from '../../../utils/url';
+import { Button, MessageBox, Overlay } from '../../controls';
 
-export default function Body({data, actions}: ExtWrapper) {
+export default function Body({ data, actions }: ExtWrapper) {
     const context = getContext();
-    const host = getURLHostOrProtocol(data.activeTab.url);
-    const custom = data.settings.customThemes.find(({url}) => isURLInList(data.activeTab.url, url));
+    const { activeTab, settings } = data;
+    const host = getURLHostOrProtocol(activeTab.url);
+    const custom = settings.customThemes.find(({ url }) => isURLInList(activeTab.url, url));
 
-    let textNode: HTMLTextAreaElement;
+    const textRef = { current: null as HTMLTextAreaElement | null };
 
-    const placeholderText = [
-        '* {',
-        '    background-color: #234 !important;',
-        '    color: #cba !important;',
-        '}',
-    ].join('\n');
+    const placeholderText = `* {
+    background-color: #234 !important;
+    color: #cba !important;
+}`;
 
     function onTextRender(node: HTMLTextAreaElement) {
-        textNode = node;
-        textNode.value = (custom ? custom.theme.stylesheet : data.settings.theme.stylesheet) || '';
-        if (document.activeElement !== textNode) {
-            textNode.focus();
+        textRef.current = node;
+        node.value = custom?.theme.stylesheet || settings.theme.stylesheet || '';
+        if (document.activeElement !== node) {
+            node.focus();
         }
     }
 
     function applyStyleSheet(css: string) {
         if (custom) {
-            custom.theme = {...custom.theme, ...{stylesheet: css}};
-            actions.changeSettings({customThemes: data.settings.customThemes});
+            custom.theme.stylesheet = css;
+            actions.changeSettings({ customThemes: settings.customThemes });
         } else {
-            actions.setTheme({stylesheet: css});
+            actions.setTheme({ stylesheet: css });
         }
     }
 
-    function showDialog() {
-        context.store.isDialogVisible = true;
+    function toggleDialog(isVisible: boolean) {
+        context.store.isDialogVisible = isVisible;
         context.refresh();
     }
-
-    function hideDialog() {
-        context.store.isDialogVisible = false;
-        context.refresh();
-    }
-
-    const dialog = context && context.store.isDialogVisible ? (
-        <MessageBox
-            caption="Are you sure you want to remove current changes? You cannot restore them later."
-            onOK={reset}
-            onCancel={hideDialog}
-        />
-    ) : null;
 
     function reset() {
-        context.store.isDialogVisible = false;
+        toggleDialog(false);
         applyStyleSheet('');
     }
 
     function apply() {
-        const css = textNode.value;
-        applyStyleSheet(css);
+        if (textRef.current) {
+            applyStyleSheet(textRef.current.value);
+        }
     }
 
     return (
@@ -82,12 +69,16 @@ export default function Body({data, actions}: ExtWrapper) {
                 autocapitalize="off"
             />
             <div class="buttons">
-                <Button onclick={showDialog}>
-                    Reset changes
-                    {dialog}
-                </Button>
+                <Button onclick={() => toggleDialog(true)}>Reset changes</Button>
                 <Button onclick={apply}>Apply</Button>
             </div>
+            {context.store.isDialogVisible && (
+                <MessageBox
+                    caption="Are you sure you want to remove current changes? You cannot restore them later."
+                    onOK={reset}
+                    onCancel={() => toggleDialog(false)}
+                />
+            )}
             <Overlay />
         </body>
     );

@@ -88,7 +88,7 @@ function Header(props: HeaderProps) {
 
     return (
         <header class="header">
-            <a class="header__logo" href={HOMEPAGE_URL} target="_blank" rel="noopener noreferrer">
+            <a class="header__logo" href={HOMEPAGE_URL} target="_blank" rel="noopener noreferrer" aria-label="Dark Reader homepage (opens in new tab)">
                 Dark Reader
             </a>
             <div class="header__control header__site-toggle">
@@ -101,9 +101,18 @@ function Header(props: HeaderProps) {
                         'header__more-settings-button': true,
                         'header__more-settings-button--off': !isSiteEnabled,
                     }}
+                    role="button"
+                    tabindex="0"
+                    aria-label="Site settings"
                     onclick={onMoreSiteSettingsClick}
+                    onkeydown={(e: KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onMoreSiteSettingsClick();
+                        }
+                    }}
                 >
-                    <SettingsIcon class="header__more-settings-button__icon" />
+                    <SettingsIcon class="header__more-settings-button__icon" ariaHidden={true} />
                     {siteToggleMessage}
                 </span>
             </div>
@@ -114,9 +123,18 @@ function Header(props: HeaderProps) {
                         'header__more-settings-button': true,
                         'header__more-settings-button--off': !data.isEnabled,
                     }}
+                    role="button"
+                    tabindex="0"
+                    aria-label="Automation settings"
                     onclick={onMoreToggleSettingsClick}
+                    onkeydown={(e: KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onMoreToggleSettingsClick();
+                        }
+                    }}
                 >
-                    <SettingsIcon class="header__more-settings-button__icon" />
+                    <SettingsIcon class="header__more-settings-button__icon" ariaHidden={true} />
                     {automationMessage}
                 </span>
                 <span
@@ -124,12 +142,13 @@ function Header(props: HeaderProps) {
                         'header__app-toggle__time': true,
                         'header__app-toggle__time--active': isAutomation,
                     }}
+                    aria-label={isAutomation ? 'Automation is active' : 'Automation is inactive'}
                 >
                     {(isTimeAutomation
-                        ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
+                        ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} ariaHidden={true} />
                         : (isLocationAutomation
-                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude!} longitude={data.settings.location.longitude!} />)
-                            : <SystemIcon />))}
+                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude!} longitude={data.settings.location.longitude!} ariaHidden={true} />)
+                            : <SystemIcon ariaHidden={true} />))}
                 </span>
             </div>
         </header>

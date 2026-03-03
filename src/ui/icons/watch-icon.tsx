@@ -4,10 +4,11 @@ interface WatchIconProps {
     color?: string;
     hours: number;
     minutes: number;
+    ariaHidden?: boolean;
 }
 
 export function WatchIcon(props: WatchIconProps): Malevic.Child {
-    const {hours, minutes, color = 'white'} = props;
+    const {hours, minutes, color = 'white', ariaHidden = true} = props;
     const cx = 8;
     const cy = 8.5;
     const lenHour = 3;
@@ -23,7 +24,7 @@ export function WatchIcon(props: WatchIconProps): Malevic.Child {
     const my = cy - lenMinute * Math.cos(am);
 
     return (
-        <svg viewBox="0 0 16 16">
+        <svg viewBox="0 0 16 16" aria-hidden={ariaHidden}>
             <circle fill="none" stroke={color} stroke-width="1.5" cx={cx} cy={cy} r={clockR} />
             <line stroke={color} stroke-width="1.5" x1={cx} y1={cy} x2={hx} y2={hy} />
             <line stroke={color} stroke-width="1.5" opacity="0.67" x1={cx} y1={cy} x2={mx} y2={my} />

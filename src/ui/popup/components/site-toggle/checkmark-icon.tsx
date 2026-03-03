@@ -1,8 +1,8 @@
 import {m} from 'malevic';
 
-export default function CheckmarkIcon({isChecked}: {isChecked: boolean}) {
+export default function CheckmarkIcon({isChecked}: {isChecked: boolean; ariaHidden?: boolean}) {
     return (
-        <svg viewBox="0 0 8 8">
+        <svg viewBox="0 0 8 8" aria-hidden={ariaHidden ?? true}>
             <path
                 d={(isChecked ?
                     'M1,4 l2,2 l4,-4 v1 l-4,4 l-2,-2 Z' :

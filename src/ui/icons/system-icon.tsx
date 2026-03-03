@@ -1,8 +1,12 @@
 import {m} from 'malevic';
 
-export function SystemIcon(): Malevic.Child {
+interface SystemIconProps {
+    ariaHidden?: boolean;
+}
+
+export function SystemIcon(props: SystemIconProps): Malevic.Child {
     return (
-        <svg viewBox="0 0 16 16">
+        <svg viewBox="0 0 16 16" aria-hidden={props.ariaHidden ?? true}>
             <path
                 fill="white"
                 stroke="none"

@@ -6,13 +6,14 @@ interface SunMoonIconProps {
     date: Date;
     latitude: number;
     longitude: number;
+    ariaHidden?: boolean;
 }
 
-export function SunMoonIcon({date, latitude, longitude}: SunMoonIconProps): Malevic.Child {
+export function SunMoonIcon({date, latitude, longitude, ariaHidden = true}: SunMoonIconProps): Malevic.Child {
     if (latitude == null || longitude == null) {
         // question mark icon
         return (
-            <svg viewBox="0 0 16 16">
+            <svg viewBox="0 0 16 16" aria-hidden={ariaHidden}>
                 <text
                     fill="white"
                     font-size="16"
@@ -28,7 +29,7 @@ export function SunMoonIcon({date, latitude, longitude}: SunMoonIconProps): Male
     if (isNightAtLocation(latitude, longitude, date)) {
         // moon icon
         return (
-            <svg viewBox="0 0 16 16">
+            <svg viewBox="0 0 16 16" aria-hidden={ariaHidden}>
                 <path fill="white" stroke="none" d="M 6 3 Q 10 8 6 13 Q 12 13 12 8 Q 12 3 6 3" />
             </svg>
         );
@@ -36,7 +37,7 @@ export function SunMoonIcon({date, latitude, longitude}: SunMoonIconProps): Male
 
     // sun icon
     return (
-        <svg viewBox="0 0 16 16">
+        <svg viewBox="0 0 16 16" aria-hidden={ariaHidden}>
             <circle fill="white" stroke="none" cx="8" cy="8" r="3" />
             <g fill="none" stroke="white" stroke-linecap="round" stroke-width="1.5">
                 {...(Array.from({length: 8}).map((_, i) => {

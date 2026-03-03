@@ -3,11 +3,12 @@ import {m} from 'malevic';
 interface SettingsIconProps {
     class?: string;
     color?: string;
+    ariaHidden?: boolean;
 }
 
 export function SettingsIcon(props: SettingsIconProps): Malevic.Child {
     return (
-        <svg viewBox="0 0 16 16" class={props.class}>
+        <svg viewBox="0 0 16 16" class={props.class} aria-hidden={props.ariaHidden ?? true}>
             <defs>
                 <path id="cog" d="M-1.25,-6.5 h2.5 l1,3 h-4.5 z" />
             </defs>

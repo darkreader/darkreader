@@ -363,6 +363,56 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         });
     }
 
+    const docPiP = (window as any).documentPictureInPicture;
+    if (docPiP) {
+        function collectFontSheetCSS(): string {
+            const fontSheetRules: string[] = [];
+            for (const sheet of document.styleSheets) {
+                try {
+                    const rules = Array.from(sheet.cssRules);
+                    if (rules.some((rule) => rule instanceof CSSFontFaceRule)) {
+                        rules.forEach((rule) => fontSheetRules.push(rule.cssText));
+                    }
+                } catch (e) {
+                    // Cross-origin sheets may throw
+                }
+            }
+            return fontSheetRules.join('\n');
+        }
+
+        function injectFontCSS(pipDoc: Document, fontCSS: string) {
+            if (pipDoc.querySelector('.darkreader--font-fix')) {
+                return;
+            }
+            const style = pipDoc.createElement('style');
+            style.classList.add('darkreader');
+            style.classList.add('darkreader--font-fix');
+            style.textContent = fontCSS;
+            (pipDoc.head || pipDoc.documentElement).appendChild(style);
+        }
+
+        function onPiPEnter() {
+            const pipWindow = docPiP.window;
+            if (!pipWindow) {
+                return;
+            }
+            const fontCSS = collectFontSheetCSS();
+            if (!fontCSS) {
+                return;
+            }
+            const pipDoc = pipWindow.document;
+            injectFontCSS(pipDoc, fontCSS);
+            const observer = new MutationObserver(() => {
+                injectFontCSS(pipDoc, fontCSS);
+            });
+            observer.observe(pipDoc, {childList: true, subtree: true});
+            pipWindow.addEventListener('unload', () => observer.disconnect());
+        }
+
+        docPiP.addEventListener('enter', onPiPEnter);
+        cleaners.push(() => docPiP.removeEventListener('enter', onPiPEnter));
+    }
+
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
         type StyleSheetCommand = {
             type: 'insert' | 'delete' | 'replace';

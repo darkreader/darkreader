@@ -77,13 +77,6 @@ export function cssFilterStyleSheetTemplate(filterRoot: string, filterValue: str
         lines.push(createTextStyle(config));
     }
 
-    // Fix bad font hinting after inversion
-    lines.push('');
-    lines.push('/* Text contrast */');
-    lines.push('html {');
-    lines.push('  text-shadow: 0 0 0 !important;');
-    lines.push('}');
-
     // Full screen fix
     lines.push('');
     lines.push('/* Full screen */');

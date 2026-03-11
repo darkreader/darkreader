@@ -48,6 +48,7 @@ export enum MessageTypeCStoBG {
     COLOR_SCHEME_CHANGE = 'cs-bg-color-scheme-change',
     DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
     DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
+    DARKREADER_LOCK_DETECTED = 'cs-bg-darkreader-lock-detected',
     FETCH = 'cs-bg-fetch',
     DOCUMENT_CONNECT = 'cs-bg-document-connect',
     DOCUMENT_FORGET = 'cs-bg-document-forget',

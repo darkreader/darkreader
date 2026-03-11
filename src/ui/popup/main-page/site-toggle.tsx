@@ -11,13 +11,15 @@ export default function SiteToggleGroup(props: ViewProps) {
     const tab = props.data.activeTab;
     const isPageEnabled = isURLEnabled(tab.url, props.data.settings, tab, props.data.isAllowedFileSchemeAccess);
     const isFile = isChromium && isLocalFile(tab.url);
-    const {isDarkThemeDetected, isProtected, isInDarkList} = tab;
+    const {isDarkThemeDetected, isDarkReaderLockDetected, isProtected, isInDarkList} = tab;
     let descriptionText = '';
 
     if (isFile && !props.data.isAllowedFileSchemeAccess) {
         descriptionText = getLocalMessage('local_files_forbidden');
     } else if (isPDF(tab.url)) {
         descriptionText = isPageEnabled ? 'Enabled for PDF files' : 'Disabled for PDF files';
+    } else if (isDarkReaderLockDetected) {
+        descriptionText = getLocalMessage('darkreader_lock_detected');
     } else if (isDarkThemeDetected) {
         descriptionText = 'Dark theme detected on page';
     } else if (isPageEnabled) {

@@ -3,6 +3,7 @@ import {getSRGBLightness, parseColorWithCache} from '../utils/color';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 
 const COLOR_SCHEME_META_SELECTOR = 'meta[name="color-scheme"]';
+const DARKREADER_LOCK_META_SELECTOR = 'meta[name="darkreader-lock"]';
 
 function hasBuiltInDarkTheme() {
     const rootStyle = getComputedStyle(document.documentElement);
@@ -242,4 +243,8 @@ function detectUsingHint(hint: DetectorHint, success: () => void) {
 function stopDetectingUsingHint() {
     hintTargetObserver?.disconnect();
     hintMatchObserver?.disconnect();
+}
+
+export function hasDarkReaderLockMeta(): boolean {
+    return document.querySelector(DARKREADER_LOCK_META_SELECTOR) != null;
 }

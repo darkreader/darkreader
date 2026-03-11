@@ -59,9 +59,11 @@ export function getSiteToggleMessage(props: ExtWrapper) {
             getLocalMessage('local_files_forbidden')
             : tab.isInDarkList ?
                 getLocalMessage('page_in_dark_list')
-                : tab.isDarkThemeDetected ?
-                    getLocalMessage('dark_theme_detected')
-                    : getLocalMessage('configure_site_toggle');
+                : tab.isDarkReaderLockDetected ?
+                    getLocalMessage('darkreader_lock_detected')
+                    : tab.isDarkThemeDetected ?
+                        getLocalMessage('dark_theme_detected')
+                        : getLocalMessage('configure_site_toggle');
 }
 
 function Header(props: HeaderProps) {

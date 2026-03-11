@@ -131,12 +131,12 @@ interface FontGroupsProps extends ThemeGroupProps {
 
 function FontGroup({theme, fonts, viewProps, change}: FontGroupsProps) {
     const {settings, activeTab, isAllowedFileSchemeAccess} = viewProps.data;
-    const {isDarkThemeDetected, isInDarkList, isInjected, isProtected} = activeTab;
+    const {isDarkThemeDetected, isDarkReaderLockDetected, isInDarkList, isInjected, isProtected} = activeTab;
 
     const custom = settings.customThemes.find((custom) => isURLInList(activeTab.url, custom.url));
     const engine = custom ? custom.theme.engine : settings.theme.engine;
     const canExportTheme = engine === ThemeEngine.dynamicTheme && activeTab.id
-        && !isDarkThemeDetected && !isInDarkList && !isProtected && isInjected !== false
+        && !isDarkThemeDetected && !isDarkReaderLockDetected && !isInDarkList && !isProtected && isInjected !== false
         && isURLEnabled(activeTab.url, settings, activeTab, isAllowedFileSchemeAccess);
 
     return (

@@ -6,7 +6,7 @@ import {HOMEPAGE_URL} from '../utils/links';
 import {activateTheme} from '@plus/utils/theme';
 
 import {writeEnabledForHost} from './cache';
-import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
+import {hasDarkReaderLockMeta, runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import {createOrUpdateStyle, removeStyle} from './style';
@@ -99,11 +99,14 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
     switch (message.type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
         case MessageTypeBGtoCS.ADD_STATIC_THEME: {
-            const {css, detectDarkTheme, detectorHints} = message.data;
+            const {css, detectDarkTheme, detectorHints, isForceEnabled} = message.data;
             removeDynamicTheme();
             createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
             writeEnabledForHost(true);
-            if (detectDarkTheme) {
+            if (!isForceEnabled && hasDarkReaderLockMeta()) {
+                removeStyle();
+                onDarkReaderLockDetected();
+            } else if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
                         removeStyle();
@@ -114,12 +117,16 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             break;
         }
         case MessageTypeBGtoCS.ADD_SVG_FILTER: {
-            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme, detectorHints} = message.data;
+            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme, detectorHints, isForceEnabled} = message.data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
             writeEnabledForHost(true);
-            if (detectDarkTheme) {
+            if (!isForceEnabled && hasDarkReaderLockMeta()) {
+                removeStyle();
+                removeSVGFilter();
+                onDarkReaderLockDetected();
+            } else if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
                         removeStyle();
@@ -131,11 +138,14 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             break;
         }
         case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme, detectorHints} = message.data;
+            const {theme, fixes, isIFrame, detectDarkTheme, detectorHints, isForceEnabled} = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             writeEnabledForHost(true);
-            if (detectDarkTheme) {
+            if (!isForceEnabled && hasDarkReaderLockMeta()) {
+                removeDynamicTheme();
+                onDarkReaderLockDetected();
+            } else if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
                         removeDynamicTheme();
@@ -204,6 +214,11 @@ function onResume() {
 function onDarkThemeDetected() {
     writeEnabledForHost(false);
     sendMessage({type: MessageTypeCStoBG.DARK_THEME_DETECTED});
+}
+
+function onDarkReaderLockDetected() {
+    writeEnabledForHost(false);
+    sendMessage({type: MessageTypeCStoBG.DARKREADER_LOCK_DETECTED});
 }
 
 // Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.

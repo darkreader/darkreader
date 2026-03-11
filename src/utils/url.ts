@@ -340,7 +340,7 @@ function isInListOptimized(url: string, list: string[]) {
     return isURLInIndexedList(url, index);
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true): boolean {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected, isDarkReaderLockDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true): boolean {
     if (isLocalFile(url) && !isAllowedFileSchemeAccess) {
         return false;
     }
@@ -364,7 +364,7 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     if (isURLInEnabledList) {
         return true;
     }
-    if (isInDarkList || (userSettings.detectDarkTheme && isDarkThemeDetected)) {
+    if (isInDarkList || (userSettings.detectDarkTheme && isDarkThemeDetected) || isDarkReaderLockDetected) {
         return false;
     }
     return !isURLInDisabledList;

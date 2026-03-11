@@ -31,6 +31,7 @@ interface DocumentInfo {
     state: DocumentState;
     timestamp: number;
     darkThemeDetected: boolean;
+    darkReaderLockDetected: boolean;
 }
 
 interface TabManagerState extends Record<string, unknown> {
@@ -175,6 +176,7 @@ export default class TabManager {
                             isTop: isTopFrame || undefined,
                             state: DocumentState.ACTIVE,
                             darkThemeDetected: false,
+                            darkReaderLockDetected: false,
                             timestamp: TabManager.timestamp,
                         };
                         TabManager.stateManager.saveState();
@@ -192,6 +194,31 @@ export default class TabManager {
                         const frameId = Number(entry[0]);
                         const frame = entry[1];
                         frame.darkThemeDetected = true;
+                        const {documentId, scriptId} = frame;
+                        if (documentId) {
+                            const message = {
+                                type: MessageTypeBGtoCS.CLEAN_UP,
+                                scriptId,
+                            };
+                            TabManager.sendDocumentMessage(tabId, documentId, message, frameId);
+                        }
+                        if (frameId === 0) {
+                            IconManager.setIcon({tabId, isActive: false});
+                        }
+                    }
+                    break;
+                }
+
+                case MessageTypeCStoBG.DARKREADER_LOCK_DETECTED: {
+                    const tabId = sender.tab!.id!;
+                    const frames = TabManager.tabs[tabId];
+                    if (!frames) {
+                        break;
+                    }
+                    for (const entry of Object.entries(frames)) {
+                        const frameId = Number(entry[0]);
+                        const frame = entry[1];
+                        frame.darkReaderLockDetected = true;
                         const {documentId, scriptId} = frame;
                         if (documentId) {
                             const message = {
@@ -326,6 +353,7 @@ export default class TabManager {
             isTop: isTop || undefined,
             state: DocumentState.ACTIVE,
             darkThemeDetected: false,
+            darkReaderLockDetected: false,
             timestamp: TabManager.timestamp,
         };
     }
@@ -491,6 +519,10 @@ export default class TabManager {
 
     static isTabDarkThemeDetected(tab: chrome.tabs.Tab | null): boolean | null {
         return tab && TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0] && TabManager.tabs[tab.id!][0].darkThemeDetected || null;
+    }
+
+    static isTabDarkReaderLockDetected(tab: chrome.tabs.Tab | null): boolean | null {
+        return tab && TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0] && TabManager.tabs[tab.id!][0].darkReaderLockDetected || null;
     }
 
     static async getActiveTabURL(): Promise<string> {

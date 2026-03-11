@@ -454,6 +454,7 @@ export class Extension {
         if (UserStorage.settings.detectDarkTheme) {
             isDarkThemeDetected = TabManager.isTabDarkThemeDetected(tab);
         }
+        const isDarkReaderLockDetected = TabManager.isTabDarkReaderLockDetected(tab);
         const id = tab && tab.id || null;
         return {
             id,
@@ -463,6 +464,7 @@ export class Extension {
             isProtected,
             isInjected,
             isDarkThemeDetected,
+            isDarkReaderLockDetected,
         };
     }
 
@@ -600,7 +602,8 @@ export class Extension {
         }
 
         const darkThemeDetected = settings.enabledByDefault && settings.detectDarkTheme && tab.isDarkThemeDetected;
-        if (!settings.enabledByDefault || isInDarkList || darkThemeDetected) {
+        const darkReaderLockDetected = settings.enabledByDefault && tab.isDarkReaderLockDetected;
+        if (!settings.enabledByDefault || isInDarkList || darkThemeDetected || darkReaderLockDetected) {
             const toggledList = getToggledList(settings.enabledFor);
             Extension.changeSettings({enabledFor: toggledList}, true);
             return;
@@ -699,10 +702,11 @@ export class Extension {
                 theme = {...theme, mode};
             }
             const detectorHints = settings.detectDarkTheme ? getDetectorHintsFor(url, ConfigManager.DETECTOR_HINTS_RAW!, ConfigManager.DETECTOR_HINTS_INDEX!) : null;
+            const isForceEnabled = isURLInList(tabURL, settings.enabledFor);
             const detectDarkTheme = (
                 settings.detectDarkTheme &&
                 (isTopFrame || detectorHints?.some((h) => h.iframe)) &&
-                !isURLInList(tabURL, settings.enabledFor) &&
+                !isForceEnabled &&
                 !isPDF(tabURL)
             );
 
@@ -717,6 +721,7 @@ export class Extension {
                             css: createCSSFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                             detectDarkTheme,
                             detectorHints,
+                            isForceEnabled,
                             theme,
                         },
                     };
@@ -729,6 +734,7 @@ export class Extension {
                                 css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                                 detectDarkTheme,
                                 detectorHints,
+                                isForceEnabled,
                                 theme,
                             },
                         };
@@ -741,6 +747,7 @@ export class Extension {
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                             detectDarkTheme,
                             detectorHints,
+                            isForceEnabled,
                             theme,
                         },
                     };
@@ -754,6 +761,7 @@ export class Extension {
                                 createStaticStylesheet(theme, url, isTopFrame, ConfigManager.STATIC_THEMES_RAW!, ConfigManager.STATIC_THEMES_INDEX!),
                             detectDarkTheme: settings.detectDarkTheme,
                             detectorHints,
+                            isForceEnabled,
                             theme,
                         },
                     };
@@ -768,6 +776,7 @@ export class Extension {
                             isIFrame: !isTopFrame,
                             detectDarkTheme,
                             detectorHints,
+                            isForceEnabled,
                         },
                     };
                 }

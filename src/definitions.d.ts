@@ -142,6 +142,7 @@ export interface TabInfo {
     isInjected: boolean | null;
     isInDarkList: boolean;
     isDarkThemeDetected: boolean | null;
+    isDarkReaderLockDetected: boolean | null;
 }
 
 export interface MessageCStoBG {

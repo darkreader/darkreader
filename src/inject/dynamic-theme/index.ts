@@ -648,6 +648,7 @@ function tryInvertChromePDF() {
  * TODO: expose this function to API builds via src/api function enable()
  */
 export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean): void {
+    setupDocumentPiPFontFix();
     const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
 
     // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
@@ -785,6 +786,69 @@ function removeProxy() {
 }
 
 const cleaners: Array<() => void> = [];
+
+let pipListenerRegistered = false;
+
+function setupDocumentPiPFontFix(): void {
+    if (pipListenerRegistered) {
+        return;
+    }
+    const docPiP = (window as any).documentPictureInPicture;
+    if (!docPiP) {
+        return;
+    }
+    pipListenerRegistered = true;
+
+    function collectFontSheetCSS(): string {
+        const fontSheetRules: string[] = [];
+        for (const sheet of document.styleSheets) {
+            try {
+                const rules = Array.from(sheet.cssRules);
+                if (rules.some((rule) => rule instanceof CSSFontFaceRule)) {
+                    rules.forEach((rule) => fontSheetRules.push(rule.cssText));
+                }
+            } catch (e) {
+                // Cross-origin sheets may throw
+            }
+        }
+        return fontSheetRules.join('\n');
+    }
+
+    function injectFontCSS(pipDoc: Document, fontCSS: string): void {
+        if (pipDoc.querySelector('.darkreader--font-fix')) {
+            return;
+        }
+        const style = pipDoc.createElement('style');
+        style.classList.add('darkreader');
+        style.classList.add('darkreader--font-fix');
+        style.textContent = fontCSS;
+        (pipDoc.head || pipDoc.documentElement).appendChild(style);
+    }
+
+    function onPiPEnter(): void {
+        const pipWindow = docPiP.window;
+        if (!pipWindow) {
+            return;
+        }
+        const fontCSS = collectFontSheetCSS();
+        if (!fontCSS) {
+            return;
+        }
+        const pipDoc = pipWindow.document;
+        injectFontCSS(pipDoc, fontCSS);
+        const observer = new MutationObserver(() => {
+            injectFontCSS(pipDoc, fontCSS);
+        });
+        observer.observe(pipDoc, {childList: true, subtree: true});
+        pipWindow.addEventListener('unload', () => observer.disconnect());
+    }
+
+    docPiP.addEventListener('enter', onPiPEnter);
+    cleaners.push(() => {
+        docPiP.removeEventListener('enter', onPiPEnter);
+        pipListenerRegistered = false;
+    });
+}
 
 export function removeDynamicTheme(): void {
     document.documentElement.removeAttribute(`data-darkreader-mode`);

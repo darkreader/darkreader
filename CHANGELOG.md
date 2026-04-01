@@ -1,3 +1,10 @@
+# 4.9.124 (April 1, 2026)
+
+- Fixed PDF inversion in Dynamic mode.
+- Fixed Picture-in-Picture mode icons.
+- Fixed Google Chats icons.
+- Fixed text stroke in Filter mode.
+
 # 4.9.123 (March 1, 2026)
 
 - Firefox: Disable white flash prevention in iframes (FF 148 issue in Google Docs, CKEditor and others).

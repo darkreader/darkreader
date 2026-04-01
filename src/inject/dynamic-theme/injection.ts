@@ -1,4 +1,5 @@
 const hostsBreakingOnStylePosition = [
+    'chat.google.com',
     'gogoprivate.com',
     'gprivate.com',
     'www.berlingske.dk',

@@ -31,12 +31,12 @@ export default function TimeRangePicker(props: TimePickerProps) {
         props.onChange([props.startTime, to24HTime($endTime)]);
     }
 
-    function setStartTime(node: HTMLInputElement) {
-        node.value = toLong24HTime(props.startTime);
+    function setStartTime(node: Node) {
+        (node as HTMLInputElement).value = toLong24HTime(props.startTime);
     }
 
-    function setEndTime(node: HTMLInputElement) {
-        node.value = toLong24HTime(props.endTime);
+    function setEndTime(node: Node) {
+        (node as HTMLInputElement).value = toLong24HTime(props.endTime);
     }
 
     return (

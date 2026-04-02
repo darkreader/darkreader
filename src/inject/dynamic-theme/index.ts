@@ -285,7 +285,7 @@ function createDynamicStyleOverrides() {
     }
     newManagers.forEach((manager) => manager.watch());
 
-    const inlineStyleElements = toArray(document.querySelectorAll(INLINE_STYLE_SELECTOR));
+    const inlineStyleElements = toArray(document.querySelectorAll(INLINE_STYLE_SELECTOR)) as HTMLElement[];
     iterateShadowHosts(document.documentElement, (host) => {
         createShadowStaticStyleOverrides(host.shadowRoot!);
         const elements = host.shadowRoot!.querySelectorAll(INLINE_STYLE_SELECTOR);
@@ -333,8 +333,8 @@ function createDynamicStyleOverrides() {
             });
         };
 
-        document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange);
-        cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange));
+        document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange as EventListener);
+        cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange as EventListener));
 
         document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
     }
@@ -508,7 +508,7 @@ function watchForUpdates() {
         }
     }, (root) => {
         createShadowStaticStyleOverrides(root);
-        const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
+        const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR) as NodeListOf<HTMLElement>;
         if (inlineStyleElements.length > 0) {
             forEach(inlineStyleElements, (el: HTMLElement) => overrideInlineStyle(el, theme!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
         }
@@ -610,7 +610,7 @@ function disableConflictingPlugins() {
     }
 }
 
-function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix | null {
+function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[] | null): DynamicThemeFix | null {
     if (!fixes) {
         return null;
     }
@@ -647,7 +647,7 @@ function tryInvertChromePDF() {
 /**
  * TODO: expose this function to API builds via src/api function enable()
  */
-export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean): void {
+export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: DynamicThemeFix[] | null, iframe: boolean): void {
     setupDocumentPiPFontFix();
     const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
 

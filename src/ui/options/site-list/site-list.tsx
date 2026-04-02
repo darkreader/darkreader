@@ -24,8 +24,8 @@ export function SiteList(props: SiteListProps): Malevic.Child {
         store.wasVisible = false;
     }
 
-    context.onRender((node: HTMLElement) => {
-        const isVisible = node.clientWidth > 0;
+    context.onRender((node) => {
+        const isVisible = (node as HTMLElement).clientWidth > 0;
         const {wasVisible} = store;
         store.wasVisible = isVisible;
         if (!wasVisible && isVisible) {
@@ -66,11 +66,11 @@ export function SiteList(props: SiteListProps): Malevic.Child {
     }
 
     function createTextBox(text: string, index: number) {
-        const onRender = (node: HTMLInputElement) => {
+        const onRender = (node: Node) => {
             store.indices.set(node, index);
             if (store.shouldFocusAtIndex === index) {
                 store.shouldFocusAtIndex = -1;
-                node.focus();
+                (node as HTMLInputElement).focus();
             }
         };
 

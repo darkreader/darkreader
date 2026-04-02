@@ -14,8 +14,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     }
 
     function documentEventListener(type: string, listener: (e: CustomEvent) => void, options?: AddEventListenerOptions) {
-        document.addEventListener(type, listener, options);
-        cleaners.push(() => document.removeEventListener(type, listener));
+        document.addEventListener(type, listener as EventListener, options);
+        cleaners.push(() => document.removeEventListener(type, listener as EventListener));
     }
 
     function disableConflictingPlugins() {
@@ -37,7 +37,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             return;
         }
         const newDescriptor: PropertyDescriptor = {...oldDescriptor};
-        Object.keys(overrides).forEach((key: keyof PropertyDescriptor) => {
+        (Object.keys(overrides) as Array<keyof PropertyDescriptor>).forEach((key) => {
             const factory = overrides[key];
             newDescriptor[key] = factory(oldDescriptor[key]);
         });

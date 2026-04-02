@@ -41,21 +41,21 @@ export default function Slider(props: SliderProps) {
 
     store.activeProps = props;
 
-    function onRootCreate(rootNode: HTMLElement) {
-        rootNode.addEventListener('touchstart', onPointerDown, {passive: true});
-        rootNode.addEventListener('wheel', onWheel, {passive: false});
+    function onRootCreate(rootNode: Node) {
+        (rootNode as HTMLElement).addEventListener('touchstart', onPointerDown, {passive: true});
+        rootNode.addEventListener('wheel', onWheel as EventListener, {passive: false});
     }
 
-    function saveTrackNode(el: HTMLElement) {
-        store.trackNode = el;
+    function saveTrackNode(el: Node) {
+        store.trackNode = el as HTMLElement;
     }
 
     function getTrackNode() {
         return store.trackNode as HTMLElement;
     }
 
-    function saveThumbNode(el: HTMLElement) {
-        store.thumbNode = el;
+    function saveThumbNode(el: Node) {
+        store.thumbNode = el as HTMLElement;
     }
 
     function getThumbNode() {
@@ -143,14 +143,14 @@ export default function Slider(props: SliderProps) {
         }
 
         function subscribe() {
-            window.addEventListener(pointerMoveEvent, onPointerMove, {passive: true});
-            window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
+            window.addEventListener(pointerMoveEvent, onPointerMove as EventListener, {passive: true});
+            window.addEventListener(pointerUpEvent, onPointerUp as EventListener, {passive: true});
             window.addEventListener('keypress', onKeyPress, {passive: true});
         }
 
         function unsubscribe() {
-            window.removeEventListener(pointerMoveEvent, onPointerMove);
-            window.removeEventListener(pointerUpEvent, onPointerUp);
+            window.removeEventListener(pointerMoveEvent, onPointerMove as EventListener);
+            window.removeEventListener(pointerUpEvent, onPointerUp as EventListener);
             window.removeEventListener('keypress', onKeyPress);
         }
 

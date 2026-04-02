@@ -289,4 +289,4 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
     );
 }
 
-export default compose(Body, withState, withForms);
+export default compose(Body as any, withState, withForms);

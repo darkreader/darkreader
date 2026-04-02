@@ -161,4 +161,4 @@ function Select(props: SelectProps) {
     );
 }
 
-export default withState(Select);
+export default withState(Select as any);

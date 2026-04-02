@@ -28,7 +28,8 @@
             "@plus/*": ["../../src/stubs/*"],
             "definitions": ["../../src/definitions"],
             "utils/*": ["../../src/utils/*"]
-        }
+        },
+        "ignoreDeprecations": "6.0",
     },
     "exclude": [
         "./coverage"

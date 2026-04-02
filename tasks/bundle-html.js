@@ -5,7 +5,7 @@ import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {writeFile} from './utils.js';
 
-/** @typedef {import('./types').HTMLEntry} HTMLEntry */
+/** @typedef {import('./types.d.ts').HTMLEntry} HTMLEntry */
 
 function html(platform, title, hasLoader, hasStyleSheet, compatibility) {
     return [

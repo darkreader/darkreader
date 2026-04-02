@@ -18,6 +18,8 @@
         "noUnusedLocals": true,
         "resolveJsonModule": true,
         "strictNullChecks": true,
+        "strictPropertyInitialization": false,
+        "ignoreDeprecations": "6.0",
         "jsx": "react",
         "jsxFactory": "m",
         "noEmit": true,

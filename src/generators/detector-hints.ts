@@ -38,7 +38,7 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
     return formatSitesFixesConfig(fixes, {
         props: Object.values(detectorHintsCommands),
         getPropCommandName: (prop) => Object.entries(detectorHintsCommands).find(([, p]) => p === prop)![0],
-        formatPropValue: (prop: keyof DetectorHint, value) => {
+        formatPropValue: (prop, value) => {
             if (Array.isArray(value)) {
                 return formatArray(value).trim();
             }

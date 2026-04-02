@@ -83,7 +83,7 @@ async function urlToImage(url: string) {
 }
 
 async function getBgImageInfo(bgImageValue: string) {
-    const bgImageURL = bgImageValue.match(/^url\("(.*)"\)$/)[1];
+    const bgImageURL = bgImageValue.match(/^url\("(.*)"\)$/)![1];
     const image = await urlToImage(bgImageURL);
 
     const width = 8;
@@ -91,7 +91,7 @@ async function getBgImageInfo(bgImageValue: string) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d')!;
     context.drawImage(image, 0, 0, width, height);
 
     const d = context.getImageData(0, 0, width, height).data;
@@ -170,7 +170,7 @@ describe('IMAGE ANALYSIS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         await timeout(500);
-        const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
+        const bgImageValue = getComputedStyle(container.querySelector('i')!).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
         expect(info.lightness).toBe(1);
@@ -184,7 +184,7 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Light icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
+        const bgImageValue = getComputedStyle(container.querySelector('i')!).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
         expect(info.lightness).toBe(1);
@@ -198,7 +198,7 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Dark background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
+        const bgImageValue = getComputedStyle(container.querySelector('h1')!).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(1);
         expect(info.lightness).toBe(0);
@@ -213,7 +213,7 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
+        const bgImageValue = getComputedStyle(container.querySelector('h1')!).backgroundImage;
         expect(bgImageValue).toBe('none');
     });
 
@@ -235,7 +235,7 @@ describe('IMAGE ANALYSIS', () => {
             disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(theme, fixes, false);
-        const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
+        const backgroundImage = getComputedStyle(container.querySelector('i')!).backgroundImage;
         expect(backgroundImage).toContain('data:');
     });
 
@@ -248,7 +248,7 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
 
     it('should handle background-image with non-base64 data URL', async () => {
@@ -260,7 +260,7 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
     });
 
     it('should handle background-image with URL and gradient (revered)', async () => {
@@ -273,7 +273,7 @@ describe('IMAGE ANALYSIS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         await timeout(500);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\), url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\), url\("blob:.*"\)$/);
     });
 
     it('should handle background-image with empty URLs', async () => {
@@ -285,6 +285,6 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toMatch(/^url\(""\), url\(""\), url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\(""\), url\(""\), url\("blob:.*"\)$/);
     });
 });

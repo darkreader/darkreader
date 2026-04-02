@@ -104,7 +104,7 @@ export function AutomationTab(props: ViewProps): Malevic.Child {
                     class="automation__location-control__latitude"
                     placeholder={getLocalMessage('latitude')}
                     onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'latitude')}
-                    oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.latitude!)}
+                    oncreate={(node) => (node as HTMLInputElement).value = getLocationString(locationSettings.latitude!)}
                     onkeypress={(e) => {
                         if (e.key === 'Enter') {
                             (e.target as HTMLInputElement).blur();
@@ -115,7 +115,7 @@ export function AutomationTab(props: ViewProps): Malevic.Child {
                     class="automation__location-control__longitude"
                     placeholder={getLocalMessage('longitude')}
                     onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'longitude')}
-                    oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.longitude!)}
+                    oncreate={(node) => (node as HTMLInputElement).value = getLocationString(locationSettings.longitude!)}
                     onkeypress={(e) => {
                         if (e.key === 'Enter') {
                             (e.target as HTMLInputElement).blur();

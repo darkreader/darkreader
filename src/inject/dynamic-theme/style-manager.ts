@@ -100,7 +100,7 @@ export function getManageableStyles(node: Node | null, results: StyleElement[] =
         results.push(node as StyleElement);
     } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
         forEach(
-            (node as Element).querySelectorAll(STYLE_SELECTOR),
+            (node as Element).querySelectorAll(STYLE_SELECTOR) as NodeListOf<StyleElement>,
             (style: StyleElement) => getManageableStyles(style, results, false),
         );
         if (
@@ -459,7 +459,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 return [null, null];
             }
             return [element.sheet.cssRules, null];
-        } catch (err) {
+        } catch (err: any) {
             return [null, err];
         }
     }

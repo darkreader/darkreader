@@ -10,7 +10,7 @@ import {createTask} from './task.js';
 import {readFile, writeFile} from './utils.js';
 
 /** @typedef {import('chokidar').FSWatcher} FSWatcher */
-/** @typedef {import('./types').CSSEntry} CSSEntry */
+/** @typedef {import('./types.d.ts').CSSEntry} CSSEntry */
 
 /** @type {CSSEntry[]} */
 const cssEntries = [

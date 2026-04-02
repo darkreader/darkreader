@@ -21,7 +21,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                     />
                     <Select
                         value={config.fontFamily}
-                        onChange={(value) =>
+                        onChange={(value: string) =>
                             onChange({
                                 fontFamily: value,
                                 useFont: true,

@@ -240,12 +240,12 @@ export async function requestBlobURLCheck(): Promise<void> {
     blobURLCheckRequested = true;
 
     await new Promise<void>((resolve) => {
-        document.addEventListener('__darkreader__blobURLCheckResponse', (e: CustomEvent) => {
+        document.addEventListener('__darkreader__blobURLCheckResponse', ((e: CustomEvent) => {
             isBlobURLSupported = e.detail.blobURLAllowed;
             resolve();
             blobURLCheckAwaiters.forEach((r) => r());
             blobURLCheckAwaiters.splice(0);
-        }, {once: true});
+        }) as EventListener, {once: true});
         document.dispatchEvent(new CustomEvent('__darkreader__blobURLCheckRequest'));
     });
 }

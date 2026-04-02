@@ -19,6 +19,7 @@ async function getVersion() {
     return p.version;
 }
 
+/** @type {string[]} */
 let watchFiles = [];
 
 async function bundleAPIModule({debug, watch}, moduleType, dest) {
@@ -29,6 +30,7 @@ async function bundleAPIModule({debug, watch}, moduleType, dest) {
             throw error;
         },
         plugins: [
+            // @ts-expect-error This expression is not callable
             rollupPluginTypescript({
                 rootDir: absolutePath('.'),
                 typescript,
@@ -36,6 +38,7 @@ async function bundleAPIModule({debug, watch}, moduleType, dest) {
                 noImplicitAny: debug ? false : true,
                 noUnusedLocals: debug ? false : true,
                 strictNullChecks: debug ? false : true,
+                strictPropertyInitialization: false,
                 removeComments: debug ? false : true,
                 sourceMap: debug ? true : false,
                 inlineSources: debug ? true : false,
@@ -43,6 +46,7 @@ async function bundleAPIModule({debug, watch}, moduleType, dest) {
                 outDir: absolutePath('.'),
                 cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : undefined,
             }),
+            // @ts-expect-error This expression is not callable
             rollupPluginReplace({
                 preventAssignment: true,
                 __DEBUG__: false,

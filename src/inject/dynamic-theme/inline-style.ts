@@ -145,9 +145,9 @@ export function getInlineOverrideStyle(): string {
 }
 
 function getInlineStyleElements(root: Node) {
-    const results: Element[] = [];
+    const results: HTMLElement[] = [];
     if (root instanceof Element && root.matches(INLINE_STYLE_SELECTOR)) {
-        results.push(root);
+        results.push(root as HTMLElement);
     }
     if (root instanceof Element || (isShadowDomSupported && root instanceof ShadowRoot) || root instanceof Document) {
         push(results, root.querySelectorAll(INLINE_STYLE_SELECTOR));

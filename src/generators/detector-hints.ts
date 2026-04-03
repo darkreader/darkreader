@@ -21,7 +21,9 @@ const detectorParserOptions: SitesFixesParserOptions<DetectorHint> = {
         if (command === 'TARGET') {
             return value.trim();
         }
-        if (command === 'NO DARK THEME' || command === 'SYSTEM THEME') {
+        if (command === 'NO DARK THEME' ||
+            command === 'SYSTEM THEME' ||
+            command === 'IFRAME') {
             return true;
         }
         return parseArray(value);
@@ -42,7 +44,9 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
             if (Array.isArray(value)) {
                 return formatArray(value).trim();
             }
-            if (prop === 'noDarkTheme' || prop === 'systemTheme') {
+            if (prop === 'noDarkTheme' ||
+                prop === 'systemTheme' ||
+                prop === 'iframe') {
                 return '';
             }
             return String(value).trim();

@@ -136,11 +136,17 @@ test('Detector Hints config', async () => {
         '========',
         'wikipedia.org',
         'NO DARK THEME',
+        '========',
+        'duckduckgo.com',
+        'IFRAME',
+        'TARGET', 'a',
+        'MATCH', '.b',
     ].join('\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], target: 'a', match: ['.b', '#c']},
         {url: ['proton.me'], systemTheme: true},
         {url: ['twitter.com'], target: 'c', match: ['[d="e"]']},
         {url: ['wikipedia.org'], noDarkTheme: true},
+        {url: ['duckduckgo.com'], target: 'a', match: ['.b'], iframe: true},
     ] as any);
 });
 

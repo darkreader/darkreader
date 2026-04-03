@@ -24,6 +24,7 @@
         "sourceMap": true,
         "inlineSources": true,
         "noEmitOnError": true,
+        "strictPropertyInitialization": false,
         "paths": {
             "@plus/*": ["../../src/stubs/*"],
             "definitions": ["../../src/definitions"],

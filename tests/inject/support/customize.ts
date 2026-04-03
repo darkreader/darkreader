@@ -2,7 +2,7 @@
     if (window.top === window.self) {
         return;
     }
-    const topDoc = window.top.document;
+    const topDoc = window.top!.document;
     const style = topDoc.createElement('style');
     style.textContent = [
         'body { background-color: #222222; color: #dddddd; }',

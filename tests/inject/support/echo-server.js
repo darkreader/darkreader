@@ -2,12 +2,12 @@
 import http from 'http';
 
 export async function createEchoServer(/** @type {number} */port) {
-    /** @type {import('http').Server} */
+    /** @type {import('http').Server | null} */
     let server;
 
     /** @type {import('http').RequestListener} */
     function handleRequest(req, res) {
-        const parsedURL = new URL(req.url, `http://${req.headers.host}`);
+        const parsedURL = new URL(req.url ?? '', `http://${req.headers.host}`);
         const pathName = parsedURL.pathname;
 
         if (pathName !== '/echo') {
@@ -43,14 +43,14 @@ export async function createEchoServer(/** @type {number} */port) {
     }
 
     /**
-     * @returns {Promise<void>}
+     * @returns {Promise<void> | undefined}
      */
     function close() {
         if (!server) {
             return;
         }
         return new Promise((resolve) => {
-            server.close((err) => {
+            server?.close((err) => {
                 if (err) {
                     console.error(err);
                 }

@@ -162,7 +162,7 @@ describe('Toggling the extension', () => {
             [['iframe', 'a'], 'color', 'rgb(0, 0, 238)'],
         ];
 
-        let loadSubframe: () => void = null;
+        let loadSubframe: () => void = () => void(0);
         const loadCompleted = loadTestPage({
             '/': multiline(
                 '<!DOCTYPE html>',

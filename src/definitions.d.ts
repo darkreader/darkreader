@@ -219,6 +219,8 @@ export interface DetectorHint {
     url: string[];
     target: string;
     match: string[];
+    matchSystemDark: string[];
+    matchSystemLight: string[];
     noDarkTheme: boolean;
     systemTheme: boolean;
     iframe: boolean;

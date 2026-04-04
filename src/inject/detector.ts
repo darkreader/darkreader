@@ -194,7 +194,9 @@ let hintMatchObserver: MutationObserver;
 function detectUsingHint(hint: DetectorHint, success: () => void) {
     stopDetectingUsingHint();
 
-    const matchSelector = (hint.match || []).join(', ');
+    const isDark = isSystemDarkModeEnabled();
+    const systemSelectors = isDark ? (hint.matchSystemDark ?? []) : (hint.matchSystemLight ?? []);
+    const matchSelector = [...(hint.match ?? []), ...systemSelectors].join(', ');
 
     function checkMatch(target: Element) {
         if (target.matches?.(matchSelector)) {

@@ -107,7 +107,9 @@ test('Detector Hints config', async () => {
 
     // selectors should have no comma
     const commaSelector = /\,(?![^\(|\"]*(\)|\"))/;
-    expect(hints.every(({target, match}) => ![target].concat(match).some((s) => commaSelector.test(s)))).toBe(true);
+    expect(hints.every(({target, match, matchSystemDark, matchSystemLight}) =>
+        ![target].concat(match, matchSystemDark ?? [], matchSystemLight ?? []).some((s) => commaSelector.test(s))
+    )).toBe(true);
 
     // only a single selector is allowed for target
     expect(hints.every(({target, noDarkTheme, systemTheme}) => noDarkTheme || systemTheme || typeof target === 'string' && !target.includes('\n'))).toBe(true);
@@ -141,12 +143,18 @@ test('Detector Hints config', async () => {
         'IFRAME',
         'TARGET', 'a',
         'MATCH', '.b',
+        '========',
+        'eff.org',
+        'TARGET', 'a',
+        'MATCH SYSTEM DARK', '.b',
+        'MATCH SYSTEM LIGHT', '.c',
     ].join('\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], target: 'a', match: ['.b', '#c']},
         {url: ['proton.me'], systemTheme: true},
         {url: ['twitter.com'], target: 'c', match: ['[d="e"]']},
         {url: ['wikipedia.org'], noDarkTheme: true},
         {url: ['duckduckgo.com'], target: 'a', match: ['.b'], iframe: true},
+        {url: ['eff.org'], target: 'a', matchSystemDark: ['.b'], matchSystemLight: ['.c']},
     ] as any);
 });
 

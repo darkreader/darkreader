@@ -870,12 +870,25 @@ URL patterns follow the same rules as other config files, see the [URL section](
   <tr>
     <td><strong>TARGET</strong></td>
     <td>A single CSS selector for the element Dark Reader watches for theme state changes.</td>
-    <td>Usually <code>html</code> or <code>body</code>. Required when using <code>MATCH</code>.
+    <td>Usually <code>html</code> or <code>body</code>. Required when using <code>MATCH</code>,
+    <code>MATCH SYSTEM DARK</code>, or <code>MATCH SYSTEM LIGHT</code>. 
+    Attribute changes on this element are detected live, but switching back from dark to
+    light currently requires a page reload.</td>
   </tr>
   <tr>
     <td><strong>MATCH</strong></td>
     <td>One CSS selector per line. If the <code>TARGET</code> element matches any selector in this section, the site is treated as dark.</td>
     <td>Applies regardless of system theme. Write one selector per line, without commas.</td>
+  </tr>
+  <tr>
+    <td><strong>MATCH&nbsp;SYSTEM&nbsp;DARK</strong></td>
+    <td>One CSS selector per line. Works like <code>MATCH</code>, but only when the system color scheme is dark (<code>prefers-color-scheme: dark</code>).</td>
+    <td>See the <a href="#when-to-use-match-system">when to use</a> section.</td>
+  </tr>
+  <tr>
+    <td><strong>MATCH&nbsp;SYSTEM&nbsp;LIGHT</strong></td>
+    <td>One CSS selector per line. Works like <code>MATCH</code>, but only when the system color scheme is light (<code>prefers-color-scheme: light</code>).</td>
+    <td>See the <a href="#when-to-use-match-system">when to use</a> section.</td>
   </tr>
   <tr>
     <td><strong>NO&nbsp;DARK&nbsp;THEME</strong></td>
@@ -895,7 +908,43 @@ URL patterns follow the same rules as other config files, see the [URL section](
 </table>
 
 > [!IMPORTANT]
-> Not all rules can be combined freely. An entry must use exactly one of: `NO DARK THEME`, `SYSTEM THEME`, or `TARGET` paired with at least one of `MATCH`, or `IFRAME`.
+> Not all rules can be combined freely. An entry must use exactly one of: `NO DARK THEME`, `SYSTEM THEME`, or `TARGET` paired with at least one of `MATCH`, `MATCH SYSTEM DARK`, or `MATCH SYSTEM LIGHT`. `IFRAME` may be added to any of these.
+
+<a name="when-to-use-match-system"></a>
+<details>
+  <summary>
+    <strong>When to use <code>MATCH SYSTEM DARK</code> / <code>MATCH SYSTEM LIGHT</code></strong>
+  </summary>
+<ul>
+
+Some sites follow the system theme but store separate theme values for the light and dark system states, allowing users to choose a specific theme for each.
+
+For example, a site may keep a single attribute such as `data-color-mode="auto"` or `data-theme-mode="system"` fixed, while separate attributes such as `data-dark-theme` and `data-light-theme` determine which palette is active for each system theme.
+
+A plain `MATCH` selector on those attributes would apply regardless of the current system theme, which can produce false positives.
+
+Use `MATCH SYSTEM DARK` and `MATCH SYSTEM LIGHT` for those cases. They are not mutually exclusive with `MATCH`.
+
+Here is a complete entry showing all three match types together:
+```css
+example.com
+
+TARGET
+html
+
+MATCH
+[data-color-mode="dark"][data-dark-theme*="dark"]
+[data-color-mode="light"][data-light-theme*="dark"]
+
+MATCH SYSTEM DARK
+[data-color-mode="auto"][data-dark-theme*="dark"]
+
+MATCH SYSTEM LIGHT
+[data-color-mode="auto"][data-light-theme*="dark"]
+```
+
+</ul>
+</details>
 
 ## Code contributions
 

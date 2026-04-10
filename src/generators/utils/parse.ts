@@ -144,5 +144,14 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
         return fix;
     });
 
+    if (fixes.length > 0) {
+        const commonFixIndex = fixes.findIndex((f) => f.url?.[0] === '*');
+        if (commonFixIndex > 0) {
+            const commonFix = fixes[commonFixIndex];
+            fixes.splice(commonFixIndex, 1);
+            fixes.unshift(commonFix);
+        }
+    }
+
     return fixes;
 }

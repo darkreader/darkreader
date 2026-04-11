@@ -1021,6 +1021,19 @@ describe('inversion-fixes.config', () => {
         expect(offending).toBeUndefined();
     });
 
+    const dynamicThemeOnlyPatterns = [
+        /--darkreader-neutral-background/,
+        /--darkreader-neutral-text/,
+        /--darkreader-selection-background/,
+        /--darkreader-selection-text/,
+        /\$\{[^}]+\}/,
+    ];
+
+    it('has no dynamic-theme-only CSS variables or templates', () => {
+        const offending = fixes.find(({css}) => dynamicThemeOnlyPatterns.some((pattern) => pattern.test(css)));
+        expect(offending).toBeUndefined();
+    });
+
     it('is properly formatted', () => expect(file).toBeFormattedAs(formatInversionFixes(fixes)));
 });
 

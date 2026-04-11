@@ -285,6 +285,8 @@ export class Extension {
             resetDevInversionFixes: DevTools.resetInversionFixes,
             applyDevStaticThemes: DevTools.applyStaticThemes,
             resetDevStaticThemes: DevTools.resetStaticThemes,
+            applyDevDetectorHints: DevTools.applyDetectorHints,
+            resetDevDetectorHints: DevTools.resetDetectorHints,
             startActivation: Extension.startActivation,
             resetActivation: Extension.resetActivation,
             hideHighlights: UIHighlights.hideHighlights,
@@ -431,15 +433,18 @@ export class Extension {
             dynamicFixesText,
             filterFixesText,
             staticThemesText,
+            detectorHintsText,
         ] = await Promise.all([
             DevTools.getDynamicThemeFixesText(),
             DevTools.getInversionFixesText(),
             DevTools.getStaticThemesText(),
+            DevTools.getDetectorHintsText(),
         ]);
         return {
             dynamicFixesText,
             filterFixesText,
             staticThemesText,
+            detectorHintsText,
         };
     }
 

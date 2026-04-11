@@ -206,7 +206,7 @@ export default class ConfigManager {
         ConfigManager.DARK_SITES_INDEX = indexURLTemplateList(templates);
     }
 
-    private static handleDetectorHints(): void {
+    static handleDetectorHints(): void {
         const $hints = ConfigManager.overrides.detectorHints || ConfigManager.raw.detectorHints || '';
         ConfigManager.DETECTOR_HINTS_INDEX = indexSitesFixesConfig($hints);
         ConfigManager.DETECTOR_HINTS_RAW = $hints;

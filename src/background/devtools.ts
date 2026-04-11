@@ -1,4 +1,5 @@
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
+import {parseDetectorHints, formatDetectorHints} from '../generators/detector-hints';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import {isFirefox} from '../utils/platform';
@@ -112,20 +113,24 @@ export default class DevTools {
     private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
     private static KEY_FILTER = 'dev_inversion_fixes';
     private static KEY_STATIC = 'dev_static_themes';
+    private static KEY_DETECTOR = 'dev_detector_hints';
 
     private static async loadConfigOverrides(): Promise<void> {
         const [
             dynamicThemeFixes,
             inversionFixes,
             staticThemes,
+            detectorHints,
         ] = await Promise.all([
             DevTools.getSavedDynamicThemeFixes(),
             DevTools.getSavedInversionFixes(),
             DevTools.getSavedStaticThemes(),
+            DevTools.getSavedDetectorHints(),
         ]);
         ConfigManager.overrides.dynamicThemeFixes = dynamicThemeFixes || null;
         ConfigManager.overrides.inversionFixes = inversionFixes || null;
         ConfigManager.overrides.staticThemes = staticThemes || null;
+        ConfigManager.overrides.detectorHints = detectorHints || null;
     }
 
     private static async getSavedDynamicThemeFixes() {
@@ -238,6 +243,45 @@ export default class DevTools {
             ConfigManager.overrides.staticThemes = formatted;
             ConfigManager.handleStaticThemes();
             DevTools.saveStaticThemes(formatted);
+            DevTools.onChange();
+            return null;
+        } catch (err) {
+            return err;
+        }
+    }
+
+    private static async getSavedDetectorHints(): Promise<string | null> {
+        return DevTools.store.get(DevTools.KEY_DETECTOR);
+    }
+
+    private static saveDetectorHints(text: string): void {
+        DevTools.store.set(DevTools.KEY_DETECTOR, text);
+    }
+
+    static async getDetectorHintsText(): Promise<string> {
+        let rawHints = await DevTools.getSavedDetectorHints();
+        if (!rawHints) {
+            await ConfigManager.load();
+            rawHints = ConfigManager.DETECTOR_HINTS_RAW || '';
+        }
+        const hints = parseDetectorHints(rawHints);
+        return formatDetectorHints(hints);
+    }
+
+    static resetDetectorHints(): void {
+        DevTools.store.remove(DevTools.KEY_DETECTOR);
+        ConfigManager.overrides.detectorHints = null;
+        ConfigManager.handleDetectorHints();
+        DevTools.onChange();
+    }
+
+    // TODO(Anton): remove any
+    static applyDetectorHints(text: string): any {
+        try {
+            const formatted = formatDetectorHints(parseDetectorHints(text));
+            ConfigManager.overrides.detectorHints = formatted;
+            ConfigManager.handleDetectorHints();
+            DevTools.saveDetectorHints(formatted);
             DevTools.onChange();
             return null;
         } catch (err) {

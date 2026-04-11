@@ -150,6 +150,17 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_STATIC_THEMES});
     }
 
+    async applyDevDetectorHints(text: string): Promise<void> {
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_DETECTOR_HINTS, text);
+        }
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_DETECTOR_HINTS, text);
+    }
+
+    resetDevDetectorHints(): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_DETECTOR_HINTS});
+    }
+
     startActivation(email: string, key: string): void {
         chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.START_ACTIVATION, data: {email, key}});
     }

@@ -23,6 +23,8 @@ export interface ExtensionAdapter {
     resetDevInversionFixes: () => void;
     applyDevStaticThemes: (text: string) => Error;
     resetDevStaticThemes: () => void;
+    applyDevDetectorHints: (text: string) => Error;
+    resetDevDetectorHints: () => void;
     startActivation: (email: string, key: string) => Promise<void>;
     resetActivation: () => Promise<void>;
     hideHighlights: (ids: string[]) => Promise<void>;
@@ -88,6 +90,7 @@ export default class Messenger {
             case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES:
             case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
             case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
+            case MessageTypeUItoBG.APPLY_DEV_DETECTOR_HINTS:
                 promise = new Promise((resolve, reject) => {
                     port.onMessage.addListener((message: MessageUItoBG | MessageCStoBG) => {
                         const {data} = message;
@@ -101,6 +104,9 @@ export default class Messenger {
                                 break;
                             case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
                                 error = Messenger.adapter.applyDevStaticThemes(data);
+                                break;
+                            case MessageTypeUItoBG.APPLY_DEV_DETECTOR_HINTS:
+                                error = Messenger.adapter.applyDevDetectorHints(data);
                                 break;
                             default:
                                 throw new Error(`Unknown port name: ${port.name}`);
@@ -175,6 +181,14 @@ export default class Messenger {
             }
             case MessageTypeUItoBG.RESET_DEV_STATIC_THEMES:
                 Messenger.adapter.resetDevStaticThemes();
+                break;
+            case MessageTypeUItoBG.APPLY_DEV_DETECTOR_HINTS: {
+                const error = Messenger.adapter.applyDevDetectorHints(data);
+                sendResponse({error: error ? error.message : undefined});
+                break;
+            }
+            case MessageTypeUItoBG.RESET_DEV_DETECTOR_HINTS:
+                Messenger.adapter.resetDevDetectorHints();
                 break;
             case MessageTypeUItoBG.START_ACTIVATION:
                 Messenger.adapter.startActivation(data.email, data.key);

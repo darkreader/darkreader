@@ -1,6 +1,11 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
+import type {DetectorHint, DynamicThemeFix, InversionFix, StaticTheme} from '../../../definitions';
+import {parseDetectorHints, formatDetectorHints} from '../../../generators/detector-hints';
+import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../generators/dynamic-theme';
+import {parseInversionFixes, formatInversionFixes} from '../../../generators/css-filter';
+import {parseStaticThemes, formatStaticThemes} from '../../../generators/static-theme';
 import {ThemeEngine} from '../../../generators/theme-engines';
 import {isMobile} from '../../../utils/platform';
 import {Button, Overlay} from '../../controls';
@@ -8,10 +13,34 @@ import TabPanel from '../../options/tab-panel/tab-panel';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import type {DevtoolsProps} from '../types';
 
-import {ConfigEditor} from './config-editor';
-import {DynamicModeEditor} from './dynamic-mode-editor';
+import {ModeEditor} from './mode-editor';
 
 declare const __PLUS__: boolean;
+
+function createDynamicFix(url: string): DynamicThemeFix {
+    return {
+        url: [url],
+        invert: [],
+        css: '',
+        ignoreImageAnalysis: [],
+        ignoreInlineStyle: [],
+        ignoreCSSUrl: [],
+        disableStyleSheetsProxy: false,
+        disableCustomElementRegistryProxy: false,
+    };
+}
+
+function createInversionFix(url: string): InversionFix {
+    return {url: [url], invert: [], noinvert: [], removebg: [], css: ''};
+}
+
+function createStaticTheme(url: string): StaticTheme {
+    return {url: [url]};
+}
+
+function createDetectorHint(url: string): DetectorHint {
+    return {url: [url], target: '', match: [], noDarkTheme: false, systemTheme: false, iframe: false};
+}
 
 export default function Body(props: DevtoolsProps): Malevic.Child {
     const {data, actions, devtools} = props;
@@ -49,22 +78,43 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
             </header>
             <TabPanel activeTabId={store.activeTabId} onTabChange={onTabChange}>
                 <TabPanel.Tab id="dynamic-editor" label="Dynamic Theme Editor">
-                    <DynamicModeEditor {...props} />
+                    <ModeEditor
+                        fixesText={devtools.dynamicFixesText}
+                        parse={parseDynamicThemeFixes}
+                        format={formatDynamicThemeFixes}
+                        apply={(text) => actions.applyDevDynamicThemeFixes(text)}
+                        reset={() => actions.resetDevDynamicThemeFixes()}
+                        createFix={createDynamicFix}
+                    />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="static-editor" label="Static Theme Editor">
-                    <ConfigEditor
-                        header="Static Theme Editor"
-                        text={devtools.staticThemesText}
+                    <ModeEditor
+                        fixesText={devtools.staticThemesText}
+                        parse={parseStaticThemes}
+                        format={formatStaticThemes}
                         apply={(text) => actions.applyDevStaticThemes(text)}
                         reset={() => actions.resetDevStaticThemes()}
+                        createFix={createStaticTheme}
                     />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="filter-editor" label="Inversion Fix Editor">
-                    <ConfigEditor
-                        header="Inversion Fix Editor"
-                        text={devtools.filterFixesText}
+                    <ModeEditor
+                        fixesText={devtools.filterFixesText}
+                        parse={parseInversionFixes}
+                        format={formatInversionFixes}
                         apply={(text) => actions.applyDevInversionFixes(text)}
                         reset={() => actions.resetDevInversionFixes()}
+                        createFix={createInversionFix}
+                    />
+                </TabPanel.Tab>
+                <TabPanel.Tab id="detector-editor" label="Detector Hints Editor">
+                    <ModeEditor
+                        fixesText={devtools.detectorHintsText}
+                        parse={parseDetectorHints}
+                        format={formatDetectorHints}
+                        apply={(text) => actions.applyDevDetectorHints(text)}
+                        reset={() => actions.resetDevDetectorHints()}
+                        createFix={createDetectorHint}
                     />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">

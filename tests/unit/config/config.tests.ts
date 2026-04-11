@@ -9,6 +9,7 @@ import {parseColorSchemeConfig, type ParsedColorSchemeConfig} from '../../../src
 import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../../src/utils/text';
 import {compareURLPatterns} from '../../../src/utils/url';
 import {multiline, rootPath} from '../../support/test-utils';
+import {parse, lexer} from 'css-tree';
 
 const commaSelector = /\,(?![^\(|\"]*(\)|\"))/;
 
@@ -974,6 +975,39 @@ describe('dynamic-theme-fixes.config', () => {
         expect(offending).toBeUndefined();
     });
 
+    it('has valid CSS', () => {
+        const offending = fixes
+            .filter(({css}) => css)
+            .map(({css, url}) => {
+                // Validate each ${...} contains a valid CSS color
+                for (const match of css.matchAll(/\$\{([^{}]+)\}/g)) {
+                    const color = match[1].trim();
+                    try {
+                        const ast = parse(color, {context: 'value'});
+                        const result = lexer.matchType('color', ast);
+                        if (result.error) {
+                            return {url, css: match[0], error: `Invalid dynamic color: "${color}"`};
+                        }
+                    } catch {
+                        // If parsing throws, it's also an invalid color
+                        // css-tree throws with context: 'value', it doesn't call onParseError...
+                        return {url, css: match[0], error: `Invalid dynamic color: "${color}"`};
+                    }
+                }
+
+                // Remove ${...} templates before parsing, we already validated them
+                let firstError: string | null = null;
+                const strippedCss = css.replace(/\$\{([^{}]+)\}/g, '$1');
+                parse(strippedCss, {onParseError: (e) => {
+                    if (!firstError) {
+                        firstError = (e as {formattedMessage?: string}).formattedMessage ?? String(e);
+                    }
+                }});
+                return firstError ? {url, error: firstError} : null;
+            });
+        expect(offending.filter(Boolean)).toEqual([]);
+    });
+
     it('is properly formatted', () => expect(file).toBeFormattedAs(formatDynamicThemeFixes(fixes)));
 });
 
@@ -1032,6 +1066,21 @@ describe('inversion-fixes.config', () => {
     it('has no dynamic-theme-only CSS variables or templates', () => {
         const offending = fixes.find(({css}) => dynamicThemeOnlyPatterns.some((pattern) => pattern.test(css)));
         expect(offending).toBeUndefined();
+    });
+
+    it('has valid CSS', () => {
+        const offending = fixes
+            .filter(({css}) => css)
+            .map(({css, url}) => {
+                const errors: unknown[] = [];
+                parse(css, {onParseError: (e) => errors.push(e)});
+                if (errors.length === 0) {
+                    return null;
+                }
+                const e = errors[0] as {formattedMessage?: string};
+                return {url, error: e.formattedMessage ?? String(e)};
+            });
+        expect(offending.filter(Boolean)).toEqual([]);
     });
 
     it('is properly formatted', () => expect(file).toBeFormattedAs(formatInversionFixes(fixes)));

@@ -43,7 +43,7 @@ export default function AppSwitch(props: ViewProps) {
     const descriptionText = isOn ?
         getLocalMessage('extension_is_enabled') :
         isOff ?
-            'Extension is disabled' :
+            getLocalMessage('extension_is_disabled') :
             isTimeAutomation ?
                 'Switches according to specified time' :
                 isLocationAutomation ?

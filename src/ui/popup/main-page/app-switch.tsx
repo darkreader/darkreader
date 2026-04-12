@@ -14,10 +14,9 @@ export default function AppSwitch(props: ViewProps) {
     const isLocationAutomation = props.data.settings.automation.mode === AutomationMode.LOCATION;
     const now = new Date();
 
-    // TODO: Replace messages with some IDs.
     const values = [
         getLocalMessage('on'),
-        'Auto',
+        getLocalMessage('auto'),
         getLocalMessage('off'),
     ];
     const value = isOn ? values[0] : isOff ? values[2] : values[1];

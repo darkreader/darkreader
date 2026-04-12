@@ -26,7 +26,7 @@
   </li>
   <li>
     <strong>Site is already dark theme only</strong> &rarr; See
-    <a href="#adding-a-website-that-is-already-dark">Adding a website that is already dark</a>
+    <a href="#adding-a-website-that-is-always-dark">Adding a website that is always dark</a>
   </li>
   <li>
     <strong>Site has built-in dark mode but Dark Reader still applies</strong> &rarr;
@@ -55,7 +55,8 @@ Translated text
 
 The English file, `en.config`, is the source of truth. Other locale files should use the same message IDs.
 
-To add a new language, create a new `{locale}.config` file in `src/_locales/`. The build will pick it up automatically. See the list of supported [language codes](https://developer.chrome.com/webstore/i18n#localeTable).
+To add a new language, create a new `{locale}.config` file in `src/_locales/`. The build will pick it up automatically.<br>
+See the list of supported [language codes](https://developer.chrome.com/webstore/i18n#localeTable).
 
 If you also want to translate the extension store listing text, edit the matching file in `src/_locales/store/`, such as `store/store.fr.config`. Otherwise, you can ignore the `store/` directory.
 
@@ -432,7 +433,7 @@ Use `onMount` only when the lock must be added dynamically on the client.<br>
 </ul>
 </details>
 
-## Adding a website that is already dark
+## Adding a website that is always dark
 
 If a website is **already dark** and meets the following requirements:
 
@@ -458,7 +459,9 @@ See [Submitting your fix](#submitting-your-fix) for how to submit the fix.
 > [!IMPORTANT]  
 > Use `dark-sites.config` instead if the entire site is *always* dark regardless of user preference or system theme.
 
-If a website has its own dark mode but Dark Reader applies its filter on top anyway (making the page look overly dark or distorted), you can add a hint so Dark Reader knows when to back off. The site must meet the following requirements:
+If a website has its own dark mode but Dark Reader applies its filter on top anyway (making the page look overly dark or distorted), you can add a hint so Dark Reader knows when to back off.
+
+The site must meet the following requirements:
 
 <ul>
   <li>
@@ -478,6 +481,7 @@ If a website has its own dark mode but Dark Reader applies its filter on top any
 </ul>
 
 Then you can **add it to the [detector-hints.config](src/config/detector-hints.config) file**.
+
 See [Detector Hints rule syntax](#detector-hints-rule-syntax) for all available rules,
 and [Submitting your fix](#submitting-your-fix) for how to submit the fix.
 
@@ -495,7 +499,9 @@ You can learn how to create a fix for the appropriate mode [below](#editor-and-r
 
 ### Using the built-in Dark Reader Dev Tools
 
-Dark Reader includes its own developer tools for testing fixes and previewing rule changes more quickly. These tools are intended for **small, targeted fixes** on a web page, such as:
+Dark Reader includes its own developer tools for testing fixes and previewing rule changes more quickly.
+
+These tools are intended for **small, targeted fixes** on a web page, such as:
 
 <ul>
   <li>fixing a dark icon on a dark background,</li>
@@ -594,7 +600,7 @@ RULE-WITH-SELECTORS
 The fix starts with the domain name, such as `example.com`. Omit a plain `www.` prefix, so use `example.com`, not `www.example.com`.
 
 If the fix applies only to a specific subdomain, include that exact host name, such as `sub.example.com`.<br>
-Do not remove subdomains that are actually part of the address,such as `app.example.com`, `www7.example.com`, or `beta.example.com`.
+Do not remove subdomains that are actually part of the address, such as `app.example.com`, `www7.example.com`, or `beta.example.com`.
 
 If the same fix applies to multiple domains or subdomains, list each one on its own line, starting with the most common one:
 
@@ -683,7 +689,8 @@ URL patterns follow the same rules as other config files, see the [URL section](
 > [!WARNING]
 > Only available in `dynamic-theme-fixes.config`.
 
-When writing a `CSS` block, avoid hardcoded colors like `#fff` or `black`, they won't adapt to the user's theme settings. Dark Reader provides two mechanisms for color values that do.
+When writing a `CSS` block, avoid hardcoded colors like `#fff` or `black`, they won't adapt to the user's theme settings.
+Dark Reader provides two mechanisms for color values that do.
 
 #### CSS custom properties
 
@@ -692,18 +699,6 @@ When writing a `CSS` block, avoid hardcoded colors like `#fff` or `black`, they 
 > while still adapting to the user's brightness, contrast, and sepia settings.
 
 Dark Reader injects a small set of CSS custom properties into `:root` that reflect the user's current theme settings.
-
-```css
-CSS
-.logo {
-    background-color: var(--darkreader-neutral-background) !important;
-}
-.footer > p {
-    color: var(--darkreader-neutral-text) !important;
-}
-```
-
-#### Rules
 
 <table>
   <tr>
@@ -737,6 +732,16 @@ CSS
 > In CSS, the keyword [**initial**](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/initial) applies the default value to an element.
 > This will most likely be inherited from the parent.
 
+```css
+CSS
+.logo {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.footer > p {
+    color: var(--darkreader-neutral-text) !important;
+}
+```
+
 #### `${COLOR}` template
 
 > [!TIP]
@@ -747,7 +752,7 @@ CSS
 
 Any valid [CSS color value](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value) works inside `${}`, including named colors, hex values, and `rgb()`:
 
-```css
+```scss
 CSS
 .wrong-element-colors {
     background-color: ${white} !important;
@@ -767,7 +772,7 @@ Keep this in mind when using `${COLOR}` on background properties with a dark sou
 In simpler terms, light colors become darker, and dark colors become lighter, regardless of which CSS property they are applied to.
 Use a light color within `${}` when targeting `background-color`, and a dark color when targeting `color`.
 
-If the original color doesn't matter, and the element just needs a neutral dark background or text color, use a custom property instead.
+If the original color doesn't matter, and the element just needs a neutral dark background or text color, use a [custom property](#css-custom-properties) instead.
 
 ### Fixes for Filter and Filter+ modes
 

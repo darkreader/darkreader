@@ -45,7 +45,7 @@ export default function AppSwitch(props: ViewProps) {
         isOff ?
             getLocalMessage('extension_is_disabled') :
             isTimeAutomation ?
-                'Switches according to specified time' :
+                getLocalMessage('time_automation_description') :
                 isLocationAutomation ?
                     'Switched according to location' :
                     'Switches according to system dark mode';

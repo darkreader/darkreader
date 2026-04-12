@@ -48,7 +48,7 @@ export default function AppSwitch(props: ViewProps) {
                 getLocalMessage('time_automation_description') :
                 isLocationAutomation ?
                     getLocalMessage('location_automation_description') :
-                    'Switches according to system dark mode';
+                    getLocalMessage('system_theme_automation_description');
     const description = (
         <span
             class={{

@@ -46,7 +46,7 @@ async function translateEnMessage(messageId) {
                 const translated = await translate(enMessage, locale);
                 locMessages.set(messageId, translated);
 
-                const output = stringifyLocale(locMessages);
+                const output = stringifyLocale(reorderLocale(enMessages, locMessages));
                 await writeFile(locFile, output);
                 log(`${locale}: ${translated}`);
             }
@@ -93,7 +93,7 @@ async function translateNewEnMessages() {
                 log(`${locale}: ${translated}`);
             }
 
-            const output = stringifyLocale(locMessages);
+            const output = stringifyLocale(reorderLocale(enMessages, locMessages));
             await writeFile(locFile, output);
         }
     }
@@ -127,6 +127,26 @@ function parseLocale(content) {
         messages.set(id, value.trim());
     });
     return messages;
+}
+
+/**
+ * @param {Map<string, string>} enMessages
+ * @param {Map<string, string>} locMessages
+ * @returns {Map<string, string>}
+ */
+function reorderLocale(enMessages, locMessages) {
+    const reordered = new Map();
+    for (const key of enMessages.keys()) {
+        if (locMessages.has(key)) {
+            reordered.set(key, locMessages.get(key));
+        }
+    }
+    for (const key of locMessages.keys()) {
+        if (!reordered.has(key)) {
+            reordered.set(key, locMessages.get(key));
+        }
+    }
+    return reordered;
 }
 
 /**

@@ -409,7 +409,18 @@ export class Extension {
             Newsmaker.getLatest(),
             Extension.getShortcuts(),
             Extension.getActiveTabInfo(),
-            new Promise<boolean>((r) => chrome.extension.isAllowedFileSchemeAccess(r)),
+            new Promise<boolean>((resolve) => {
+                // Firefox always returns false from isAllowedFileSchemeAccess()
+                // We are also not going to assume <all_urls> always grants file scheme access
+                if (isFirefox) {
+                    chrome.permissions.contains(
+                        {origins: ['file:///*']},
+                        resolve
+                    );
+                } else {
+                    chrome.extension.isAllowedFileSchemeAccess(resolve);
+                }
+            }),
             UIHighlights.getHighlightsToShow(),
         ]);
         return {

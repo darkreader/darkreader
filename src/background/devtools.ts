@@ -51,9 +51,8 @@ class PersistentStorageWrapper implements DevToolsStorage {
         return new Promise<void>((resolve) => chrome.storage.local.set({[key]: value}, () => {
             if (chrome.runtime.lastError) {
                 console.error('Failed to write DevTools data', chrome.runtime.lastError);
-            } else {
-                resolve();
             }
+            resolve();
         }));
     }
 
@@ -62,9 +61,8 @@ class PersistentStorageWrapper implements DevToolsStorage {
         return new Promise<void>((resolve) => chrome.storage.local.remove(key, () => {
             if (chrome.runtime.lastError) {
                 console.error('Failed to delete DevTools data', chrome.runtime.lastError);
-            } else {
-                resolve();
             }
+            resolve();
         }));
     }
 

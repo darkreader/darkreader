@@ -485,7 +485,7 @@ export class Extension {
             return;
         }
         Extension.wasLastColorSchemeDark = isDark;
-        Extension.MV3syncSystemColorStateManager(isDark);
+        await Extension.MV3syncSystemColorStateManager(isDark);
         await Extension.loadData();
         if (UserStorage.settings.automation.mode !== AutomationMode.SYSTEM) {
             return;

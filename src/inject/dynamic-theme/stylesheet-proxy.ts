@@ -494,7 +494,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 return;
             }
             const unqueuedSheets: NodeSheet[] = [];
-            unqueuedSheets.forEach(({sheetId, sheet}) => {
+            sheets.forEach(({sheetId, sheet}) => {
                 if (queuedSheetChanges.has(sheet)) {
                     return;
                 }

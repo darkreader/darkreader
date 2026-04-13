@@ -182,7 +182,7 @@ async function getLocaleFiles(locale) {
     const walk = async (dir) => {
         const entries = await fs.readdir(dir);
         const matched = entries.filter((f) => f === `${locale}.config` || f.endsWith(`.${locale}.config`));
-        results.push(...matched);
+        results.push(...matched.map((f) => `${dir}/${f}`));
 
         for (const e of entries) {
             const p = `${dir}/${e}`;

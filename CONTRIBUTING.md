@@ -231,7 +231,25 @@ Then execute `npm run debug`.
 
 If you execute `npm run debug:watch` instead of `npm run debug`, it will automatically recompile after making any code changes.
 
-## Tips
+## Rules and recommendations
+
+If a change requires more than **10 lines of code**,
+please submit an issue on GitHub (if there is no existing one),
+and **discuss your solution and approach** with active contributors,
+before performing further changes.
+
+**Keep the changes simple**.
+Please use as fewer code as possible.
+A single pull request should have a single purpose.
+
+**Low effort contributions** are not allowed.
+A contributor should ensure the changes work and solve a real problem.
+
+Code changes predominantly **generated with AI are not allowed**.
+All comments and conversations must be held by humans.
+
+**Adding external dependencies** and any changes to `package.json` and lock files are forbidden.
+Any changes to build process are prohibited.
 
 You can use any text editor or web IDE (for example, [Visual Studio Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/)) for editing the code.
 

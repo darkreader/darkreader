@@ -79,7 +79,6 @@ export class Extension {
         }
         Extension.initialized = true;
 
-        DevTools.init(Extension.onSettingsChanged);
         Messenger.init(Extension.getMessengerAdapter());
         TabManager.init({
             getConnectionMessage: Extension.getConnectionMessage,
@@ -232,6 +231,7 @@ export class Extension {
     static async start(): Promise<void> {
         Extension.init();
         await TabManager.cleanState();
+        await DevTools.init(Extension.onSettingsChanged);
         await Promise.all([
             ConfigManager.load({local: true}),
             Extension.MV3syncSystemColorStateManager(null),

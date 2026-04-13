@@ -95,7 +95,7 @@ export default class DevTools {
     private static onChange: () => void;
     private static store: DevToolsStorage;
 
-    static init(onChange: () => void): void {
+    static async init(onChange: () => void): Promise<void> {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
         if (!isFirefox && typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
@@ -103,8 +103,8 @@ export default class DevTools {
         } else {
             DevTools.store = new TempStorage();
         }
-        DevTools.loadConfigOverrides();
         DevTools.onChange = onChange;
+        await DevTools.loadConfigOverrides();
     }
 
     private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';

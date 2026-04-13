@@ -189,10 +189,10 @@ function deepWatchForInlineStyles(
             elementStyleDidChange(el);
         });
         iterateShadowHosts(node, (n) => {
-            if (discoveredNodes.has(node)) {
+            if (discoveredNodes.has(n)) {
                 return;
             }
-            discoveredNodes.add(node);
+            discoveredNodes.add(n);
             shadowRootDiscovered(n.shadowRoot!);
             deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });

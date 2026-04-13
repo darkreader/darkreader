@@ -52,7 +52,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]): s
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: string, index: SiteFixesIndex, enabledForPDF: boolean): DynamicThemeFix[] | null {
+export function getDynamicThemeFixesFor(url: string, text: string, index: SiteFixesIndex, enabledForPDF: boolean): DynamicThemeFix[] | null {
     const fixes = getSitesFixesFor(url, text, index, parseDynamicThemeFixes);
 
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
@@ -61,7 +61,8 @@ export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: 
 
     if (enabledForPDF) {
         // Copy part of fixes which will be mutated
-        const commonFix = {...fixes[0]};
+        const invert = fixes[0].invert.slice();
+        const commonFix = {...fixes[0], invert};
         const pdfFixes: DynamicThemeFix[] = [
             commonFix,
             ...fixes.slice(1),

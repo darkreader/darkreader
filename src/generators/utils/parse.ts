@@ -140,7 +140,7 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
         const [start, length] = offset;
         const block = text.slice(start, start + length);
         const fix = parse(block)[0];
-        siteFixesCache.set(offset, cache);
+        siteFixesCache.set(offset, fix);
         return fix;
     });
 

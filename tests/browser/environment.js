@@ -133,10 +133,11 @@ export default class CustomJestEnvironment extends TestEnvironment {
             await new Promise((resolve) => setTimeout(resolve, retryIntervalInMs));
             try {
                 return await connect({
-                    browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
+                    browserWSEndpoint: `ws://localhost:${FIREFOX_DEVTOOLS_PORT}/session`,
+                    protocol: 'webDriverBiDi',
                 });
             } catch (err) {
-                console.log(`Firefox connection attempt ${i + 1} failed:`, e);
+                console.log(`Firefox connection attempt ${i + 1} failed:`, err);
             }
         }
         throw new Error('Failed to connect to Puppeteer');

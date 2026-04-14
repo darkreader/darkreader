@@ -130,24 +130,24 @@ export default function HSBPicker(props: HSBPickerProps) {
         activeHSB = store.activeHSB!;
     }
 
-    function onSBCanvasRender(canvas: HTMLCanvasElement) {
-        if (isElementHidden(canvas)) {
+    function onSBCanvasRender(canvas: Node) {
+        if (isElementHidden(canvas as HTMLCanvasElement)) {
             return;
         }
         const hue = activeHSB!.h;
         const prevHue = prevColor && rgbToHSB(parseColorWithCache(prevColor)!).h;
         if (store.wasPrevHidden || hue !== prevHue) {
-            renderSB(hue, canvas);
+            renderSB(hue, canvas as HTMLCanvasElement);
         }
         store.wasPrevHidden = false;
     }
 
-    function onHueCanvasRender(canvas: HTMLCanvasElement) {
-        if (store.hueCanvasRendered || isElementHidden(canvas)) {
+    function onHueCanvasRender(canvas: Node) {
+        if (store.hueCanvasRendered || isElementHidden(canvas as HTMLCanvasElement)) {
             return;
         }
         store.hueCanvasRendered = true;
-        renderHue(canvas);
+        renderHue(canvas as HTMLCanvasElement);
     }
 
     function createHSBSwipeHandler(getEventHSB: (e: {clientX: number; clientY: number; rect: ClientRect}) => HSB) {
@@ -205,11 +205,11 @@ export default function HSBPicker(props: HSBPickerProps) {
             <span
                 class="hsb-picker__sb-container"
                 onmousedown={onSBPointerDown}
-                onupdate={(el: HTMLElement) => {
+                onupdate={(el) => {
                     if (store.sbTouchStartHandler) {
-                        el.removeEventListener('touchstart', store.sbTouchStartHandler);
+                        (el as HTMLElement).removeEventListener('touchstart', store.sbTouchStartHandler);
                     }
-                    el.addEventListener('touchstart', onSBPointerDown, {passive: true});
+                    (el as HTMLElement).addEventListener('touchstart', onSBPointerDown, {passive: true});
                     store.sbTouchStartHandler = onSBPointerDown;
                 }}
             >
@@ -219,11 +219,11 @@ export default function HSBPicker(props: HSBPickerProps) {
             <span
                 class="hsb-picker__hue-container"
                 onmousedown={onHuePointerDown}
-                onupdate={(el: HTMLElement) => {
+                onupdate={(el) => {
                     if (store.hueTouchStartHandler) {
-                        el.removeEventListener('touchstart', store.hueTouchStartHandler);
+                        (el as HTMLElement).removeEventListener('touchstart', store.hueTouchStartHandler);
                     }
-                    el.addEventListener('touchstart', onHuePointerDown, {passive: true});
+                    (el as HTMLElement).addEventListener('touchstart', onHuePointerDown, {passive: true});
                     store.hueTouchStartHandler = onHuePointerDown;
                 }}
             >

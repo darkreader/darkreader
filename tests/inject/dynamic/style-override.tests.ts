@@ -30,10 +30,10 @@ describe('STYLE ELEMENTS', () => {
         const modifier = createStyleSheetModifier();
         const overrideStyle = document.createElement('style');
         container.append(overrideStyle);
-        const override = overrideStyle.sheet;
+        const override = overrideStyle.sheet!;
         modifier.modifySheet({
             theme,
-            sourceCSSRules: style.sheet.cssRules,
+            sourceCSSRules: style.sheet!.cssRules,
             ignoreImageAnalysis: [],
             force: false,
             prepareSheet: () => override,
@@ -55,8 +55,8 @@ describe('STYLE ELEMENTS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('span')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('a')).color).toBe('rgb(51, 145, 255)');
+        expect(getComputedStyle(container.querySelector('span')!!).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('a')!!).color).toBe('rgb(51, 145, 255)');
     });
 
     it('should override static style', async () => {
@@ -69,9 +69,9 @@ describe('STYLE ELEMENTS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
     });
 
     it('should override style with @import', async () => {
@@ -86,9 +86,9 @@ describe('STYLE ELEMENTS', () => {
 
         await timeout(50);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
     });
 
     it('should override style with @import"..."', async () => {
@@ -103,9 +103,9 @@ describe('STYLE ELEMENTS', () => {
 
         await timeout(50);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
     });
 
     it('should restore override', async () => {
@@ -117,15 +117,15 @@ describe('STYLE ELEMENTS', () => {
             '<h1>Style <strong>override</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(141, 141, 141)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
 
-        const style = document.querySelector('.testcase-style');
-        style.nextSibling.remove();
+        const style = document.querySelector('.testcase-style')!;
+        style.nextSibling!.remove();
         await timeout(0);
         expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(141, 141, 141)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
     });
 
     it('should move override', async () => {
@@ -137,15 +137,15 @@ describe('STYLE ELEMENTS', () => {
             '<h1>Some test foor...... <strong>Moving styles</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
 
-        const style = document.querySelector('.testcase-style');
+        const style = document.querySelector('.testcase-style')!;
         container.append(style);
         await timeout(0);
         expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
     });
 
     it('should remove override', async () => {
@@ -157,14 +157,14 @@ describe('STYLE ELEMENTS', () => {
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        const style = document.querySelector('.testcase-style');
-        const sibling = style.nextSibling;
+        const style = document.querySelector('.testcase-style')!;
+        const sibling = style.nextSibling!;
         style.remove();
         await timeout(0);
         expect(sibling.isConnected).toBe(false);
         expect(document.querySelector('.darkreader--sync')).toBe(null);
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 255, 255)');
     });
 
     it('should react to updated style', async () => {
@@ -174,14 +174,14 @@ describe('STYLE ELEMENTS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        const style: HTMLStyleElement = document.querySelector('.testcase-style');
-        style.sheet.insertRule('h1 { color: gray }');
-        style.sheet.insertRule('strong { color: red }');
-        style.sheet.insertRule('body { background-color: pink }');
+        const style: HTMLStyleElement = document.querySelector('.testcase-style')!;
+        style.sheet!.insertRule('h1 { color: gray }');
+        style.sheet!.insertRule('strong { color: red }');
+        style.sheet!.insertRule('body { background-color: pink }');
         await timeout(0);
-        expect((style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText).toBe('body { background-color: var(--darkreader-background-ffc0cb, #320009); }');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(141, 141, 141)');
-        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect((style.nextSibling as HTMLStyleElement).sheet!.cssRules[0].cssText).toBe('body { background-color: var(--darkreader-background-ffc0cb, #320009); }');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
+        expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(50, 0, 9)');
     });
 
@@ -193,11 +193,11 @@ describe('STYLE ELEMENTS', () => {
             '<h1>Style <strong>text change</strong></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(document.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
 
-        document.querySelector('.testcase-style').textContent = 'h1 strong { color: green; }';
+        document.querySelector('.testcase-style')!.textContent = 'h1 strong { color: green; }';
         await timeout(0);
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(140, 255, 140)');
+        expect(getComputedStyle(document.querySelector('h1 strong')!).color).toBe('rgb(140, 255, 140)');
     });
 
     it('should react to a new style', async () => {
@@ -209,16 +209,16 @@ describe('STYLE ELEMENTS', () => {
         const style: HTMLStyleElement = document.createElement('style');
         style.classList.add('testcase-style');
         container.append(style);
-        style.sheet.insertRule('h1 { color: pink }');
-        style.sheet.insertRule('strong { color: orange }');
+        style.sheet!.insertRule('h1 { color: pink }');
+        style.sheet!.insertRule('strong { color: orange }');
 
         await timeout(0);
-        const newStyle: HTMLStyleElement = document.querySelector('.testcase-style');
+        const newStyle: HTMLStyleElement = document.querySelector('.testcase-style')!;
         const nextSibling = newStyle.nextSibling as HTMLStyleElement;
-        expect(nextSibling.sheet.cssRules.length).toBe(2);
+        expect(nextSibling.sheet!.cssRules.length).toBe(2);
         expect(nextSibling.classList.contains('darkreader--sync')).toBe(true);
-        expect(getComputedStyle(document.querySelector('h1')).color).toBe('rgb(255, 198, 208)');
-        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
+        expect(getComputedStyle(document.querySelector('h1')!).color).toBe('rgb(255, 198, 208)');
+        expect(getComputedStyle(document.querySelector('h1 strong')!).color).toBe('rgb(255, 174, 26)');
     });
 
     it('should restore override after container move', async () => {
@@ -232,17 +232,17 @@ describe('STYLE ELEMENTS', () => {
             '<h1>Moving container</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(140, 255, 140)');
 
-        const styleContainer = document.querySelector('.style-container');
-        const style = styleContainer.querySelector('.testcase-style');
+        const styleContainer = document.querySelector('.style-container')!;
+        const style = styleContainer.querySelector('.testcase-style')!;
         const override = style.nextElementSibling as HTMLStyleElement;
         container.append(styleContainer);
         await timeout(0);
         expect(style.nextElementSibling).toBe(override);
-        expect(override.sheet.cssRules.length).toBe(2);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+        expect(override.sheet!.cssRules.length).toBe(2);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(140, 255, 140)');
     });
 });

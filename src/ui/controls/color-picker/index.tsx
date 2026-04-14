@@ -109,9 +109,9 @@ function ColorPicker(props: ColorPickerProps) {
         <span
             class="color-picker__preview"
             onclick={toggleFocus}
-            onrender={(el: HTMLElement) => {
-                store.previewNode = el;
-                el.style.backgroundColor = isColorValid ? props.color : 'transparent';
+            onrender={(el: Node) => {
+                store.previewNode = el as HTMLElement;
+                (el as HTMLElement).style.backgroundColor = isColorValid ? props.color : 'transparent';
             }}
         ></span>
     );

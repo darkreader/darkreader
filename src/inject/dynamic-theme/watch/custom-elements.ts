@@ -53,7 +53,7 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
 
 const unhandledShadowHosts = new Set<Element>();
 
-document.addEventListener('__darkreader__shadowDomAttaching', (e: CustomEvent) => {
+document.addEventListener('__darkreader__shadowDomAttaching', ((e: CustomEvent) => {
     const host = (e.target as HTMLElement);
     if (unhandledShadowHosts.size === 0) {
         queueMicrotask(() => {
@@ -63,7 +63,7 @@ document.addEventListener('__darkreader__shadowDomAttaching', (e: CustomEvent) =
         });
     }
     unhandledShadowHosts.add(host);
-});
+}) as EventListener);
 
 const resolvers = new Map<string, Array<() => void>>();
 
@@ -102,7 +102,7 @@ async function customElementsWhenDefined(tag: string): Promise<void> {
             const checkIfDefined = () => {
                 const elements = undefinedGroups.get(tag);
                 if (elements && elements.size > 0) {
-                    if (elements.values().next().value.matches(':defined')) {
+                    if (elements.values().next()!.value!.matches(':defined')) {
                         resolve();
                     } else {
                         requestAnimationFrame(checkIfDefined);
@@ -122,5 +122,5 @@ export function watchWhenCustomElementsDefined(callback: (elements: Element[]) =
 export function unsubscribeFromDefineCustomElements(): void {
     elementsDefinitionCallback = null;
     undefinedGroups.clear();
-    document.removeEventListener('__darkreader__isDefined', handleIsDefined);
+    document.removeEventListener('__darkreader__isDefined', handleIsDefined as EventListener);
 }

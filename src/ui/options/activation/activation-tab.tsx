@@ -85,8 +85,8 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                     class="activation__email-control__text"
                     placeholder="example@gmail.com"
                     onchange={(e: {target: HTMLInputElement}) => e.target.value}
-                    oncreate={(node: HTMLInputElement) => {
-                        store.emailTextElement = node;
+                    oncreate={(node) => {
+                        store.emailTextElement = node as HTMLInputElement;
                     }}
                     onkeypress={(e) => {
                         if (e.key === 'Enter') {
@@ -105,8 +105,8 @@ export function ActivationTab(props: ViewProps): Malevic.Child {
                     class="activation__key-control__text"
                     placeholder="XXXX-XXXX-XXXX-XXXX"
                     onchange={(e: {target: HTMLInputElement}) => e.target.value}
-                    oncreate={(node: HTMLInputElement) => {
-                        store.keyTextElement = node;
+                    oncreate={(node) => {
+                        store.keyTextElement = node as HTMLInputElement;
                     }}
                     onkeypress={(e) => {
                         if (e.key === 'Enter') {

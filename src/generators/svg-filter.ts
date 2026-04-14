@@ -1,11 +1,11 @@
-import type {Theme, InversionFix} from '../definitions';
+import type {Theme} from '../definitions';
 import {isFirefox} from '../utils/platform';
 
 import {cssFilterStyleSheetTemplate} from './css-filter';
 import {createFilterMatrix, Matrix} from './utils/matrix';
-import type {SitePropsIndex} from './utils/parse';
+import type {SiteFixesIndex} from './utils/parse';
 
-export function createSVGFilterStylesheet(config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>): string {
+export function createSVGFilterStylesheet(config: Theme, url: string, isTopFrame: boolean, fixes: string, index: SiteFixesIndex): string {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox) {

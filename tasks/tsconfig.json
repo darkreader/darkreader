@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "module": "node20",
+        "types": [
+            "node"
+        ],
+        "allowJs": true,
+        "noEmit": true,
+        "strict": false
+    }
+}

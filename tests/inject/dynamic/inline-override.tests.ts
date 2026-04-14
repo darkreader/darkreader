@@ -24,13 +24,13 @@ describe('INLINE STYLES', () => {
     it('should override inline style', () => {
         container.innerHTML = '<span style="color: red;">Inline style override</span>';
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(document.querySelector('span')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(document.querySelector('span')!).color).toBe('rgb(255, 26, 26)');
     });
 
     it('should watch for inline style change', async () => {
         container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);
-        const span = document.querySelector('span');
+        const span = document.querySelector('span')!;
         expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
 
         span.style.color = 'green';
@@ -44,7 +44,7 @@ describe('INLINE STYLES', () => {
             '<span class="bg-gray" style="color: red;">Inline style override</span>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        const span = container.querySelector('span');
+        const span = container.querySelector('span')!;
         expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
 
@@ -57,9 +57,9 @@ describe('INLINE STYLES', () => {
     it('should clean up the customProp after originial is gone', async () => {
         container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);
-        const span = document.querySelector('span');
-        expect(span.getAttribute('style').startsWith('color: red; --darkreader-inline-color:')).toBeTrue();
-        expect(span.getAttribute('style').includes('--darkreader-inline-color: var(--darkreader-text-ff0000, #ff1a1a);')).toBe(true);
+        const span = document.querySelector('span')!;
+        expect(span.getAttribute('style')!.startsWith('color: red; --darkreader-inline-color:')).toBeTrue();
+        expect(span.getAttribute('style')!.includes('--darkreader-inline-color: var(--darkreader-text-ff0000, #ff1a1a);')).toBe(true);
 
         span.style.color = '';
         await timeout(0);
@@ -70,7 +70,7 @@ describe('INLINE STYLES', () => {
         container.innerHTML = '<link rel="mask-icon" color="red">';
         createOrUpdateDynamicTheme(theme, null, false);
 
-        const maskIcon = document.querySelector('link[rel="mask-icon"]');
+        const maskIcon = document.querySelector('link[rel="mask-icon"]')!;
         expect(maskIcon.getAttribute('style')).toBe(null);
     });
 
@@ -79,7 +79,7 @@ describe('INLINE STYLES', () => {
         container.innerHTML += `<style> rect[width][height] { fill: red }</style>`;
         createOrUpdateDynamicTheme(theme, null, false);
 
-        const rect = container.querySelector('rect');
+        const rect = container.querySelector('rect')!;
         expect(getComputedStyle(rect).fill).toBe('rgb(255, 26, 26)');
     });
 });

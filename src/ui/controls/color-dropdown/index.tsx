@@ -4,6 +4,7 @@ import {getContext} from 'malevic/dom';
 import {parseColorWithCache} from '../../../utils/color';
 import ColorPicker from '../color-picker';
 import DropDown from '../dropdown';
+import type {DropDownOption} from '../dropdown';
 
 interface ColorDropDownProps {
     class?: string;
@@ -35,7 +36,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         props.hasDefaultOption ? {id: 'default', content: labels.DEFAULT} : null,
         props.hasAutoOption ? {id: 'auto', content: labels.AUTO} : null,
         {id: 'custom', content: labels.CUSTOM},
-    ].filter((v) => v) as Array<{id: string; content: string}>;
+    ].filter((v) => v) as Array<DropDownOption<any>>;
 
     const selectedDropDownValue = (
         props.value === '' ? 'default' :

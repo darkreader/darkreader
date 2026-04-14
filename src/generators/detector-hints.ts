@@ -4,7 +4,7 @@ import {compareURLPatterns} from '../utils/url';
 
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
-import type {SitePropsIndex, SitesFixesParserOptions} from './utils/parse';
+import type {SiteFixesIndex, SitesFixesParserOptions} from './utils/parse';
 
 const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
     'TARGET': 'target',
@@ -38,7 +38,7 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
     return formatSitesFixesConfig(fixes, {
         props: Object.values(detectorHintsCommands),
         getPropCommandName: (prop) => Object.entries(detectorHintsCommands).find(([, p]) => p === prop)![0],
-        formatPropValue: (prop: keyof DetectorHint, value) => {
+        formatPropValue: (prop, value) => {
             if (Array.isArray(value)) {
                 return formatArray(value).trim();
             }
@@ -53,28 +53,10 @@ export function formatDetectorHints(detectorHints: DetectorHint[]): string {
     });
 }
 
-function shouldExcludeHint(hint: DetectorHint) {
-    if (hint.target === 'html' || hint.target === 'body') {
-        const match = hint.match[0]?.toLocaleLowerCase() ?? '';
-        if (
-            (match.startsWith('.') && match.includes('dark')) ||
-            match === '[data-theme="dark"]'
-        ) {
-            return true;
-        }
-    }
-    return false;
-}
-
-export function getDetectorHintsFor(url: string, text: string, index: SitePropsIndex<DetectorHint>): DetectorHint[] | null {
-    const fixes = getSitesFixesFor(url, text, index, detectorParserOptions);
+export function getDetectorHintsFor(url: string, text: string, index: SiteFixesIndex): DetectorHint[] | null {
+    const fixes = getSitesFixesFor(url, text, index, parseDetectorHints);
 
     if (fixes.length === 0) {
-        return null;
-    }
-
-    // Hints like ".dark" or [data-theme="dark"] are irrelevant
-    if (fixes.filter((hint) => shouldExcludeHint(hint)).length === 0) {
         return null;
     }
 

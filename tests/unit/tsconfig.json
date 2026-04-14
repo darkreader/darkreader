@@ -18,6 +18,7 @@
         "forceConsistentCasingInFileNames": true,
         "noImplicitAny": true,
         "strictNullChecks": true,
+        "strictPropertyInitialization": false,
         "inlineSourceMap": true,
         "paths": {
             "@plus/*": ["../../src/stubs/*"]

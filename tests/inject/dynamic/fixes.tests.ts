@@ -39,11 +39,12 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        expect(getComputedStyle(container.querySelector('.logo')).filter).toBe('invert(1) hue-rotate(180deg) contrast(0.9)');
+        expect(getComputedStyle(container.querySelector('.logo')!).filter).toBe('invert(1) hue-rotate(180deg) contrast(0.9)');
     });
 
     it('should insert CSS', async () => {
@@ -56,11 +57,12 @@ describe('FIXES', () => {
             css: '.text { color: red }',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        expect(getComputedStyle(container.querySelector('.text')).color).toBe('rgb(255, 0, 0)');
+        expect(getComputedStyle(container.querySelector('.text')!).color).toBe('rgb(255, 0, 0)');
     });
 
     it('should ignore inline style', async () => {
@@ -73,11 +75,12 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
+            ignoreCSSUrl: [],
             disableStyleSheetsProxy: false,
             disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        expect(getComputedStyle(container.querySelector('.text')).backgroundColor).toBe('rgb(128, 0, 128)');
+        expect(getComputedStyle(container.querySelector('.text')!).backgroundColor).toBe('rgb(128, 0, 128)');
     });
 
     it('should ignore styling when darkreader-lock detected', async () => {

@@ -1,4 +1,7 @@
 const hostsBreakingOnStylePosition = [
+    'chat.google.com',
+    'gogoprivate.com',
+    'gprivate.com',
     'www.berlingske.dk',
     'www.bloomberg.com',
     'www.diffusioneshop.com',
@@ -42,7 +45,7 @@ export function injectStyleAway(styleElement: HTMLStyleElement | SVGStyleElement
         containerObserver = new MutationObserver(() => {
             if (container?.nextElementSibling != null) {
                 // Prevent clearing style overrides after container move
-                container.querySelectorAll('.darkreader--sync').forEach((el: HTMLStyleElement) => {
+                (container.querySelectorAll('.darkreader--sync') as NodeListOf<HTMLStyleElement>).forEach((el) => {
                     if (el.sheet!.cssRules.length > 0) {
                         let cssText = '';
                         for (const rule of el.sheet!.cssRules) {

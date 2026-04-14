@@ -70,17 +70,6 @@ const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.ma
 }) : null;
 
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void): void {
-    forEach(style, (property) => {
-        const value = style.getPropertyValue(property).trim();
-        if (!value) {
-            return;
-        }
-        iterate(property, value);
-    });
-
-    // Bigger sites like gmail.com and google.com will love this optimization.
-    // As a side-effect, styles with a lot of `var(` will notice a maximum slowdown of ~50ms.
-    // Against the bigger sites that saves around ~150ms+ it's a good win.
     const cssText = style.cssText;
     if (cssText.includes('var(')) {
         if (isSafari) {
@@ -102,12 +91,25 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
     }
 
-    if (cssText.includes('background-color: ;') && !style.getPropertyValue('background')) {
+    if (
+        (
+            cssText.includes('background-color: ;') ||
+            cssText.includes('background-image: ;')
+        ) && !style.getPropertyValue('background')
+    ) {
         handleEmptyShorthand('background', style, iterate);
     }
     if (cssText.includes('border-') && cssText.includes('-color: ;') && !style.getPropertyValue('border')) {
         handleEmptyShorthand('border', style, iterate);
     }
+
+    forEach(style, (property) => {
+        const value = style.getPropertyValue(property).trim();
+        if (!value) {
+            return;
+        }
+        iterate(property, value);
+    });
 }
 
 // `rule.cssText` fails when the rule has both
@@ -131,6 +133,7 @@ function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, ite
             }
         } else if (shorthand === 'background') {
             iterate('background-color', '#ffffff');
+            iterate('background-image', 'none');
         }
     }
 }

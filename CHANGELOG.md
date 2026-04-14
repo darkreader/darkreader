@@ -1,3 +1,55 @@
+# 4.9.124 (April 1, 2026)
+
+- Fixed PDF inversion in Dynamic mode.
+- Fixed Picture-in-Picture mode icons.
+- Fixed Google Chats icons.
+- Fixed text stroke in Filter mode.
+
+# 4.9.123 (March 1, 2026)
+
+- Firefox: Disable white flash prevention in iframes (FF 148 issue in Google Docs, CKEditor and others).
+
+# 4.9.122 (February 27, 2026)
+
+- Chrome: Fixed PDF inversion in Dynamic mode.
+- Firefox: Fixed pasting text in Google Docs.
+- Improved mask image handling.
+
+# 4.9.121 (February 10, 2026)
+
+- Fixed sites fixes indexing.
+
+# 4.9.120 (February 9, 2026)
+
+- IGNORE CSS URL config property.
+- Optimized site list search.
+- Optimized fixes search.
+- Optimized color parsing.
+- Optimized PDF URL check.
+- Fixed overriding background size and position.
+- Fixed analyzing images with URL encoding.
+- Fixed analyzing SVG icons with unset size.
+
+# 4.9.119 (January 14, 2026)
+
+- Optimized inline style changes.
+- Support Shadow DOM created from HTML templates.
+- Fixed Google Maps satellite view.
+- Fixed SVG icons with unset size or inherited colors.
+- Fixed font element color attribute values.
+
+# 4.9.118 (December 8, 2025)
+
+- Improved RGB colors support in CSS variables.
+- Extended cross-origin request limitations.
+
+# 4.9.117 (December 3, 2025)
+
+- Improved dark theme detection.
+- Optimized SVG image analysis.
+- CSS variables support improvements.
+- Applied cross-origin request limitations.
+
 # 4.9.116 (November 22, 2025)
 
 - Improved dark theme detection.

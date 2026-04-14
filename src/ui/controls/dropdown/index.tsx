@@ -28,12 +28,12 @@ export default function DropDown<T>(props: DropDownProps<T>) {
         }
     }
 
-    function saveListNode(el: HTMLElement) {
-        store.listNode = el;
+    function saveListNode(el: Node) {
+        store.listNode = el as HTMLElement;
     }
 
-    function saveSelectedNode(el: HTMLElement) {
-        store.selectedNode = el;
+    function saveSelectedNode(el: Node) {
+        store.selectedNode = el as HTMLElement;
     }
 
     function onSelectedClick() {

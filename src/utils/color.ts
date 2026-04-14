@@ -221,61 +221,147 @@ export function parse($color: string): RGBA | null {
     return null;
 }
 
-function getNumbers($color: string) {
-    const numbers: string[] = [];
-    let prevPos = 0;
-    let isMining = false;
-    // Get the first `(`.
-    const startIndex = $color.indexOf('(');
-    $color = $color.substring(startIndex + 1, $color.length - 1);
-    for (let i = 0; i < $color.length; i++) {
-        const c = $color[i];
-        // Check if `c` is a digit.
-        if (c >= '0' && c <= '9' || c === '.' || c === '+' || c === '-') {
-            // Enable the mining flag.
-            isMining = true;
-        } else if (isMining && (c === ' ' || c === ',' || c === '/')) {
-            // isMining is true and we got a terminating
-            // character. So we can push the current number
-            // into the array.
-            numbers.push($color.substring(prevPos, i));
-            // Disable the mining flag.
-            isMining = false;
-            // Ensure the prevPos is correct.
-            prevPos = i + 1;
-        } else if (!isMining) {
-            // Ensure the prevPos is correct.
-            prevPos = i + 1;
-        }
-    }
-    // Push the last number.
-    if (isMining) {
-        numbers.push($color.substring(prevPos, $color.length));
-    }
-    return numbers;
-}
+const C_0 = '0'.charCodeAt(0);
+const C_9 = '9'.charCodeAt(0);
+const C_e = 'e'.charCodeAt(0);
+const C_DOT = '.'.charCodeAt(0);
+const C_PLUS = '+'.charCodeAt(0);
+const C_MINUS = '-'.charCodeAt(0);
+const C_SPACE = ' '.charCodeAt(0);
+const C_COMMA = ','.charCodeAt(0);
+const C_SLASH = '/'.charCodeAt(0);
+const C_PERCENT = '%'.charCodeAt(0);
 
-function getNumbersFromString(str: string, range: number[], units: {[unit: string]: number}) {
-    const raw = getNumbers(str);
-    const unitsList = Object.entries(units);
-    const numbers = raw.map((r) => r.trim()).map((r, i) => {
-        let n: number;
-        const unit = unitsList.find(([u]) => r.endsWith(u));
-        if (unit) {
-            n = parseFloat(r.substring(0, r.length - unit[0].length)) / unit[1] * range[i];
-        } else {
-            n = parseFloat(r);
+function getNumbersFromString(input: string, range: number[], units: {[unit: string]: number}) {
+    const numbers: number[] = [];
+    const searchStart = input.indexOf('(') + 1;
+    const searchEnd = input.length - 1;
+    let numStart = -1;
+    let unitStart = -1;
+
+    const push = (matchEnd: number) => {
+        const numEnd = unitStart > -1 ? unitStart : matchEnd;
+        const $num = input.slice(numStart, numEnd);
+        let n = parseFloat($num);
+        const r = range[numbers.length];
+        if (unitStart > -1) {
+            const unit = input.slice(unitStart, matchEnd);
+            const u = units[unit];
+            if (u != null) {
+                n *= r / u;
+            }
         }
-        if (range[i] > 1) {
-            return Math.round(n);
+        if (r > 1) {
+            n = Math.round(n);
         }
-        return n;
-    });
+        numbers.push(n);
+        numStart = -1;
+        unitStart = -1;
+    };
+
+    for (let i = searchStart; i < searchEnd; i++) {
+        const c = input.charCodeAt(i);
+        const isNumChar = (c >= C_0 && c <= C_9) || c === C_DOT || c === C_PLUS || c === C_MINUS || c === C_e;
+        const isDelimiter = c === C_SPACE || c === C_COMMA || c === C_SLASH;
+        if (isNumChar) {
+            if (numStart === -1) {
+                numStart = i;
+            }
+        } else if (numStart > -1) {
+            if (isDelimiter) {
+                push(i);
+            } else if (unitStart === -1) {
+                unitStart = i;
+            }
+        }
+    }
+    if (numStart > -1) {
+        push(searchEnd);
+    }
     return numbers;
 }
 
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
+
+export function getRGBValues(input: string): number[] | null {
+    const CHAR_CODE_0 = 48;
+    const length = input.length;
+    let i = 0;
+    let digitsCount = 0;
+    let digitSequence = false;
+    let floatDigitsCount = -1;
+    let delimiter = C_SPACE;
+    let channel = -1;
+    let result: number[] | null = null;
+    while (i < length) {
+        const c = input.charCodeAt(i);
+        if ((c >= C_0 && c <= C_9) || c === C_DOT) {
+            if (!digitSequence) {
+                digitSequence = true;
+                digitsCount = 0;
+                floatDigitsCount = -1;
+                channel++;
+                if (channel === 3 && result) {
+                    result[3] = 0;
+                }
+                if (channel > 3) {
+                    return null;
+                }
+            }
+            if (c === C_DOT) {
+                if (floatDigitsCount > 0) {
+                    return null;
+                }
+                floatDigitsCount = 0;
+            } else {
+                const d = c - CHAR_CODE_0;
+                if (!result) {
+                    result = [0, 0, 0, 1];
+                }
+                if (floatDigitsCount > -1) {
+                    floatDigitsCount++;
+                    result[channel] += d / (10 ** floatDigitsCount);
+                } else {
+                    digitsCount++;
+                    if (digitsCount > 3) {
+                        return null;
+                    }
+                    result[channel] = result[channel] * 10 + d;
+                }
+            }
+        } else if (c === C_PERCENT) {
+            if (channel < 0 || channel > 3 || delimiter !== C_SPACE || !result) {
+                return null;
+            }
+            result[channel] = channel < 3 ? Math.round(result[channel] * 255 / 100) : (result[channel] / 100);
+            digitSequence = false;
+        } else {
+            digitSequence = false;
+            if (c === C_SPACE) {
+                if (channel === 0) {
+                    delimiter = c;
+                }
+            } else if (c === C_COMMA) {
+                if (channel === -1) {
+                    return null;
+                }
+                delimiter = C_COMMA;
+            } else if (c === C_SLASH) {
+                if (channel !== 2 || delimiter !== C_SPACE) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        i++;
+    }
+    if (channel < 2 || channel > 3) {
+        return null;
+    }
+    return result;
+}
 
 function parseRGB($rgb: string): RGBA | null {
     const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
@@ -296,23 +382,52 @@ function parseHSL($hsl: string): RGBA | null {
     return hslToRGB({h, s, l, a});
 }
 
+const C_A = 'A'.charCodeAt(0);
+const C_F = 'F'.charCodeAt(0);
+const C_a = 'a'.charCodeAt(0);
+const C_f = 'f'.charCodeAt(0);
+
 function parseHex($hex: string): RGBA | null {
-    const h = $hex.substring(1);
-    switch (h.length) {
-        case 3:
-        case 4: {
-            const [r, g, b] = [0, 1, 2].map((i) => parseInt(`${h[i]}${h[i]}`, 16));
-            const a = h.length === 3 ? 1 : (parseInt(`${h[3]}${h[3]}`, 16) / 255);
-            return {r, g, b, a};
+    const length = $hex.length;
+    const digitCount = length - 1;
+    const isShort = digitCount === 3 || digitCount === 4;
+    const isLong = digitCount === 6 || digitCount === 8;
+    if (!isShort && !isLong) {
+        return null;
+    }
+
+    const hex = (i: number) => {
+        const c = $hex.charCodeAt(i);
+        if (c >= C_A && c <= C_F) {
+            return c + 10 - C_A;
         }
-        case 6:
-        case 8: {
-            const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.substring(i, i + 2), 16));
-            const a = h.length === 6 ? 1 : (parseInt(h.substring(6, 8), 16) / 255);
-            return {r, g, b, a};
+        if (c >= C_a && c <= C_f) {
+            return c + 10 - C_a;
+        }
+        return c - C_0;
+    };
+
+    let r: number;
+    let g: number;
+    let b: number;
+    let a = 1;
+    if (isShort) {
+        r = hex(1) * 17;
+        g = hex(2) * 17;
+        b = hex(3) * 17;
+        if (digitCount === 4) {
+            a = hex(4) * 17 / 255;
+        }
+    } else {
+        r = hex(1) * 16 + hex(2);
+        g = hex(3) * 16 + hex(4);
+        b = hex(5) * 16 + hex(6);
+        if (digitCount === 8) {
+            a = (hex(7) * 16 + hex(8)) / 255;
         }
     }
-    return null;
+
+    return {r, g, b, a};
 }
 
 function getColorByName($color: string): RGBA {

@@ -145,9 +145,9 @@ export function getInlineOverrideStyle(): string {
 }
 
 function getInlineStyleElements(root: Node) {
-    const results: Element[] = [];
+    const results: HTMLElement[] = [];
     if (root instanceof Element && root.matches(INLINE_STYLE_SELECTOR)) {
-        results.push(root);
+        results.push(root as HTMLElement);
     }
     if (root instanceof Element || (isShadowDomSupported && root instanceof ShadowRoot) || root instanceof Document) {
         push(results, root.querySelectorAll(INLINE_STYLE_SELECTOR));
@@ -189,10 +189,10 @@ function deepWatchForInlineStyles(
             elementStyleDidChange(el);
         });
         iterateShadowHosts(node, (n) => {
-            if (discoveredNodes.has(node)) {
+            if (discoveredNodes.has(n)) {
                 return;
             }
-            discoveredNodes.add(node);
+            discoveredNodes.add(n);
             shadowRootDiscovered(n.shadowRoot!);
             deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });
@@ -337,6 +337,8 @@ function getSVGElementRoot(svgElement: SVGElement): SVGSVGElement | null {
     return root;
 }
 
+const inlineStringValueCache = new Map<string, Map<string, string>>();
+
 export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
     if (elementsLastChanges.has(element)) {
         if (Date.now() - elementsLastChanges.get(element)! < LOOP_DETECTION_THRESHOLD) {
@@ -361,6 +363,12 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
     const unsetProps = new Set(Object.keys(overrides));
 
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
+        const cachedStringValue = inlineStringValueCache.get(modifierCSSProp)?.get(cssVal);
+        if (cachedStringValue) {
+            setStaticValue(cachedStringValue);
+            return;
+        }
+
         const mod = getModifiableCSSDeclaration(
             modifierCSSProp,
             cssVal,
@@ -420,6 +428,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         const value = typeof mod.value === 'function' ? mod.value(theme) : mod.value;
         if (typeof value === 'string') {
             setStaticValue(value);
+            if (!inlineStringValueCache.has(modifierCSSProp)) {
+                inlineStringValueCache.set(modifierCSSProp, new Map());
+            }
+            inlineStringValueCache.get(modifierCSSProp)!.set(cssVal, value);
         } else if (value instanceof Promise) {
             setAsyncValue(value, cssVal);
         } else if (typeof value === 'object') {
@@ -488,6 +500,9 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         let value = element.getAttribute('color')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
+        } else if (value.match(/^#?[0-9a-f]{4}$/i)) {
+            const hex = value.startsWith('#') ? value.substring(1) : value;
+            value = `#${hex}00`;
         }
         setCustomProp('color', 'color', value);
     }
@@ -495,7 +510,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
     if (isSVGElement) {
         if (element.hasAttribute('fill')) {
             const value = element.getAttribute('fill')!;
-            if (value !== 'none') {
+            if (value !== 'none' && value !== 'currentColor') {
                 if (!(element instanceof SVGTextElement)) {
                     // getBoundingClientRect forces a layout change. And when it happens and
                     // the DOM is not in the `complete` readystate, it will cause the layout to be drawn

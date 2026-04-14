@@ -58,7 +58,7 @@ export async function collectCSS(): Promise<string> {
     addStaticCSS('.darkreader--variables', 'Variables Style');
 
     const modifiedCSS: string[] = [];
-    document.querySelectorAll('.darkreader--sync').forEach((element: HTMLStyleElement) => {
+    (document.querySelectorAll('.darkreader--sync') as NodeListOf<HTMLStyleElement>).forEach((element) => {
         forEach(element.sheet!.cssRules, (rule) => {
             rule && rule.cssText && modifiedCSS.push(rule.cssText);
         });

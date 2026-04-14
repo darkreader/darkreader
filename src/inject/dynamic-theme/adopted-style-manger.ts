@@ -171,8 +171,8 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     function addSheetChangeEventListener(type: string, listener: (e: CustomEvent) => void) {
-        node.addEventListener(type, listener);
-        cleaners.push(() => node.removeEventListener(type, listener));
+        node.addEventListener(type, listener as EventListener);
+        cleaners.push(() => node.removeEventListener(type, listener as EventListener));
     }
 
     function watch(callback: (sheets: CSSStyleSheet[]) => void) {

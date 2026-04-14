@@ -64,7 +64,7 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI): true | undefined {
         } else {
             chrome.runtime.sendMessage<MessageCStoBG | MessageCStoUI, 'unsupportedSender' | undefined>(message, responseHandler);
         }
-    } catch (error) {
+    } catch (error: any) {
         /*
          * We get here if Background context is unreachable which occurs when:
          *  - extension was disabled
@@ -216,8 +216,8 @@ if (!__THUNDERBIRD__) {
 
 if (__PLUS__) {
     if (location.origin === HOMEPAGE_URL) {
-        document.addEventListener('__darkreader_activate__', async (e: CustomEvent) => {
-            const {email, key} = e.detail;
+        document.addEventListener('__darkreader_activate__', async (e) => {
+            const {email, key} = (e as CustomEvent).detail;
             const result = await activateTheme(email, key);
             document.dispatchEvent(new CustomEvent('__darkreader_activationResult__', {detail: {result}}));
         }, {once: true});
@@ -236,8 +236,8 @@ if (__TEST__) {
     async function awaitDarkReaderReady() {
         if (darkReaderDynamicThemeStateForTesting !== 'ready') {
             return new Promise<void>((resolve) => {
-                document.addEventListener('test-message', (event: CustomEvent) => {
-                    const message = event.detail;
+                document.addEventListener('test-message', (event) => {
+                    const message = (event as CustomEvent).detail;
                     if (message === 'darkreader-dynamic-theme-ready' && darkReaderDynamicThemeStateForTesting === 'ready') {
                         resolve();
                     }
@@ -248,11 +248,11 @@ if (__TEST__) {
 
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
-        document.addEventListener('test-message', (e: CustomEvent) => {
+        document.addEventListener('test-message', (e) => {
             socket.send(JSON.stringify({
                 data: {
                     type: 'page',
-                    uuid: e.detail,
+                    uuid: (e as CustomEvent).detail,
                 },
                 id: null,
             }));

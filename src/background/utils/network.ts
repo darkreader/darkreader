@@ -247,7 +247,7 @@ export function createFileLoader(): FileLoader {
             cache.set(url, data);
             limiter.loaded(url, data);
             return {data};
-        } catch (error) {
+        } catch (error: any) {
             limiter.failed(url, error);
             return {error};
         }

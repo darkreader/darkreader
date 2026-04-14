@@ -68,7 +68,7 @@ describe('Link override', () => {
     });
 
     it('should wait till style is loading', async () => {
-        let proceedCSSResponse: () => void;
+        let proceedCSSResponse: () => any = () => void(0);
 
         await loadTestPage({
             '/': multiline(

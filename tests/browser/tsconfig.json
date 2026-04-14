@@ -19,5 +19,6 @@
         "moduleResolution": "Node",
         "noEmit": true,
         "noImplicitAny": true,
+        "ignoreDeprecations": "6.0",
     }
 }

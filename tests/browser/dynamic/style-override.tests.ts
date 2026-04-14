@@ -78,8 +78,8 @@ describe('Style override', () => {
             const styleElement = document.createElement('style');
             styleElement.classList.add('testcase-style');
             document.head.append(styleElement);
-            styleElement.sheet.insertRule('h1 { color: gray }');
-            styleElement.sheet.insertRule('strong { color: red }');
+            styleElement.sheet!.insertRule('h1 { color: gray }');
+            styleElement.sheet!.insertRule('strong { color: red }');
         });
 
         await expectStyles([
@@ -88,8 +88,8 @@ describe('Style override', () => {
         ]);
 
         await expect(pageUtils.evaluateScript(async () => {
-            const style = document.querySelector('.testcase-style');
-            style.nextSibling.remove();
+            const style = document.querySelector('.testcase-style')!;
+            style.nextSibling!.remove();
             await new Promise((resolve) => setTimeout(resolve));
             return (style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);
@@ -113,12 +113,12 @@ describe('Style override', () => {
             const styleElement = document.createElement('style');
             styleElement.classList.add('testcase-style');
             document.head.append(styleElement);
-            styleElement.sheet.insertRule('h1 { color: gray } ');
-            styleElement.sheet.insertRule('strong { color: red } ');
+            styleElement.sheet!.insertRule('h1 { color: gray } ');
+            styleElement.sheet!.insertRule('strong { color: red } ');
         });
 
         await expect(pageUtils.evaluateScript(async () => {
-            const style = document.querySelector('.testcase-style');
+            const style = document.querySelector('.testcase-style')!;
             document.body.append(style);
             await new Promise((resolve) => setTimeout(resolve));
             return (style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
@@ -143,13 +143,13 @@ describe('Style override', () => {
             const styleElement = document.createElement('style');
             styleElement.classList.add('testcase-style');
             document.head.append(styleElement);
-            styleElement.sheet.insertRule('h1 { color: gray }');
-            styleElement.sheet.insertRule('strong { color: red }');
+            styleElement.sheet!.insertRule('h1 { color: gray }');
+            styleElement.sheet!.insertRule('strong { color: red }');
         });
 
         await expect(pageUtils.evaluateScript(async () => {
-            const style = document.querySelector('.testcase-style');
-            const sibling = style.nextSibling;
+            const style = document.querySelector('.testcase-style')!;
+            const sibling = style.nextSibling!;
             style.remove();
             await new Promise((resolve) => setTimeout(resolve));
             return sibling.isConnected && !((sibling as HTMLStyleElement).classList.contains('darkreader--sync'));
@@ -178,15 +178,15 @@ describe('Style override', () => {
             const styleElement = document.createElement('style');
             styleElement.classList.add('testcase-style');
             document.head.append(styleElement);
-            styleElement.sheet.insertRule('h1 { color: gray }');
-            styleElement.sheet.insertRule('strong { color: red }');
+            styleElement.sheet!.insertRule('h1 { color: gray }');
+            styleElement.sheet!.insertRule('strong { color: red }');
         });
 
         await expect(pageUtils.evaluateScript(async () => {
-            const style = document.querySelector('.testcase-style');
-            (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
+            const style = document.querySelector('.testcase-style')!;
+            (style as HTMLStyleElement).sheet!.insertRule('html { background-color: pink }');
             await new Promise((resolve) => setTimeout(resolve));
-            return (style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText;
+            return (style.nextSibling as HTMLStyleElement).sheet!.cssRules[0].cssText;
         })).resolves.toBe('html { background-color: var(--darkreader-background-ffc0cb, #590010); }');
     });
 
@@ -208,10 +208,10 @@ describe('Style override', () => {
             const styleElement = document.createElement('style');
             styleElement.classList.add('testcase-style');
             document.head.append(styleElement);
-            styleElement.sheet.insertRule('h1 { color: pink }');
-            styleElement.sheet.insertRule('strong { color: orange }');
+            styleElement.sheet!.insertRule('h1 { color: pink }');
+            styleElement.sheet!.insertRule('strong { color: orange }');
             await new Promise((resolve) => setTimeout(resolve));
-            return (styleElement.nextSibling as HTMLStyleElement).sheet.cssRules.length === 2 && (styleElement.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
+            return (styleElement.nextSibling as HTMLStyleElement).sheet!.cssRules.length === 2 && (styleElement.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);
     });
 

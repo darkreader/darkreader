@@ -38,20 +38,34 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
-// isFontsGoogleApiStyle returns is the given link element is a style from
-// google fonts.
-function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
-    if (!element.href) {
-        return false;
-    }
+let ignoredCSSURLPatterns: string[] = [];
 
-    try {
-        const elementURL = new URL(element.href);
-        return elementURL.hostname === 'fonts.googleapis.com';
-    } catch (err) {
-        logInfo(`Couldn't construct ${element.href} as URL`);
+export function setIgnoredCSSURLs(patterns: string[]): void {
+    ignoredCSSURLPatterns = patterns || [];
+}
+
+// shouldIgnoreCSSURL checks if a stylesheet URL matches any ignored pattern
+function shouldIgnoreCSSURL(url: string): boolean {
+    if (!url || ignoredCSSURLPatterns.length === 0) {
         return false;
     }
+    for (const pattern of ignoredCSSURLPatterns) {
+        if (pattern.startsWith('^')) {
+            // Prefix match
+            if (url.startsWith(pattern.slice(1))) {
+                return true;
+            }
+        } else if (pattern.endsWith('$')) {
+            // Suffix match
+            if (url.endsWith(pattern.slice(0, -1))) {
+                return true;
+            }
+        } else if (url.includes(pattern)) {
+            // Contains match
+            return true;
+        }
+    }
+    return false;
 }
 
 const hostsBreakingOnSVGStyleOverride = [
@@ -72,7 +86,7 @@ export function shouldManageStyle(element: Node | null): boolean {
                 Boolean(element.href) &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
-                !isFontsGoogleApiStyle(element)
+                !shouldIgnoreCSSURL(element.href)
             )
         ) &&
         !element.classList.contains('darkreader') &&
@@ -86,10 +100,15 @@ export function getManageableStyles(node: Node | null, results: StyleElement[] =
         results.push(node as StyleElement);
     } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
         forEach(
-            (node as Element).querySelectorAll(STYLE_SELECTOR),
+            (node as Element).querySelectorAll(STYLE_SELECTOR) as NodeListOf<StyleElement>,
             (style: StyleElement) => getManageableStyles(style, results, false),
         );
-        if (deep) {
+        if (
+            deep && (
+                (node as Element).children?.length > 0 || 
+                (node as Element).shadowRoot
+            )
+        ) {
             iterateShadowHosts(node, (host) => getManageableStyles(host.shadowRoot, results, false));
         }
     }
@@ -97,7 +116,8 @@ export function getManageableStyles(node: Node | null, results: StyleElement[] =
 }
 
 const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
-const corsStyleSet = new WeakSet<HTMLStyleElement>();
+const corsCopies = new WeakMap<StyleElement, CSSStyleSheet>();
+const corsCopiesTextLengths = new WeakMap<StyleElement, number>();
 
 let loadingLinkCounter = 0;
 const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
@@ -109,7 +129,6 @@ export function cleanLoadingLinks(): void {
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}: {update: () => void; loadingStart: () => void; loadingEnd: () => void}): StyleManager {
     const inMode = getStyleInjectionMode();
 
-    let corsCopy: HTMLStyleElement | null = null;
     let syncStyle: HTMLStyleElement | SVGStyleElement | null = null;
 
     if (inMode === 'next') {
@@ -118,7 +137,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
             prevStyles.push(next as HTMLStyleElement);
         }
-        corsCopy = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
         syncStyle = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
     }
 
@@ -181,9 +199,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     }
 
     function getRulesSync(): CSSRuleList | null {
-        if (corsCopy) {
+        if (corsCopies.has(element)) {
             logInfo('[getRulesSync] Using cors-copy.');
-            return corsCopy.sheet!.cssRules;
+            return corsCopies.get(element)!.cssRules;
         }
         if (containsCSSImport()) {
             logInfo('[getRulesSync] CSSImport detected.');
@@ -212,20 +230,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     function insertStyle() {
         if (inMode === 'next') {
-            if (corsCopy) {
-                if (element.nextSibling !== corsCopy) {
-                    element.parentNode!.insertBefore(corsCopy, element.nextSibling);
-                }
-                if (corsCopy.nextSibling !== syncStyle) {
-                    element.parentNode!.insertBefore(syncStyle!, corsCopy.nextSibling);
-                }
-            } else if (element.nextSibling !== syncStyle) {
+            if (element.nextSibling !== syncStyle) {
                 element.parentNode!.insertBefore(syncStyle!, element.nextSibling);
             }
         } else if (inMode === 'away') {
-            if (corsCopy && !corsCopy.parentNode) {
-                injectStyleAway(corsCopy);
-            }
             injectStyleAway(syncStyle!);
         }
     }
@@ -308,8 +316,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         await createOrUpdateCORSCopy(cssText, cssBasePath);
-        if (corsCopy) {
-            return corsCopy.sheet!.cssRules;
+        if (corsCopies.has(element)) {
+            return corsCopies.get(element)!.cssRules;
         }
 
         return null;
@@ -321,30 +329,18 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             // so need to load CSS text and insert it into style element
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
-                if (corsCopy) {
-                    if ((corsCopy.textContent?.length ?? 0) < fullCSSText.length) {
-                        corsCopy.textContent = fullCSSText;
+                if (corsCopies.has(element)) {
+                    if ((corsCopiesTextLengths.get(element) ?? 0) < fullCSSText.length) {
+                        corsCopies.get(element)!.replaceSync(fullCSSText);
+                        corsCopiesTextLengths.set(element, fullCSSText.length);
                     }
                 } else {
-                    corsCopy = createCORSCopy(
-                        fullCSSText,
-                        inMode === 'next' ?
-                            (cc) =>  element.parentNode!.insertBefore(cc, element.nextSibling) :
-                            injectStyleAway,
-                    );
-                    if (corsCopy) {
-                        if (inMode === 'next') {
-                            element.parentNode!.insertBefore(corsCopy, element.nextSibling);
-                        } else if (inMode === 'away') {
-                            injectStyleAway(corsCopy);
-                        }
-                    }
+                    const corsCopy = new CSSStyleSheet();
+                    corsCopy.replaceSync(fullCSSText);
+                    corsCopies.set(element, corsCopy);
                 }
             } catch (err) {
                 logWarn(err);
-            }
-            if (corsCopy && inMode === 'next') {
-                corsCopyPositionWatcher = watchForNodePosition(corsCopy, 'prev-sibling');
             }
         }
     }
@@ -463,7 +459,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 return [null, null];
             }
             return [element.sheet.cssRules, null];
-        } catch (err) {
+        } catch (err: any) {
             return [null, err];
         }
     }
@@ -498,7 +494,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     function destroy() {
         pause();
-        removeNode(corsCopy);
+        corsCopies.delete(element);
         removeNode(syncStyle);
         loadingEnd();
         if (rejectorsForLoadingLinks.has(loadingLinkId)) {
@@ -603,7 +599,9 @@ async function loadText(url: string) {
     } else {
         text = await bgFetch({url, responseType: 'text', mimeType: 'text/css', origin: location.origin});
     }
-    writeCSSFetchCache(url, text);
+    if (parsedURL.origin === location.origin) {
+        writeCSSFetchCache(url, text);
+    }
     return text;
 }
 
@@ -658,20 +656,4 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
     cssText = cssText.trim();
 
     return cssText;
-}
-
-function createCORSCopy(cssText: string, inject: (cc: HTMLStyleElement) => void) {
-    if (!cssText) {
-        return null;
-    }
-
-    const cors = document.createElement('style');
-    cors.classList.add('darkreader');
-    cors.classList.add('darkreader--cors');
-    cors.media = 'screen';
-    cors.textContent = cssText;
-    inject(cors);
-    cors.sheet!.disabled = true;
-    corsStyleSet.add(cors);
-    return cors;
 }

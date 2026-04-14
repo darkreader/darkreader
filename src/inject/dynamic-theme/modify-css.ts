@@ -46,6 +46,13 @@ function getPriority(ruleStyle: CSSStyleDeclaration, property: string) {
     return Boolean(ruleStyle && ruleStyle.getPropertyPriority(property));
 }
 
+const bgPropsToCopy = [
+    'background-clip',
+    'background-position',
+    'background-repeat',
+    'background-size',
+];
+
 export function getModifiableCSSDeclaration(
     property: string,
     value: string,
@@ -88,6 +95,8 @@ export function getModifiableCSSDeclaration(
         modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
     } else if (property.includes('shadow')) {
         modifier = getShadowModifier(value);
+    } else if (bgPropsToCopy.includes(property) && value !== 'initial') {
+        modifier = value;
     }
 
     if (!modifier) {
@@ -279,11 +288,11 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
     }
 
     if (prop.includes('background')) {
+        const maskImageValue = rule.style.maskImage ?? rule.style.mask;
         if (
-            (rule.style.webkitMaskImage && rule.style.webkitMaskImage !== 'none') ||
-            (rule.style.webkitMask && !rule.style.webkitMask.startsWith('none')) ||
-            (rule.style.mask && rule.style.mask !== 'none') ||
-            (rule.style.getPropertyValue('mask-image') && rule.style.getPropertyValue('mask-image') !== 'none')
+            maskImageValue &&
+            !maskImageValue.startsWith('none') &&
+            !maskImageValue.startsWith('linear-gradient')
         ) {
             return (theme) => modifyForegroundColor(rgb, theme);
         }
@@ -494,7 +503,12 @@ export function getBgImageModifier(
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
                             imageDetailsCache.set(url, imageDetails);
-                            writeImageDetailsCache(url, imageDetails);
+                            if (!url.startsWith('data:')) {
+                                const parsedURL = new URL(url);
+                                if (parsedURL.origin === location.origin) {
+                                    writeImageDetailsCache(url, imageDetails);
+                                }
+                            }
                             awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);
                         }

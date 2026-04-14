@@ -1,12 +1,13 @@
 import {DEFAULT_COLORSCHEME} from '../defaults';
-import type {InversionFix, StaticTheme, DynamicThemeFix, DetectorHint} from '../definitions';
-import {indexSiteListConfig, indexSitesFixesConfig, isURLInSiteList} from '../generators/utils/parse';
-import type {SiteListIndex, SitePropsIndex} from '../generators/utils/parse';
+import {indexSitesFixesConfig} from '../generators/utils/parse';
+import type {SiteFixesIndex} from '../generators/utils/parse';
 import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {parseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {CONFIG_URL_BASE} from '../utils/links';
+import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
-
+import {indexURLTemplateList, isURLInIndexedList} from '../utils/url';
+import type {URLTemplateIndex} from '../utils/url';
 import UserStorage from './user-storage';
 import {logWarn} from './utils/log';
 import {readText} from './utils/network';
@@ -52,14 +53,14 @@ interface Config extends LocalConfig {
 }
 
 export default class ConfigManager {
-    private static DARK_SITES_INDEX: SiteListIndex | null;
-    static DETECTOR_HINTS_INDEX: SitePropsIndex<DetectorHint> | null;
+    private static DARK_SITES_INDEX: URLTemplateIndex | null;
+    static DETECTOR_HINTS_INDEX: SiteFixesIndex | null;
     static DETECTOR_HINTS_RAW: string | null;
-    static DYNAMIC_THEME_FIXES_INDEX: SitePropsIndex<DynamicThemeFix> | null;
+    static DYNAMIC_THEME_FIXES_INDEX: SiteFixesIndex | null;
     static DYNAMIC_THEME_FIXES_RAW: string | null;
-    static INVERSION_FIXES_INDEX: SitePropsIndex<InversionFix> | null;
+    static INVERSION_FIXES_INDEX: SiteFixesIndex | null;
     static INVERSION_FIXES_RAW: string | null;
-    static STATIC_THEMES_INDEX: SitePropsIndex<StaticTheme> | null;
+    static STATIC_THEMES_INDEX: SiteFixesIndex | null;
     static STATIC_THEMES_RAW: string | null;
     static COLOR_SCHEMES_RAW: ParsedColorSchemeConfig | null;
 
@@ -201,34 +202,38 @@ export default class ConfigManager {
 
     private static handleDarkSites(): void {
         const $sites = ConfigManager.overrides.darkSites || ConfigManager.raw.darkSites;
-        ConfigManager.DARK_SITES_INDEX = indexSiteListConfig($sites || '');
+        const templates = parseArray($sites!);
+        ConfigManager.DARK_SITES_INDEX = indexURLTemplateList(templates);
     }
 
     private static handleDetectorHints(): void {
         const $hints = ConfigManager.overrides.detectorHints || ConfigManager.raw.detectorHints || '';
-        ConfigManager.DETECTOR_HINTS_INDEX = indexSitesFixesConfig<DetectorHint>($hints);
+        ConfigManager.DETECTOR_HINTS_INDEX = indexSitesFixesConfig($hints);
         ConfigManager.DETECTOR_HINTS_RAW = $hints;
     }
 
     static handleDynamicThemeFixes(): void {
         const $fixes = ConfigManager.overrides.dynamicThemeFixes || ConfigManager.raw.dynamicThemeFixes || '';
-        ConfigManager.DYNAMIC_THEME_FIXES_INDEX = indexSitesFixesConfig<DynamicThemeFix>($fixes);
+        ConfigManager.DYNAMIC_THEME_FIXES_INDEX = indexSitesFixesConfig($fixes);
         ConfigManager.DYNAMIC_THEME_FIXES_RAW = $fixes;
     }
 
     static handleInversionFixes(): void {
         const $fixes = ConfigManager.overrides.inversionFixes || ConfigManager.raw.inversionFixes || '';
-        ConfigManager.INVERSION_FIXES_INDEX = indexSitesFixesConfig<InversionFix>($fixes);
+        ConfigManager.INVERSION_FIXES_INDEX = indexSitesFixesConfig($fixes);
         ConfigManager.INVERSION_FIXES_RAW = $fixes;
     }
 
     static handleStaticThemes(): void {
         const $themes = ConfigManager.overrides.staticThemes || ConfigManager.raw.staticThemes || '';
-        ConfigManager.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
+        ConfigManager.STATIC_THEMES_INDEX = indexSitesFixesConfig($themes);
         ConfigManager.STATIC_THEMES_RAW = $themes;
     }
 
     static isURLInDarkList(url: string): boolean {
-        return isURLInSiteList(url, ConfigManager.DARK_SITES_INDEX);
+        if (!ConfigManager.DARK_SITES_INDEX) {
+            return false;
+        }
+        return isURLInIndexedList(url, ConfigManager.DARK_SITES_INDEX);
     }
 }

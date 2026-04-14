@@ -49,4 +49,4 @@ function Loader({complete = false}: LoaderProps) {
     );
 }
 
-export default withState(Loader);
+export default withState(Loader as any);

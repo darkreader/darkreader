@@ -1,11 +1,14 @@
 import {wasEnabledForHost} from './cache';
 
+declare const __FIREFOX_MV2__: boolean;
+
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
     wasEnabledForHost() !== false &&
     !document.querySelector('.darkreader--fallback') &&
-    !document.querySelector('.darkreader')
+    !document.querySelector('.darkreader') &&
+    !(__FIREFOX_MV2__ && window !== top)
 ) {
     const css = [
         'html, body, body :not(iframe) {',
@@ -45,8 +48,6 @@ if (
         observer.observe(root, {childList: true});
     }
 }
-
-declare const __FIREFOX_MV2__: boolean;
 
 if (__FIREFOX_MV2__ && (location.host === 'teams.live.com' || location.host === 'teams.microsoft.com')) {
     // Microsoft Teams calls sheet.cssRules on extension styles and that

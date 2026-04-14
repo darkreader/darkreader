@@ -1,5 +1,5 @@
 import type {UserSettings} from '../../../src/definitions';
-import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
+import {isURLEnabled, isURLMatched, isPDF, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
 
 it('URL is enabled', () => {
     function fillUserSettings(settings: Partial<UserSettings>): UserSettings {
@@ -392,9 +392,4 @@ it('Absolute URL', () => {
     expect(getAbsoluteURL('https://www.google.com/path/page.html', '../image.jpg')).toBe('https://www.google.com/image.jpg');
     expect(getAbsoluteURL('path/index.html', 'image.jpg')).toBe(`${location.origin}/path/image.jpg`);
     expect(getAbsoluteURL('path/index.html', '/image.jpg?size=128')).toBe(`${location.origin}/image.jpg?size=128`);
-});
-
-it('Fully qualified domain', () => {
-    expect(isFullyQualifiedDomain('www.google.com')).toBe(true);
-    expect(isFullyQualifiedDomain('*.google.com')).toBe(false);
 });

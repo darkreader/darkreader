@@ -44,6 +44,10 @@ export const log = Object.assign((/** @type {string} */text) => logWithTime(text
     ok: (/** @type {string} */text) => logWithTime(colors.green(text)),
     warn: (/** @type {string} */text) => logWithTime(colors.yellow(text)),
     error: (/** @type {string} */text) => logWithTime(colors.red(text)),
+    clearLine: () => {
+        process.stdout.moveCursor(0, -1);
+        process.stdout.clearLine(1);
+    },
 });
 
 /**

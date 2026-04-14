@@ -30,7 +30,7 @@ function sendMessage(message: MessageCStoBG): void {
          *
          * Regular message passing errors are returned via rejected promise or runtime.lastError.
          */
-        if (error.message === 'Extension context invalidated.') {
+        if ((error as Error).message === 'Extension context invalidated.') {
             console.log('Dark Reader: instance of old CS detected, cleaning up.');
             cleanup();
         } else {

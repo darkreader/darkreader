@@ -149,6 +149,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
     async launchFirefox() {
         // We need to manually launch Firefox via cmd.run() to install extension
         // because Firefox does not support installing via CLI arguments
+        process.setMaxListeners(process.getMaxListeners() + 1);
         const firefox = await getFirefoxPath();
         const {cmd} = await import('web-ext');
         await cmd.run({

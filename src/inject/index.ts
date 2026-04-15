@@ -272,46 +272,7 @@ if (__TEST__) {
         }));
     };
 
-    // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
     if (__FIREFOX_MV2__) {
-        function expectPageStyles(data: any) {
-            const checkOne = (expectation: any) => {
-                const [selector, cssAttributeName, expectedValue] = expectation;
-                const selector_ = Array.isArray(selector) ? selector : [selector];
-                let element = document as any;
-                for (const part of selector_) {
-                    if (element instanceof HTMLIFrameElement) {
-                        element = element.contentDocument;
-                    }
-                    if (element.shadowRoot instanceof ShadowRoot) {
-                        element = element.shadowRoot;
-                    }
-                    if (part === 'document') {
-                        element = element.documentElement;
-                    } else {
-                        element = element.querySelector(part);
-                    }
-                    if (!element) {
-                        return `Could not find element ${part}`;
-                    }
-                }
-                const style = getComputedStyle(element);
-                if (style[cssAttributeName] !== expectedValue) {
-                    return `Got ${style[cssAttributeName]}`;
-                }
-            };
-
-            const errors: Array<[number, string]> = [];
-            const expectations = Array.isArray(data[0]) ? data : [data];
-            for (let i = 0; i < expectations.length; i++) {
-                const error = checkOne(expectations[i]);
-                if (error) {
-                    errors.push([i, error]);
-                }
-            }
-            return errors;
-        }
-
         socket.onmessage = (e) => {
             function respond(data: any) {
                 socket.send(JSON.stringify({id, data}));
@@ -319,30 +280,6 @@ if (__TEST__) {
 
             const {id, data, type} = JSON.parse(e.data);
             switch (type) {
-                case 'firefox-eval': {
-                    const result = eval(data);
-                    if (result instanceof Promise) {
-                        result.then(respond);
-                    } else {
-                        respond(result);
-                    }
-                    break;
-                }
-                case 'firefox-expectPageStyles': {
-                    // Styles may not have been applied to the document yet,
-                    // so we check once immediately and then on an interval.
-                    function checkPageStylesNow() {
-                        const errors = expectPageStyles(data);
-                        if (errors.length === 0) {
-                            respond([]);
-                            interval && clearInterval(interval);
-                        }
-                    }
-
-                    const interval: number = setInterval(checkPageStylesNow, 200);
-                    checkPageStylesNow();
-                    break;
-                }
                 case 'firefox-getColorScheme': {
                     respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
                     break;

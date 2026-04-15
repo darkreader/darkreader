@@ -1,7 +1,4 @@
 describe('Modifying settings', () => {
-    // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
-
     it('Modifying sync settings to contain long list', async () => {
         const newSettings = {
             enabledFor: [] as string[],

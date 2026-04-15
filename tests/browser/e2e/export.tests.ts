@@ -1,9 +1,6 @@
 import {timeout} from '../../support/test-utils';
 
 describe('Export settings', () => {
-    // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
-
     it('Should download file', async () => {
         await timeout(1000);
         const p = new Promise<{ok: boolean}>((resolve) => backgroundUtils.onDownload(resolve));

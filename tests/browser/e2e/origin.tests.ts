@@ -57,9 +57,6 @@ async function loadBasicPage() {
 }
 
 describe('Different paths in URL patterns', () => {
-    // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
-
     it('Different paths upon initial load', async () => {
         await Promise.all([
             awaitForEvent('ready-/red.html'),

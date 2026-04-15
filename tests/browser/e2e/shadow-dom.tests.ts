@@ -6,9 +6,6 @@ async function expectStyles(styles: StyleExpectations) {
 }
 
 describe('Custom HTML elements', () => {
-    // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
-
     it('Asynchronous define', async () => {
         // Temporarily disable this test on Firefox
         if (product === 'firefox') {

@@ -26,9 +26,6 @@ async function loadBasicPage(header: string) {
 }
 
 describe('Toggling the extension', () => {
-    // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
-
     const automationMenuSelector = '.header__more-settings-button';
     const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
 
@@ -250,6 +247,6 @@ describe('Toggling the extension', () => {
         await loadBasicPage('Dynamic styles');
 
         const numStyles = await pageUtils.evaluateScript(() => document.styleSheets.length);
-        expect(numStyles).toBe(product === 'firefox' ? 10 : 1);
+        expect(numStyles).toBe(1);
     });
 });

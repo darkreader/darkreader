@@ -29,9 +29,9 @@ declare global {
         getColorScheme: () => Promise<ColorScheme>;
         getChromeStorage: (region: 'local' | 'sync', keys: string[]) => Promise<{[key: string]: any}>;
         getManifest: () => Promise<chrome.runtime.Manifest>;
-        createTab: (url: string) => Promise<void>;
         setNews: (news: News[] | null) => Promise<void>;
         onDownload: (callback: (p: {ok: boolean}) => void) => void;
+        emulateColorScheme: (colorScheme: ColorScheme) => Promise<void>;
     };
     const pageUtils: {
         evaluateScript: (script: () => any) => Promise<any>;

@@ -21,9 +21,6 @@ async function loadBasicPage(header = 'E2E test page') {
 }
 
 describe('Test environment', () => {
-    // TODO: remove flakes and remove this line
-    jest.retryTimes(10, {logErrorsBeforeRetry: true});
-
     it('should turn On/Off', async () => {
         await loadBasicPage();
 

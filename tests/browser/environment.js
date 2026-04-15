@@ -163,12 +163,11 @@ export default class CustomJestEnvironment extends TestEnvironment {
     }
 
     async createTestPage() {
-        if (this.global.product === 'firefox') {
-            return;
-        }
         const page = await this.browser.newPage();
         page.on('pageerror', (err) => process.emit('uncaughtException', err));
-        await page.coverage.startJSCoverage();
+        if (this.global.product !== 'firefox') {
+            await page.coverage.startJSCoverage();
+        }
         return page;
     }
 
@@ -207,21 +206,12 @@ export default class CustomJestEnvironment extends TestEnvironment {
         const pathname = new URL(url).pathname;
         // Depending on external circumstances, page may connect to server before page.goto() reolves
         const promise = this.awaitForEvent(`ready-${pathname}`);
-        // Firefox does not resolve promise returned by page.goto()
-        // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
-        // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-        if (this.global.product !== 'firefox') {
-            await this.page.goto(url, gotoOptions);
-        } else {
-            await this.global.backgroundUtils.createTab(url);
-        }
+        await this.page.goto(url, gotoOptions);
         await promise;
     }
 
     async openTestPage(url, gotoOptions) {
-        if (this.global.product !== 'firefox') {
-            await this.page.bringToFront();
-        }
+        await this.page.bringToFront();
         await this.pageGoto(url, gotoOptions);
     }
 
@@ -295,22 +285,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
             return isDark ? 'dark' : 'light';
         };
 
-        global.pageUtils.evaluateScript = async (script) => {
-            if (global.product === 'firefox') {
-                if (typeof script !== 'function') {
-                    throw new Error('Not implemented');
-                }
-                return await global.pageUtils.evaluate(`(${script.toString()})()`);
-            }
-            return await page.evaluate(script);
-        };
+        global.pageUtils.evaluateScript = async (script) => await page.evaluate(script);
 
         global.expectPageStyles = async (expect, expectations) => {
-            if (global.product === 'firefox') {
-                const errors = await global.pageUtils.expectPageStyles(expectations);
-                expect(errors.length).toBe(0);
-                return;
-            }
             if (!Array.isArray(expectations[0])) {
                 expectations = [expectations];
             }
@@ -353,8 +330,6 @@ export default class CustomJestEnvironment extends TestEnvironment {
     async createMessageServer() {
         const awaitForEvent = this.awaitForEvent.bind(this);
 
-        // Puppeteer cannot evaluate scripts in moz-extension:// pages
-        // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {
             const wsServer = new WebSocketServer({port: POPUP_TEST_PORT});
             let backgroundSocket = null;
@@ -386,13 +361,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
                         popupSockets.add(ws);
                         this.onPageEventResponse(message.data.uuid);
                     } else if (message.id === null && message.data && message.data.type === 'page') {
-                        if (message.data.message === 'page-ready') {
+                        if (message.data.message === 'page-ready' && message.data.uuid === 'ready-/') {
                             ws.on('close', () => pageSockets.delete(ws));
-                            // Filter out non-top frames
-                            // this is to simplify expectPageStyle implementation
-                            if (message.data.uuid === 'ready-/') {
-                                pageSockets.add(ws);
-                            }
+                            pageSockets.add(ws);
                         }
                         this.onPageEventResponse(message.data.uuid);
                     } else if (message.id === null && message.data && message.data.type === 'download') {
@@ -410,7 +381,6 @@ export default class CustomJestEnvironment extends TestEnvironment {
                     rejectors.delete(message.id);
                 });
             });
-
 
             function sendToContext(sockets, type, data) {
                 return new Promise((resolve, reject) => {
@@ -468,21 +438,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 getChromeStorage: async (region, keys) => await sendToBackground('getChromeStorage', {region, keys}),
                 getManifest: async () => await sendToBackground('getManifest'),
                 getColorScheme: async () => {
-                    if (this.global.product !== 'firefox') {
-                        throw new Error('Not supported');
-                    }
                     return await sendToBackground('firefox-getColorScheme');
                 },
-                createTab: async (url) => {
-                    if (this.global.product !== 'firefox') {
-                        throw new Error('Not supported');
-                    }
-                    await sendToBackground('firefox-createTab', url);
-                },
                 emulateColorScheme: async (colorScheme) => {
-                    if (this.global.product !== 'firefox') {
-                        throw new Error('Not supported');
-                    }
                     await sendToBackground('firefox-emulateColorScheme', colorScheme);
                 },
                 setNews: async (news) => await sendToBackground('setNews', news),
@@ -490,13 +448,8 @@ export default class CustomJestEnvironment extends TestEnvironment {
             };
 
             this.global.pageUtils = {
-                evaluate: async (script) => await sendToPage('firefox-eval', script),
-                expectPageStyles: async (expectations) => await sendToPage('firefox-expectPageStyles', expectations),
                 emulateColorScheme: async (colorScheme) => await sendToPage('firefox-emulateColorScheme', colorScheme),
                 getColorScheme: async () => {
-                    if (this.global.product !== 'firefox') {
-                        throw new Error('Not supported');
-                    }
                     return await sendToPage('firefox-getColorScheme');
                 },
             };

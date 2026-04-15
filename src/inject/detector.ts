@@ -59,12 +59,23 @@ function hasBuiltInDarkTheme() {
     if (!rootColor) {
         return false;
     }
+
     const bodyColor = document.body ? parseColorWithCache(getComputedStyle(document.body).backgroundColor) : {r: 0, g: 0, b: 0, a: 0};
     if (!bodyColor) {
         return false;
     }
+
+    if (rootColor.a === 0 && bodyColor.a === 0) {
+        const rootTextColor = parseColorWithCache(rootStyle.color);
+        if (rootTextColor) {
+            const textLightness = getSRGBLightness(rootTextColor.r, rootTextColor.g, rootTextColor.b);
+            return textLightness > 0.5;
+        }
+    }
+
     const rootLightness = (1 - rootColor.a!) + rootColor.a! * getSRGBLightness(rootColor.r, rootColor.g, rootColor.b);
     const finalLightness = (1 - bodyColor.a!) * rootLightness + bodyColor.a! * getSRGBLightness(bodyColor.r, bodyColor.g, bodyColor.b);
+
     return finalLightness < 0.5;
 }
 

@@ -64,7 +64,6 @@ declare const __LOG__: string | false;
 declare const __PORT__: number;
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __FIREFOX_MV2__: boolean;
 
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {

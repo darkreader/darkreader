@@ -61,7 +61,7 @@ export function getDynamicThemeFixesFor(url: string, text: string, index: SiteFi
 
     if (enabledForPDF) {
         // Copy part of fixes which will be mutated
-        const invert = fixes[0].invert.slice();
+        const invert = fixes[0].invert?.slice();
         const commonFix = {...fixes[0], invert};
         const pdfFixes: DynamicThemeFix[] = [
             commonFix,

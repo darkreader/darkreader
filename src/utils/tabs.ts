@@ -1,3 +1,5 @@
+import {isFirefox, isMobile} from './platform';
+
 declare const __TEST__: boolean;
 declare const __DEBUG__: boolean;
 
@@ -44,6 +46,11 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
         tab = (await queryTabs({
             active: true,
             windowType: 'app',
+        }))[0];
+    }
+    if (!tab && isFirefox && isMobile) {
+        tab = (await queryTabs({
+            active: true,
         }))[0];
     }
     if (log) {

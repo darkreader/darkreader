@@ -61,8 +61,23 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                         create={(url) => {
                             return {
                                 url: [url],
-                                invert: [],
-                                css: '',
+                                invert: [
+                                    '.example_icon-selector-to-invert',
+                                    'img[src*="image-to-invert.png"]',
+                                ],
+                                css: [
+                                    '.example_color-value-inversion {',
+                                    '    background-color: ${rgba(128 255 164)} !important;',
+                                    '    color: ${black} !important;',
+                                    '}',
+                                    '.example_remove-background-image {',
+                                    '    background-image: none !important;',
+                                    '}',
+                                    '.example_builin-variables {',
+                                    '    background-color: var(--darkreader-neutral-background) !important;',
+                                    '    color: var(--darkreader-neutral-text) !important;',
+                                    '}',
+                                ].join('\n'),
                                 ignoreImageAnalysis: [],
                                 ignoreInlineStyle: [],
                                 ignoreCSSUrl: [],
@@ -81,10 +96,22 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                         create={(url) => {
                             return {
                                 url: [url],
-                                invert: [],
-                                noinvert: [],
-                                removebg: [],
-                                css: '',
+                                invert: [
+                                    '.example_icon-selector-to-invert',
+                                    'img[src*="image-to-invert.png"]',
+                                ],
+                                noinvert: [
+                                    '.example_icon-to-not-invert',
+                                ],
+                                removebg: [
+                                    '.example_remove-background',
+                                ],
+                                css: [
+                                    '.example_force-color-before-inversion {',
+                                    '    background-color: ${rgba(128 255 164)} !important;',
+                                    '    color: ${black} !important;',
+                                    '}',
+                                ].join('\n'),
                             } as InversionFix;
                         }}
                     />
@@ -111,8 +138,10 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                         create={(url) => {
                             return {
                                 url: [url],
-                                target: '',
-                                match: [],
+                                target: 'html',
+                                match: [
+                                    '.example-dark-theme-selector',
+                                ],
                                 noDarkTheme: false,
                                 systemTheme: false,
                                 iframe: false,

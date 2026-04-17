@@ -1,27 +1,25 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
-import type {DynamicThemeFix} from '../../../definitions';
-import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../generators/dynamic-theme';
 import {Button, TextBox} from '../../controls';
-import type {DevtoolsProps} from '../types';
+import type {ConfigEditorProps, SiteFix} from '../types';
 
 import {ConfigEditor} from './config-editor';
 
-export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
+export function PerSiteConfigEditor(props: ConfigEditorProps): Malevic.Child {
     const context = getContext();
     const store = context.getStore({
         errorText: '',
-        fixes: [] as DynamicThemeFix[],
+        fixes: [] as SiteFix[],
         fixesLength: 0,
         search: '',
-        currentFix: null as (DynamicThemeFix | null),
+        currentFix: null as (SiteFix | null),
     });
 
-    const fixesText = props.devtools.dynamic;
+    const fixesText = props.devtools[props.type];
     const didFixesChange = store.fixesLength !== fixesText.length;
     if (didFixesChange) {
-        store.fixes = parseDynamicThemeFixes(fixesText);
+        store.fixes = props.parse(fixesText);
         store.fixesLength = fixesText.length;
     }
 
@@ -46,12 +44,12 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
     }
 
     async function apply(text: string) {
-        const [change] = parseDynamicThemeFixes(text);
+        const [change] = props.parse(text);
         const index = store.fixes.indexOf(store.currentFix!);
         store.fixes[index] = change;
         store.currentFix = change;
-        const config = formatDynamicThemeFixes(store.fixes);
-        await props.actions.applyDevFixes('dynamic', config);
+        const config = props.format(store.fixes);
+        await props.actions.applyDevFixes(props.type, config);
     }
 
     function addNewFix() {
@@ -60,23 +58,14 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
             ((context.node as Element).querySelector('.js-search') as HTMLInputElement).focus();
             return;
         }
-        const newFix: DynamicThemeFix = {
-            url: [newFixURL],
-            invert: [],
-            css: '',
-            ignoreImageAnalysis: [],
-            ignoreInlineStyle: [],
-            ignoreCSSUrl: [],
-            disableStyleSheetsProxy: false,
-            disableCustomElementRegistryProxy: false,
-        };
+        const newFix = props.create(newFixURL);
         store.fixes.push(newFix);
         store.currentFix = newFix;
-        const config = formatDynamicThemeFixes(store.fixes);
-        props.actions.applyDevFixes('dynamic', config);
+        const config = props.format(store.fixes);
+        props.actions.applyDevFixes(props.type, config);
     }
 
-    const fixText = store.currentFix ? formatDynamicThemeFixes([store.currentFix]) : '';
+    const fixText = store.currentFix ? props.format([store.currentFix]) : '';
     const filteredFixes = store.search ? store.fixes.filter(({url}) => url.some((u) => u.includes(store.search))) : store.fixes;
 
     return (
@@ -108,14 +97,14 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
                     text={fixText}
                     apply={apply}
                     reset={() => {
-                        props.actions.resetDevFixes('dynamic');
+                        props.actions.resetDevFixes(props.type);
                     }}
                     delete={async () => {
                         const index = store.fixes.indexOf(store.currentFix!);
                         store.fixes.splice(index, 1);
                         store.currentFix = null;
-                        const config = formatDynamicThemeFixes(store.fixes);
-                        await props.actions.applyDevFixes('dynamic', config);
+                        const config = props.format(store.fixes);
+                        await props.actions.applyDevFixes(props.type, config);
                     }}
                 />
             ) : (

@@ -69,18 +69,18 @@ export function PerSiteConfigEditor(props: ConfigEditorProps): Malevic.Child {
     const filteredFixes = store.search ? store.fixes.filter(({url}) => url.some((u) => u.includes(store.search))) : store.fixes;
 
     return (
-        <div class="dynamic-per-site">
-            <div class="dynamic-per-site__search-wrapper">
-                <TextBox class="dynamic-per-site__search-input js-search" type="text" oninput={onSearchInput} placeholder="Search by URL" />
+        <div class="config-editor-per-site">
+            <div class="config-editor-per-site__search-wrapper">
+                <TextBox class="config-editor-per-site__search-input js-search" type="text" oninput={onSearchInput} placeholder="Search by URL" />
             </div>
-            <list class="dynamic-per-site__urls">
+            <list class="config-editor-per-site__urls">
                 {filteredFixes.map((fix) => {
                     const text = fix.url.join(' ');
                     return <li>
                         <Button
                             class={{
-                                'dynamic-per-site__url': true,
-                                'dynamic-per-site__url--active': fix === store.currentFix,
+                                'config-editor-per-site__url': true,
+                                'config-editor-per-site__url--active': fix === store.currentFix,
                             }}
                             onclick={() => {
                                 store.currentFix = fix === store.currentFix ? null : fix;
@@ -108,11 +108,11 @@ export function PerSiteConfigEditor(props: ConfigEditorProps): Malevic.Child {
                     }}
                 />
             ) : (
-                <div class="dynamic-per-site__add-fix">
-                    <Button onclick={addNewFix} class="dynamic-per-site__add-fix__button">
+                <div class="config-editor-per-site__add-fix">
+                    <Button onclick={addNewFix} class="config-editor-per-site__add-fix__button">
                         Create new fix
                     </Button>
-                    <p class="dynamic-per-site__add-fix__description">
+                    <p class="config-editor-per-site__add-fix__description">
                         Search for an <strong>existing fix</strong> or enter a <strong>domain name</strong><br />for a new fix and click <strong>Create</strong>
                     </p>
                 </div>

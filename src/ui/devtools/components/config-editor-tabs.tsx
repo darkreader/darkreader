@@ -17,7 +17,7 @@ export function ConfigEditorTabs(props: ConfigEditorProps): Malevic.Child {
     }
 
     return (
-        <div class="dynamic-mode-editor">
+        <div class="config-editor-tabs">
             <TabPanel isVertical activeTabId={store.activeTabId} onTabChange={onTabChange}>
                 <TabPanel.Tab id="full-editor" label="Full Editor">
                     <ConfigEditor

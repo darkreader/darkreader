@@ -79,10 +79,11 @@ export function getModifiableCSSDeclaration(
         property === 'stroke' ||
         property === 'stop-color'
     ) {
-        if (property.startsWith('border') && property !== 'border-color' && value === 'initial') {
+        if (property.startsWith('border') && property !== 'border-color' && (value === 'initial' || value === 'currentcolor')) {
             const borderSideProp = property.substring(0, property.length - 6);
             const borderSideVal = rule.style.getPropertyValue(borderSideProp);
-            if (borderSideVal.startsWith('0px') || borderSideVal === 'none') {
+            const borderStyleVal = rule.style.getPropertyValue('border-style');
+            if (borderSideVal.startsWith('0px') || borderSideVal === 'none' || borderStyleVal === 'none') {
                 property = borderSideProp;
                 modifier = borderSideVal;
             } else {

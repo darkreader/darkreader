@@ -67,6 +67,14 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                         reset={() => actions.resetDevFixes('filter')}
                     />
                 </TabPanel.Tab>
+                <TabPanel.Tab id="detector-editor" label="Detector Hints Editor">
+                    <ConfigEditor
+                        header="Detector Hints Editor"
+                        text={devtools.detector}
+                        apply={(text) => actions.applyDevFixes('detector', text)}
+                        reset={() => actions.resetDevFixes('detector')}
+                    />
+                </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">
                     <div class="buttons">
                         {isMobile || (__PLUS__ && !data.settings.previewNewDesign) ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}

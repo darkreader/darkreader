@@ -424,15 +424,18 @@ export class Extension {
 
     static async collectDevToolsData(): Promise<DevToolsData> {
         const [
+            detector,
             dynamic,
             filter,
             staticThemesText,
         ] = await Promise.all([
+            DevTools.getDetectorHintsText(),
             DevTools.getDynamicThemeFixesText(),
             DevTools.getInversionFixesText(),
             DevTools.getStaticThemesText(),
         ]);
         return {
+            detector,
             dynamic,
             filter,
             static: staticThemesText,

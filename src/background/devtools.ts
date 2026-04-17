@@ -1,5 +1,6 @@
 import type {DevFixType} from '../definitions';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
+import {formatDetectorHints, parseDetectorHints} from '../generators/detector-hints';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import {isFirefox} from '../utils/platform';
@@ -108,6 +109,7 @@ export default class DevTools {
         await DevTools.loadConfigOverrides();
     }
 
+    private static KEY_DETECTOR = 'dev_detector_hints';
     private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
     private static KEY_FILTER = 'dev_inversion_fixes';
     private static KEY_STATIC = 'dev_static_themes';
@@ -130,6 +132,7 @@ export default class DevTools {
     static applyFixes(type: DevFixType, text: string): Error | null {
         try {
             const apply = ({
+                'detector': DevTools.applyDetectorHints,
                 'dynamic': DevTools.applyDynamicThemeFixes,
                 'filter': DevTools.applyInversionFixes,
                 'static': DevTools.applyStaticThemes,
@@ -143,11 +146,45 @@ export default class DevTools {
 
     static resetFixes(type: DevFixType): void {
         const reset = ({
+            'detector': DevTools.resetDetectorHints,
             'dynamic': DevTools.resetDynamicThemeFixes,
             'filter': DevTools.resetInversionFixes,
             'static': DevTools.resetStaticThemes,
         } as Record<DevFixType, () => void>)[type];
         reset();
+    }
+
+    private static async getSavedDetectorHints() {
+        return DevTools.store.get(DevTools.KEY_DETECTOR);
+    }
+
+    private static saveDetectorHints(text: string) {
+        DevTools.store.set(DevTools.KEY_DETECTOR, text);
+    }
+
+    static async getDetectorHintsText(): Promise<string> {
+        let rawFixes = await DevTools.getSavedDetectorHints();
+        if (!rawFixes) {
+            await ConfigManager.load();
+            rawFixes = ConfigManager.DETECTOR_HINTS_RAW || '';
+        }
+        const fixes = parseDetectorHints(rawFixes);
+        return formatDetectorHints(fixes);
+    }
+
+    private static resetDetectorHints(): void {
+        DevTools.store.remove(DevTools.KEY_DETECTOR);
+        ConfigManager.overrides.detectorHints = null;
+        ConfigManager.handleDetectorHints();
+        DevTools.onChange();
+    }
+
+    private static applyDetectorHints(text: string): any {
+        const formatted = formatDetectorHints(parseDetectorHints(text));
+        ConfigManager.overrides.detectorHints = formatted;
+        ConfigManager.handleDetectorHints();
+        DevTools.saveDetectorHints(formatted);
+        DevTools.onChange();
     }
 
     private static async getSavedDynamicThemeFixes() {

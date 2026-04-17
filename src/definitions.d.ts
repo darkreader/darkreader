@@ -19,7 +19,7 @@ export interface ExtensionData {
     uiHighlights: string[];
 }
 
-export type DevFixType = 'dynamic' | 'filter' | 'static';
+export type DevFixType = 'detector' | 'dynamic' | 'filter' | 'static';
 
 export type DevToolsData = Record<DevFixType, string>;
 

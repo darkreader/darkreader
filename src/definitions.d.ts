@@ -19,11 +19,9 @@ export interface ExtensionData {
     uiHighlights: string[];
 }
 
-export interface DevToolsData {
-    dynamicFixesText: string;
-    filterFixesText: string;
-    staticThemesText: string;
-}
+export type DevFixType = 'dynamic' | 'filter' | 'static';
+
+export type DevToolsData = Record<DevFixType, string>;
 
 export interface TabData {
     type: MessageTypeBGtoCS;
@@ -38,12 +36,8 @@ export interface ExtensionActions {
     markNewsAsRead(ids: string[]): void;
     markNewsAsDisplayed(ids: string[]): void;
     loadConfig(options: {local: boolean}): void;
-    applyDevDynamicThemeFixes(text: string): Promise<void>;
-    resetDevDynamicThemeFixes(): void;
-    applyDevInversionFixes(text: string): Promise<void>;
-    resetDevInversionFixes(): void;
-    applyDevStaticThemes(text: string): Promise<void>;
-    resetDevStaticThemes(): void;
+    applyDevFixes(type: DevFixType, text: string): Promise<void>;
+    resetDevFixes(type: DevFixType): void;
     startActivation(email: string, key: string): void;
     resetActivation(): void;
     hideHighlights(ids: string[]): void;

@@ -21,9 +21,9 @@ export function DynamicModeEditor(props: DevtoolsProps): Malevic.Child {
             <TabPanel isVertical activeTabId={store.activeTabId} onTabChange={onTabChange}>
                 <TabPanel.Tab id="full-editor" label="Full Editor">
                     <ConfigEditor
-                        text={props.devtools.dynamicFixesText}
-                        apply={(text) => props.actions.applyDevDynamicThemeFixes(text)}
-                        reset={() => props.actions.resetDevDynamicThemeFixes()}
+                        text={props.devtools.dynamic}
+                        apply={(text) => props.actions.applyDevFixes('dynamic', text)}
+                        reset={() => props.actions.resetDevFixes('dynamic')}
                     />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="per-site-editor" label="Per Site Editor">

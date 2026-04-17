@@ -1,4 +1,4 @@
-import type {ExtensionData, ExtensionActions, Theme, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI} from '../../definitions';
+import type {ExtensionData, ExtensionActions, Theme, UserSettings, DevToolsData, MessageUItoBG, MessageBGtoUI, DevFixType} from '../../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../../utils/message';
 import {isFirefox} from '../../utils/platform';
 
@@ -16,7 +16,7 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(type: MessageTypeUItoBG, data?: string): Promise<T> {
+    private async sendRequest<T>(type: MessageTypeUItoBG, data?: {type: DevFixType; text: string}): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             chrome.runtime.sendMessage<MessageUItoBG>({type, data}, ({data, error}: MessageUItoBG) => {
                 if (error) {
@@ -28,7 +28,7 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: MessageTypeUItoBG, data?: string): Promise<T> {
+    private async firefoxSendRequestWithResponse<T>(type: MessageTypeUItoBG, data?: {type: DevFixType; text: string}): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name: type});
             dataPort.onDisconnect.addListener(() => reject());
@@ -117,37 +117,15 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.LOAD_CONFIG, data: options});
     }
 
-    async applyDevDynamicThemeFixes(text: string): Promise<void> {
+    async applyDevFixes(type: DevFixType, text: string): Promise<void> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_FIXES, {type, text});
         }
-        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_FIXES, {type, text});
     }
 
-    resetDevDynamicThemeFixes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_DYNAMIC_THEME_FIXES});
-    }
-
-    async applyDevInversionFixes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
-        }
-        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
-    }
-
-    resetDevInversionFixes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_INVERSION_FIXES});
-    }
-
-    async applyDevStaticThemes(text: string): Promise<void> {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
-        }
-        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
-    }
-
-    resetDevStaticThemes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_STATIC_THEMES});
+    resetDevFixes(type: DevFixType): void {
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_FIXES, data: {type}});
     }
 
     startActivation(email: string, key: string): void {

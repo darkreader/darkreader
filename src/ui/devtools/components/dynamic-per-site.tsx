@@ -18,7 +18,7 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
         currentFix: null as (DynamicThemeFix | null),
     });
 
-    const fixesText = props.devtools.dynamicFixesText;
+    const fixesText = props.devtools.dynamic;
     const didFixesChange = store.fixesLength !== fixesText.length;
     if (didFixesChange) {
         store.fixes = parseDynamicThemeFixes(fixesText);
@@ -51,7 +51,7 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
         store.fixes[index] = change;
         store.currentFix = change;
         const config = formatDynamicThemeFixes(store.fixes);
-        await props.actions.applyDevDynamicThemeFixes(config);
+        await props.actions.applyDevFixes('dynamic', config);
     }
 
     function addNewFix() {
@@ -73,7 +73,7 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
         store.fixes.push(newFix);
         store.currentFix = newFix;
         const config = formatDynamicThemeFixes(store.fixes);
-        props.actions.applyDevDynamicThemeFixes(config);
+        props.actions.applyDevFixes('dynamic', config);
     }
 
     const fixText = store.currentFix ? formatDynamicThemeFixes([store.currentFix]) : '';
@@ -108,14 +108,14 @@ export function DynamicPerSiteEditor(props: DevtoolsProps): Malevic.Child {
                     text={fixText}
                     apply={apply}
                     reset={() => {
-                        props.actions.resetDevDynamicThemeFixes();
+                        props.actions.resetDevFixes('dynamic');
                     }}
                     delete={async () => {
                         const index = store.fixes.indexOf(store.currentFix!);
                         store.fixes.splice(index, 1);
                         store.currentFix = null;
                         const config = formatDynamicThemeFixes(store.fixes);
-                        await props.actions.applyDevDynamicThemeFixes(config);
+                        await props.actions.applyDevFixes('dynamic', config);
                     }}
                 />
             ) : (

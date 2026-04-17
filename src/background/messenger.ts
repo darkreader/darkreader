@@ -1,4 +1,4 @@
-import type {ExtensionData, Theme, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
+import type {ExtensionData, Theme, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI, DevFixType} from '../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
 import {HOMEPAGE_URL} from '../utils/links';
 import {isFirefox} from '../utils/platform';
@@ -17,12 +17,8 @@ export interface ExtensionAdapter {
     markNewsAsDisplayed: (ids: string[]) => Promise<void>;
     toggleActiveTab: () => void;
     loadConfig: (options: {local: boolean}) => Promise<void>;
-    applyDevDynamicThemeFixes: (json: string) => Error;
-    resetDevDynamicThemeFixes: () => void;
-    applyDevInversionFixes: (json: string) => Error;
-    resetDevInversionFixes: () => void;
-    applyDevStaticThemes: (text: string) => Error;
-    resetDevStaticThemes: () => void;
+    applyDevFixes: (type: DevFixType, text: string) => Error | null;
+    resetDevFixes: (type: DevFixType) => void;
     startActivation: (email: string, key: string) => Promise<void>;
     resetActivation: () => Promise<void>;
     hideHighlights: (ids: string[]) => Promise<void>;
@@ -85,26 +81,11 @@ export default class Messenger {
                 promise = Messenger.adapter.collectDevToolsData();
                 break;
             // These types require data, so we need to add a listener to the port.
-            case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES:
-            case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
-            case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
+            case MessageTypeUItoBG.APPLY_DEV_FIXES:
                 promise = new Promise((resolve, reject) => {
                     port.onMessage.addListener((message: MessageUItoBG | MessageCStoBG) => {
                         const {data} = message;
-                        let error: Error;
-                        switch (port.name) {
-                            case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES:
-                                error = Messenger.adapter.applyDevDynamicThemeFixes(data);
-                                break;
-                            case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES:
-                                error = Messenger.adapter.applyDevInversionFixes(data);
-                                break;
-                            case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES:
-                                error = Messenger.adapter.applyDevStaticThemes(data);
-                                break;
-                            default:
-                                throw new Error(`Unknown port name: ${port.name}`);
-                        }
+                        const error = Messenger.adapter.applyDevFixes(data.type, data.text);
                         if (error) {
                             reject(error);
                         } else {
@@ -152,29 +133,13 @@ export default class Messenger {
             case MessageTypeUItoBG.LOAD_CONFIG:
                 Messenger.adapter.loadConfig(data);
                 break;
-            case MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES: {
-                const error = Messenger.adapter.applyDevDynamicThemeFixes(data);
+            case MessageTypeUItoBG.APPLY_DEV_FIXES: {
+                const error = Messenger.adapter.applyDevFixes(data.type, data.text);
                 sendResponse({error: (error ? error.message : undefined)});
                 break;
             }
-            case MessageTypeUItoBG.RESET_DEV_DYNAMIC_THEME_FIXES:
-                Messenger.adapter.resetDevDynamicThemeFixes();
-                break;
-            case MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES: {
-                const error = Messenger.adapter.applyDevInversionFixes(data);
-                sendResponse({error: (error ? error.message : undefined)});
-                break;
-            }
-            case MessageTypeUItoBG.RESET_DEV_INVERSION_FIXES:
-                Messenger.adapter.resetDevInversionFixes();
-                break;
-            case MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES: {
-                const error = Messenger.adapter.applyDevStaticThemes(data);
-                sendResponse({error: error ? error.message : undefined});
-                break;
-            }
-            case MessageTypeUItoBG.RESET_DEV_STATIC_THEMES:
-                Messenger.adapter.resetDevStaticThemes();
+            case MessageTypeUItoBG.RESET_DEV_FIXES:
+                Messenger.adapter.resetDevFixes(data.type);
                 break;
             case MessageTypeUItoBG.START_ACTIVATION:
                 Messenger.adapter.startActivation(data.email, data.key);

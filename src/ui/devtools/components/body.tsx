@@ -54,17 +54,17 @@ export default function Body(props: DevtoolsProps): Malevic.Child {
                 <TabPanel.Tab id="static-editor" label="Static Theme Editor">
                     <ConfigEditor
                         header="Static Theme Editor"
-                        text={devtools.staticThemesText}
-                        apply={(text) => actions.applyDevStaticThemes(text)}
-                        reset={() => actions.resetDevStaticThemes()}
+                        text={devtools.static}
+                        apply={(text) => actions.applyDevFixes('static', text)}
+                        reset={() => actions.resetDevFixes('static')}
                     />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="filter-editor" label="Inversion Fix Editor">
                     <ConfigEditor
                         header="Inversion Fix Editor"
-                        text={devtools.filterFixesText}
-                        apply={(text) => actions.applyDevInversionFixes(text)}
-                        reset={() => actions.resetDevInversionFixes()}
+                        text={devtools.filter}
+                        apply={(text) => actions.applyDevFixes('filter', text)}
+                        reset={() => actions.resetDevFixes('filter')}
                     />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced">

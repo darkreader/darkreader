@@ -17,9 +17,7 @@ export function makeChromiumHappy(): void {
             // Messenger
             MessageTypeUItoBG.GET_DATA,
             MessageTypeUItoBG.GET_DEVTOOLS_DATA,
-            MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES,
-            MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES,
-            MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES,
+            MessageTypeUItoBG.APPLY_DEV_FIXES,
         ].includes(message.type as MessageTypeUItoBG) &&
             (message.type !== MessageTypeCStoBG.DOCUMENT_CONNECT || !isPanel(sender))) {
             sendResponse({type: '¯\\_(ツ)_/¯'});

@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
-import {DetectorHint, DynamicThemeFix, InversionFix, StaticTheme} from '../../../definitions';
+import type {DetectorHint, DynamicThemeFix, InversionFix, StaticTheme} from '../../../definitions';
 import {formatInversionFixes, parseInversionFixes} from '../../../generators/css-filter';
 import {formatDetectorHints, parseDetectorHints} from '../../../generators/detector-hints';
 import {formatDynamicThemeFixes, parseDynamicThemeFixes} from '../../../generators/dynamic-theme';

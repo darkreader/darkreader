@@ -15,7 +15,9 @@ async function patchManifest(platform, debug, watch, test) {
     }
     if (platform === PLATFORM.CHROMIUM_MV3) {
         patched.browser_action = undefined;
-    }
+    } else if (platform === PLATFORM.FIREFOX_MV2) {
+        patched.commands._execute_browser_action = { }
+    } 
     if (debug) {
         patched.version = '1';
         patched.description = `Debug build, platform: ${platform}, watch: ${watch ? 'yes' : 'no'}.`;

@@ -44,7 +44,7 @@ export const themeCacheKeys: Array<keyof Theme> = [
 ];
 extendThemeCacheKeys(themeCacheKeys);
 
-function getCacheId(rgb: RGBA, theme: Theme): string {
+function getCacheId(rgb: RGBA, theme: Theme, poleA?: string, poleB?: string): string {
     let resultId = '';
     rgbCacheKeys.forEach((key) => {
         resultId += `${rgb[key]};`;
@@ -52,6 +52,7 @@ function getCacheId(rgb: RGBA, theme: Theme): string {
     themeCacheKeys.forEach((key) => {
         resultId += `${theme[key]};`;
     });
+    resultId += `${poleA};${poleB}`;
     return resultId;
 }
 
@@ -63,7 +64,7 @@ function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: HSLModifyFunct
         fnCache = new Map();
         colorModificationCache.set(modifyHSL, fnCache);
     }
-    const id = getCacheId(rgb, theme);
+    const id = getCacheId(rgb, theme, poleColor, anotherPoleColor);
     if (fnCache.has(id)) {
         return fnCache.get(id)!;
     }

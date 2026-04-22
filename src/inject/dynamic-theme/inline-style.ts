@@ -344,6 +344,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         if (Date.now() - elementsLastChanges.get(element)! < LOOP_DETECTION_THRESHOLD) {
             const cycles = elementsLoopCycles.get(element) ?? 0;
             elementsLoopCycles.set(element, cycles + 1);
+        } else {
+            elementsLoopCycles.delete(element);
         }
         if ((elementsLoopCycles.get(element) ?? 0) >= MAX_LOOP_CYCLES) {
             return;

@@ -35,7 +35,7 @@ export function registerVariablesSheet(sheet: CSSStyleSheet): void {
         types.forEach((type) => {
             if (registered[type]) {
                 const {variable, value} = registered[type];
-                (variablesSheet?.cssRules[0] as CSSStyleRule).style.setProperty(variable, value);
+                (variablesSheet?.cssRules[0] as CSSStyleRule)?.style.setProperty(variable, value);
             }
         });
     });

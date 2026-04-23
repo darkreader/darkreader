@@ -100,6 +100,24 @@ function injectStaticStyle(style: HTMLStyleElement, prevNode: Node | null, watch
     }
 }
 
+function setInversionStyleValue(invertStyle: HTMLStyleElement) {
+    if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
+        const filter = getCSSFilterValue({
+            ...theme!,
+            contrast: theme!.mode === 0 ? theme!.contrast : clamp(theme!.contrast - 10, 0, 100),
+        });
+        if (filter) {
+            invertStyle.textContent = [
+                `${fixes.invert.join(', ')} {`,
+                `    filter: ${filter} !important;`,
+                '}',
+            ].join('\n');
+            return;
+        }
+    }
+    invertStyle.textContent = '';
+}
+
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
     fallbackStyle.textContent = getModifiedFallbackStyle(theme!, {strict: true});
@@ -118,18 +136,7 @@ function createStaticStyleOverrides() {
     injectStaticStyle(textStyle, userAgentStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
-    if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
-        invertStyle.textContent = [
-            `${fixes.invert.join(', ')} {`,
-            `    filter: ${getCSSFilterValue({
-                ...theme!,
-                contrast: theme!.mode === 0 ? theme!.contrast : clamp(theme!.contrast - 10, 0, 100),
-            })} !important;`,
-            '}',
-        ].join('\n');
-    } else {
-        invertStyle.textContent = '';
-    }
+    setInversionStyleValue(invertStyle);
     injectStaticStyle(invertStyle, textStyle, 'invert');
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
@@ -183,18 +190,7 @@ function createShadowStaticStyleOverridesInner(root: ShadowRoot) {
     root.insertBefore(overrideStyle, inlineStyle.nextSibling);
 
     const invertStyle = createOrUpdateStyle('darkreader--invert', root);
-    if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
-        invertStyle.textContent = [
-            `${fixes.invert.join(', ')} {`,
-            `    filter: ${getCSSFilterValue({
-                ...theme!,
-                contrast: theme!.mode === 0 ? theme!.contrast : clamp(theme!.contrast - 10, 0, 100),
-            })} !important;`,
-            '}',
-        ].join('\n');
-    } else {
-        invertStyle.textContent = '';
-    }
+    setInversionStyleValue(invertStyle);
     root.insertBefore(invertStyle, overrideStyle.nextSibling);
     shadowRootsWithOverrides.add(root);
 }

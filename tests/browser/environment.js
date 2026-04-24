@@ -1,5 +1,5 @@
 import {TestEnvironment} from 'jest-environment-node';
-import {launch, connect} from 'puppeteer-core';
+import {launch} from 'puppeteer-core';
 import {WebSocketServer} from 'ws';
 
 import {generateHTMLCoverageReports} from './coverage.js';
@@ -126,41 +126,20 @@ export default class CustomJestEnvironment extends TestEnvironment {
     /**
      * @returns {Promise<Browser>}
      */
-    async launchFirefoxPuppeteer() {
-        const retries = 10;
-        const retryIntervalInMs = 500;
-        for (let i = 0; i < retries; i++) {
-            await new Promise((resolve) => setTimeout(resolve, retryIntervalInMs));
-            try {
-                return await connect({
-                    browserWSEndpoint: `ws://localhost:${FIREFOX_DEVTOOLS_PORT}/session`,
-                    protocol: 'webDriverBiDi',
-                });
-            } catch (err) {
-                console.log(`Firefox connection attempt ${i + 1} failed:`, err);
-            }
-        }
-        throw new Error('Failed to connect to Puppeteer');
-    }
-
-    /**
-     * @returns {Promise<Browser>}
-     */
     async launchFirefox() {
         // We need to manually launch Firefox via cmd.run() to install extension
         // because Firefox does not support installing via CLI arguments
         process.setMaxListeners(process.getMaxListeners() + 1);
         const firefox = await getFirefoxPath();
-        const {cmd} = await import('web-ext');
-        await cmd.run({
-            sourceDir: firefoxExtensionDebugDir,
-            firefox,
-            noReload: true,
-            args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],
-        }, {
-            shouldExitProgram: false,
+        const browser = await launch({
+            browser: 'firefox',
+            executablePath: firefox,
+            protocol: 'webDriverBiDi',
+            headless: false,
+            args: [`--remote-debugging-port=${FIREFOX_DEVTOOLS_PORT}`],
         });
-        return await this.launchFirefoxPuppeteer();
+        await browser.installExtension(firefoxExtensionDebugDir);
+        return browser;
     }
 
     async createTestPage() {

@@ -65,7 +65,8 @@ describe('Link override', () => {
     });
 
     it('should wait till style is loading', async () => {
-        let proceedCSSResponse: () => any = () => void(0);
+        const styleResolvers: Array<() => any> = [];
+        let didStyleResolve = false;
 
         await loadTestPage({
             '/': multiline(
@@ -83,7 +84,11 @@ describe('Link override', () => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'text/css');
 
-                await new Promise<void>((resolve) => proceedCSSResponse = resolve);
+                // For some reason Firefox 151 performs two requests.
+                // Only the second has effect on page's look.
+                if (!didStyleResolve) {
+                    await new Promise<void>((resolve) => styleResolvers.push(resolve));
+                }
 
                 res.end(multiline(
                     'body { background: gray; }',
@@ -102,7 +107,8 @@ describe('Link override', () => {
             ['h1 strong', 'color', 'rgb(232, 230, 227)'],
         ]);
 
-        proceedCSSResponse();
+        styleResolvers.forEach((resolve) => resolve());
+        didStyleResolve = true;
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

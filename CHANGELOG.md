@@ -1,3 +1,16 @@
+# 4.9.125 (April 28, 2026)
+
+- Detector Hints editor in Dev Tools.
+- Per-site editors for all Dev Tools configs.
+- Dev Tool fix templates.
+- Fixed Dev Tools fixes not being applied after restart.
+- Fixed handling border "none" style values.
+- Fixed dark mode detection for raw text file content.
+- Fixed removing image sprites in light mode.
+- Fixed searching for site fixes with ports and RegExps.
+- Fixed site toggle in Firefox Nightly on Android.
+- Updated experimental design for Microsoft Edge.
+
 # 4.9.124 (April 1, 2026)
 
 - Fixed PDF inversion in Dynamic mode.

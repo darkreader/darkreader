@@ -5,7 +5,6 @@ import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {parseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {CONFIG_URL_BASE} from '../utils/links';
 import {parseArray} from '../utils/text';
-import {getDuration} from '../utils/time';
 import {indexURLTemplateList, isURLInIndexedList} from '../utils/url';
 import type {URLTemplateIndex} from '../utils/url';
 import UserStorage from './user-storage';
@@ -39,7 +38,6 @@ const CONFIG_URLs = {
     },
 };
 
-const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 interface LocalConfig {
     local: boolean;
@@ -87,22 +85,8 @@ export default class ConfigManager {
         localURL,
         remoteURL,
     }: Config) {
-        let $config: string;
         const loadLocal = async () => await readText({url: localURL});
-        if (local) {
-            $config = await loadLocal();
-        } else {
-            try {
-                $config = await readText({
-                    url: `${remoteURL}?nocache=${Date.now()}`,
-                    timeout: REMOTE_TIMEOUT_MS,
-                });
-            } catch (err) {
-                console.error(`${name} remote load error`, err);
-                $config = await loadLocal();
-            }
-        }
-        return $config;
+        return await loadLocal();
     }
 
     private static async loadColorSchemes({local}: LocalConfig) {

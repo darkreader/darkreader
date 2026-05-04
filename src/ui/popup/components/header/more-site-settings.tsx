@@ -1,7 +1,6 @@
 import {m} from 'malevic';
 
 import type {ExtWrapper} from '../../../../definitions';
-import {DONATE_URL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
 import {Button, CheckBox, Shortcut} from '../../../controls';
 import {KeyboardIcon} from '../../../icons';
@@ -98,18 +97,41 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                     <KeyboardIcon />
                 </span>
                 <p class="header__more-settings__description">
-                    {getLocalMessage('website_toggle_shortcut')}
+                    {getLocalMessage('page_protected_settings')}
                 </p>
-                {data.uiHighlights.includes('anniversary') ? (
-                    <div class="header__more-settings__donate">
-                        <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                            <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
-                        </a>
-                        <p class="header__more-settings__description">
-                            {getLocalMessage('support_out_work')}
-                        </p>
-                    </div>
-                ) : null}
+                <div class="header__more-settings__line">
+                    <CheckBox
+                        checked={data.settings.enableForPDF}
+                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({enableForPDF: e.target.checked})}
+                    />
+                    <Button
+                        class={{
+                            'header__more-settings__enable-for-pdf__button': true,
+                            'header__more-settings__enable-for-pdf__button--active': data.settings.enableForPDF,
+                        }}
+                        onclick={() => actions.changeSettings({enableForPDF: !data.settings.enableForPDF})}
+                    >
+                        {getLocalMessage('enable_for_pdf')}
+                    </Button>
+                </div>
+                <p class="header__more-settings__description">
+                    {getLocalMessage('enable_for_pdf_description')}
+                </p>
+                <div class="header__more-settings__line">
+                    <CheckBox
+                        checked={data.settings.enableForProtectedPages}
+                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({enableForProtectedPages: e.target.checked})}
+                    />
+                    <Button
+                        class={{
+                            'header__more-settings__enable-for-protected-pages__button': true,
+                            'header__more-settings__enable-for-protected-pages__button--active': data.settings.enableForProtectedPages,
+                        }}
+                        onclick={() => actions.changeSettings({enableForProtectedPages: !data.settings.enableForProtectedPages})}
+                    >
+                        {getLocalMessage('enable_for_protected_pages')}
+                    </Button>
+                </div>
             </div>
         </div>
     );

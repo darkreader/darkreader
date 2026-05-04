@@ -22,12 +22,6 @@ function renderBody(data: ExtensionData, fonts: string[], installation: {date: n
         document.documentElement.classList.remove('preview');
     }
 
-    if (data.news && data.news.length > 0) {
-        const latest = data.news[0];
-        if (latest && !latest.displayed) {
-            actions.markNewsAsDisplayed([latest.id]);
-        }
-    }
 
     sync(document.body, (
         <Body data={data} actions={actions} fonts={fonts} installation={installation} />

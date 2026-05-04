@@ -1,13 +1,11 @@
 import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
 import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
 
-import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
-import {DONATE_URL, HOMEPAGE_URL, MOBILE_URL, getHelpURL} from '../../../utils/links';
+import type {ExtensionData, ExtensionActions} from '../../../definitions';
+import {getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {isMobile} from '../../../utils/platform';
-import {getDuration} from '../../../utils/time';
 import {TabPanel} from '../../controls';
 import {compose} from '../../utils';
 import NewBody from '../body';
@@ -16,12 +14,10 @@ import FilterSettings from './filter-settings';
 import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
-import {NewsGroup, NewsButton} from './news';
-import {MobileLinks, MobileLinksButton} from './news/mobile-links';
 import SiteListSettings from './site-list-settings';
 
 
-import {PlusBody, activate} from '@plus/popup/plus-body';
+import {PlusBody} from '@plus/popup/plus-body';
 
 declare const __THUNDERBIRD__: boolean;
 declare const __PLUS__: boolean;
@@ -43,7 +39,6 @@ interface BodyState {
 }
 
 function Body(props: BodyProps & {fonts: string[]} & {installation: {date: number; version: string}}) {
-    const context = getContext();
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
         newsOpen: false,
@@ -138,78 +133,7 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
         }
     }
 
-    const birthdayMessage = getLocalMessage('we_celebrate_10_years');
-    let birthdayMessageSpec = <span>{birthdayMessage}</span>;
-    try {
-        const index10 = birthdayMessage.indexOf('10');
-        const indexDot = birthdayMessage.indexOf('.', index10);
-        if (index10 >= 0 && indexDot > index10) {
-            const timePassed = Date.now() - (new Date(2014, 6, 7)).getTime();
-            let years = Math.abs((new Date(timePassed)).getFullYear() - 1970);
-            years = Math.max(10, years);
-            birthdayMessageSpec = (
-                <span>
-                    {birthdayMessage.substring(0, index10)}
-                    <a href={`${HOMEPAGE_URL}/timeline/`} target="_blank" rel="noopener noreferrer">
-                        {`${years}${birthdayMessage.substring(index10 + 2, indexDot)}`}
-                    </a>
-                    {birthdayMessage.substring(indexDot)}
-                </span>
-            );
-        }
-    } catch (err) {
-        console.error(err);
-    }
-
     const filterTab = <FilterSettings data={props.data} actions={props.actions}>
-        {__PLUS__ ? (
-            props.data.uiHighlights.includes('anniversary') ? (
-                <div class="ui-upgrade">
-                    <i class="ui-upgrade__icon">
-                    </i>
-                    <span class="ui-upgrade__message">
-                        Support the development and get access to the latest features
-                    </span>
-                    <a class="ui-upgrade__button" href={`${HOMEPAGE_URL}/plus/`} target="_blank" rel="noopener noreferrer">
-                        <span class="ui-upgrade__button__text">
-                            Upgrade
-                        </span>
-                    </a>
-                </div>
-            ) : (
-                <div class="ui-upgrade">
-                    <i class="ui-upgrade__icon">
-                    </i>
-                    <span class="ui-upgrade__message">
-                        Activate the latest features
-                    </span>
-                    <a class="ui-upgrade__button" target="_blank" rel="noopener noreferrer" onclick={() => {
-                        chrome.storage.local.get<Record<string, any>>({activationEmail: '', activationKey: ''}, async ({activationEmail, activationKey}) => {
-                            const result = await activate(activationEmail, activationKey);
-                            if (result) {
-                                context.refresh();
-                            } else {
-                                props.actions.changeSettings({previewNewestDesign: true});
-                            }
-                        });
-                    }}>
-                        <span class="ui-upgrade__button__text">
-                            Enable new design
-                        </span>
-                    </a>
-                </div>
-            )
-        ) : props.data.uiHighlights.includes('anniversary') ? (
-            <div class="birthday-container">
-                <i class="birthday-icon">🎉</i>
-                <span class="birthday-message">
-                    {birthdayMessageSpec}
-                </span>
-                <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                    <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
-                </a>
-            </div>
-        ) : null}
     </FilterSettings>;
 
     const moreTab = <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />;
@@ -218,7 +142,6 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
         <body
             class={{
                 'ext-disabled': !props.data.isEnabled,
-                'ext-tall': __PLUS__ || props.data.uiHighlights.includes('anniversary'),
             }}
         >
             <Loader complete />
@@ -250,32 +173,11 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
                 }}
             />
 
-            <div class="mobile-link-container">
-                <a class="mobile-link" href={MOBILE_URL} target="_blank" rel="noopener noreferrer">
-                    <span class="mobile-link__icon"></span>
-                    <span class="mobile-link__text">
-                        {getLocalMessage('mobile_link')}
-                    </span>
-                </a>
-            </div>
             <footer>
                 <div class="footer-buttons">
                     <a class="footer-help-link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
-                    <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <MobileLinksButton active={state.mobileLinksOpen} onClick={toggleMobileLinks} />
                 </div>
             </footer>
-            <NewsGroup
-                news={props.data.news}
-                expanded={state.newsOpen}
-                onNewsOpen={onNewsOpen}
-                onClose={toggleNews}
-            />
-            <MobileLinks
-                expanded={state.mobileLinksOpen}
-                onLinkClick={disableMobileLinksSlideIn}
-                onClose={toggleMobileLinks}
-            />
             <MoreSiteSettings
                 data={props.data}
                 actions={props.actions}

@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 
 import type {ViewProps} from '../../../definitions';
-import {DONATE_URL, HELP_URL, HOMEPAGE_URL, MOBILE_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
+import {HELP_URL, HOMEPAGE_URL, MOBILE_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {isMobile} from '../../../utils/platform';
 
@@ -32,14 +32,5 @@ export function AboutTab(props: ViewProps & AboutTabProps): Malevic.Child {
         <div>
             <a href={props.plus ? `${HELP_URL}/plus/` : getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
         </div>
-        {props.plus ? null : isMobile ? (
-            <div>
-                <a href={`${HOMEPAGE_URL}/plus/`} target="_blank" rel="noopener noreferrer">{getLocalMessage('pay_for_using')}</a>
-            </div>
-        ) : props.data.uiHighlights.includes('anniversary') ? (
-            <div>
-                <a href={DONATE_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('pay_for_using')}</a>
-            </div>
-        ) : null}
     </div>;
 }

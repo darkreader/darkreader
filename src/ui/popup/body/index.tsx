@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
 import type {ViewProps} from '../../../definitions';
-import {DONATE_URL, HOMEPAGE_URL} from '../../../utils/links';
+import {HOMEPAGE_URL} from '../../../utils/links';
 import {isMobile} from '../../../utils/platform';
 import {Overlay} from '../../controls';
 import {openExtensionPage} from '../../utils';
@@ -97,22 +97,6 @@ function Pages(props: ViewProps) {
     );
 }
 
-function DonateGroup() {
-    return (
-        <div class="m-donate-group">
-            <a class="m-donate-button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                <span class="m-donate-button__icon"></span>
-                <span class="m-donate-button__text">
-                    Pay for using <strong class="m-donate-button__darkreader">Dark Reader</strong>
-                </span>
-            </a>
-            <label class="m-donate-description">
-                Please support our work
-            </label>
-        </div>
-    );
-}
-
 export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
@@ -136,11 +120,6 @@ export default function Body(props: ViewProps) {
             <section class="m-section pages-section">
                 <Pages {...props} />
             </section>
-            {props.data.uiHighlights.includes('anniversary') ? (
-                <section class="m-section">
-                    <DonateGroup />
-                </section>
-            ) : null}
             <Overlay />
         </body>
     );

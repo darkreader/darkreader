@@ -30,7 +30,10 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
     return new Promise<ImageDetails>(async (resolve, reject) => {
         try {
             let dataURL = url.startsWith('data:') ? url : await getDataURL(url);
-            const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadAsBlob(url);
+            // Convert the already-fetched dataURL to a blob instead of re-fetching the
+            // original URL (which would violate the page's connect-src CSP for cross-origin
+            // resources like gstatic.com images used by Gmail et al.).
+            const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadBlobSafe(url, dataURL);
             let image: ImageBitmap | HTMLImageElement;
             let useViewBox = false;
             if (dataURL.startsWith('data:image/svg+xml')) {
@@ -92,6 +95,32 @@ async function getDataURL(url: string): Promise<string> {
         return await loadAsDataURL(url);
     }
     return await bgFetch({url, responseType: 'data-url', origin: location.origin});
+}
+
+/**
+ * Fetches a Blob for the given URL without violating the page's CSP.
+ * For same-origin URLs we can use fetch() directly.
+ * For cross-origin URLs the resource has already been fetched (as a data URL)
+ * by the background service worker via bgFetch, so we fetch the data: URI
+ * locally — that never hits the network and is always allowed.
+ */
+async function loadBlobSafe(originalURL: string, dataURL: string): Promise<Blob> {
+    if (!originalURL.startsWith('data:')) {
+        try {
+            const parsedURL = new URL(originalURL);
+            if (parsedURL.origin === location.origin) {
+                // Same-origin: safe to fetch directly from content-script context.
+                return await loadAsBlob(originalURL);
+            }
+        } catch {
+            // Malformed URL — fall through to dataURL path.
+        }
+    }
+    // Cross-origin (or already a data: URL): convert the data URL to a blob
+    // locally without any network request, so the page's connect-src CSP is
+    // never triggered.
+    const response = await fetch(dataURL);
+    return response.blob();
 }
 
 async function tryCreateImageBitmap(blob: Blob) {

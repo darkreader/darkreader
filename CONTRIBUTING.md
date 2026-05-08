@@ -248,11 +248,10 @@ A contributor should ensure the changes work and solve a real problem.
 Code changes predominantly **generated with AI are not allowed**.
 All comments and conversations must be held by humans.
 
-**Changes that should not be made:**
+**The following changes are STRICTLY FORBIDDEN**
  - adding external dependencies
  - changing the build process
- - modifying `package.json`
- - modifying lock files
+ - modifying `package.json` and `package-lock.json`
 
 You can use any text editor or web IDE (for example, [Visual Studio Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/)) to edit the code.
 

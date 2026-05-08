@@ -1,12 +1,12 @@
 <h2 align="center">Contributions</h2>
 
-<p align="center">You can contribute to and help Dark Reader in many ways. Read on below to learn how and thank you in advance.</p>
+<p align="center">You can contribute to and help Dark Reader in many ways. Continue reading to learn how, and thank you in advance!</p>
 
 ## Sponsor
 
 <a href="https://opencollective.com/darkreader/donate" target="_blank" rel="noreferrer noopener"> <img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 /></a>
 
-Sponsor the development of Dark Reader.
+Please sponsor the development of Dark Reader.
 
 ## Translation
 
@@ -38,7 +38,7 @@ document.head.appendChild(lock);
 
 If a website is **already dark** and meets the following requirements:
 
-- The entire website, including all subpages, is dark by default, regardless of the system's preferred color scheme.
+- The entire website - including all subpages - is dark by default, regardless of the system's preferred color scheme.
 - The URL is the actual website address. No redirects of any kind are allowed.
 - The website is complete and finished. Any website in the design or development phase or any other incomplete status is not permitted. These statuses can include any placeholder web pages or verbiage about coming soon, the website being under construction, the website having moved, etc.
 
@@ -52,7 +52,7 @@ If any **element** on a web page is **not inverted or styled correctly**, you ca
 
 **Please maintain the alphabetical order of the websites listed, use short selectors, and preserve the code style in these files.**
 
-You can learn how to create a fix for the appropriate mode below.
+You can learn how to create a fix for the appropriate Dark Reader mode below.
 
 ## How to use the Dev Tools
 
@@ -76,7 +76,7 @@ https://github.com/user-attachments/assets/76a5d9bc-7553-4e50-acf5-5a9051cec152
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
 - Pick an incorrectly inverted element.
 - Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (for example, if it has `class="icon small"`, the selector may look like `.icon`).
-- Click **Dark Reader icon** to open the extension popup window.
+- Click the **Dark Reader icon** to open the extension's popup window.
 - Switch to the **More** tab.
 - Click the **⛭ All settings** button at the bottom.
 - Switch to the **Advanced** section on the left.
@@ -84,14 +84,14 @@ https://github.com/user-attachments/assets/76a5d9bc-7553-4e50-acf5-5a9051cec152
 - (Optional but helpful) Switch to the **Per Site Editor** tab at the bottom and type in the domain name you wish to update or add.
 - Edit or add a block containing the URL and selectors to invert, using the [rules below](#editor--rule-syntax).
 - Click **Apply**.
-- Check how the site looks both in **Light** and **Dark** mode.
+- Check how the site looks both in **Light** and **Dark** modes.
 - If the **fix works**, open **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config)** or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config)**.
-- Click **Edit** (login to GitHub first).
+- Click **Edit** (requires being logged in to GitHub).
 - **Insert your fix** there (copying and pasting it from the Dev Tools). Preserve **alphabetic order** by URL.
 - Provide a **short description** of what you have done.
 - Click **Propose file change**.
 - Review your changes. Click **Create pull request**.
-- Once you create the pull request, GitHub Actions will run tests behind the scenes to make sure your submission has the right code style. This will take a few minutes.
+- Once you create the pull request, GitHub Actions will run tests behind the scenes to ensure your submission has the right code style. This will take a few minutes.
 - If you see a **red cross**, click **Details** to see what is wrong and edit the existing Pull Request.
 - When you see a **green checkmark**, then everything is fine.
 - A Dark Reader developer will **review** and merge your changes, making them available to all Dark Reader users.
@@ -125,19 +125,19 @@ IGNORE IMAGE ANALYSIS
 
 The fix starts with the domain name, like `example.com`. The `www` part should be ommited.
 
-If the fix affects a particular sub domain, this exact subdomain should be defined like `sub.domain.com`.
+If the fix affects a particular subdomain, this exact subdomain should be specified like `sub.domain.com`.
 
-Some websites have different top level domains depending on location. A `*` can be used like `example.*`.
+Some websites have different top level domains depending on the user's location. A `*` can be used like `example.*`.
 
-If the same fix applies to a website (or similar websites) that can have multiple domain names or sub-domains,
-they can be listed on each line, starting with the most popular one:
+If the same fix applies to a website (or similar websites) that can have multiple domain names or subdomains,
+they can be listed on separate lines, starting with the most popular one:
 ```
 example.com
 sub.example.com
 example.mirror.com
 ```
 
-The use of `*` wildcard is discouraged, it can only be used as the last resort.
+The use of `*` wildcard is discouraged; it can only be used as the last resort.
 
 For 
 
@@ -150,7 +150,7 @@ For
 
 ## Dynamic variables
 
-When making a fix for background or text colors, instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`), please use CSS variables that are generated based on the user settings:
+When making a fix for background or text colors, instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`), please use CSS variables that are generated based on the user's settings:
 
 ```CSS
 dynamic-theme-fixes.config
@@ -207,10 +207,10 @@ CSS
 
 ## Adding new features or fixing bugs
 
-If you would like to **add a new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
+If you would like to **add a new feature** to Dark Reader or **fix a bug**, please **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
 
-To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS version.
-Install development dependencies by running `npm install` in the project root folder.
+To build and debug the extension, **install the [Node.js](https://nodejs.org/)** LTS version.
+Install development dependencies by running `npm install` in the project's root folder.
 Then execute `npm run debug`.
 
 #### Chrome and Edge
@@ -229,7 +229,7 @@ Then execute `npm run debug`.
 - Click the **Load Temporary Add-on** button.
 - Open the `build/debug/firefox/manifest.json` file.
 
-If you execute `npm run debug:watch` instead of `npm run debug`, it will automatically recompile after making any code changes.
+If you execute `npm run debug:watch` instead of `npm run debug`, it will automatically recompile the extension after making any code changes.
 
 ## Rules and recommendations
 
@@ -239,7 +239,7 @@ and **discuss your solution and approach** with active contributors,
 before performing further changes.
 
 **Keep the changes simple**.
-Please use as fewer code as possible.
+Please use as little code as possible.
 A single pull request should have a single purpose.
 
 **Low effort contributions** are not allowed.
@@ -248,13 +248,16 @@ A contributor should ensure the changes work and solve a real problem.
 Code changes predominantly **generated with AI are not allowed**.
 All comments and conversations must be held by humans.
 
-**Adding external dependencies** and any changes to `package.json` and lock files are forbidden.
-Any changes to build process are prohibited.
+**Changes that should not be made:**
+ - adding external dependencies
+ - changing the build process
+ - modifying `package.json`
+ - modifying lock files
 
-You can use any text editor or web IDE (for example, [Visual Studio Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/)) for editing the code.
+You can use any text editor or web IDE (for example, [Visual Studio Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/)) to edit the code.
 
-**Please preserve the code style** (for example, whitespaces, etc.). It can be done automatically by executing `npm run code-style`.
+**Please preserve the code style** (e.g. whitespaces). It can be performed automatically by executing `npm run code-style`.
 
-Run tests by executing `npm test` to verify it will pass.
+Run tests by executing `npm test` to verify your changes will pass.
 
-If your code is ready to be reviewed and merged, you can submit a **pull request** and wait for a **review**.
+If your code is ready to be reviewed and merged, please submit a **pull request** and wait for a **review**.

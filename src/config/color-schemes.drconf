@@ -40,6 +40,10 @@ DARK
 background: #282b36
 text: #e8e6e3
 
+LIGHT
+background: #f8f8f2
+text: #343746
+
 ================================
 
 Everforest

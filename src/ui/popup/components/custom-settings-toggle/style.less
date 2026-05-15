@@ -4,6 +4,12 @@
     color: @color-fore;
     white-space: normal;
 
+    &__group {
+        display: flex;
+        flex-direction: column;
+        gap: @indent-small;
+    }
+
     &--checked,
     &:active,
     &--checked:hover {
@@ -28,5 +34,20 @@
         display: inline-flex;
         justify-content: center;
         min-width: @popup-content-width - 2 * @size-border;
+    }
+
+    &__reset {
+        background-color: transparent;
+
+        &__text {
+            white-space: nowrap;
+        }
+
+        .button__wrapper {
+            align-items: center;
+            display: inline-flex;
+            justify-content: center;
+            min-width: @popup-content-width - 2 * @size-border;
+        }
     }
 }

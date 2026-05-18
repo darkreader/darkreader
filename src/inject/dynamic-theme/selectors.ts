@@ -3,7 +3,6 @@ const emptyPseudoClasses = [':before', ':after', ':empty'];
 export const filterSelectors = {
     invert: new Set<string>(),
     dim: new Set<string>(),
-    light: new Set<string>(),
 };
 
 export function addFilterSelector(selector: string, type: keyof typeof filterSelectors) {
@@ -67,5 +66,4 @@ export function isSelectorWithin(sub: string, parent: string): boolean {
 export function cleanFilterSelectors() {
     filterSelectors.invert.clear();
     filterSelectors.dim.clear();
-    filterSelectors.light.clear();
 }

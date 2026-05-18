@@ -275,7 +275,7 @@ export function createFallbackFactory(fn: (colors: typeof colorModifiers) => Fal
     fallbackFactory = fn(colorModifiers);
 }
 
-export type FilterType = 'invert' | 'dim' | 'light';
+export type FilterType = 'invert' | 'dim';
 
 let addFilterSelector: ((selector: string, type: FilterType) => void) | null = null;
 
@@ -602,7 +602,7 @@ export function getBgImageModifier(
                     const inverted = getFilteredImageURL(imageDetails, theme);
                     result = `url("${inverted}")`;
                 } else {
-                    pushFilter?.('dim');
+                    pushFilter?.('invert');
                 }
             } else if (theme.mode === 0 && isLight && imageDetails.dataURL) {
                 logInfo(`Applying filter to image ${logSrc}`);
@@ -610,7 +610,7 @@ export function getBgImageModifier(
                     const filtered = getFilteredImageURL(imageDetails, {...theme, brightness: clamp(theme.brightness - 10, 5, 200), sepia: clamp(theme.sepia + 10, 0, 100)});
                     result = `url("${filtered}")`;
                 } else {
-                    pushFilter?.('light');
+                    pushFilter?.('dim');
                 }
             } else {
                 logInfo(`Not modifying the image ${logSrc}`);

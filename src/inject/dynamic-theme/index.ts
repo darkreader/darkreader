@@ -146,10 +146,7 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
         }));
     }
     if (filterSelectors.dim.size > 0) {
-        appendRule([...filterSelectors.dim], getCSSFilterValue(theme));
-    }
-    if (filterSelectors.light.size > 0) {
-        appendRule([...filterSelectors.light], getCSSFilterValue({
+        appendRule([...filterSelectors.dim], getCSSFilterValue({
             ...theme,
             brightness: clamp(theme.brightness - 10, 5, 200),
             sepia: clamp(theme.sepia + 10, 0, 100),

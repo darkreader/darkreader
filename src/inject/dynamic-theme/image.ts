@@ -2,6 +2,7 @@ import type {Theme} from '../../definitions';
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import AsyncQueue from '../../utils/async-queue';
 import {getSRGBLightness} from '../../utils/color';
+import type {RGBA} from '../../utils/color';
 import {loadAsBlob, loadAsDataURL} from '../../utils/network';
 import {getHashCode} from '../../utils/text';
 import {addReadyStateCompleteListener, isReadyStateComplete} from '../utils/dom';
@@ -18,6 +19,7 @@ export interface ImageDetails {
     isLight: boolean;
     isTransparent: boolean;
     isLarge: boolean;
+    solidColor?: RGBA | null;
     useViewBox?: boolean;
 }
 
@@ -160,6 +162,7 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
             isLight: false,
             isTransparent: false,
             isLarge: false,
+            averageColor: null,
         };
     }
 
@@ -183,6 +186,13 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
     let darkPixelsCount = 0;
     let lightPixelsCount = 0;
 
+    let minLightness = 1;
+    let maxLightness = 0;
+    let sumR = 0;
+    let sumG = 0;
+    let sumB = 0;
+    let sumA = 0;
+
     let i: number, x: number, y: number;
     let r: number, g: number, b: number, a: number;
     let l: number;
@@ -194,6 +204,11 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
             b = d[i + 2];
             a = d[i + 3];
 
+            sumR += r;
+            sumG += g;
+            sumB += b;
+            sumA += a;
+
             if (a / 255 < TRANSPARENT_ALPHA_THRESHOLD) {
                 transparentPixelsCount++;
             } else {
@@ -203,6 +218,12 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
                 }
                 if (l > LIGHT_LIGHTNESS_THRESHOLD) {
                     lightPixelsCount++;
+                }
+                if (l < minLightness) {
+                    minLightness = l;
+                }
+                if (l > maxLightness) {
+                    maxLightness = l;
                 }
             }
         }
@@ -214,12 +235,25 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
     const DARK_IMAGE_THRESHOLD = 0.7;
     const LIGHT_IMAGE_THRESHOLD = 0.7;
     const TRANSPARENT_IMAGE_THRESHOLD = 0.1;
+    const SOLID_LIGHTNESS_DIFF_THRESHOLD = 0.1;
+
+    const isSolid = (
+        sumA === totalPixelsCount * 255 &&
+        (maxLightness - minLightness) < SOLID_LIGHTNESS_DIFF_THRESHOLD
+    );
+    const solidColor = isSolid ? {
+        r: Math.round(sumR / opaquePixelsCount),
+        g: Math.round(sumG / opaquePixelsCount),
+        b: Math.round(sumB / opaquePixelsCount),
+        a: transparentPixelsCount / totalPixelsCount,
+    } : null;
 
     return {
         isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
         isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
         isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
         isLarge,
+        solidColor,
     };
 }
 
@@ -294,6 +328,16 @@ export function getFilteredImageURL({dataURL, width, height, useViewBox}: ImageD
     const objectURL = URL.createObjectURL(blob);
     objectURLs.add(objectURL);
     return objectURL;
+}
+
+export function getSolidColorImageURL({width, height, useViewBox}: ImageDetails, color: string): string {
+    const size = useViewBox ? `viewBox="0 0 ${width} ${height}"` : `width="${width}" height="${height}"`;
+    const svg = [
+        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ${size}>`,
+        `<rect width="100%" height="100%" fill="${escapeXML(color)}" />`,
+        '</svg>',
+    ].join('');
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
 const xmlEscapeChars: Record<string, string> = {

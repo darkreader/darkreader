@@ -11,7 +11,7 @@ import {logWarn, logInfo} from '../utils/log';
 
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
-import {getImageDetails, getFilteredImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
+import {getImageDetails, getFilteredImageURL, getSolidColorImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from './modify-colors';
 import {getSheetScope} from './style-scope';
 import type {CSSVariableModifier, VariablesStore} from './variables';
@@ -577,7 +577,7 @@ export function getBgImageModifier(
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, theme: Theme) => {
-            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, solidColor, width} = imageDetails;
             let result: string | null = null;
             const logSrc = imageDetails.src.startsWith('data:') ? 'data:' : imageDetails.src;
             if (isLarge && isLight && !isTransparent && theme.mode === 1) {
@@ -592,10 +592,15 @@ export function getBgImageModifier(
                     pushFilter?.('invert');
                 }
             } else if (isLight && !isTransparent && theme.mode === 1) {
-                logInfo(`Dimming light image ${logSrc}`);
-                if (canFilterImage(imageDetails.src)) {
-                    const dimmed = getFilteredImageURL(imageDetails, theme);
-                    result = `url("${dimmed}")`;
+                if (solidColor) {
+                    logInfo(`Replacing image with a solid color ${logSrc}`);
+                    const darkColor = modifyBackgroundColor(solidColor, theme, false);
+                    const solid = getSolidColorImageURL(imageDetails, darkColor);
+                    result = `url("${solid}")`;
+                } else if (canFilterImage(imageDetails.src)) {
+                    logInfo(`Inverting light image ${logSrc}`);
+                    const inverted = getFilteredImageURL(imageDetails, theme);
+                    result = `url("${inverted}")`;
                 } else {
                     pushFilter?.('dim');
                 }

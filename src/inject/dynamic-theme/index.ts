@@ -139,11 +139,25 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
         ].join('\n'));
     };
 
+    const appendCounterInversion = (selectors: string[]) => {
+        if (selectors.length === 0) {
+            return;
+        }
+        rules.push([
+            `${selectors.map((s) => `${s} > *`).join(', ')} {`,
+            `    filter: invert(100%) hue-rotate(180deg) !important;`,
+            '}',
+        ].join('\n'));
+    };
+
     if ((fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) || filterSelectors.invert.size > 0) {
-        appendRule([...(fixes?.invert ?? []), ...[...filterSelectors.invert]], getCSSFilterValue({
+        const extraInversionSelectors = [...filterSelectors.invert];
+        const invertSelectors = [...(fixes?.invert ?? []), ...extraInversionSelectors];
+        appendRule(invertSelectors, getCSSFilterValue({
             ...theme,
             contrast: theme.mode === 0 ? theme.contrast : clamp(theme.contrast - 10, 0, 100),
         }));
+        appendCounterInversion(invertSelectors);
     }
     if (filterSelectors.dim.size > 0) {
         appendRule([...filterSelectors.dim], getCSSFilterValue({

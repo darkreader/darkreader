@@ -144,6 +144,9 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
             return;
         }
         rules.push([
+            `${selectors.join(', ')} {`,
+            `    color: black !important;`,
+            '}',
             `${selectors.map((s) => `${s} > *`).join(', ')} {`,
             `    filter: invert(100%) hue-rotate(180deg) !important;`,
             '}',

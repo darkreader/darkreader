@@ -140,7 +140,7 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
     };
 
     const appendCounterInversion = (selectors: string[]) => {
-        if (selectors.length === 0) {
+        if (theme!.mode === 0 || selectors.length === 0) {
             return;
         }
         rules.push([

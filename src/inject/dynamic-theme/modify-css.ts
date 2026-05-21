@@ -275,7 +275,7 @@ export function createFallbackFactory(fn: (colors: typeof colorModifiers) => Fal
     fallbackFactory = fn(colorModifiers);
 }
 
-export type FilterType = 'invert' | 'dim';
+export type FilterType = 'invert' | 'dim' | 'none';
 
 let addFilterSelector: ((selector: string, type: FilterType) => void) | null = null;
 
@@ -613,6 +613,9 @@ export function getBgImageModifier(
                     pushFilter?.('dim');
                 }
             } else {
+                if (theme.mode === 1 && !canFilterImage(imageDetails.src)) {
+                    pushFilter?.('none');
+                }
                 logInfo(`Not modifying the image ${logSrc}`);
             }
             return result;

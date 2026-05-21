@@ -153,6 +153,21 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
         ].join('\n'));
     };
 
+    const appendInversionCancellation = (selectors: string[]) => {
+        if (theme!.mode === 0 || selectors.length === 0) {
+            return;
+        }
+        rules.push([
+            `${selectors.join(', ')} {`,
+            `    filter: none !important;`,
+            `    color: var(--darkreader-neutral-text) !important;`,
+            '}',
+            `${selectors.map((s) => `${s} > *`).join(', ')} {`,
+            `    filter: none !important;`,
+            '}',
+        ].join('\n'));
+    };
+
     if ((fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) || filterSelectors.invert.size > 0) {
         const extraInversionSelectors = [...filterSelectors.invert];
         const invertSelectors = [...(fixes?.invert ?? []), ...extraInversionSelectors];
@@ -161,6 +176,9 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
             contrast: theme.mode === 0 ? theme.contrast : clamp(theme.contrast - 10, 0, 100),
         }));
         appendCounterInversion(invertSelectors);
+        if (filterSelectors.none.size > 0) {
+            appendInversionCancellation([...filterSelectors.none]);
+        }
     }
     if (filterSelectors.dim.size > 0) {
         appendRule([...filterSelectors.dim], getCSSFilterValue({

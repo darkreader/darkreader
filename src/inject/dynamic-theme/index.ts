@@ -171,13 +171,22 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
     if ((fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) || filterSelectors.invert.size > 0) {
         const extraInversionSelectors = [...filterSelectors.invert];
         const invertSelectors = [...(fixes?.invert ?? []), ...extraInversionSelectors];
-        appendRule(invertSelectors, getCSSFilterValue({
+        const invertFilter = getCSSFilterValue({
             ...theme,
             contrast: theme.mode === 0 ? theme.contrast : clamp(theme.contrast - 10, 0, 100),
-        }));
+        });
+        appendRule(invertSelectors, invertFilter);
         appendCounterInversion(invertSelectors);
         if (filterSelectors.none.size > 0) {
-            appendInversionCancellation([...filterSelectors.none]);
+            const noneSelectors = [...filterSelectors.none];
+            appendInversionCancellation(noneSelectors);
+            if (theme.mode === 1) {
+                const invertedChildSelectors: string[] = [];
+                noneSelectors.forEach((parent) => {
+                    invertSelectors.forEach((child) => invertedChildSelectors.push(`${parent} > ${child}`));
+                });
+                appendRule(invertedChildSelectors, invertFilter);
+            }
         }
     }
     if (filterSelectors.dim.size > 0) {

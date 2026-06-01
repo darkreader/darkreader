@@ -576,6 +576,14 @@ export function getBgImageModifier(
             };
         };
 
+        const isSafeToInvert = () => {
+            const repeat = (rule.style.backgroundRepeat || '').toLowerCase();
+            const size = (rule.style.backgroundSize || '').toLowerCase();
+            const isTiled = repeat.length > 0 && repeat !== 'no-repeat' && !repeat.includes('no-repeat');
+            const isStretched = size.includes('cover') || size.includes('contain') || size.includes('100%');
+            return !isTiled && !isStretched;
+        };
+
         const getBgImageValue = (imageDetails: ImageDetails, theme: Theme) => {
             const {isDark, isLight, isTransparent, isLarge, solidColor, width} = imageDetails;
             let result: string | null = null;
@@ -588,7 +596,7 @@ export function getBgImageModifier(
                 if (canFilterImage(imageDetails.src)) {
                     const inverted = getFilteredImageURL(imageDetails, {...theme, sepia: clamp(theme.sepia + 10, 0, 100)});
                     result = `url("${inverted}")`;
-                } else {
+                } else if (isSafeToInvert()) {
                     pushFilter?.('invert');
                 }
             } else if (isLight && !isTransparent && theme.mode === 1) {
@@ -601,7 +609,7 @@ export function getBgImageModifier(
                     logInfo(`Inverting light image ${logSrc}`);
                     const inverted = getFilteredImageURL(imageDetails, theme);
                     result = `url("${inverted}")`;
-                } else {
+                } else if (isSafeToInvert()) {
                     pushFilter?.('invert');
                 }
             } else if (theme.mode === 0 && isLight && imageDetails.dataURL) {

@@ -22,7 +22,7 @@ function hasBuiltInDarkTheme() {
     for (let y = Math.floor(stepY / 2); y < winHeight; y += stepY) {
         for (let x = Math.floor(stepX / 2); x < winWidth; x += stepX) {
             const element = document.elementFromPoint(x, y);
-            if (!element || processedElements.has(element)) {
+            if (!element || processedElements.has(element) || element.tagName.toLocaleLowerCase() === 'img') {
                 continue;
             }
             processedElements.add(element);

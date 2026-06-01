@@ -39,7 +39,7 @@ function hasBuiltInDarkTheme() {
             }
             if (bgColor.a === 1) {
                 const bgLightness = getSRGBLightness(bgColor.r, bgColor.g, bgColor.b);
-                if (bgLightness > 0.5) {
+                if (bgLightness > 0.6) {
                     return false;
                 }
             } else {
@@ -48,7 +48,7 @@ function hasBuiltInDarkTheme() {
                     return false;
                 }
                 const textLightness = getSRGBLightness(textColor.r, textColor.g, textColor.b);
-                if (textLightness < 0.5) {
+                if (textLightness < 0.4) {
                     return false;
                 }
             }

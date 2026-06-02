@@ -176,14 +176,14 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
             contrast: theme.mode === 0 ? theme.contrast : clamp(theme.contrast - 10, 0, 100),
         });
         appendRule(invertSelectors, invertFilter);
-        appendCounterInversion(invertSelectors);
+        appendCounterInversion(extraInversionSelectors);
         if (filterSelectors.none.size > 0) {
             const noneSelectors = [...filterSelectors.none];
             appendInversionCancellation(noneSelectors);
             if (theme.mode === 1) {
                 const invertedChildSelectors: string[] = [];
                 noneSelectors.forEach((parent) => {
-                    invertSelectors.forEach((child) => invertedChildSelectors.push(`${parent} > ${child}`));
+                    extraInversionSelectors.forEach((child) => invertedChildSelectors.push(`${parent} > ${child}`));
                 });
                 appendRule(invertedChildSelectors, invertFilter);
             }

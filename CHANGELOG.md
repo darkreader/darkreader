@@ -1,3 +1,10 @@
+# 4.9.126 (June 3, 2026)
+
+- Optimized image inversion.
+- Improved dark theme detection.
+- Chrome: Fixed affecting Picture-in-Picture mode.
+- Firefox: Fix adopted style sheets performance (Reddit issue).
+
 # 4.9.125 (April 28, 2026)
 
 - Detector Hints editor in Dev Tools.

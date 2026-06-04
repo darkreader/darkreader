@@ -42,6 +42,7 @@ export class VariablesStore {
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
     private unstableVarValues = new Map<string, string>();
     private varFilterTypes = new Map<string, FilterType>();
+    private notifyingVarFilterTypes = new Set<string>();
     private onRootVariableDefined: () => void;
 
     clear(): void {
@@ -58,6 +59,7 @@ export class VariablesStore {
         this.typeChangeSubscriptions.clear();
         this.unstableVarValues.clear();
         this.varFilterTypes.clear();
+        this.notifyingVarFilterTypes.clear();
     }
 
     private isVarType(varName: string, typeNum: number) {
@@ -362,9 +364,14 @@ export class VariablesStore {
             return;
         }
         this.varFilterTypes.set(varName, type);
+        if (this.notifyingVarFilterTypes.has(varName)) {
+            return;
+        }
         const subs = this.typeChangeSubscriptions.get(varName);
         if (subs && subs.size > 0) {
+            this.notifyingVarFilterTypes.add(varName);
             subs.forEach((callback) => callback());
+            this.notifyingVarFilterTypes.delete(varName);
         }
     }
 

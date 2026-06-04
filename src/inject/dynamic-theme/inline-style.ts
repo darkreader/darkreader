@@ -158,6 +158,12 @@ function getInlineStyleElements(root: Node) {
 const treeObservers = new Map<Node, {disconnect(): void}>();
 const attrObservers = new Map<Node, MutationObserver>();
 
+let asyncCancelled = true;
+
+function isAsyncCancelled() {
+    return asyncCancelled;
+}
+
 export function watchForInlineStyles(
     elementStyleDidChange: (element: HTMLElement) => void,
     shadowRootDiscovered: (root: ShadowRoot) => void,
@@ -267,6 +273,7 @@ function deepWatchForInlineStyles(
 }
 
 export function stopWatchingForInlineStyles(): void {
+    asyncCancelled = true;
     treeObservers.forEach((o) => o.disconnect());
     attrObservers.forEach((o) => o.disconnect());
     treeObservers.clear();
@@ -371,13 +378,14 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
             return;
         }
 
+        asyncCancelled = false;
         const mod = getModifiableCSSDeclaration(
             modifierCSSProp,
             cssVal,
             {style: element.style} as CSSStyleRule,
             variablesStore,
             ignoreImageSelectors,
-            null,
+            isAsyncCancelled,
         );
         if (!mod) {
             return;

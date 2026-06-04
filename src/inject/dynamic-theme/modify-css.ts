@@ -70,11 +70,11 @@ export function getModifiableCSSDeclaration(
     rule: CSSStyleRule,
     variablesStore: VariablesStore,
     ignoreImageSelectors: string[],
-    isCancelled: (() => boolean) | null,
+    isCancelled: () => boolean,
 ): ModifiableCSSDeclaration | null {
     let modifier: ModifiableCSSDeclaration['value'] | null = null;
     if (property.startsWith('--')) {
-        modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
+        modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
     } else if (value.includes('var(')) {
         modifier = getVariableDependantModifier(variablesStore, property, value, rule);
     } else if (property === 'color-scheme') {
@@ -108,7 +108,7 @@ export function getModifiableCSSDeclaration(
         const pushFilter = selectorText
             ? (type: FilterType) => pushFilterSelector(selectorText, type)
             : null;
-        modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!, pushFilter);
+        modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled, pushFilter);
     } else if (property.includes('shadow')) {
         modifier = getShadowModifier(value);
     } else if (bgPropsToCopy.includes(property) && value !== 'initial') {

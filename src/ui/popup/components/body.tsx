@@ -101,11 +101,11 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
         if (state.newsOpen && unreadNews.length > 0) {
             props.actions.markNewsAsRead(unreadNews.map(({id}) => id));
         }
-        setState({newsOpen: !state.newsOpen, didNewsSlideIn: state.didNewsSlideIn || !state.newsOpen});
+        setState({newsOpen: !state.newsOpen, mobileLinksOpen: false, didNewsSlideIn: state.didNewsSlideIn || !state.newsOpen});
     }
 
     function toggleMobileLinks() {
-        setState({mobileLinksOpen: !state.mobileLinksOpen, didMobileLinksSlideIn: state.didMobileLinksSlideIn || !state.mobileLinksOpen});
+        setState({mobileLinksOpen: !state.mobileLinksOpen, newsOpen: false, didMobileLinksSlideIn: state.didMobileLinksSlideIn || !state.mobileLinksOpen});
         if (state.mobileLinksOpen && props.data.uiHighlights.includes('mobile-links')) {
             disableMobileLinksSlideIn();
         }

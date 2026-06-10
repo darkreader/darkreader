@@ -196,12 +196,15 @@ export class VariablesStore {
                             (fallback) => tryModifyBgColor(fallback, theme),
                         );
                     }
+                    const pushFilter = rule.selectorText ?
+                        (type: FilterType) => this.setVarFilterType(varName, type) :
+                        null;
                     const bgModifier = getBgImageModifier(
                         modifiedValue,
                         rule,
                         ignoredImgSelectors,
                         isCancelled,
-                        (type) => this.setVarFilterType(varName, type),
+                        pushFilter,
                     );
                     modifiedValue = typeof bgModifier === 'function' ? bgModifier(theme) : bgModifier!;
                     declarations.push({
@@ -216,6 +219,9 @@ export class VariablesStore {
             const callbacks = new Set<() => void>();
 
             const addListener = (onTypeChange: (decs: ModifiedVarDeclaration[]) => void) => {
+                if (!rule.selectorText) {
+                    return;
+                }
                 const callback = () => {
                     const decs = getDeclarations();
                     onTypeChange(decs);

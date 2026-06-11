@@ -197,6 +197,68 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     };
 }
 
+export interface AdoptedStyleSheetFirefoxManager {
+    render(sheets: CSSStyleSheet[], theme: Theme, ignoreImageAnalysis: string[]): void;
+    destroy(): void;
+}
+
+export function createAdoptedStyleSheetOverrideFirefox(node: Document | ShadowRoot): AdoptedStyleSheetFirefoxManager {
+    let cancelAsyncOperations = false;
+
+    const overridesBySource = new Map<CSSStyleSheet, CSSStyleSheet>();
+    const overrideSheets = new WeakSet<CSSStyleSheet>();
+
+    function injectSheet(override: CSSStyleSheet) {
+        if (!node.adoptedStyleSheets.includes(override)) {
+            node.adoptedStyleSheets = [...node.adoptedStyleSheets, override];
+        }
+    }
+
+    function render(sheets: CSSStyleSheet[], theme: Theme, ignoreImageAnalysis: string[]) {
+        sheets.forEach((sheet) => {
+            let override = overridesBySource.get(sheet);
+            if (!override) {
+                override = new CSSStyleSheet();
+                overridesBySource.set(sheet, override);
+                overrideSheets.add(override);
+            }
+            const target = override;
+
+            const prepareSheet = () => {
+                for (let i = target.cssRules.length - 1; i >= 0; i--) {
+                    target.deleteRule(i);
+                }
+                target.insertRule('#__darkreader__adoptedOverride {}');
+                injectSheet(target);
+                return target;
+            };
+
+            const sheetModifier = createStyleSheetModifier();
+            sheetModifier.modifySheet({
+                prepareSheet,
+                sourceCSSRules: sheet.cssRules,
+                theme,
+                ignoreImageAnalysis,
+                force: false,
+                isAsyncCancelled: () => cancelAsyncOperations,
+            });
+        });
+    }
+
+    function destroy() {
+        cancelAsyncOperations = true;
+        if (Array.isArray(node.adoptedStyleSheets)) {
+            const newSheets = node.adoptedStyleSheets.filter((s) => !overrideSheets.has(s));
+            if (newSheets.length !== node.adoptedStyleSheets.length) {
+                node.adoptedStyleSheets = newSheets;
+            }
+        }
+        overridesBySource.clear();
+    }
+
+    return {render, destroy};
+}
+
 export interface AdoptedStyleSheetFallback {
     render(options: {
         theme: Theme;

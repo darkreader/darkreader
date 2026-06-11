@@ -5,15 +5,15 @@ import {forEach, push, toArray} from '../../utils/array';
 import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {isFirefox} from '../../utils/platform';
-import {requestAnimationFrameOnce, throttle} from '../../utils/throttle';
+import {throttle} from '../../utils/throttle';
 import {generateUID} from '../../utils/uid';
 import {parsedURLCache} from '../../utils/url';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
 
-import type {AdoptedStyleSheetManager, AdoptedStyleSheetFallback} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetFallback, canHaveAdoptedStyleSheets} from './adopted-style-manger';
+import type {AdoptedStyleSheetManager, AdoptedStyleSheetFirefoxManager} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetOverrideFirefox, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {combineFixes, findRelevantFix} from './fixes';
 import {getStyleInjectionMode, injectStyleAway, removeStyleContainer} from './injection';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
@@ -35,8 +35,7 @@ declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
-const adoptedStyleFallbacks = new Map<CSSStyleSheet, AdoptedStyleSheetFallback>();
-const adoptedStyleChangeTokens = new WeakMap<CSSStyleSheet, symbol>();
+const adoptedStyleFirefoxManagers = new Map<Document | ShadowRoot, AdoptedStyleSheetFirefoxManager>();
 let theme: Theme | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
@@ -384,30 +383,17 @@ function createDynamicStyleOverrides() {
         };
 
         const onAdoptedCssChange = (e: CustomEvent) => {
-            const {sheets} = e.detail;
-            if (!Array.isArray(sheets) || sheets.length === 0) {
+            const {nodes, sheets} = e.detail;
+            if (!Array.isArray(nodes) || !Array.isArray(sheets) || nodes.length === 0 || sheets.length === 0) {
                 return;
             }
-            sheets.forEach(({sheet}: NodeSheet) => {
-                const {cssRules} = sheet;
-                variablesStore.addRulesForMatching(cssRules);
+            const sourceSheets: CSSStyleSheet[] = sheets.map(({sheet}: NodeSheet) => sheet);
+            sourceSheets.forEach((sheet) => {
+                variablesStore.addRulesForMatching(sheet.cssRules);
             });
             variablesStore.matchVariablesAndDependents();
-            const response: Array<{sheetId: number; commands: any}> = [];
-            sheets.forEach(({sheetId, sheet}: NodeSheet) => {
-                const fallback = getAdoptedStyleSheetFallback(sheet);
-                const cssRules = sheet.cssRules;
-                fallback.render({
-                    theme: theme!,
-                    ignoreImageAnalysis: ignoredImageAnalysisSelectors!,
-                    cssRules,
-                });
-                const commands = fallback.commands();
-                response.push({sheetId, commands});
-            });
-
-            requestAnimationFrameOnce(getAdoptedStyleChangeToken(sheets[0].sheet), () => {
-                document.dispatchEvent(new CustomEvent('__darkreader__adoptedStyleSheetCommands', {detail: JSON.stringify(response)}));
+            nodes.forEach((node: Document | ShadowRoot) => {
+                getAdoptedStyleFirefoxManager(node).render(sourceSheets, theme!, ignoredImageAnalysisSelectors!);
             });
         };
 
@@ -529,22 +515,13 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     }
 }
 
-function getAdoptedStyleChangeToken(sheet: CSSStyleSheet) {
-    if (adoptedStyleChangeTokens.has(sheet)) {
-        return adoptedStyleChangeTokens.get(sheet)!;
+function getAdoptedStyleFirefoxManager(node: Document | ShadowRoot) {
+    let manager = adoptedStyleFirefoxManagers.get(node);
+    if (!manager) {
+        manager = createAdoptedStyleSheetOverrideFirefox(node);
+        adoptedStyleFirefoxManagers.set(node, manager);
     }
-    const token = Symbol();
-    adoptedStyleChangeTokens.set(sheet, token);
-    return token;
-}
-
-function getAdoptedStyleSheetFallback(sheet: CSSStyleSheet) {
-    let fallback = adoptedStyleFallbacks.get(sheet);
-    if (!fallback) {
-        fallback = createAdoptedStyleSheetFallback();
-        adoptedStyleFallbacks.set(sheet, fallback);
-    }
-    return fallback;
+    return manager;
 }
 
 function watchForUpdates() {
@@ -979,8 +956,8 @@ export function removeDynamicTheme(): void {
 
     adoptedStyleManagers.forEach((manager) => manager.destroy());
     adoptedStyleManagers.splice(0);
-    adoptedStyleFallbacks.forEach((fallback) => fallback.destroy());
-    adoptedStyleFallbacks.clear();
+    adoptedStyleFirefoxManagers.forEach((manager) => manager.destroy());
+    adoptedStyleFirefoxManagers.clear();
 
     metaObserver && metaObserver.disconnect();
     scheduleInversionStyleUpdate.cancel();

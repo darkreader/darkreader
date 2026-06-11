@@ -364,11 +364,6 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     }
 
     if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-        type StyleSheetCommand = {
-            type: 'insert' | 'delete' | 'replace';
-            path: number[];
-            cssText?: string;
-        };
         type NodeSheet = {
             sheetId: number;
             sheet: CSSStyleSheet;
@@ -377,15 +372,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         const targetNodes = new Set<Document | ShadowRoot>();
         const sourceSheets = new WeakSet<CSSStyleSheet>();
         const sourceSheetNodes = new WeakMap<CSSStyleSheet, Set<Document | ShadowRoot>>();
-        const overrideSheetsByNode = new WeakMap<Document | ShadowRoot, Set<CSSStyleSheet>>();
-        const overrideSheetsBySource = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-        const overrideSheets = new WeakSet<CSSStyleSheet>();
-        const relevantOverrides = new WeakSet<CSSStyleSheet>();
 
         let observableStyleDeclarations = new WeakMap<CSSStyleDeclaration, CSSStyleSheet>();
         cleaners.push(() => observableStyleDeclarations = new WeakMap());
-
-        let executing = false;
 
         let nodeCounter = 0;
         const nodeIds = new WeakMap<Document | ShadowRoot, number>();
@@ -422,32 +411,19 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                     sourceSheetNodes.delete(sheet);
                 }
             });
-            const overrides = overrideSheetsByNode.get(node);
-            if (overrides && Array.isArray(node.adoptedStyleSheets)) {
-                overrides.forEach((override) => {
-                    const index = node.adoptedStyleSheets.indexOf(override);
-                    if (index >= 0) {
-                        node.adoptedStyleSheets.splice(index, 1);
-                    }
-                });
-            }
-            overrideSheetsByNode.delete(node);
         };
 
         const iterateSourceSheets = (node: Document | ShadowRoot, iterator: (sheet: CSSStyleSheet) => void) => {
             if (Array.isArray(node.adoptedStyleSheets)) {
-                const overrides = overrideSheetsByNode.get(node);
                 node.adoptedStyleSheets.forEach((sheet) => {
-                    if ((!overrides || !overrides.has(sheet)) && !overrideSheets.has(sheet)) {
-                        if (!sourceSheets.has(sheet)) {
-                            sourceSheets.add(sheet);
-                        }
-                        if (!sourceSheetNodes.has(sheet)) {
-                            sourceSheetNodes.set(sheet, new Set());
-                        }
-                        sourceSheetNodes.get(sheet)!.add(node);
-                        iterator(sheet);
+                    if (!sourceSheets.has(sheet)) {
+                        sourceSheets.add(sheet);
                     }
+                    if (!sourceSheetNodes.has(sheet)) {
+                        sourceSheetNodes.set(sheet, new Set());
+                    }
+                    sourceSheetNodes.get(sheet)!.add(node);
+                    iterator(sheet);
                 });
             }
         };
@@ -499,18 +475,13 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 if (queuedSheetChanges.has(sheet)) {
                     return;
                 }
-                const override = overrideSheetsBySource.get(sheet);
-                if (override && relevantOverrides.has(override)) {
-                    putOverride(node, override);
-                } else {
-                    queuedSheetChanges.add(sheet);
-                    unqueuedSheets.push({sheetId, sheet});
-                }
+                queuedSheetChanges.add(sheet);
+                unqueuedSheets.push({sheetId, sheet});
             });
             if (unqueuedSheets.length > 0) {
                 queueMicrotask(() => {
                     unqueuedSheets.forEach(({sheet}) => queuedSheetChanges.delete(sheet));
-                    sendSourceStyles(sheets);
+                    sendSourceStyles([node], sheets);
                 });
             }
         };
@@ -521,74 +492,12 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             }
             const sheetId = getSheetId(sheet);
             queueMicrotask(() => {
-                const override = overrideSheetsBySource.get(sheet);
-                if (override) {
-                    relevantOverrides.delete(override);
+                const nodes = sourceSheetNodes.get(sheet);
+                if (!nodes) {
+                    return;
                 }
-                sendSourceStyles([{sheetId, sheet}]);
+                sendSourceStyles([...nodes], [{sheetId, sheet}]);
             });
-        };
-
-        const executeCommands = (sheet: CSSStyleSheet, commands: StyleSheetCommand[]) => {
-            executing = true;
-
-            let override: CSSStyleSheet;
-            if (overrideSheetsBySource.has(sheet)) {
-                override = overrideSheetsBySource.get(sheet)!;
-            } else {
-                override = new CSSStyleSheet();
-                overrideSheetsBySource.set(sheet, override);
-                overrideSheets.add(override);
-            }
-
-            commands.forEach((c) => {
-                const {type, path, cssText} = c;
-                let target: CSSStyleSheet | CSSGroupingRule = override;
-                const pathLength = path.length - (type === 'replace' ? 0 : 1);
-                for (let i = 0; i < pathLength; i++) {
-                    target = target.cssRules[path[i]] as CSSGroupingRule;
-                }
-                const index = path.at(-1)!;
-                if (type === 'insert') {
-                    const cssText = c.cssText!;
-                    target.insertRule(cssText, index);
-                } else if (type === 'delete') {
-                    target.deleteRule(index);
-                } else if (type === 'replace') {
-                    (target as CSSStyleSheet).replaceSync(cssText!);
-                }
-            });
-
-            const nodes = sourceSheetNodes.get(sheet) ?? new Set();
-            nodes.forEach((node) => putOverride(node, override));
-            relevantOverrides.add(override);
-
-            executing = false;
-        };
-
-        const putOverride = (node: Document | ShadowRoot, override: CSSStyleSheet) => {
-            const wasExecuting = executing;
-            executing = true;
-
-            if (!node.isConnected) {
-                cleanNode(node);
-                return;
-            }
-            if (!overrideSheetsByNode.has(node)) {
-                overrideSheetsByNode.set(node, new Set());
-            }
-            overrideSheetsByNode.get(node)!.add(override);
-            const overrideIndex = node.adoptedStyleSheets.indexOf(override);
-            if (overrideIndex < 0) {
-                node.adoptedStyleSheets.push(override);
-            } else if (overrideIndex !== node.adoptedStyleSheets.length - 1) {
-                node.adoptedStyleSheets.splice(overrideIndex, 1);
-                node.adoptedStyleSheets.push(override);
-            }
-
-            if (!wasExecuting) {
-                executing = false;
-            }
         };
 
         const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
@@ -608,7 +517,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 },
                 set(target, property, value) {
                     target[property as any] = value;
-                    if (property === 'length' && !executing) {
+                    if (property === 'length') {
                         handleSheetChangeForNode(node);
                     }
                     return true;
@@ -648,26 +557,13 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             });
         });
 
-        const sendSourceStyles = (sheets: NodeSheet[]) => {
-            const data = {detail: {sheets}};
+        const sendSourceStyles = (nodes: Array<Document | ShadowRoot>, sheets: NodeSheet[]) => {
+            const data = {detail: {nodes, sheets}};
             const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
             document.dispatchEvent(event);
         };
 
-        const commandsListener = (e: CustomEvent) => {
-            const response = JSON.parse(e.detail) as Array<{sheetId: number; commands: StyleSheetCommand[]}>;
-            response.forEach(({sheetId, commands}) => {
-                const sheet = sheetsById.get(sheetId);
-                if (sheet) {
-                    executeCommands(sheet, commands);
-                }
-            });
-        };
-
         onFFSheetChange = (sheet) => {
-            if (overrideSheets.has(sheet)) {
-                return;
-            }
             if (sourceSheets.has(sheet)) {
                 handleSheetChange(sheet);
             }
@@ -676,8 +572,6 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         documentEventListener('__darkreader__startAdoptedStyleSheetsWatcher', () => {
             proxyAdoptedStyleSheets();
             proxyStyleDeclaration();
-
-            documentEventListener('__darkreader__adoptedStyleSheetCommands', commandsListener);
 
             walkNodesWithAdoptedStyles(document, (node) => targetNodes.add(node));
             cleaners.push(() => targetNodes.forEach((node) => cleanNode(node)));
@@ -690,7 +584,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 allSheets.push(...filtered);
                 filtered.forEach(({sheetId}) => addedSheetIds.add(sheetId));
             });
-            sendSourceStyles(allSheets);
+            // TODO: Group if nodes share sheets
+            allSheets.forEach((sheet) => {
+                const nodes = sourceSheetNodes.get(sheet.sheet);
+                if (!nodes) {
+                    return;
+                }
+                sendSourceStyles([...nodes], [sheet]);
+            });
         });
     }
 }

@@ -51,20 +51,36 @@ Pages like Gmail enforce strict `connect-src 'self'` CSPs. Dark Reader must **ne
 
 ---
 
+## Local workflow
+
+Use the root [`justfile`](justfile) for recurring fork maintenance and local builds. Run `just` (or `just --list`) for the full recipe index.
+
+| Recipe | Purpose |
+|--------|---------|
+| `just doctor` | Verbose environment check (deps, env vars, Node/.nvmrc) |
+| `just build` | Release build (zip/xpi) — default |
+| `just build debug` | Debug build (Chrome MV3 + Firefox) with load instructions |
+| `just build all` | Full debug build for all platforms |
+| `just test` | All test suites (default) |
+| `just test unit` | Unit tests only (fast, no browser) |
+| `just verify` | Lint, typecheck, all tests, debug build, privacy checks |
+| `just sync` | Fetch upstream `main`, rebase current branch onto it |
+| `just install` | `npm install` after clone or `package-lock.json` changes |
+| `just watch` | MV3 debug watch mode (rebuild on file changes) |
+
+Run `just verify` separately after `just sync` when you are ready for the full gate.
+
 ## Build Commands
 
 ```bash
+# Release build (Chrome MV3 + Firefox) — default
+just build
+
+# Debug build (Chrome MV3 + Firefox, with load instructions)
+just build debug
+
 # Debug build (Chrome MV3, watch mode)
-npm run debug:watch:mv3
-
-# Release build (all targets)
-npm run build
-
-# Release build (Chrome MV3 only)
-npm run build:chrome-mv3
-
-# Type-check only (fast, no emit)
-npx tsc --noEmit -p src/tsconfig.json
+just watch
 ```
 
 > **Note:** Pre-existing type errors from `node_modules/malevic/index.d.ts` are known and benign — ignore them. Only errors in `src/` matter.
@@ -74,17 +90,17 @@ npx tsc --noEmit -p src/tsconfig.json
 ## Test Commands
 
 ```bash
+# All test suites (default)
+just test
+
 # Unit tests (fast, no browser needed)
-npm run test:unit
+just test unit
 
 # Inject tests (Karma, needs Chrome/Firefox)
-npm run test:inject
+just test inject
 
 # Full browser integration tests
-npm run test:browser
-
-# All tests
-npm run test:all
+just test browser
 ```
 
 ---

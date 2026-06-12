@@ -1,4 +1,6 @@
 import type {Theme} from '../../definitions';
+import {forEach} from '../../utils/array';
+import {isFirefox} from '../../utils/platform';
 
 import {iterateCSSRules} from './css-rules';
 import {defineSheetScope} from './style-scope';
@@ -21,11 +23,22 @@ export function canHaveAdoptedStyleSheets(node: Document | ShadowRoot): boolean 
     return Array.isArray(node.adoptedStyleSheets);
 }
 
+const getAdoptedSheets: (node: Document | ShadowRoot) => CSSStyleSheet[] = isFirefox ?
+    (node) => (node.adoptedStyleSheets as any).wrappedJSObject ?? node.adoptedStyleSheets :
+    (node) => node.adoptedStyleSheets;
+
+const createOverrideSheet: () => CSSStyleSheet = isFirefox ?
+    () => {
+        const pageWindow: any = (window as any).wrappedJSObject ?? window;
+        return new pageWindow.CSSStyleSheet();
+    } :
+    () => new CSSStyleSheet();
+
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
     let cancelAsyncOperations = false;
 
     function iterateSourceSheets(iterator: (sheet: CSSStyleSheet) => void) {
-        node.adoptedStyleSheets.forEach((sheet) => {
+        forEach(getAdoptedSheets(node), (sheet) => {
             if (!overrides.has(sheet)) {
                 iterator(sheet);
             }
@@ -34,25 +47,27 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
-        const newSheets = [...node.adoptedStyleSheets];
+        const newSheets = isFirefox ? getAdoptedSheets(node) : [...node.adoptedStyleSheets];
         const sheetIndex = newSheets.indexOf(sheet);
         const overrideIndex = newSheets.indexOf(override);
         if (overrideIndex >= 0) {
             newSheets.splice(overrideIndex, 1);
         }
         newSheets.splice(sheetIndex + 1, 0, override);
-        node.adoptedStyleSheets = newSheets;
+        if (!isFirefox) {
+            node.adoptedStyleSheets = newSheets;
+        }
     }
 
     function clear() {
-        const newSheets = [...node.adoptedStyleSheets];
+        const newSheets = isFirefox ? getAdoptedSheets(node) : [...node.adoptedStyleSheets];
         for (let i = newSheets.length - 1; i >= 0; i--) {
             const sheet = newSheets[i];
             if (overrides.has(sheet)) {
                 newSheets.splice(i, 1);
             }
         }
-        if (node.adoptedStyleSheets.length !== newSheets.length) {
+        if (!isFirefox && node.adoptedStyleSheets.length !== newSheets.length) {
             node.adoptedStyleSheets = newSheets;
         }
         sourceSheets = new WeakSet();
@@ -82,7 +97,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         if (count === 1) {
             // MS Copilot issue, where there is an empty `:root {}` style at the beginning.
             // Counting all the rules for all the shadow DOM elements can be expensive.
-            const rule = node.adoptedStyleSheets[0].cssRules[0];
+            const rule = getAdoptedSheets(node)[0].cssRules[0];
             return rule instanceof CSSStyleRule ? rule.style.length : count;
         }
         return count;
@@ -94,8 +109,9 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     function render(theme: Theme, ignoreImageAnalysis: string[]) {
         clear();
 
-        for (let i = node.adoptedStyleSheets.length - 1; i >= 0; i--) {
-            const sheet = node.adoptedStyleSheets[i];
+        const sheets = getAdoptedSheets(node);
+        for (let i = sheets.length - 1; i >= 0; i--) {
+            const sheet = sheets[i];
             if (overrides.has(sheet)) {
                 continue;
             }
@@ -109,7 +125,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             }
 
             const rules = sheet.cssRules;
-            const override = new CSSStyleSheet();
+            const override = createOverrideSheet();
             overridesBySource.set(sheet, override);
             iterateCSSRules(rules, (rule) => sourceDeclarations.add(rule.style));
 
@@ -146,7 +162,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         callbackRequested = true;
         queueMicrotask(() => {
             callbackRequested = false;
-            const sheets = node.adoptedStyleSheets.filter((s) => !overrides.has(s));
+            const sheets = getAdoptedSheets(node).filter((s) => !overrides.has(s));
             sheets.forEach((sheet) => overridesBySource.delete(sheet));
             callback(sheets);
         });

@@ -376,7 +376,8 @@ function createDynamicStyleOverrides() {
 
     tryInvertChromePDF();
 
-    if (isFirefox) {
+    // if (isFirefox) {
+    if (false) {
         type NodeSheet = {
             sheetId: number;
             sheet: CSSStyleSheet;
@@ -491,13 +492,18 @@ function createThemeAndWatchForUpdates() {
     changeMetaThemeColorWhenAvailable(theme!);
 }
 
+function unwrap<T>(value: T): T {
+    return (value as any)?.wrappedJSObject ?? value;
+}
+
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    if (isFirefox) {
+    // if (isFirefox) {
+    if (false) {
         return;
     }
 
     if (canHaveAdoptedStyleSheets(node)) {
-        node.adoptedStyleSheets.forEach((s) => {
+        forEach(isFirefox ? unwrap(node.adoptedStyleSheets) : node.adoptedStyleSheets, (s) => {
             variablesStore.addRulesForMatching(s.cssRules);
         });
         const newManger = createAdoptedStyleSheetOverride(node);

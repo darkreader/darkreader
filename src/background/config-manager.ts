@@ -80,10 +80,10 @@ export default class ConfigManager {
     };
 
     private static async loadConfig({
-        name,
-        local,
+        name: _name,
+        local: _local,
         localURL,
-        remoteURL,
+        remoteURL: _remoteURL,
     }: Config) {
         const loadLocal = async () => await readText({url: localURL});
         return await loadLocal();

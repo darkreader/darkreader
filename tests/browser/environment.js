@@ -1,15 +1,42 @@
 import {TestEnvironment} from 'jest-environment-node';
-import {launch} from 'puppeteer-core';
 import {WebSocketServer} from 'ws';
 
 import {generateHTMLCoverageReports} from './coverage.js';
-import {getChromePath, getFirefoxPath, chromeMV3ExtensionDebugDir, chromePlusExtensionDebugDir, firefoxExtensionDebugDir, getEdgePath} from './paths.js';
+import {collectBrowserDiagnostics} from './diagnostics.js';
+import {
+    CORS_SERVER_PORT,
+    POPUP_TEST_PORT,
+    TEST_SERVER_PORT,
+} from './ports.js';
+import {acquireBrowser} from './shared-browser.js';
 import {createTestServer, generateRandomId} from './server.js';
+const DEFAULT_TIMEOUT_MS = Number(process.env.BROWSER_TEST_TIMEOUT_MS) || 120_000;
+const SETUP_TIMEOUT_MS = Number(process.env.BROWSER_TEST_SETUP_TIMEOUT_MS) || 45_000;
 
-const TEST_SERVER_PORT = 8891;
-const CORS_SERVER_PORT = 8892;
-const FIREFOX_DEVTOOLS_PORT = 8893;
-const POPUP_TEST_PORT = 8894;
+/**
+ * @template T
+ * @param {Promise<T>} promise
+ * @param {number} ms
+ * @param {string} label
+ * @returns {Promise<T>}
+ */
+function withTimeout(promise, ms, label) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error(`${label} (timed out after ${ms}ms)`));
+        }, ms);
+        Promise.resolve(promise).then(
+            (value) => {
+                clearTimeout(timer);
+                resolve(value);
+            },
+            (error) => {
+                clearTimeout(timer);
+                reject(error);
+            },
+        );
+    });
+}
 
 export default class CustomJestEnvironment extends TestEnvironment {
     /** @type {() => void} */
@@ -18,133 +45,96 @@ export default class CustomJestEnvironment extends TestEnvironment {
 
     /** @type {Browser} */
     browser;
+    /** @type {boolean} */
+    browserOwned = false;
     /** @type {WebSocketServer} */
     messageServer;
 
     async setup() {
         await super.setup();
 
-        const promises1 = [
-            this.createMessageServer(),
-            this.launchBrowser(),
-        ];
-        const promises2 = [
-            createTestServer(TEST_SERVER_PORT),
-            createTestServer(CORS_SERVER_PORT),
-        ];
+        try {
+            const [testServer, corsServer] = await Promise.all([
+                createTestServer(TEST_SERVER_PORT),
+                createTestServer(CORS_SERVER_PORT, {cors: true}),
+            ]);
+            this.testServer = testServer;
+            this.corsServer = corsServer;
 
-        const results1 = await Promise.all(promises1);
-        this.messageServer = results1[0];
-        this.browser = results1[1];
+            // Listen before launching the browser so the extension never connects
+            // while the WebSocket server is still starting.
+            this.messageServer = await this.startMessageServer();
 
-        promises2.push(
-            this.createTestPage(),
-        );
+            const {browser, owned} = await acquireBrowser(this.global.product);
+            this.browser = browser;
+            this.browserOwned = owned;
 
-        const results2 = await Promise.all(promises2);
-        this.testServer = results2[0];
-        this.corsServer = results2[1];
-        this.page = results2[2];
+            await withTimeout(
+                this.waitForStartup(),
+                SETUP_TIMEOUT_MS,
+                `Extension did not connect to ws://localhost:${POPUP_TEST_PORT} during setup`,
+            );
 
-        // Wait for tabs to load?
+            await withTimeout(
+                this.waitForHarnessUIPages(),
+                SETUP_TIMEOUT_MS,
+                'Popup and DevTools pages did not connect to test harness',
+            );
 
-        this.assignTestGlobals(this.global, this.testServer, this.corsServer, this.page);
+            this.page = await this.createTestPage();
+            this.assignTestGlobals(this.global, this.testServer, this.corsServer, this.page);
+        } catch (error) {
+            const diagnostics = await collectBrowserDiagnostics(this.browser);
+            await this.forceCleanup();
+            const details = error instanceof Error ? error : new Error(String(error));
+            details.message += `\n\nBrowser diagnostics:\n${diagnostics}`;
+            throw details;
+        }
     }
 
     /**
      * @returns {Promise<void>}
      */
+    async waitForHarnessUIPages() {
+        return new Promise((resolve) => {
+            const tick = () => {
+                if (this.harnessUIState?.hasPopup() && this.harnessUIState?.hasDevTools()) {
+                    resolve();
+                    return;
+                }
+                setTimeout(tick, 25);
+            };
+            tick();
+        });
+    }
+
+    async resetHarnessExtensionState() {
+        if (!this.harnessMessaging?.sendToBackground) {
+            return;
+        }
+        await this.harnessMessaging.sendToBackground('changeSettings', {enabled: true});
+    }
+
     async waitForStartup() {
-        if (!this.extensionOrigin) {
-            return new Promise((ready) => this.extensionStartListeners.push(ready));
+        if (this.extensionOrigin) {
+            return;
         }
-    }
-
-    /**
-     * @returns {Promise<Browser>}
-     */
-    async launchBrowser() {
-        let browser;
-        if (this.global.product === 'edge') {
-            browser = await this.launchEdge();
-        } else if (this.global.product === 'chrome-mv3') {
-            browser = await this.launchChrome();
-        } else if (this.global.product === 'firefox') {
-            browser = await this.launchFirefox();
-        }
-        // Wait for the extension to start
-        await this.waitForStartup();
-        return browser;
-    }
-
-    /**
-     * @returns {Promise<Browser>}
-     */
-    async launchChrome() {
-        const extensionDir = chromeMV3ExtensionDebugDir;
-        let executablePath;
-        try {
-            executablePath = await getChromePath();
-        } catch (e) {
-            console.error(e);
-        }
-        // Explanation of these options:
-        // https://pptr.dev/guides/chrome-extensions
-        return await launch({
-            args: [
-                '--show-component-extension-options',
-            ],
-            enableExtensions: [extensionDir],
-            executablePath,
-            headless: false,
-            pipe: true,
-        });
-    }
-
-    /**
-     * @returns {Promise<Browser>}
-     */
-    async launchEdge() {
-        const extensionDir = chromePlusExtensionDebugDir;
-        let executablePath;
-        try {
-            executablePath = await getEdgePath();
-        } catch (e) {
-            console.error(e);
-        }
-        return await launch({
-            args: [
-                '--show-component-extension-options',
-            ],
-            enableExtensions: [extensionDir],
-            executablePath,
-            headless: false,
-            pipe: true,
-        });
-    }
-
-    /**
-     * @returns {Promise<Browser>}
-     */
-    async launchFirefox() {
-        // We need to manually launch Firefox via cmd.run() to install extension
-        // because Firefox does not support installing via CLI arguments
-        process.setMaxListeners(process.getMaxListeners() + 1);
-        const firefox = await getFirefoxPath();
-        const browser = await launch({
-            browser: 'firefox',
-            executablePath: firefox,
-            protocol: 'webDriverBiDi',
-            headless: false,
-            args: [`--remote-debugging-port=${FIREFOX_DEVTOOLS_PORT}`],
-        });
-        await browser.installExtension(firefoxExtensionDebugDir);
-        return browser;
+        const hint = `Extension did not connect to ws://localhost:${POPUP_TEST_PORT}. `
+            + 'Ensure the debug test build exists (npm run test:chrome-mv3 runs it), '
+            + `port ${POPUP_TEST_PORT} is free, and Chrome/Firefox can load the extension.`;
+        return withTimeout(
+            new Promise((ready) => this.extensionStartListeners.push(ready)),
+            DEFAULT_TIMEOUT_MS,
+            hint,
+        );
     }
 
     async createTestPage() {
         const page = await this.browser.newPage();
-        page.on('pageerror', (err) => process.emit('uncaughtException', err));
+        this.pageErrors = [];
+        page.on('pageerror', (err) => {
+            this.pageErrors.push(err instanceof Error ? err.message : String(err));
+        });
         if (this.global.product !== 'firefox') {
             await page.coverage.startJSCoverage();
         }
@@ -166,13 +156,17 @@ export default class CustomJestEnvironment extends TestEnvironment {
     }
 
     async awaitForEvent(uuid) {
-        return new Promise((resolve) => {
-            if (this.pageEventListeners.has(uuid)) {
-                this.pageEventListeners.get(uuid).push(resolve);
-            } else {
-                this.pageEventListeners.set(uuid, [resolve]);
-            }
-        });
+        return withTimeout(
+            new Promise((resolve) => {
+                if (this.pageEventListeners.has(uuid)) {
+                    this.pageEventListeners.get(uuid).push(resolve);
+                } else {
+                    this.pageEventListeners.set(uuid, [resolve]);
+                }
+            }),
+            DEFAULT_TIMEOUT_MS,
+            `Timed out waiting for browser test event "${uuid}"`,
+        );
     }
 
     /**
@@ -246,9 +240,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
             return errors;
         };
 
-        let timeout = 10;
+        let timeout = 50;
         let errors = checkAll();
-        for (let i = 0; (errors.length !== 0) && (i < 10); i++) {
+        for (let i = 0; (errors.length !== 0) && (i < 15); i++) {
             timeout *= 2;
             await new Promise((r) => requestIdleCallback(r, {timeout}));
             errors = checkAll();
@@ -287,32 +281,40 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 return;
             }
             await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
-            // Switching Edge to MV3
-            // if (global.product === 'edge') {
-            //     const page = await this.getChromiumMV2BackgroundPage();
-            //     await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
-            // }
         };
 
         global.loadTestPage = async (paths, gotoOptions) => {
             const {cors, ...testPaths} = paths;
             testServer.setPaths(testPaths);
             cors && corsServer.setPaths(cors);
-            await this.openTestPage(`http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
+            await this.openTestPage(testServer.url, gotoOptions);
         };
 
         global.corsURL = corsServer.url;
+        global.testServerHost = `localhost:${testServer.port}`;
     }
 
     /**
-     * Creates a server and returns once extension connects to it
+     * Starts the WebSocket server used to talk to the extension.
      * @returns {Promise<WebSocketServer>} server
      */
-    async createMessageServer() {
+    async startMessageServer() {
         const awaitForEvent = this.awaitForEvent.bind(this);
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const wsServer = new WebSocketServer({port: POPUP_TEST_PORT});
+            wsServer.on('listening', () => resolve(wsServer));
+            wsServer.on('error', (error) => {
+                if (error.code === 'EADDRINUSE') {
+                    reject(new Error(
+                        `WebSocket port ${POPUP_TEST_PORT} is already in use `
+                        + '(often a stale browser test). '
+                        + `Free it with: lsof -ti:${POPUP_TEST_PORT} | xargs kill -9`,
+                    ));
+                    return;
+                }
+                reject(error);
+            });
             let backgroundSocket = null;
             let devToolsSocket = null;
             const popupSockets = new Set();
@@ -322,6 +324,11 @@ export default class CustomJestEnvironment extends TestEnvironment {
 
             let onDownloadCallback = null;
 
+            this.harnessUIState = {
+                hasPopup: () => popupSockets.size > 0,
+                hasDevTools: () => devToolsSocket !== null,
+            };
+
             wsServer.on('connection', async (ws) => {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
@@ -330,9 +337,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
                         // and signals that extenstion is ready
                         this.extensionOrigin = message.data.extensionOrigin;
                         this.extensionStartListeners.forEach((ready) => ready());
+                        this.extensionStartListeners = [];
                         ws.on('close', () => backgroundSocket = null);
                         backgroundSocket = ws;
-                        resolve(wsServer);
                     } else if (message.id === null && message.data && message.data.type === 'devtools') {
                         ws.on('close', () => devToolsSocket = null);
                         devToolsSocket = ws;
@@ -355,8 +362,8 @@ export default class CustomJestEnvironment extends TestEnvironment {
                         const reject = rejectors.get(message.id);
                         reject(message.error);
                     } else {
-                        const resolve = resolvers.get(message.id);
-                        resolve(message.data);
+                        const resolveMessage = resolvers.get(message.id);
+                        resolveMessage(message.data);
                     }
                     resolvers.delete(message.id);
                     rejectors.delete(message.id);
@@ -364,13 +371,13 @@ export default class CustomJestEnvironment extends TestEnvironment {
             });
 
             function sendToContext(sockets, type, data) {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolveMessage, reject) => {
                     const id = generateRandomId();
-                    resolvers.set(id, resolve);
+                    resolvers.set(id, resolveMessage);
                     rejectors.set(id, reject);
                     const json = JSON.stringify({type, data, id});
-                    for (const ws of sockets) {
-                        ws.send(json);
+                    for (const socket of sockets) {
+                        socket.send(json);
                     }
                 });
             }
@@ -436,7 +443,60 @@ export default class CustomJestEnvironment extends TestEnvironment {
             };
 
             this.global.awaitForEvent = awaitForEvent;
+
+            this.harnessMessaging = {
+                sendToBackground,
+                sendToDevTools,
+            };
         });
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async forceCleanup() {
+        await this.resetHarnessExtensionState();
+        const promises = [];
+        if (this.global.product !== 'firefox' && this.page?.coverage) {
+            try {
+                const coverage = await this.page.coverage.stopJSCoverage();
+                const dir = './tests/browser/coverage/';
+                const promise = generateHTMLCoverageReports(dir, coverage);
+                promise.then(() => console.info('Coverage reports generated in', dir));
+                promises.push(promise);
+            } catch (e) {
+                // Coverage may not have started if setup failed early.
+            }
+        }
+        if (this.messageServer) {
+            const server = this.messageServer;
+            this.messageServer = null;
+            for (const client of server.clients) {
+                client.terminate();
+            }
+            promises.push(new Promise((resolve) => server.close(() => resolve())));
+        }
+        if (this.testServer) {
+            const server = this.testServer;
+            this.testServer = null;
+            promises.push(server.close());
+        }
+        if (this.corsServer) {
+            const server = this.corsServer;
+            this.corsServer = null;
+            promises.push(server.close());
+        }
+        if (this.browser && this.browserOwned) {
+            const browser = this.browser;
+            this.browser = null;
+            promises.push(browser.close().catch(() => {}));
+        } else {
+            this.browser = null;
+        }
+        this.page = null;
+        this.extensionOrigin = undefined;
+        this.extensionStartListeners = [];
+        await Promise.allSettled(promises);
     }
 
     /**
@@ -444,24 +504,6 @@ export default class CustomJestEnvironment extends TestEnvironment {
      */
     async teardown() {
         await super.teardown();
-
-        const promises = [];
-        if (this.global.product !== 'firefox' && this.page?.coverage) {
-            const coverage = await this.page.coverage.stopJSCoverage();
-            const dir = './tests/browser/coverage/';
-            const promise = generateHTMLCoverageReports(dir, coverage);
-            promise.then(() => console.info('Coverage reports generated in', dir));
-            promises.push(promise);
-        }
-
-        // Note: this.browser.close() will close all tabs, so no need to close them
-        // explicitly
-        promises.push([
-            this.testServer?.close(),
-            this.corsServer?.close(),
-            this.messageServer?.close(),
-            this.browser?.close(),
-        ]);
-        await Promise.all(promises);
+        await this.forceCleanup();
     }
 }

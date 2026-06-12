@@ -3,6 +3,7 @@ import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeCh
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
 import {HOMEPAGE_URL} from '../utils/links';
+import {openTestHarnessSocket} from '../utils/test-harness-ws';
 import {activateTheme} from '@plus/utils/theme';
 
 import {writeEnabledForHost} from './cache';
@@ -284,34 +285,37 @@ if (__TEST__) {
         }
     }
 
-    const socket = new WebSocket(`ws://localhost:8894`);
-    socket.onopen = async () => {
-        document.addEventListener('test-message', (e) => {
-            socket.send(JSON.stringify({
-                data: {
-                    type: 'page',
-                    uuid: (e as CustomEvent).detail,
-                },
-                id: null,
-            }));
-        }, {passive: true});
-
-        // Wait for DOM to be complete
-        // Note that here we wait only for DOM parsing and not for sub-resource load
-        await awaitDOMContentLoaded();
-        await awaitDarkReaderReady();
-        socket.send(JSON.stringify({
+    let pageHarnessSocket: WebSocket | null = null;
+    document.addEventListener('test-message', (e) => {
+        pageHarnessSocket?.send(JSON.stringify({
             data: {
                 type: 'page',
-                message: 'page-ready',
-                uuid: `ready-${document.location.pathname}`,
+                uuid: (e as CustomEvent).detail,
             },
             id: null,
         }));
-    };
+    }, {passive: true});
+    openTestHarnessSocket({
+        onOpen: async (socket) => {
+            pageHarnessSocket = socket;
 
-    if (__FIREFOX_MV2__) {
-        socket.onmessage = (e) => {
+            // Wait for DOM to be complete
+            // Note that here we wait only for DOM parsing and not for sub-resource load
+            await awaitDOMContentLoaded();
+            await awaitDarkReaderReady();
+            socket.send(JSON.stringify({
+                data: {
+                    type: 'page',
+                    message: 'page-ready',
+                    uuid: `ready-${document.location.pathname}`,
+                },
+                id: null,
+            }));
+        },
+        onMessage: (e, socket) => {
+            if (!__FIREFOX_MV2__) {
+                return;
+            }
             function respond(data: any) {
                 socket.send(JSON.stringify({id, data}));
             }
@@ -328,6 +332,6 @@ if (__TEST__) {
                     break;
                 }
             }
-        };
-    }
+        },
+    });
 }

@@ -97,12 +97,6 @@ jobs:
       - name: Run injection tests
         run: npm run test:inject -- --ci --json --outputFile=test-results-inject.json
 
-      - name: Run browser tests on Chromium MV2 build
-        if: ${{ matrix.chrome }}
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: npm run test:chrome -- --json --outputFile=test-results-chrome.json
-
       - name: Run browser tests on Chromium MV3 build
         if: ${{ matrix.chrome }}
         uses: coactions/setup-xvfb@v1

@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {sync} from 'malevic/dom';
 
 import type {DevToolsData, ExtensionData} from '../../definitions';
+import {openTestHarnessSocket} from '../../utils/test-harness-ws';
 import Connector from '../connect/connector';
 
 import Body from './components/body';
@@ -32,17 +33,17 @@ start();
 
 declare const __TEST__: boolean;
 if (__TEST__) {
-    const socket = new WebSocket(`ws://localhost:8894`);
-    socket.onopen = async () => {
-        socket.send(JSON.stringify({
-            data: {
-                type: 'devtools',
-                uuid: `ready-${document.location.pathname}`,
-            },
-            id: null,
-        }));
-    };
-    socket.onmessage = (e) => {
+    openTestHarnessSocket({
+        onOpen: async (socket) => {
+            socket.send(JSON.stringify({
+                data: {
+                    type: 'devtools',
+                    uuid: `ready-${document.location.pathname}`,
+                },
+                id: null,
+            }));
+        },
+        onMessage: (e, socket) => {
         const respond = (message: {id: number; data?: string | boolean; error?: string}) => socket.send(JSON.stringify(message));
         const message: {type: string; id: number; data: string} = JSON.parse(e.data);
         const {type, id, data} = message;
@@ -100,7 +101,8 @@ if (__TEST__) {
         } catch (err) {
             respond({id, error: String(err)});
         }
-    };
+        },
+    });
 }
 
 if (__CHROMIUM_MV3__) {

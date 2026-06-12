@@ -5,6 +5,8 @@ import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query'
 import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI, DebugMessageTypeCStoBG} from '../utils/message';
 import {isFirefox} from '../utils/platform';
 
+import {openTestHarnessSocket} from '../utils/test-harness-ws';
+
 import {Extension} from './extension';
 import {makeChromiumHappy} from './make-chromium-happy';
 import {setNewsForTesting} from './newsmaker';
@@ -141,19 +143,22 @@ if (__TEST__) {
     chrome.tabs.create({url: chrome.runtime.getURL('/ui/popup/index.html'), active: false});
     chrome.tabs.create({url: chrome.runtime.getURL('/ui/devtools/index.html'), active: false});
 
-    const socket = new WebSocket(`ws://localhost:8894`);
-    socket.onopen = async () => {
-        // Wait for extension to start
-        await extension;
-        socket.send(JSON.stringify({
-            data: {
-                type: 'background',
-                extensionOrigin: chrome.runtime.getURL(''),
-            },
-            id: null,
-        }));
-    };
-    socket.onmessage = (e) => {
+    let harnessSocket: WebSocket | null = null;
+    openTestHarnessSocket({
+        onOpen: async (socket) => {
+            harnessSocket = socket;
+            // Wait for extension to start
+            await extension;
+            socket.send(JSON.stringify({
+                data: {
+                    type: 'background',
+                    extensionOrigin: chrome.runtime.getURL(''),
+                },
+                id: null,
+            }));
+        },
+        onMessage: (e, socket) => {
+            harnessSocket = socket;
         try {
             const message: TestMessage = JSON.parse(e.data);
             const {id, type} = message;
@@ -205,7 +210,8 @@ if (__TEST__) {
         } catch (err) {
             socket.send(JSON.stringify({error: String(err), original: e.data}));
         }
-    };
+        },
+    });
 
     chrome.downloads.onCreated.addListener(({id, mime, url, danger, paused}) => {
         // Cancel download
@@ -215,7 +221,7 @@ if (__TEST__) {
             const {protocol, origin} = new URL(url);
             const realOrigin = (new URL(chrome.runtime.getURL(''))).origin;
             const ok = paused === false && danger === 'safe' && protocol === 'blob:' && origin === realOrigin;
-            socket.send(JSON.stringify({
+            harnessSocket?.send(JSON.stringify({
                 data: {
                     type: 'download',
                     ok,

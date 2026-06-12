@@ -1,9 +1,23 @@
 // @ts-check
+import {TEST_WEBSOCKET_CONNECT_SRC} from '../tests/browser/ports.js';
 import {getDestDir, absolutePath} from './paths.js';
 import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readJSON, writeJSON} from './utils.js';
+
+/**
+ * @param {string} csp
+ * @returns {string}
+ */
+function patchCSPStringForTest(csp) {
+    // Test builds talk to local HTTP servers and the Jest WebSocket harness.
+    // Release/debug (non-test) builds keep connect-src 'self' only.
+    return csp.replace(
+        /connect-src[^;]+/,
+        `connect-src 'self' ${TEST_WEBSOCKET_CONNECT_SRC} *`,
+    );
+}
 
 async function patchManifest(platform, debug, watch, test) {
     const isMV2 = platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV2_PLUS;
@@ -24,7 +38,7 @@ async function patchManifest(platform, debug, watch, test) {
         patched.version = '1';
         patched.description = `Debug build, platform: ${platform}, watch: ${watch ? 'yes' : 'no'}.`;
     }
-    if (debug && !test && isMV3) {
+    if (debug && isMV3) {
         patched.permissions.push('tabs');
     }
     if (debug && (isMV2 || isMV3)) {
@@ -33,6 +47,16 @@ async function patchManifest(platform, debug, watch, test) {
     // Needed to test settings export and CSS theme export via a download
     if (test || debug) {
         patched.permissions.push('downloads');
+    }
+    if (test) {
+        if (platform === PLATFORM.CHROMIUM_MV3 && patched.content_security_policy?.extension_pages) {
+            patched.content_security_policy = {
+                ...patched.content_security_policy,
+                extension_pages: patchCSPStringForTest(patched.content_security_policy.extension_pages),
+            };
+        } else if (typeof patched.content_security_policy === 'string') {
+            patched.content_security_policy = patchCSPStringForTest(patched.content_security_policy);
+        }
     }
     return patched;
 }

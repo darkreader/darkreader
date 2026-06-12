@@ -11,6 +11,7 @@ type StyleExpectations = OneStyleExpectation[] | OneStyleExpectation;
 declare global {
     const loadTestPage: (paths: PathsObject & {cors?: PathsObject}, gotoOptions?: WaitForOptions) => Promise<void>;
     const corsURL: string;
+    const testServerHost: string;
     const popupUtils: {
         click: (selector: string) => Promise<void>;
         exists: (selector: string) => Promise<void>;

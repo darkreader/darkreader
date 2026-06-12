@@ -62,6 +62,7 @@ Use the root [`justfile`](justfile) for recurring fork maintenance and local bui
 | `just build debug` | Debug build (Chrome MV3 + Firefox) with load instructions |
 | `just build all` | Full debug build for all platforms |
 | `just test` | All test suites (default) |
+| `just test-browser-preflight` | Ports + test build + CSP check (no browser; run before `just test browser`) |
 | `just test unit` | Unit tests only (fast, no browser) |
 | `just verify` | Lint, typecheck, all tests, debug build, privacy checks |
 | `just sync` | Fetch upstream `main`, rebase current branch onto it |
@@ -128,6 +129,8 @@ just test browser
 
 6. **Do not introduce remote URLs** into manifests, defaults, or config files. All resource URLs must be local (`chrome-extension://` or `data:`).
 
+7. **Browser test ports are fixed** — see `tests/browser/ports.js` (8891 page server, 8892 CORS, 8893 Firefox debug, 8894 WebSocket harness). Free stale listeners with `lsof -ti:8891,8892,8893,8894 | xargs kill -9` before browser tests. Run `just test-browser-preflight` first.
+
 ---
 
 ## File Map (Key Files)
@@ -143,4 +146,7 @@ just test browser
 | `src/definitions.d.ts`                | Shared TypeScript types                                   |
 | `tasks/cli.js`                        | Build entry point                                         |
 | `tasks/bundle-js.js`                  | Rollup bundling logic                                     |
+| `tests/browser/ports.js`              | Fixed browser-test ports (8891–8894)                      |
+| `tests/browser/preflight.js`          | Pre-launch build/CSP/port checks                          |
+| `tests/browser/environment.js`        | Puppeteer Jest environment                                |
 

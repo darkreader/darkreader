@@ -30,8 +30,10 @@ export function generateRandomId() {
 
 /**
  * @param {number} port
+ * @param {{cors?: boolean}} [options]
  */
-export async function createTestServer(port) {
+export async function createTestServer(port, options = {}) {
+    const {cors = false} = options;
     /** @type {import('http').Server} */
     let server;
     /** @type {{[path: string]: string | import('http').RequestListener}} */
@@ -64,6 +66,9 @@ export async function createTestServer(port) {
         res.statusCode = 200;
         res.setHeader('Content-Type', contentType);
         res.setHeader('Cache-Control', 'no-cache');
+        if (cors) {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+        }
         res.end(content, 'utf8');
     }
 
@@ -71,15 +76,37 @@ export async function createTestServer(port) {
      * @returns {Promise<void>}
      */
     function start() {
-        return new Promise((resolve) => {
-            server = http
-                .createServer(handleRequest)
-                .listen(port, () => resolve());
+        return new Promise((resolve, reject) => {
+            let actualPort = port;
 
-            server.on('connection', (socket) => {
-                sockets.add(socket);
-                socket.on('close', () => sockets.delete(socket));
-            });
+            const listen = (listenPort) => {
+                server = http.createServer(handleRequest);
+                server.on('error', (err) => {
+                    if (err.code === 'EADDRINUSE') {
+                        if (process.env.TEST_SERVER_ALLOW_DYNAMIC_PORT === '1' && listenPort !== 0) {
+                            listen(0);
+                            return;
+                        }
+                        reject(new Error(
+                            `Test HTTP server port ${listenPort} is already in use. `
+                            + `Free it with: lsof -ti:${listenPort} | xargs kill -9 `
+                            + '(or set TEST_SERVER_ALLOW_DYNAMIC_PORT=1 to opt into dynamic ports).',
+                        ));
+                        return;
+                    }
+                    reject(err);
+                });
+                server.on('connection', (socket) => {
+                    sockets.add(socket);
+                    socket.on('close', () => sockets.delete(socket));
+                });
+                server.listen(listenPort, () => {
+                    actualPort = /** @type {import('net').AddressInfo} */ (server.address()).port;
+                    resolve(actualPort);
+                });
+            };
+
+            listen(port);
         });
     }
 
@@ -117,11 +144,12 @@ export async function createTestServer(port) {
     }
     terminationListeners.push(close);
 
-    await start();
+    const actualPort = await start();
 
     return {
         setPaths,
         close,
-        url: `http://localhost:${port}`,
+        port: actualPort,
+        url: `http://localhost:${actualPort}`,
     };
 }

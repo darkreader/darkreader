@@ -12,8 +12,16 @@ function check() {
     }
 }
 
-export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_policy'] {
+// Browser integration tests talk to the harness over this WebSocket (see __TEST__ in background).
+export const TEST_WEBSOCKET_CONNECT_SRC = 'ws://localhost:8894';
+
+export function prepareCSPMV3(options: {test?: boolean} = {}): chrome.runtime.ManifestV3['content_security_policy'] {
     check();
+
+    const connectSrc: string[] = [CSP.SELF];
+    if (options.test) {
+        connectSrc.push(TEST_WEBSOCKET_CONNECT_SRC, '*');
+    }
 
     const result: any = {};
     const policy: any = {
@@ -25,7 +33,7 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
                 '*',
                 'data:',
             ],
-            'connect-src': ['*'],
+            'connect-src': connectSrc,
             'media-src': [CSP.NONE],
             'child-src': [CSP.NONE],
             'worker-src': [CSP.NONE],

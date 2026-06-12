@@ -37,6 +37,9 @@ function linuxAppPath(app) {
  * @returns {Promise<string>}
  */
 export async function getChromePath() {
+    if (process.env.CHROME_BIN && fs.existsSync(process.env.CHROME_BIN)) {
+        return process.env.CHROME_BIN;
+    }
     if (process.platform === 'darwin') {
         return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
     }
@@ -55,32 +58,35 @@ export async function getChromePath() {
 }
 
 /**
- * @returns {Promise<string>}
+ * @param {string[]} paths
+ * @returns {string | null}
  */
-export async function getEdgePath() {
-    if (process.platform === 'darwin') {
-        return '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
-    }
-    if (process.platform === 'win32') {
-        return winProgramFiles('Microsoft\\Edge\\Application\\msedge.exe');
-    }
-    const possibleLinuxPaths = ['microsoft-edge', 'microsoft-edge-stable'];
-    for (const possiblePath of possibleLinuxPaths) {
-        try {
-            return await linuxAppPath(possiblePath);
-        } catch (e) {
-            // ignore
+function firstExistingPath(paths) {
+    for (const candidate of paths) {
+        if (candidate && fs.existsSync(candidate)) {
+            return candidate;
         }
     }
-    throw new Error('Could not find Edge');
+    return null;
 }
 
 /**
  * @returns {Promise<string>}
  */
 export async function getFirefoxPath() {
+    if (process.env.FIREFOX_BIN && fs.existsSync(process.env.FIREFOX_BIN)) {
+        return process.env.FIREFOX_BIN;
+    }
     if (process.platform === 'darwin') {
-        return '/Applications/Firefox Nightly.app/Contents/MacOS/firefox';
+        const found = firstExistingPath([
+            '/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox',
+            '/Applications/Firefox.app/Contents/MacOS/firefox',
+            '/Applications/Firefox Nightly.app/Contents/MacOS/firefox',
+        ]);
+        if (found) {
+            return found;
+        }
+        throw new Error('Could not find Firefox');
     }
     if (process.platform === 'win32') {
         return await winProgramFiles('Firefox Nightly\\firefox.exe');
@@ -111,7 +117,5 @@ export async function getFirefoxPath() {
     throw new Error('Could not find firefox-nightly');
 }
 
-export const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
-export const chromePlusExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome-plus');
 export const chromeMV3ExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome-mv3');
 export const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');

@@ -19,6 +19,7 @@
         "resolveJsonModule": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": false,
+        "skipLibCheck": true,
         "ignoreDeprecations": "6.0",
         "jsx": "react",
         "jsxFactory": "m",

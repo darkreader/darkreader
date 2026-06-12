@@ -79,7 +79,11 @@ export function configureKarma(config, env) {
         autoWatch: true,
         browsers: headless
             ? ['ChromeHeadless', 'FirefoxHeadless']
-            : ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
+            : [
+                'Chrome',
+                'Firefox',
+                process.platform === 'darwin' && env.KARMA_SAFARI ? 'Safari' : null,
+            ].filter(Boolean),
         singleRun: true,
         concurrency: 1,
     };

@@ -20,6 +20,7 @@ node_version := trim(`cat .nvmrc`)
 chrome_debug_dir := repo_root / "build/debug/chrome-mv3"
 firefox_debug_dir := repo_root / "build/debug/firefox"
 privacy_script := repo_root / "scripts/check-privacy-invariants.sh"
+activate_node_script := repo_root / "scripts/activate-node.sh"
 required_deps := env_var_or_default("REQUIRED_DEPS", "node npm")
 required_envs := env_var_or_default("REQUIRED_ENVS", "")
 
@@ -91,23 +92,9 @@ check-envs:
 [script]
 check-node verbose="":
     set -euo pipefail
-    expected="{{ node_version }}"
-    if command -v nvm >/dev/null 2>&1; then
-        source "$(command -v nvm)" 2>/dev/null || true
-    fi
-    if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
-        source "$HOME/.nvm/nvm.sh"
-        nvm use "${expected#v}" >/dev/null 2>&1 || nvm use "${expected}" >/dev/null 2>&1 || true
-    fi
-    if ! command -v node >/dev/null 2>&1; then
-        just logerror "node not found. Install Node.js ${expected} (see .nvmrc)."
-        just exitone
-    fi
-    actual="$(node -v)"
-    if [[ "$actual" != "$expected" ]]; then
-        just logwarn "node is ${actual}, expected ${expected} (.nvmrc)."
-    elif [[ -n "{{ verbose }}" ]]; then
-        just logsuccess "Node OK (${actual})."
+    source "{{ activate_node_script }}"
+    if [[ -n "{{ verbose }}" ]]; then
+        just logsuccess "Node OK ($(node -v))."
     fi
 
 [private]
@@ -122,22 +109,7 @@ preflight:
         just exitone
       }
     }
-    expected="{{ node_version }}"
-    if command -v nvm >/dev/null 2>&1; then
-        source "$(command -v nvm)" 2>/dev/null || true
-    fi
-    if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
-        source "$HOME/.nvm/nvm.sh"
-        nvm use "${expected#v}" >/dev/null 2>&1 || nvm use "${expected}" >/dev/null 2>&1 || true
-    fi
-    if ! command -v node >/dev/null 2>&1; then
-        just logerror "node not found. Install Node.js ${expected} (see .nvmrc)."
-        just exitone
-    fi
-    actual="$(node -v)"
-    if [[ "$actual" != "$expected" ]]; then
-        just logwarn "node is ${actual}, expected ${expected} (.nvmrc)."
-    fi
+    source "{{ activate_node_script }}"
 
 [private]
 [script]
@@ -170,23 +142,31 @@ print-release-artifacts:
 
 [private]
 [script]
-build-release-run: preflight
+build-release-run:
+    set -euo pipefail
+    source "{{ activate_node_script }}"
     npm run build:chrome-mv3 && npm run build:firefox
 
 [private]
 [script]
-build-debug: preflight
+build-debug:
+    set -euo pipefail
+    source "{{ activate_node_script }}"
     npm run debug -- --chrome-mv3 --firefox
 
 [private]
-check: preflight
+[script]
+check:
+    set -euo pipefail
+    source "{{ activate_node_script }}"
     npm run lint
     npx tsc --noEmit -p src/tsconfig.json
 
 [private]
 [script]
-check-privacy: preflight
+check-privacy:
     set -euo pipefail
+    source "{{ activate_node_script }}"
     bg="{{ chrome_debug_dir }}/background/index.js"
     manifest="{{ chrome_debug_dir }}/manifest.json"
     if [[ ! -f "$bg" || ! -f "$manifest" ]]; then
@@ -235,7 +215,9 @@ doctor: check-deps check-envs
 
 # Release build (default); debug or all for unpacked local loading
 [script]
-build target="": preflight
+build target="":
+    set -euo pipefail
+    source "{{ activate_node_script }}"
     case "{{ target }}" in
       ""|release)
         just build-release-run
@@ -258,9 +240,18 @@ build target="": preflight
         ;;
     esac
 
+# Browser harness preflight: ports 8891-8894, test build, manifest CSP (no browser launch)
+[script]
+test-browser-preflight product="chrome-mv3":
+    set -euo pipefail
+    source "{{ activate_node_script }}"
+    node scripts/browser-test-preflight.js "{{ product }}"
+
 # Run test suites (default: all)
 [script]
-test suite="all": preflight
+test suite="all":
+    set -euo pipefail
+    source "{{ activate_node_script }}"
     case "{{ suite }}" in
       all)     npm run test:all ;;
       unit)    npm run test:unit ;;
@@ -293,12 +284,17 @@ sync:
     just rebase-on-main
 
 # Install npm dependencies after clone or package-lock changes
-install: preflight
+[script]
+install:
+    set -euo pipefail
+    source "{{ activate_node_script }}"
     npm install
 
 # MV3 debug rebuild on file changes
 [script]
-watch: preflight
+watch:
+    set -euo pipefail
+    source "{{ activate_node_script }}"
     just print-load-instructions
     printf "\n{{ BOLD + BLUE }}👀 MV3 debug watch started (Press Ctrl+C to stop)...{{ NORMAL }}\n"
     npm run debug:watch:mv3

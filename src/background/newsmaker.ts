@@ -9,10 +9,10 @@ export default class Newsmaker {
     static unSubscribe(): void {
     }
     static async markAsRead(_ids: string[]): Promise<void> {
-        return;
+
     }
     static async markAsDisplayed(_ids: string[]): Promise<void> {
-        return;
+
     }
 }
 

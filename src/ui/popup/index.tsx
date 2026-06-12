@@ -4,6 +4,7 @@ import {sync} from 'malevic/dom';
 import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {DebugMessageTypeBGtoUI} from '../../utils/message';
 import {isMobile, isFirefox} from '../../utils/platform';
+import {openTestHarnessSocket} from '../../utils/test-harness-ws';
 import Connector from '../connect/connector';
 import {getFontList, saveFile} from '../utils';
 
@@ -89,17 +90,17 @@ if (__DEBUG__) {
 
 declare const __TEST__: boolean;
 if (__TEST__) {
-    const socket = new WebSocket(`ws://localhost:8894`);
-    socket.onopen = async () => {
-        socket.send(JSON.stringify({
-            data: {
-                type: 'popup',
-                uuid: `ready-${document.location.pathname}`,
-            },
-            id: null,
-        }));
-    };
-    socket.onmessage = (e) => {
+    openTestHarnessSocket({
+        onOpen: async (socket) => {
+            socket.send(JSON.stringify({
+                data: {
+                    type: 'popup',
+                    uuid: `ready-${document.location.pathname}`,
+                },
+                id: null,
+            }));
+        },
+        onMessage: (e, socket) => {
         const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
             const message: {type: string; id: number; data: any} = JSON.parse(e.data);
@@ -145,5 +146,6 @@ if (__TEST__) {
         } catch (err) {
             respond({error: String(err)});
         }
-    };
+        },
+    });
 }

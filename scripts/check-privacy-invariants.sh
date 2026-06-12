@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # Verify fork privacy invariants in a built Chrome MV3 debug bundle.
 set -euo pipefail
 
@@ -16,13 +16,13 @@ pass() {
     echo "OK: $1"
 }
 
-if [ ! -f "$background_js" ]; then
+if [[ ! -f "$background_js" ]]; then
     echo "Error: background bundle not found: $background_js"
     echo "Run 'just build' first."
     exit 1
 fi
 
-if [ ! -f "$manifest_json" ]; then
+if [[ ! -f "$manifest_json" ]]; then
     echo "Error: manifest not found: $manifest_json"
     echo "Run 'just build' first."
     exit 1
@@ -50,7 +50,7 @@ print(data.get("content_security_policy", {}).get("extension_pages", ""))
 PY
 )"
 
-if [ -z "$csp" ]; then
+if [[ -z "$csp" ]]; then
     fail "manifest missing extension_pages CSP"
 elif echo "$csp" | grep -E "connect-src[^;]*https?://" >/dev/null 2>&1; then
     fail "manifest connect-src allows external HTTP origins"
@@ -60,7 +60,7 @@ else
     fail "manifest connect-src does not restrict to 'self'"
 fi
 
-if [ "$failures" -gt 0 ]; then
+if [[ "$failures" -gt 0 ]]; then
     echo ""
     echo "$failures privacy invariant check(s) failed."
     echo "Review fork changes in src/background/config-manager.ts and src/utils/csp.ts."

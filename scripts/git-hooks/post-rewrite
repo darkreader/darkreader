@@ -1,0 +1,37 @@
+#!/usr/bin/env zsh
+# Runs after git rewrite operations (rebase, amend).
+# When darkreader sync verification is active, runs `just verify` after a
+# completed rebase and rolls back on failure.
+set -euo pipefail
+
+command="${1:-}"
+[[ "$command" == "rebase" ]] || exit 0
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+script_dir="$(cd "$(dirname "${(%):-%x}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$script_dir/sync-lib.sh"
+
+[[ -f "$(sync_marker_path)" ]] || exit 0
+
+git_dir="$(git rev-parse --absolute-git-dir)"
+if [[ -d "$git_dir/rebase-merge" || -d "$git_dir/rebase-apply" ]]; then
+    exit 0
+fi
+
+# shellcheck disable=SC1090
+source "$(sync_meta_path)"
+
+sync_log "🔍 darkreader sync: rebase finished — running just verify..."
+if just verify; then
+    rm -f "$(sync_marker_path)"
+    exec "$MAIN_REPO/scripts/sync-finalize.sh" success
+fi
+
+sync_log_error "Verification failed — rolling back sync (git reset --hard ORIG_HEAD)"
+git reset --hard ORIG_HEAD
+rm -f "$(sync_marker_path)"
+"$MAIN_REPO/scripts/sync-finalize.sh" fail
+exit 1

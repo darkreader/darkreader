@@ -47,3 +47,7 @@ deno.json
 
 .cursor
 .cursor/
+!.cursor/plans
+
+# Ephemeral upstream sync worktrees
+.sync-worktrees/

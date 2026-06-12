@@ -14,12 +14,14 @@ set script-interpreter := ["zsh", "-u"]
 # ------ Variables ------
 
 repo_root := justfile_directory()
+call_dir := invocation_directory()
 upstream_remote := "origin"
 upstream_branch := "main"
 node_version := trim(`cat .nvmrc`)
 chrome_debug_dir := repo_root / "build/debug/chrome-mv3"
 firefox_debug_dir := repo_root / "build/debug/firefox"
 privacy_script := repo_root / "scripts/check-privacy-invariants.sh"
+with_node_script := repo_root / "scripts/with-node.sh"
 activate_node_script := repo_root / "scripts/activate-node.sh"
 required_deps := env_var_or_default("REQUIRED_DEPS", "node npm")
 required_envs := env_var_or_default("REQUIRED_ENVS", "")
@@ -29,26 +31,24 @@ required_envs := env_var_or_default("REQUIRED_ENVS", "")
 [private]
 @default:
     just --justfile {{ justfile() }} --list --unsorted
-
 [private]
 @exitone:
     echo "" && exit 1
-
 [private]
 @logerror msg:
     printf "{{ BOLD + UNDERLINE + RED }}🚨 {{ msg + NORMAL }}\n\n"
-
 [private]
 @logwarn msg:
     printf "{{ BOLD + YELLOW }}⚠️ {{ msg + NORMAL }}\n\n"
-
 [private]
 @loginfo msg:
     printf "{{ BLUE }}🔍 {{ msg + NORMAL }}\n"
-
 [private]
 @logsuccess msg:
     printf "{{ BOLD + GREEN }}✅ {{ msg + NORMAL }}\n"
+[private]
+@notify title msg sound="Pop":
+    osascript -e 'display notification "{{ msg }}" with title "{{ title }}" sound name "{{ sound }}"'
 
 [private]
 [script]
@@ -59,7 +59,6 @@ testDep test_dep:
       just loginfo "Install Node.js {{ node_version }} (see .nvmrc) and ensure npm is on PATH."
       just exitone
     }
-
 [private]
 [script]
 check-deps:
@@ -78,7 +77,6 @@ testEnv test_env:
       just loginfo "Set {{ test_env }} in your environment before trying again."
       just exitone
     }
-
 [private]
 [script]
 check-envs:
@@ -97,19 +95,7 @@ check-node verbose="":
         just logsuccess "Node OK ($(node -v))."
     fi
 
-[private]
-[script]
-preflight:
-    set -e
-    deps=( {{ required_deps }} )
-    for dep ("$deps[@]") {
-      whence -p "$dep" >/dev/null || {
-        just logerror "$dep not found!"
-        just loginfo "Install Node.js {{ node_version }} (see .nvmrc) and ensure npm is on PATH."
-        just exitone
-      }
-    }
-    source "{{ activate_node_script }}"
+# ------ Tooling Scripts ------
 
 [private]
 [script]
@@ -144,29 +130,26 @@ print-release-artifacts:
 [script]
 build-release-run:
     set -euo pipefail
-    source "{{ activate_node_script }}"
-    npm run build:chrome-mv3 && npm run build:firefox
+    "{{ with_node_script }}" npm run build:chrome-mv3
+    "{{ with_node_script }}" npm run build:firefox
 
 [private]
 [script]
 build-debug:
     set -euo pipefail
-    source "{{ activate_node_script }}"
-    npm run debug -- --chrome-mv3 --firefox
+    "{{ with_node_script }}" npm run debug -- --chrome-mv3 --firefox
 
 [private]
 [script]
 check:
     set -euo pipefail
-    source "{{ activate_node_script }}"
-    npm run lint
-    npx tsc --noEmit -p src/tsconfig.json
+    "{{ with_node_script }}" npm run lint
+    "{{ with_node_script }}" npx tsc --noEmit -p src/tsconfig.json
 
 [private]
 [script]
 check-privacy:
     set -euo pipefail
-    source "{{ activate_node_script }}"
     bg="{{ chrome_debug_dir }}/background/index.js"
     manifest="{{ chrome_debug_dir }}/manifest.json"
     if [[ ! -f "$bg" || ! -f "$manifest" ]]; then
@@ -207,6 +190,11 @@ rebase-on-main: check-clean
     fi
     just logsuccess "Rebase complete."
 
+[private]
+sync-internal:
+    just update-main
+    just rebase-on-main
+
 # ------ CLI Recipes ------
 
 # Verbose environment doctor: deps + envs + Node/.nvmrc
@@ -215,9 +203,8 @@ doctor: check-deps check-envs
 
 # Release build (default); debug or all for unpacked local loading
 [script]
-build target="":
+build target="": doctor
     set -euo pipefail
-    source "{{ activate_node_script }}"
     case "{{ target }}" in
       ""|release)
         just build-release-run
@@ -230,7 +217,7 @@ build target="":
         just logsuccess "Debug build complete"
         ;;
       all)
-        npm run debug
+        "{{ with_node_script }}" npm run debug
         just print-load-instructions
         just logsuccess "Debug build (all platforms) complete"
         ;;
@@ -242,21 +229,19 @@ build target="":
 
 # Browser harness preflight: ports 8891-8894, test build, manifest CSP (no browser launch)
 [script]
-test-browser-preflight product="chrome-mv3":
+test-browser-preflight product="chrome-mv3": doctor
     set -euo pipefail
-    source "{{ activate_node_script }}"
-    node scripts/browser-test-preflight.js "{{ product }}"
+    "{{ with_node_script }}" node scripts/browser-test-preflight.js "{{ product }}"
 
 # Run test suites (default: all)
 [script]
-test suite="all":
+test suite="all": doctor
     set -euo pipefail
-    source "{{ activate_node_script }}"
     case "{{ suite }}" in
-      all)     npm run test:all ;;
-      unit)    npm run test:unit ;;
-      inject)  npm run test:inject ;;
-      browser) npm run test:browser ;;
+      all)     "{{ with_node_script }}" npm run test:all ;;
+      unit)    "{{ with_node_script }}" npm run test:unit ;;
+      inject)  "{{ with_node_script }}" npm run test:inject ;;
+      browser) "{{ with_node_script }}" npm run test:browser ;;
       *)
         just logerror "Unknown test suite: {{ suite }} (expected: unit, inject, browser, all)"
         just exitone
@@ -265,7 +250,7 @@ test suite="all":
 
 # Lint, typecheck, all tests, debug build, and privacy checks
 [script]
-verify:
+verify: doctor
     set -euo pipefail
     just loginfo "Running full verification gate..."
     just loginfo "Lint + typecheck"
@@ -278,23 +263,37 @@ verify:
     just check-privacy
     just logsuccess "Verification complete"
 
-# Fetch upstream main and rebase the current branch onto it
+# Fetch upstream main, rebase via isolated worktree, and verify before landing.
+[script]
 sync:
-    just update-main
-    just rebase-on-main
+    set -euo pipefail
+    "{{ repo_root }}/scripts/sync-via-worktree.sh"
+
+# Install post-rewrite hook (also run automatically on first `just sync`).
+[script]
+install-hooks:
+    set -euo pipefail
+    "{{ repo_root }}/scripts/install-git-hooks.sh"
+
+# Abandon an in-progress sync worktree and restore the pre-sync branch tip.
+[script]
+sync-abort:
+    set -euo pipefail
+    "{{ repo_root }}/scripts/sync-abort.sh"
 
 # Install npm dependencies after clone or package-lock changes
 [script]
-install:
+install: doctor
     set -euo pipefail
-    source "{{ activate_node_script }}"
-    npm install
+    "{{ with_node_script }}" npm install
 
 # MV3 debug rebuild on file changes
 [script]
-watch:
+watch: doctor
     set -euo pipefail
-    source "{{ activate_node_script }}"
     just print-load-instructions
     printf "\n{{ BOLD + BLUE }}👀 MV3 debug watch started (Press Ctrl+C to stop)...{{ NORMAL }}\n"
-    npm run debug:watch:mv3
+    "{{ with_node_script }}" npm run debug:watch:mv3 2>&1 | while read -r line; do
+      print -r -- "$line"
+      [[ "$line" == *"MISSION FAILED!"* ]] && just notify "Dark Reader Watch" "Build error — check terminal." "Basso"
+    done

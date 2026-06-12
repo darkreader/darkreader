@@ -55,6 +55,14 @@ Pages like Gmail enforce strict `connect-src 'self'` CSPs. Dark Reader must **ne
 
 Use the root [`justfile`](justfile) for recurring fork maintenance and local builds. Run `just` (or `just --list`) for the full recipe index.
 
+**Environment gate:** `just doctor` checks required deps, env vars, and Node/.nvmrc alignment. Public npm/node recipes also declare `: doctor` as a prerequisite.
+
+**Node activation:** Recipes run `npm`/`npx`/`node` via [`scripts/with-node.sh`](scripts/with-node.sh), which sources [`scripts/activate-node.sh`](scripts/activate-node.sh) in the same shell. Do not use `source activate-node.sh` as a standalone just prerequisite — prerequisites run in separate shells.
+
+**Shell stack:** The justfile uses zsh (`set shell` / `set script-interpreter`). All just-invoked shell scripts under `scripts/` use `#!/usr/bin/env zsh`.
+
+**Golden template:** [`just/starter.justfile`](just/starter.justfile) and [`just/just.env`](just/just.env) hold the project's reference just patterns; the root `justfile` and `just.env` are the live config.
+
 | Recipe | Purpose |
 |--------|---------|
 | `just doctor` | Verbose environment check (deps, env vars, Node/.nvmrc) |
@@ -65,11 +73,24 @@ Use the root [`justfile`](justfile) for recurring fork maintenance and local bui
 | `just test-browser-preflight` | Ports + test build + CSP check (no browser; run before `just test browser`) |
 | `just test unit` | Unit tests only (fast, no browser) |
 | `just verify` | Lint, typecheck, all tests, debug build, privacy checks |
-| `just sync` | Fetch upstream `main`, rebase current branch onto it |
+| `just sync` | Safe upstream sync: isolated worktree, rebase onto `main`, auto `just verify` |
+| `just sync-abort` | Abandon in-progress sync worktree and restore pre-sync branch tip |
+| `just install-hooks` | Install `post-rewrite` hook (`just sync` also installs hooks automatically) |
 | `just install` | `npm install` after clone or `package-lock.json` changes |
 | `just watch` | MV3 debug watch mode (rebuild on file changes) |
 
-Run `just verify` separately after `just sync` when you are ready for the full gate.
+### Safe sync workflow
+
+`just sync` never rebases your main checkout directly. It:
+
+1. Creates `.sync-worktrees/<branch>/` on a temporary branch `sync-wt/<branch>` (gitignored) and rebases there — your main checkout stays on the real branch.
+2. Runs `just verify` automatically via the `post-rewrite` hook when the rebase finishes.
+3. On **verify success**: fast-forwards your branch in the main worktree and removes the sync worktree.
+4. On **verify failure**: rolls back with `git reset --hard ORIG_HEAD` in the sync worktree, destroys the worktree, and leaves your main branch unchanged.
+
+If the rebase stops for conflicts, resolve them inside the sync worktree (`cd .sync-worktrees/<branch>`), then `git rebase --continue`. The hook verifies on the final continue. Use `just sync-abort` to abandon.
+
+Fork-sensitive files to review during conflict resolution are listed when `rebase-on-main` fails inside the sync worktree.
 
 ## Build Commands
 

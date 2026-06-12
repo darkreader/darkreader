@@ -62,7 +62,6 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     const shadowDomAttachingEvent = new CustomEvent('__darkreader__shadowDomAttaching', {bubbles: true});
     const adoptedSheetOwners = new WeakMap<CSSStyleSheet, Set<Document | ShadowRoot>>();
     const adoptedDeclarationSheets = new WeakMap<CSSStyleDeclaration, CSSStyleSheet>();
-    let onFFSheetChange: (sheet: CSSStyleSheet) => void;
 
     function onAdoptedSheetChange(sheet: CSSStyleSheet) {
         const owners = adoptedSheetOwners.get(sheet);
@@ -79,9 +78,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         if (sheet.ownerNode && !isDRSheet(sheet)) {
             sheet.ownerNode.dispatchEvent(updateSheetEvent);
         }
-        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            onFFSheetChange(sheet);
-        } else if (adoptedSheetOwners.has(sheet)) {
+        if (adoptedSheetOwners.has(sheet)) {
             onAdoptedSheetChange(sheet);
         }
     }
@@ -91,11 +88,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         if (ownerNode && !isDRSheet(sheet) && promise && promise instanceof Promise) {
             promise.then(() => ownerNode.dispatchEvent(updateSheetEvent));
         }
-        if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-            if (promise && promise instanceof Promise) {
-                promise.then(() => onFFSheetChange(sheet));
-            }
-        } else if (adoptedSheetOwners.has(sheet)) {
+        if (adoptedSheetOwners.has(sheet)) {
             if (promise && promise instanceof Promise) {
                 promise.then(() => onAdoptedSheetChange(sheet));
             }
@@ -256,349 +249,108 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         });
     }
 
-    if (!(__FIREFOX_MV2__ || __THUNDERBIRD__)) {
-        const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
-        const adoptedSheetsProxySources = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
-        const adoptedSheetsChangeEvent = new CustomEvent('__darkreader__adoptedStyleSheetsChange');
-        const adoptedSheetOverrideCache = new WeakSet<CSSStyleSheet>();
-        const adoptedSheetsSnapshots = new WeakMap<Document | ShadowRoot, CSSStyleSheet[]>();
+    const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
+    const adoptedSheetsProxySources = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
+    const adoptedSheetsChangeEvent = new CustomEvent('__darkreader__adoptedStyleSheetsChange');
+    const adoptedSheetOverrideCache = new WeakSet<CSSStyleSheet>();
+    const adoptedSheetsSnapshots = new WeakMap<Document | ShadowRoot, CSSStyleSheet[]>();
 
-        const isDRAdoptedSheetOverride = (sheet: CSSStyleSheet) => {
-            if (!sheet || !sheet.cssRules) {
-                return false;
-            }
-            if (adoptedSheetOverrideCache.has(sheet)) {
-                return true;
-            }
-            if (sheet.cssRules.length > 0 && sheet.cssRules[0].cssText.startsWith('#__darkreader__adoptedOverride')) {
-                adoptedSheetOverrideCache.add(sheet);
-                return true;
-            }
+    const isDRAdoptedSheetOverride = (sheet: CSSStyleSheet) => {
+        if (!sheet || !sheet.cssRules) {
             return false;
-        };
+        }
+        if (adoptedSheetOverrideCache.has(sheet)) {
+            return true;
+        }
+        if (sheet.cssRules.length > 0 && sheet.cssRules[0].cssText.startsWith('#__darkreader__adoptedOverride')) {
+            adoptedSheetOverrideCache.add(sheet);
+            return true;
+        }
+        return false;
+    };
 
-        const areArraysEqual = (a: any[], b: any[]) => {
-            return a.length === b.length && a.every((x, i) => x === b[i]);
-        };
+    const areArraysEqual = (a: any[], b: any[]) => {
+        return a.length === b.length && a.every((x, i) => x === b[i]);
+    };
 
-        const onAdoptedSheetsChange = (node: Document | ShadowRoot) => {
-            const prev = adoptedSheetsSnapshots.get(node);
-            const curr = (node.adoptedStyleSheets || []).filter((s) => !isDRAdoptedSheetOverride(s));
-            adoptedSheetsSnapshots.set(node, curr);
-            if (!prev || !areArraysEqual(prev, curr)) {
-                curr.forEach((sheet) => {
-                    if (!adoptedSheetOwners.has(sheet)) {
-                        adoptedSheetOwners.set(sheet, new Set());
+    const onAdoptedSheetsChange = (node: Document | ShadowRoot) => {
+        const prev = adoptedSheetsSnapshots.get(node);
+        const curr = (node.adoptedStyleSheets || []).filter((s) => !isDRAdoptedSheetOverride(s));
+        adoptedSheetsSnapshots.set(node, curr);
+        if (!prev || !areArraysEqual(prev, curr)) {
+            curr.forEach((sheet) => {
+                if (!adoptedSheetOwners.has(sheet)) {
+                    adoptedSheetOwners.set(sheet, new Set());
+                }
+                adoptedSheetOwners.get(sheet)!.add(node);
+                for (const rule of sheet.cssRules) {
+                    const declaration = (rule as CSSStyleRule).style;
+                    if (declaration) {
+                        adoptedDeclarationSheets.set(declaration, sheet);
                     }
-                    adoptedSheetOwners.get(sheet)!.add(node);
-                    for (const rule of sheet.cssRules) {
-                        const declaration = (rule as CSSStyleRule).style;
-                        if (declaration) {
-                            adoptedDeclarationSheets.set(declaration, sheet);
-                        }
-                    }
-                });
-                node.dispatchEvent(adoptedSheetsChangeEvent);
-            }
-        };
-
-        const proxyAdoptedSheetsArray = (node: Document | ShadowRoot, source: CSSStyleSheet[]) => {
-            if (adoptedSheetsProxySources.has(source)) {
-                return source;
-            }
-            if (adoptedSheetsSourceProxies.has(source)) {
-                return adoptedSheetsSourceProxies.get(source)!;
-            }
-            const proxy = new Proxy(source, {
-                deleteProperty(target, property) {
-                    delete target[property as any];
-                    return true;
-                },
-                set(target, property, value) {
-                    target[property as any] = value;
-                    if (property === 'length') {
-                        onAdoptedSheetsChange(node);
-                    }
-                    return true;
-                },
+                }
             });
-            adoptedSheetsSourceProxies.set(source, proxy);
-            adoptedSheetsProxySources.set(proxy, source);
-            return proxy;
-        };
+            node.dispatchEvent(adoptedSheetsChangeEvent);
+        }
+    };
 
-        [Document, ShadowRoot].forEach((ctor: {prototype: Document | ShadowRoot}) => {
-            overrideProperty(ctor, 'adoptedStyleSheets', {
-                get: (native) => function () {
-                    const source = native.call(this) as CSSStyleSheet[];
-                    return proxyAdoptedSheetsArray(this, source);
-                },
-                set: (native) => function (source) {
-                    if (adoptedSheetsProxySources.has(source)) {
-                        source = adoptedSheetsProxySources.get(source);
-                    }
-                    native.call(this, source);
-                    onAdoptedSheetsChange(this);
-                },
-            });
+    const proxyAdoptedSheetsArray = (node: Document | ShadowRoot, source: CSSStyleSheet[]) => {
+        if (adoptedSheetsProxySources.has(source)) {
+            return source;
+        }
+        if (adoptedSheetsSourceProxies.has(source)) {
+            return adoptedSheetsSourceProxies.get(source)!;
+        }
+        const proxy = new Proxy(source, {
+            deleteProperty(target, property) {
+                delete target[property as any];
+                return true;
+            },
+            set(target, property, value) {
+                target[property as any] = value;
+                if (property === 'length') {
+                    onAdoptedSheetsChange(node);
+                }
+                return true;
+            },
         });
+        adoptedSheetsSourceProxies.set(source, proxy);
+        adoptedSheetsProxySources.set(proxy, source);
+        return proxy;
+    };
 
-        const adoptedDeclarationChangeEvent = new CustomEvent('__darkreader__adoptedStyleDeclarationChange');
-        (['setProperty', 'removeProperty'] as Array<keyof CSSStyleDeclaration>).forEach((key) => {
-            override(CSSStyleDeclaration, key, (native) => {
-                return function (...args: any[]) {
-                    const returnValue = native.apply(this, args);
-                    const sheet = adoptedDeclarationSheets.get(this);
-                    if (sheet) {
-                        const owners = adoptedSheetOwners.get(sheet);
-                        if (owners) {
-                            owners.forEach((node) => {
-                                node.dispatchEvent(adoptedDeclarationChangeEvent);
-                            });
-                        }
-                    }
-                    return returnValue;
-                };
-            });
+    [Document, ShadowRoot].forEach((ctor: {prototype: Document | ShadowRoot}) => {
+        overrideProperty(ctor, 'adoptedStyleSheets', {
+            get: (native) => function () {
+                const source = native.call(this) as CSSStyleSheet[];
+                return proxyAdoptedSheetsArray(this, source);
+            },
+            set: (native) => function (source) {
+                if (adoptedSheetsProxySources.has(source)) {
+                    source = adoptedSheetsProxySources.get(source);
+                }
+                native.call(this, source);
+                onAdoptedSheetsChange(this);
+            },
         });
-    }
+    });
 
-    if (__FIREFOX_MV2__ || __THUNDERBIRD__) {
-        type NodeSheet = {
-            sheetId: number;
-            sheet: CSSStyleSheet;
-        };
-
-        const targetNodes = new Set<Document | ShadowRoot>();
-        const sourceSheets = new WeakSet<CSSStyleSheet>();
-        const sourceSheetNodes = new WeakMap<CSSStyleSheet, Set<Document | ShadowRoot>>();
-
-        let observableStyleDeclarations = new WeakMap<CSSStyleDeclaration, CSSStyleSheet>();
-        cleaners.push(() => observableStyleDeclarations = new WeakMap());
-
-        let nodeCounter = 0;
-        const nodeIds = new WeakMap<Document | ShadowRoot, number>();
-        const nodesById = new Map<number, Document | ShadowRoot>();
-        const getNodeId = (node: Document | ShadowRoot) => {
-            if (nodeIds.has(node)) {
-                return nodeIds.get(node)!;
-            }
-            const id = ++nodeCounter;
-            nodeIds.set(node, id);
-            nodesById.set(id, node);
-            return id;
-        };
-
-        let sheetCounter = 0;
-        const sheetIds = new WeakMap<CSSStyleSheet, number>();
-        const sheetsById = new Map<number, CSSStyleSheet>();
-        const getSheetId = (sheet: CSSStyleSheet) => {
-            if (sheetIds.has(sheet)) {
-                return sheetIds.get(sheet)!;
-            }
-            const id = ++sheetCounter;
-            sheetIds.set(sheet, id);
-            sheetsById.set(id, sheet);
-            return id;
-        };
-
-        const cleanNode = (node: Document | ShadowRoot) => {
-            targetNodes.delete(node);
-            nodesById.delete(getNodeId(node));
-            iterateSourceSheets(node, (sheet) => {
-                sourceSheetNodes.get(sheet)?.delete(node);
-                if (sourceSheetNodes.get(sheet)?.size === 0) {
-                    sourceSheetNodes.delete(sheet);
-                }
-            });
-        };
-
-        const iterateSourceSheets = (node: Document | ShadowRoot, iterator: (sheet: CSSStyleSheet) => void) => {
-            if (Array.isArray(node.adoptedStyleSheets)) {
-                node.adoptedStyleSheets.forEach((sheet) => {
-                    if (!sourceSheets.has(sheet)) {
-                        sourceSheets.add(sheet);
-                    }
-                    if (!sourceSheetNodes.has(sheet)) {
-                        sourceSheetNodes.set(sheet, new Set());
-                    }
-                    sourceSheetNodes.get(sheet)!.add(node);
-                    iterator(sheet);
-                });
-            }
-        };
-
-        const getSourceSheets = (node: Document | ShadowRoot) => {
-            const allRules: NodeSheet[] = [];
-            iterateSourceSheets(node, (sheet) => {
-                const sheetId = getSheetId(sheet);
-                for (let i = 0; i < sheet.cssRules.length; i++) {
-                    const rule = sheet.cssRules[i];
-                    if ((rule as CSSStyleRule).style) {
-                        observableStyleDeclarations.set((rule as CSSStyleRule).style, sheet);
+    const adoptedDeclarationChangeEvent = new CustomEvent('__darkreader__adoptedStyleDeclarationChange');
+    (['setProperty', 'removeProperty'] as Array<keyof CSSStyleDeclaration>).forEach((key) => {
+        override(CSSStyleDeclaration, key, (native) => {
+            return function (...args: any[]) {
+                const returnValue = native.apply(this, args);
+                const sheet = adoptedDeclarationSheets.get(this);
+                if (sheet) {
+                    const owners = adoptedSheetOwners.get(sheet);
+                    if (owners) {
+                        owners.forEach((node) => {
+                            node.dispatchEvent(adoptedDeclarationChangeEvent);
+                        });
                     }
                 }
-                allRules.push({sheetId, sheet});
-            });
-            return allRules;
-        };
-
-        const walkNodesWithAdoptedStyles = (root: Document | ShadowRoot, iterator: (host: Document | ShadowRoot) => void) => {
-            iterator(root);
-            const acceptNode = (node: Node) => (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
-            const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {acceptNode});
-            const start = root === document ? walker.nextNode() : root;
-            for (let node = start; node != null; node = walker.nextNode() as Element) {
-                const shadowRoot = (node as Element).shadowRoot;
-                if (shadowRoot) {
-                    walkNodesWithAdoptedStyles(shadowRoot, iterator);
-                }
-            }
-        };
-
-        const queuedSheetChanges = new Set<CSSStyleSheet>();
-
-        const handleSheetChangeForNode = (node: Document | ShadowRoot) => {
-            if (!node.isConnected) {
-                cleanNode(node);
-                return;
-            }
-            if (!targetNodes.has(node)) {
-                targetNodes.add(node);
-            }
-            const sheets = getSourceSheets(node);
-            if (sheets.every(({sheet}) => queuedSheetChanges.has(sheet))) {
-                return;
-            }
-            const unqueuedSheets: NodeSheet[] = [];
-            sheets.forEach(({sheetId, sheet}) => {
-                if (queuedSheetChanges.has(sheet)) {
-                    return;
-                }
-                queuedSheetChanges.add(sheet);
-                unqueuedSheets.push({sheetId, sheet});
-            });
-            if (unqueuedSheets.length > 0) {
-                queueMicrotask(() => {
-                    unqueuedSheets.forEach(({sheet}) => queuedSheetChanges.delete(sheet));
-                    sendSourceStyles([node], sheets);
-                });
-            }
-        };
-
-        const handleSheetChange = (sheet: CSSStyleSheet) => {
-            if (queuedSheetChanges.has(sheet)) {
-                return;
-            }
-            const sheetId = getSheetId(sheet);
-            queueMicrotask(() => {
-                const nodes = sourceSheetNodes.get(sheet);
-                if (!nodes) {
-                    return;
-                }
-                sendSourceStyles([...nodes], [{sheetId, sheet}]);
-            });
-        };
-
-        const adoptedSheetsSourceProxies = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
-        const adoptedSheetsProxySources = new WeakMap<CSSStyleSheet[], CSSStyleSheet[]>();
-
-        const proxyArray = (node: Document | ShadowRoot, source: CSSStyleSheet[]) => {
-            if (adoptedSheetsProxySources.has(source)) {
-                return source;
-            }
-            if (adoptedSheetsSourceProxies.has(source)) {
-                return adoptedSheetsSourceProxies.get(source)!;
-            }
-            const proxy = new Proxy(source, {
-                deleteProperty(target, property) {
-                    delete target[property as any];
-                    return true;
-                },
-                set(target, property, value) {
-                    target[property as any] = value;
-                    if (property === 'length') {
-                        handleSheetChangeForNode(node);
-                    }
-                    return true;
-                },
-            });
-            adoptedSheetsSourceProxies.set(source, proxy);
-            adoptedSheetsProxySources.set(proxy, source);
-            return proxy;
-        };
-
-        const proxyAdoptedStyleSheets = () => [Document, ShadowRoot].forEach((ctor: {prototype: Document | ShadowRoot}) => {
-            overrideProperty(ctor, 'adoptedStyleSheets', {
-                get: (native) => function () {
-                    const source = native.call(this) as CSSStyleSheet[];
-                    return proxyArray(this, source);
-                },
-                set: (native) => function (source) {
-                    if (adoptedSheetsProxySources.has(source)) {
-                        source = adoptedSheetsProxySources.get(source);
-                    }
-                    native.call(this, source);
-                    handleSheetChangeForNode(this);
-                },
-            });
+                return returnValue;
+            };
         });
-
-        const proxyStyleDeclaration = () => (['setProperty', 'removeProperty'] as Array<keyof CSSStyleDeclaration>).forEach((key) => {
-            override(CSSStyleDeclaration, key, (native) => {
-                return function (...args: any[]) {
-                    const returnValue = native.apply(this, args);
-                    if (observableStyleDeclarations.has(this)) {
-                        const sheet = observableStyleDeclarations.get(this)!;
-                        handleSheetChange(sheet);
-                    }
-                    return returnValue;
-                };
-            });
-        });
-
-        const sendSourceStyles = (nodes: Array<Document | ShadowRoot>, sheets: NodeSheet[]) => {
-            const data = {detail: {nodes, sheets}};
-            const event = new CustomEvent('__darkreader__adoptedStyleSheetsChange', data);
-            document.dispatchEvent(event);
-        };
-
-        onFFSheetChange = (sheet) => {
-            if (sourceSheets.has(sheet)) {
-                handleSheetChange(sheet);
-            }
-        };
-
-        documentEventListener('__darkreader__startAdoptedStyleSheetsWatcher', () => {
-            proxyAdoptedStyleSheets();
-            proxyStyleDeclaration();
-
-            walkNodesWithAdoptedStyles(document, (node) => targetNodes.add(node));
-            cleaners.push(() => targetNodes.forEach((node) => cleanNode(node)));
-
-            const allSheets: NodeSheet[] = [];
-            const addedSheetIds = new Set<number>();
-            targetNodes.forEach((node) => {
-                const sheets = getSourceSheets(node);
-                const filtered = sheets.filter(({sheetId}) => !addedSheetIds.has(sheetId));
-                allSheets.push(...filtered);
-                filtered.forEach(({sheetId}) => addedSheetIds.add(sheetId));
-            });
-            const groups = new Map<string, {nodes: Array<Document | ShadowRoot>; sheets: NodeSheet[]}>();
-            allSheets.forEach((sheet) => {
-                const nodes = sourceSheetNodes.get(sheet.sheet);
-                if (!nodes) {
-                    return;
-                }
-                const key = [...nodes].map((node) => getNodeId(node)).sort((a, b) => a - b).join(',');
-                let group = groups.get(key);
-                if (!group) {
-                    group = {nodes: [...nodes], sheets: []};
-                    groups.set(key, group);
-                }
-                group.sheets.push(sheet);
-            });
-            groups.forEach(({nodes, sheets}) => sendSourceStyles(nodes, sheets));
-        });
-    }
+    });
 }

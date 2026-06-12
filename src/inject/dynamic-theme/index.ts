@@ -12,8 +12,8 @@ import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibili
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
 
-import type {AdoptedStyleSheetManager, AdoptedStyleSheetFirefoxManager} from './adopted-style-manger';
-import {createAdoptedStyleSheetOverride, createAdoptedStyleSheetOverrideFirefox, canHaveAdoptedStyleSheets} from './adopted-style-manger';
+import type {AdoptedStyleSheetManager} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, canHaveAdoptedStyleSheets} from './adopted-style-manger';
 import {combineFixes, findRelevantFix} from './fixes';
 import {getStyleInjectionMode, injectStyleAway, removeStyleContainer} from './injection';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
@@ -35,7 +35,6 @@ declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
-let adoptedStyleFirefoxManager: AdoptedStyleSheetFirefoxManager | null = null;
 let theme: Theme | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
@@ -375,32 +374,6 @@ function createDynamicStyleOverrides() {
     variablesStore.matchVariablesAndDependents();
 
     tryInvertChromePDF();
-
-    // if (isFirefox) {
-    if (false) {
-        type NodeSheet = {
-            sheetId: number;
-            sheet: CSSStyleSheet;
-        };
-
-        const onAdoptedCssChange = (e: CustomEvent) => {
-            const {nodes, sheets} = e.detail;
-            if (!Array.isArray(nodes) || !Array.isArray(sheets) || nodes.length === 0 || sheets.length === 0) {
-                return;
-            }
-            const sourceSheets: CSSStyleSheet[] = sheets.map(({sheet}: NodeSheet) => sheet);
-            sourceSheets.forEach((sheet) => {
-                variablesStore.addRulesForMatching(sheet.cssRules);
-            });
-            variablesStore.matchVariablesAndDependents();
-            getAdoptedStyleFirefoxManager().render(nodes, sourceSheets, theme!, ignoredImageAnalysisSelectors!);
-        };
-
-        document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange as EventListener);
-        cleaners.push(() => document.removeEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange as EventListener));
-
-        document.dispatchEvent(new CustomEvent('__darkreader__startAdoptedStyleSheetsWatcher'));
-    }
 }
 
 let loadingStylesCounter = 0;
@@ -497,11 +470,6 @@ function unwrap<T>(value: T): T {
 }
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    // if (isFirefox) {
-    if (false) {
-        return;
-    }
-
     if (canHaveAdoptedStyleSheets(node)) {
         forEach(isFirefox ? unwrap(node.adoptedStyleSheets) : node.adoptedStyleSheets, (s) => {
             variablesStore.addRulesForMatching(s.cssRules);
@@ -517,13 +485,6 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             newManger.render(theme!, ignoredImageAnalysisSelectors);
         });
     }
-}
-
-function getAdoptedStyleFirefoxManager() {
-    if (!adoptedStyleFirefoxManager) {
-        adoptedStyleFirefoxManager = createAdoptedStyleSheetOverrideFirefox();
-    }
-    return adoptedStyleFirefoxManager;
 }
 
 function watchForUpdates() {
@@ -958,10 +919,6 @@ export function removeDynamicTheme(): void {
 
     adoptedStyleManagers.forEach((manager) => manager.destroy());
     adoptedStyleManagers.splice(0);
-    if (adoptedStyleFirefoxManager) {
-        adoptedStyleFirefoxManager.destroy();
-        adoptedStyleFirefoxManager = null;
-    }
 
     metaObserver && metaObserver.disconnect();
     scheduleInversionStyleUpdate.cancel();

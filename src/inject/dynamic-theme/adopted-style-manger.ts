@@ -198,23 +198,25 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 }
 
 export interface AdoptedStyleSheetFirefoxManager {
-    render(sheets: CSSStyleSheet[], theme: Theme, ignoreImageAnalysis: string[]): void;
+    render(nodes: Array<Document | ShadowRoot>, sheets: CSSStyleSheet[], theme: Theme, ignoreImageAnalysis: string[]): void;
     destroy(): void;
 }
 
-export function createAdoptedStyleSheetOverrideFirefox(node: Document | ShadowRoot): AdoptedStyleSheetFirefoxManager {
+export function createAdoptedStyleSheetOverrideFirefox(): AdoptedStyleSheetFirefoxManager {
     let cancelAsyncOperations = false;
 
     const overridesBySource = new Map<CSSStyleSheet, CSSStyleSheet>();
     const overrideSheets = new WeakSet<CSSStyleSheet>();
+    const managedNodes = new Set<Document | ShadowRoot>();
 
-    function injectSheet(override: CSSStyleSheet) {
+    function injectSheet(node: Document | ShadowRoot, override: CSSStyleSheet) {
+        managedNodes.add(node);
         if (!node.adoptedStyleSheets.includes(override)) {
             node.adoptedStyleSheets = [...node.adoptedStyleSheets, override];
         }
     }
 
-    function render(sheets: CSSStyleSheet[], theme: Theme, ignoreImageAnalysis: string[]) {
+    function render(nodes: Array<Document | ShadowRoot>, sheets: CSSStyleSheet[], theme: Theme, ignoreImageAnalysis: string[]) {
         sheets.forEach((sheet) => {
             let override = overridesBySource.get(sheet);
             if (!override) {
@@ -229,7 +231,6 @@ export function createAdoptedStyleSheetOverrideFirefox(node: Document | ShadowRo
                     target.deleteRule(i);
                 }
                 target.insertRule('#__darkreader__adoptedOverride {}');
-                injectSheet(target);
                 return target;
             };
 
@@ -242,17 +243,22 @@ export function createAdoptedStyleSheetOverrideFirefox(node: Document | ShadowRo
                 force: false,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
+
+            nodes.forEach((node) => injectSheet(node, target));
         });
     }
 
     function destroy() {
         cancelAsyncOperations = true;
-        if (Array.isArray(node.adoptedStyleSheets)) {
-            const newSheets = node.adoptedStyleSheets.filter((s) => !overrideSheets.has(s));
-            if (newSheets.length !== node.adoptedStyleSheets.length) {
-                node.adoptedStyleSheets = newSheets;
+        managedNodes.forEach((node) => {
+            if (Array.isArray(node.adoptedStyleSheets)) {
+                const newSheets = node.adoptedStyleSheets.filter((s) => !overrideSheets.has(s));
+                if (newSheets.length !== node.adoptedStyleSheets.length) {
+                    node.adoptedStyleSheets = newSheets;
+                }
             }
-        }
+        });
+        managedNodes.clear();
         overridesBySource.clear();
     }
 

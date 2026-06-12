@@ -35,7 +35,7 @@ declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
-const adoptedStyleFirefoxManagers = new Map<Document | ShadowRoot, AdoptedStyleSheetFirefoxManager>();
+let adoptedStyleFirefoxManager: AdoptedStyleSheetFirefoxManager | null = null;
 let theme: Theme | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
@@ -392,9 +392,7 @@ function createDynamicStyleOverrides() {
                 variablesStore.addRulesForMatching(sheet.cssRules);
             });
             variablesStore.matchVariablesAndDependents();
-            nodes.forEach((node: Document | ShadowRoot) => {
-                getAdoptedStyleFirefoxManager(node).render(sourceSheets, theme!, ignoredImageAnalysisSelectors!);
-            });
+            getAdoptedStyleFirefoxManager().render(nodes, sourceSheets, theme!, ignoredImageAnalysisSelectors!);
         };
 
         document.addEventListener('__darkreader__adoptedStyleSheetsChange', onAdoptedCssChange as EventListener);
@@ -515,13 +513,11 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     }
 }
 
-function getAdoptedStyleFirefoxManager(node: Document | ShadowRoot) {
-    let manager = adoptedStyleFirefoxManagers.get(node);
-    if (!manager) {
-        manager = createAdoptedStyleSheetOverrideFirefox(node);
-        adoptedStyleFirefoxManagers.set(node, manager);
+function getAdoptedStyleFirefoxManager() {
+    if (!adoptedStyleFirefoxManager) {
+        adoptedStyleFirefoxManager = createAdoptedStyleSheetOverrideFirefox();
     }
-    return manager;
+    return adoptedStyleFirefoxManager;
 }
 
 function watchForUpdates() {
@@ -956,8 +952,10 @@ export function removeDynamicTheme(): void {
 
     adoptedStyleManagers.forEach((manager) => manager.destroy());
     adoptedStyleManagers.splice(0);
-    adoptedStyleFirefoxManagers.forEach((manager) => manager.destroy());
-    adoptedStyleFirefoxManagers.clear();
+    if (adoptedStyleFirefoxManager) {
+        adoptedStyleFirefoxManager.destroy();
+        adoptedStyleFirefoxManager = null;
+    }
 
     metaObserver && metaObserver.disconnect();
     scheduleInversionStyleUpdate.cancel();

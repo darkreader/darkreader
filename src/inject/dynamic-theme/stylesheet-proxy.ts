@@ -584,14 +584,21 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
                 allSheets.push(...filtered);
                 filtered.forEach(({sheetId}) => addedSheetIds.add(sheetId));
             });
-            // TODO: Group if nodes share sheets
+            const groups = new Map<string, {nodes: Array<Document | ShadowRoot>; sheets: NodeSheet[]}>();
             allSheets.forEach((sheet) => {
                 const nodes = sourceSheetNodes.get(sheet.sheet);
                 if (!nodes) {
                     return;
                 }
-                sendSourceStyles([...nodes], [sheet]);
+                const key = [...nodes].map((node) => getNodeId(node)).sort((a, b) => a - b).join(',');
+                let group = groups.get(key);
+                if (!group) {
+                    group = {nodes: [...nodes], sheets: []};
+                    groups.set(key, group);
+                }
+                group.sheets.push(sheet);
             });
+            groups.forEach(({nodes, sheets}) => sendSourceStyles(nodes, sheets));
         });
     }
 }

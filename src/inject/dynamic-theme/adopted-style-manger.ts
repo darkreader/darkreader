@@ -209,10 +209,21 @@ export function createAdoptedStyleSheetOverrideFirefox(): AdoptedStyleSheetFiref
     const overrideSheets = new WeakSet<CSSStyleSheet>();
     const managedNodes = new Set<Document | ShadowRoot>();
 
+    const pageWindow: any = (window as any).wrappedJSObject ?? window;
+
+    function unwrap<T>(value: T): T {
+        return (value as any)?.wrappedJSObject ?? value;
+    }
+
+    function createOverrideSheet(): CSSStyleSheet {
+        return new pageWindow.CSSStyleSheet();
+    }
+
     function injectSheet(node: Document | ShadowRoot, override: CSSStyleSheet) {
         managedNodes.add(node);
-        if (!node.adoptedStyleSheets.includes(override)) {
-            node.adoptedStyleSheets = [...node.adoptedStyleSheets, override];
+        const adopted = unwrap(node.adoptedStyleSheets);
+        if (!adopted.includes(override)) {
+            adopted.splice(adopted.length, 0, override);
         }
     }
 
@@ -220,7 +231,7 @@ export function createAdoptedStyleSheetOverrideFirefox(): AdoptedStyleSheetFiref
         sheets.forEach((sheet) => {
             let override = overridesBySource.get(sheet);
             if (!override) {
-                override = new CSSStyleSheet();
+                override = createOverrideSheet();
                 overridesBySource.set(sheet, override);
                 overrideSheets.add(override);
             }
@@ -251,10 +262,13 @@ export function createAdoptedStyleSheetOverrideFirefox(): AdoptedStyleSheetFiref
     function destroy() {
         cancelAsyncOperations = true;
         managedNodes.forEach((node) => {
-            if (Array.isArray(node.adoptedStyleSheets)) {
-                const newSheets = node.adoptedStyleSheets.filter((s) => !overrideSheets.has(s));
-                if (newSheets.length !== node.adoptedStyleSheets.length) {
-                    node.adoptedStyleSheets = newSheets;
+            if (node.adoptedStyleSheets == null) {
+                return;
+            }
+            const adopted = unwrap(node.adoptedStyleSheets);
+            for (let i = adopted.length - 1; i >= 0; i--) {
+                if (overrideSheets.has(adopted[i])) {
+                    adopted.splice(i, 1);
                 }
             }
         });

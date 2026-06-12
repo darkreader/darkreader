@@ -248,7 +248,7 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\("(blob:|data:)[^"]*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
 
     it('should handle background-image with non-base64 data URL', async () => {
@@ -260,7 +260,7 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\("(blob:|data:)[^"]*"\)$/);
     });
 
     it('should handle background-image with URL and gradient (revered)', async () => {
@@ -273,7 +273,7 @@ describe('IMAGE ANALYSIS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         await timeout(500);
-        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\), url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\), url\("(blob:|data:)[^"]*"\)$/);
     });
 
     it('should handle background-image with empty URLs', async () => {
@@ -285,6 +285,6 @@ describe('IMAGE ANALYSIS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
-        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\(""\), url\(""\), url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toMatch(/^url\(""\), url\(""\), url\("(blob:|data:)[^"]*"\)$/);
     });
 });

@@ -274,7 +274,7 @@ function analyzeImage(image: ImageBitmap | HTMLImageElement) {
         r: Math.round(sumR / opaquePixelsCount),
         g: Math.round(sumG / opaquePixelsCount),
         b: Math.round(sumB / opaquePixelsCount),
-        a: transparentPixelsCount / totalPixelsCount,
+        a: sumA / (totalPixelsCount * 255),
     } : null;
 
     return {

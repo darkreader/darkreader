@@ -73,52 +73,6 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
         return <NewBody {...props} fonts={props.fonts} />;
     }
 
-    const unreadNews = props.data.news.filter(({read}) => !read);
-    const latestNews = props.data.news.length > 0 ? props.data.news[0] : null;
-    const isFirstNewsUnread = latestNews && !latestNews.read;
-    let newsWereLongTimeAgo = true;
-    if (unreadNews.length > 0) {
-        const latest = new Date(unreadNews[0].date);
-        const today = new Date();
-        newsWereLongTimeAgo = latest.getTime() < today.getTime() - getDuration({days: 30});
-    }
-    const displayedNewsCount = newsWereLongTimeAgo ? 0 : unreadNews.length;
-
-    context.onRender(() => {
-        if (props.data.uiHighlights.includes('mobile-links') && !state.mobileLinksOpen && !state.didMobileLinksSlideIn) {
-            setTimeout(toggleMobileLinks, 750);
-        } else if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn && !newsWereLongTimeAgo) {
-            setTimeout(toggleNews, 750);
-        }
-    });
-
-    function toggleNews() {
-        if (state.newsOpen && unreadNews.length > 0) {
-            props.actions.markNewsAsRead(unreadNews.map(({id}) => id));
-        }
-        setState({newsOpen: !state.newsOpen, mobileLinksOpen: false, didNewsSlideIn: state.didNewsSlideIn || !state.newsOpen});
-    }
-
-    function toggleMobileLinks() {
-        setState({mobileLinksOpen: !state.mobileLinksOpen, newsOpen: false, didMobileLinksSlideIn: state.didMobileLinksSlideIn || !state.mobileLinksOpen});
-        if (state.mobileLinksOpen && props.data.uiHighlights.includes('mobile-links')) {
-            disableMobileLinksSlideIn();
-        }
-    }
-
-    function disableMobileLinksSlideIn() {
-        if (props.data.uiHighlights.includes('mobile-links')) {
-            props.actions.hideHighlights(['mobile-links']);
-        }
-    }
-
-    function onNewsOpen(...news: NewsObject[]) {
-        const unread = news.filter(({read}) => !read);
-        if (unread.length > 0) {
-            props.actions.markNewsAsRead(unread.map(({id}) => id));
-        }
-    }
-
     function toggleMoreSiteSettings() {
         setState({moreSiteSettingsOpen: !state.moreSiteSettingsOpen, moreToggleSettingsOpen: false, newToggleMenusHighlightHidden: true});
         if (props.data.uiHighlights.includes('new-toggle-menus')) {

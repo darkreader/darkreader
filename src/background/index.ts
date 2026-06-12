@@ -159,57 +159,57 @@ if (__TEST__) {
         },
         onMessage: (e, socket) => {
             harnessSocket = socket;
-        try {
-            const message: TestMessage = JSON.parse(e.data);
-            const {id, type} = message;
-            const respond = (data?: ExtensionData | string | boolean | {[key: string]: string} | null) => socket.send(JSON.stringify({
-                data,
-                id,
-            }));
+            try {
+                const message: TestMessage = JSON.parse(e.data);
+                const {id, type} = message;
+                const respond = (data?: ExtensionData | string | boolean | {[key: string]: string} | null) => socket.send(JSON.stringify({
+                    data,
+                    id,
+                }));
 
-            switch (type) {
-                case 'changeSettings':
-                    Extension.changeSettings(message.data);
-                    respond();
-                    break;
-                case 'collectData':
-                    Extension.collectData().then(respond);
-                    break;
-                case 'getManifest': {
-                    const data = chrome.runtime.getManifest();
-                    respond(data);
-                    break;
+                switch (type) {
+                    case 'changeSettings':
+                        Extension.changeSettings(message.data);
+                        respond();
+                        break;
+                    case 'collectData':
+                        Extension.collectData().then(respond);
+                        break;
+                    case 'getManifest': {
+                        const data = chrome.runtime.getManifest();
+                        respond(data);
+                        break;
+                    }
+                    case 'changeChromeStorage': {
+                        const region = message.data.region;
+                        chrome.storage[region].set(message.data.data, () => respond());
+                        break;
+                    }
+                    case 'getChromeStorage': {
+                        const keys = message.data.keys;
+                        const region = message.data.region;
+                        chrome.storage[region].get(keys as any, respond);
+                        break;
+                    }
+                    case 'setNews':
+                        setNewsForTesting(message.data);
+                        respond();
+                        break;
+                    case 'firefox-getColorScheme': {
+                        ASSERT('Firefox-specific function', isFirefox);
+                        respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
+                        break;
+                    }
+                    case 'firefox-emulateColorScheme': {
+                        ASSERT('Firefox-specific function', isFirefox);
+                        emulateColorScheme(message.data);
+                        respond();
+                        break;
+                    }
                 }
-                case 'changeChromeStorage': {
-                    const region = message.data.region;
-                    chrome.storage[region].set(message.data.data, () => respond());
-                    break;
-                }
-                case 'getChromeStorage': {
-                    const keys = message.data.keys;
-                    const region = message.data.region;
-                    chrome.storage[region].get(keys as any, respond);
-                    break;
-                }
-                case 'setNews':
-                    setNewsForTesting(message.data);
-                    respond();
-                    break;
-                case 'firefox-getColorScheme': {
-                    ASSERT('Firefox-specific function', isFirefox);
-                    respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
-                    break;
-                }
-                case 'firefox-emulateColorScheme': {
-                    ASSERT('Firefox-specific function', isFirefox);
-                    emulateColorScheme(message.data);
-                    respond();
-                    break;
-                }
+            } catch (err) {
+                socket.send(JSON.stringify({error: String(err), original: e.data}));
             }
-        } catch (err) {
-            socket.send(JSON.stringify({error: String(err), original: e.data}));
-        }
         },
     });
 

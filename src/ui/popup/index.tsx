@@ -101,51 +101,51 @@ if (__TEST__) {
             }));
         },
         onMessage: (e, socket) => {
-        const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
-        try {
-            const message: {type: string; id: number; data: any} = JSON.parse(e.data);
-            const {type, id, data} = message;
-            switch (type) {
-                case 'popup-click': {
+            const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
+            try {
+                const message: {type: string; id: number; data: any} = JSON.parse(e.data);
+                const {type, id, data} = message;
+                switch (type) {
+                    case 'popup-click': {
                     // The required element may not exist yet
-                    const check = () => {
-                        const element: HTMLElement | null = document.querySelector(data);
-                        if (element) {
-                            element.click();
-                            respond({id});
-                        } else {
-                            requestIdleCallback(check, {timeout: 500});
-                        }
-                    };
+                        const check = () => {
+                            const element: HTMLElement | null = document.querySelector(data);
+                            if (element) {
+                                element.click();
+                                respond({id});
+                            } else {
+                                requestIdleCallback(check, {timeout: 500});
+                            }
+                        };
 
-                    check();
-                    break;
-                }
-                case 'popup-exists': {
+                        check();
+                        break;
+                    }
+                    case 'popup-exists': {
                     // The required element may not exist yet
-                    const check = () => {
-                        const element: HTMLElement | null = document.querySelector(data);
-                        if (element) {
-                            respond({id, data: true});
-                        } else {
-                            requestIdleCallback(check, {timeout: 500});
-                        }
-                    };
+                        const check = () => {
+                            const element: HTMLElement | null = document.querySelector(data);
+                            if (element) {
+                                respond({id, data: true});
+                            } else {
+                                requestIdleCallback(check, {timeout: 500});
+                            }
+                        };
 
-                    check();
-                    break;
+                        check();
+                        break;
+                    }
+                    case 'popup-saveFile': {
+                        const {name, content} = data;
+                        saveFile(name, content);
+                        respond({id});
+                        break;
+                    }
+                    default:
                 }
-                case 'popup-saveFile': {
-                    const {name, content} = data;
-                    saveFile(name, content);
-                    respond({id});
-                    break;
-                }
-                default:
+            } catch (err) {
+                respond({error: String(err)});
             }
-        } catch (err) {
-            respond({error: String(err)});
-        }
         },
     });
 }

@@ -44,3 +44,6 @@ deno.json
 # System files
 #-----------------------------------
 .DS_Store
+
+.cursor
+.cursor/

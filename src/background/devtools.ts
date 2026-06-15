@@ -3,7 +3,6 @@ import {parseInversionFixes, formatInversionFixes} from '../generators/css-filte
 import {formatDetectorHints, parseDetectorHints} from '../generators/detector-hints';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
-import {isFirefox} from '../utils/platform';
 
 import ConfigManager from './config-manager';
 import {logInfo} from './utils/log';
@@ -98,9 +97,7 @@ export default class DevTools {
     private static store: DevToolsStorage;
 
     static async init(onChange: () => void): Promise<void> {
-        // Firefox don't seem to like using storage.local to store big data on the background-extension.
-        // Disabling it for now and defaulting back to localStorage.
-        if (!isFirefox && typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
+        if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
             DevTools.store = new PersistentStorageWrapper();
         } else {
             DevTools.store = new TempStorage();

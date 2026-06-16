@@ -497,7 +497,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
         setCustomProp('background-color', 'background-color', value);
     }
 
-    if ((element === document.documentElement || element === document.body) && element.hasAttribute('background')) {
+    if (
+        (element === document.documentElement || element === document.body) &&
+        element.hasAttribute('background') &&
+        element.getAttribute('background') !== ''
+    ) {
         const url = getAbsoluteURL(location.href, element.getAttribute('background') ?? '');
         const value = `url("${url}")`;
         setCustomProp('background-image', 'background-image', value);

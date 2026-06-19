@@ -1,3 +1,10 @@
+# 4.9.128 (June 19, 2026)
+
+- Firefox: Improved adopted style sheets handling performance.
+- Fixed high CPU usage when handling inline background image variables.
+- Firefox: Fixed saving Dev Tools changes.
+- Fixed empty background attribute handling.
+
 # 4.9.127 (June 5, 2026)
 
 - Fixed high CPU usage for inline style background image variables.

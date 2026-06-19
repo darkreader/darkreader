@@ -586,10 +586,6 @@ export class VariablesStore {
     }
 
     putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
-        const sheet = styleElement.sheet!;
-        if (sheet.cssRules.length > 0) {
-            sheet.deleteRule(0);
-        }
         const declarations = new Map<string, string>();
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVariable(property)) {
@@ -612,7 +608,15 @@ export class VariablesStore {
         }
         cssLines.push('}');
         const cssText = cssLines.join('\n');
-        sheet.insertRule(cssText);
+        const sheet = styleElement.sheet;
+        if (sheet) {
+            if (sheet.cssRules.length > 0) {
+                sheet.deleteRule(0);
+            }
+            sheet.insertRule(cssText);
+        } else {
+            styleElement.textContent = cssText;
+        }
     }
 }
 

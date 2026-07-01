@@ -851,9 +851,16 @@ function tryModifyBorderColor(color: string, theme: Theme) {
     return handleRawColorValue(color, theme, modifyBorderColor);
 }
 
-function insertVarValues(source: string, varValues: Map<string, string>, fullStack = new Set<string>()) {
+const MAX_VARIABLE_SUBSTITUTIONS = 10000;
+
+function insertVarValues(source: string, varValues: Map<string, string>, fullStack = new Set<string>(), iterations = {count: 0}) {
     let containsUnresolvedVar = false;
     const matchReplacer = (match: string, count: number) => {
+        if (iterations.count >= MAX_VARIABLE_SUBSTITUTIONS) {
+            containsUnresolvedVar = true;
+            return null;
+        }
+        iterations.count++;
         const {name, fallback} = getVariableNameAndFallback(match);
         const stack = count > 1 ? new Set(fullStack) : fullStack;
         if (stack.has(name)) {
@@ -865,7 +872,7 @@ function insertVarValues(source: string, varValues: Map<string, string>, fullSta
         let inserted: string | null = null;
         if (varValue) {
             if (isVarDependant(varValue)) {
-                inserted = insertVarValues(varValue, varValues, stack);
+                inserted = insertVarValues(varValue, varValues, stack, iterations);
             } else {
                 inserted = varValue;
             }

@@ -851,31 +851,25 @@ function tryModifyBorderColor(color: string, theme: Theme) {
     return handleRawColorValue(color, theme, modifyBorderColor);
 }
 
-const MAX_VARIABLE_SUBSTITUTIONS = 10000;
+const MAX_VARIABLE_SUBSTITUTIONS = 100000;
 
-function insertVarValues(source: string, varValues: Map<string, string>, fullStack = new Set<string>(), iterations = {count: 0}) {
+function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>(), cache = new Map<string, string | null>()) {
     let containsUnresolvedVar = false;
-    const matchReplacer = (match: string, count: number) => {
-        if (iterations.count >= MAX_VARIABLE_SUBSTITUTIONS) {
-            containsUnresolvedVar = true;
-            return null;
-        }
-        iterations.count++;
+    const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
-        const stack = count > 1 ? new Set(fullStack) : fullStack;
-        if (stack.has(name)) {
-            containsUnresolvedVar = true;
-            return null;
-        }
-        stack.add(name);
-        const varValue = varValues.get(name) || fallback;
+        const varValue = varValues.get(name);
         let inserted: string | null = null;
         if (varValue) {
-            if (isVarDependant(varValue)) {
-                inserted = insertVarValues(varValue, varValues, stack, iterations);
-            } else {
-                inserted = varValue;
+            if (cache.has(name)) {
+                inserted = cache.get(name)!;
+            } else if (!stack.has(name)) {
+                stack.add(name);
+                inserted = isVarDependant(varValue) ? insertVarValues(varValue, varValues, stack, cache) : varValue;
+                stack.delete(name);
+                cache.set(name, inserted);
             }
+        } else if (fallback) {
+            inserted = isVarDependant(fallback) ? insertVarValues(fallback, varValues, stack, cache) : fallback;
         }
         if (!inserted) {
             containsUnresolvedVar = true;
@@ -885,7 +879,7 @@ function insertVarValues(source: string, varValues: Map<string, string>, fullSta
     };
 
     const replaced = replaceVariablesMatches(source, matchReplacer);
-    if (containsUnresolvedVar) {
+    if (containsUnresolvedVar || replaced.length > MAX_VARIABLE_SUBSTITUTIONS) {
         return null;
     }
     return replaced;

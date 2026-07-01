@@ -4,6 +4,7 @@ import {PLATFORM} from './platform.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readJSON, writeJSON} from './utils.js';
+import {copyFile} from 'node:fs/promises';
 
 async function patchManifest(platform, debug, watch, test) {
     const manifest = await readJSON(absolutePath('src/manifest.json'));
@@ -15,6 +16,11 @@ async function patchManifest(platform, debug, watch, test) {
     }
     if (platform === PLATFORM.CHROMIUM_MV3) {
         patched.browser_action = undefined;
+    }
+    if (platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV3) {
+        patched.storage = {
+            managed_schema: 'managed-storage.json',
+        };
     }
     if (debug) {
         patched.version = '1';
@@ -42,6 +48,9 @@ async function manifests({platforms, debug, watch, test}) {
         const manifest = await patchManifest(platform, debug, watch, test);
         const destDir = getDestDir({debug, platform});
         await writeJSON(`${destDir}/manifest.json`, manifest);
+        if (platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV3) {
+            await copyFile(absolutePath('src/managed-storage.json'), `${destDir}/managed-storage.json`);
+        }
     }
 }
 
@@ -49,7 +58,7 @@ const bundleManifestTask = createTask(
     'bundle-manifest',
     manifests,
 ).addWatcher(
-    ['src/manifest*.json'],
+    ['src/manifest*.json', 'src/managed-storage.json'],
     async (changedFiles, _, buildPlatforms) => {
         const chrome = changedFiles.some((file) => file.endsWith('manifest.json'));
         const platforms = {};

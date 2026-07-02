@@ -552,23 +552,20 @@ export class VariablesStore {
         varDeps.forEach((v) => iterator(v));
     }
 
-    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()): string | null {
-        if (stack.has(varName)) {
-            return null;
-        }
-        stack.add(varName);
-        const result = iterator(varName);
-        if (result) {
-            return varName;
-        }
-        const refs = this.varRefs.get(varName);
-        if (!refs || refs.size === 0) {
-            return null;
-        }
-        for (const ref of refs) {
-            const found = this.findVarRef(ref, iterator, stack);
-            if (found) {
-                return found;
+    private findVarRef(varName: string, iterator: (v: string) => boolean, visited = new Set<string>()): string | null {
+        const queue = [varName];
+        while (queue.length > 0) {
+            const v = queue.pop()!;
+            if (visited.has(v)) {
+                continue;
+            }
+            visited.add(v);
+            if (iterator(v)) {
+                return v;
+            }
+            const refs = this.varRefs.get(v);
+            if (refs) {
+                refs.forEach((ref) => queue.push(ref));
             }
         }
         return null;
@@ -852,8 +849,12 @@ function tryModifyBorderColor(color: string, theme: Theme) {
 }
 
 const MAX_VARIABLE_SUBSTITUTIONS = 100000;
+const MAX_VARIABLE_DEPTH = 1000;
 
-function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>(), cache = new Map<string, string | null>()) {
+function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>(), cache = new Map<string, string | null>(), depth = 0) {
+    if (depth > MAX_VARIABLE_DEPTH) {
+        return null;
+    }
     let containsUnresolvedVar = false;
     const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
@@ -864,12 +865,20 @@ function insertVarValues(source: string, varValues: Map<string, string>, stack =
                 inserted = cache.get(name)!;
             } else if (!stack.has(name)) {
                 stack.add(name);
-                inserted = isVarDependant(varValue) ? insertVarValues(varValue, varValues, stack, cache) : varValue;
+                if (isVarDependant(varValue)) {
+                    inserted = insertVarValues(varValue, varValues, stack, cache, depth + 1);
+                } else {
+                    inserted = varValue;
+                }
                 stack.delete(name);
                 cache.set(name, inserted);
             }
         } else if (fallback) {
-            inserted = isVarDependant(fallback) ? insertVarValues(fallback, varValues, stack, cache) : fallback;
+            if (isVarDependant(fallback)) {
+                inserted = insertVarValues(fallback, varValues, stack, cache, depth + 1);
+            } else {
+                inserted = fallback;
+            }
         }
         if (!inserted) {
             containsUnresolvedVar = true;

@@ -8,6 +8,7 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string): P
             cache: 'force-cache',
             credentials,
             referrer: origin,
+            redirect: 'error',
         },
     );
 

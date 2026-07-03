@@ -4,16 +4,25 @@ import {escapeRegExpSpecialChars} from '../../utils/text';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, iterate: (rule: CSSStyleRule) => void, onImportError?: () => void): void {
+export function iterateCSSRules(
+    rules: CSSRuleList | CSSRule[] | Set<CSSRule>,
+    iterate: (rule: CSSStyleRule) => void,
+    onImportError?: () => void,
+    importedSheets = new Set<CSSStyleSheet>()
+): void {
     forEach(rules, (rule) => {
         if (isStyleRule(rule)) {
             iterate(rule);
             if (rule.cssRules?.length > 0) {
-                iterateCSSRules(rule.cssRules, iterate);
+                iterateCSSRules(rule.cssRules, iterate, onImportError, importedSheets);
             }
         } else if (isImportRule(rule)) {
             try {
-                iterateCSSRules(rule.styleSheet!.cssRules, iterate, onImportError);
+                const importedSheet = rule.styleSheet!;
+                if (!importedSheets.has(importedSheet)) {
+                    importedSheets.add(importedSheet);
+                    iterateCSSRules(importedSheet.cssRules, iterate, onImportError, importedSheets);
+                }
             } catch (err) {
                 logInfo(`Found a non-loaded link.`);
                 onImportError?.();
@@ -24,14 +33,14 @@ export function iterateCSSRules(rules: CSSRuleList | CSSRule[] | Set<CSSRule>, i
             const isNotScreen = !isScreenOrAllOrQuery && media.some((m) => ignoredMedia.some((i) => m.startsWith(i)));
 
             if (isScreenOrAllOrQuery || !isNotScreen) {
-                iterateCSSRules(rule.cssRules, iterate, onImportError);
+                iterateCSSRules(rule.cssRules, iterate, onImportError, importedSheets);
             }
         } else if (isSupportsRule(rule)) {
             if (CSS.supports(rule.conditionText)) {
-                iterateCSSRules(rule.cssRules, iterate, onImportError);
+                iterateCSSRules(rule.cssRules, iterate, onImportError, importedSheets);
             }
         } else if (isLayerRule(rule)) {
-            iterateCSSRules(rule.cssRules, iterate, onImportError);
+            iterateCSSRules(rule.cssRules, iterate, onImportError, importedSheets);
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }

@@ -552,23 +552,20 @@ export class VariablesStore {
         varDeps.forEach((v) => iterator(v));
     }
 
-    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()): string | null {
-        if (stack.has(varName)) {
-            return null;
-        }
-        stack.add(varName);
-        const result = iterator(varName);
-        if (result) {
-            return varName;
-        }
-        const refs = this.varRefs.get(varName);
-        if (!refs || refs.size === 0) {
-            return null;
-        }
-        for (const ref of refs) {
-            const found = this.findVarRef(ref, iterator, stack);
-            if (found) {
-                return found;
+    private findVarRef(varName: string, iterator: (v: string) => boolean, visited = new Set<string>()): string | null {
+        const queue = [varName];
+        while (queue.length > 0) {
+            const v = queue.pop()!;
+            if (visited.has(v)) {
+                continue;
+            }
+            visited.add(v);
+            if (iterator(v)) {
+                return v;
+            }
+            const refs = this.varRefs.get(v);
+            if (refs) {
+                refs.forEach((ref) => queue.push(ref));
             }
         }
         return null;
@@ -586,10 +583,6 @@ export class VariablesStore {
     }
 
     putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
-        const sheet = styleElement.sheet!;
-        if (sheet.cssRules.length > 0) {
-            sheet.deleteRule(0);
-        }
         const declarations = new Map<string, string>();
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVariable(property)) {
@@ -612,7 +605,15 @@ export class VariablesStore {
         }
         cssLines.push('}');
         const cssText = cssLines.join('\n');
-        sheet.insertRule(cssText);
+        const sheet = styleElement.sheet;
+        if (sheet) {
+            if (sheet.cssRules.length > 0) {
+                sheet.deleteRule(0);
+            }
+            sheet.insertRule(cssText);
+        } else {
+            styleElement.textContent = cssText;
+        }
     }
 }
 
@@ -847,23 +848,36 @@ function tryModifyBorderColor(color: string, theme: Theme) {
     return handleRawColorValue(color, theme, modifyBorderColor);
 }
 
-function insertVarValues(source: string, varValues: Map<string, string>, fullStack = new Set<string>()) {
+const MAX_VARIABLE_SUBSTITUTIONS = 100000;
+const MAX_VARIABLE_DEPTH = 1000;
+
+function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>(), cache = new Map<string, string | null>(), depth = 0) {
+    if (depth > MAX_VARIABLE_DEPTH) {
+        return null;
+    }
     let containsUnresolvedVar = false;
-    const matchReplacer = (match: string, count: number) => {
+    const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
-        const stack = count > 1 ? new Set(fullStack) : fullStack;
-        if (stack.has(name)) {
-            containsUnresolvedVar = true;
-            return null;
-        }
-        stack.add(name);
-        const varValue = varValues.get(name) || fallback;
+        const varValue = varValues.get(name);
         let inserted: string | null = null;
         if (varValue) {
-            if (isVarDependant(varValue)) {
-                inserted = insertVarValues(varValue, varValues, stack);
+            if (cache.has(name)) {
+                inserted = cache.get(name)!;
+            } else if (!stack.has(name)) {
+                stack.add(name);
+                if (isVarDependant(varValue)) {
+                    inserted = insertVarValues(varValue, varValues, stack, cache, depth + 1);
+                } else {
+                    inserted = varValue;
+                }
+                stack.delete(name);
+                cache.set(name, inserted);
+            }
+        } else if (fallback) {
+            if (isVarDependant(fallback)) {
+                inserted = insertVarValues(fallback, varValues, stack, cache, depth + 1);
             } else {
-                inserted = varValue;
+                inserted = fallback;
             }
         }
         if (!inserted) {
@@ -874,7 +888,7 @@ function insertVarValues(source: string, varValues: Map<string, string>, fullSta
     };
 
     const replaced = replaceVariablesMatches(source, matchReplacer);
-    if (containsUnresolvedVar) {
+    if (containsUnresolvedVar || replaced.length > MAX_VARIABLE_SUBSTITUTIONS) {
         return null;
     }
     return replaced;

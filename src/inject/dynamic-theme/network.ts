@@ -44,7 +44,6 @@ chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) =>
     }
 });
 
-const ipV4RegExp = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
 const MAX_CORS_HOSTS = 16;
 const corsHosts = new Set<string>();
 const checkedHosts = new Set<string>();
@@ -84,10 +83,20 @@ const localSubDomains = [
     ...localAliases.map((alias) => `.${alias}`),
 ];
 
+function isIPHost(hostname: string): boolean {
+    if (hostname.startsWith('[')) {
+        return true;
+    }
+    const labels = hostname.split('.');
+    const last = labels[labels.length - 1];
+    return /^(0x[0-9a-f]+|\d+)$/i.test(last);
+}
+
 function shouldIgnoreCors(url: URL) {
     if (__TEST__) {
         return false;
     }
+    const {host, port, protocol} = url;
     const hostname = url.hostname.endsWith('.') ? url.hostname.slice(0, -1) : url.hostname;
     if (!corsHosts.has(host)) {
         corsHosts.add(host);
@@ -101,8 +110,7 @@ function shouldIgnoreCors(url: URL) {
         port !== '' ||
         localAliases.includes(hostname) ||
         localSubDomains.some((sub) => hostname.endsWith(sub)) ||
-        hostname.startsWith('[') ||
-        hostname.match(ipV4RegExp)
+        isIPHost(hostname)
     ) {
         return true;
     }

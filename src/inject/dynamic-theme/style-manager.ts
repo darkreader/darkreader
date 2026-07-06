@@ -605,7 +605,18 @@ async function loadText(url: string) {
     return text;
 }
 
-async function replaceCSSImports(cssText: string, basePath: string, cache = new Map<string, string>()) {
+const MAX_CSS_IMPORT_DEPTH = 32;
+
+async function replaceCSSImports(
+    cssText: string,
+    basePath: string,
+    cache = new Map<string, string>(),
+    depth = 0
+) {
+    if (depth > MAX_CSS_IMPORT_DEPTH) {
+        return '';
+    }
+
     cssText = removeCSSComments(cssText);
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
@@ -637,7 +648,12 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
                 try {
                     importedCSS = await loadText(absoluteURL);
                     cache.set(absoluteURL, importedCSS);
-                    importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
+                    importedCSS = await replaceCSSImports(
+                        importedCSS,
+                        getCSSBaseBath(absoluteURL),
+                        cache,
+                        depth + 1
+                    );
                 } catch (err) {
                     logWarn(err);
                     importedCSS = '';

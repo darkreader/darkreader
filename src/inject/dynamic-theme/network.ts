@@ -88,7 +88,7 @@ function shouldIgnoreCors(url: URL) {
     if (__TEST__) {
         return false;
     }
-    const {host, hostname, port, protocol} = url;
+    const hostname = url.hostname.endsWith('.') ? url.hostname.slice(0, -1) : url.hostname;
     if (!corsHosts.has(host)) {
         corsHosts.add(host);
     }

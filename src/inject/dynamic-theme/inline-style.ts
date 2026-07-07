@@ -202,15 +202,16 @@ function deepWatchForInlineStyles(
             shadowRootDiscovered(n.shadowRoot!);
             deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });
-        variablesStore.matchVariablesAndDependents();
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
         onMinorMutations: (_root, {additions}) => {
             additions.forEach((added) => discoverNodes(added));
+            variablesStore.matchVariablesAndDependents();
         },
         onHugeMutations: () => {
             discoverNodes(root);
+            variablesStore.matchVariablesAndDependents();
         },
     });
     treeObservers.set(root, treeObserver);

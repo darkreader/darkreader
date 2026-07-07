@@ -17,24 +17,20 @@ export interface HSLA {
 }
 
 const hslaParseCache = new Map<string, HSLA>();
-const rgbaParseCache = new Map<string, RGBA>();
+const rgbaParseCache = new Map<string, RGBA | null>();
 
 export function parseColorWithCache($color: string): RGBA | null {
     $color = $color.trim();
-    if (rgbaParseCache.has($color)) {
-        return rgbaParseCache.get($color)!;
+    const key = $color;
+    if (rgbaParseCache.has(key)) {
+        return rgbaParseCache.get(key)!;
     }
-    // We cannot _really_ parse any color which has the calc() expression,
-    // so we try our best to remove those and then parse the value.
     if ($color.includes('calc(')) {
         $color = lowerCalcExpression($color);
     }
     const color = parse($color);
-    if (color) {
-        rgbaParseCache.set($color, color);
-        return color;
-    }
-    return null;
+    rgbaParseCache.set(key, color);
+    return color;
 }
 
 export function parseToHSLWithCache(color: string): HSLA | null {

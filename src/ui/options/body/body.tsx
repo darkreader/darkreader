@@ -3,9 +3,8 @@ import {getContext} from 'malevic/dom';
 
 import type {ViewProps} from '../../../definitions';
 import {Overlay} from '../../controls';
-import {AdvancedIcon, HelpIcon, KeyboardIcon, KeyIcon, ListIcon, SettingsIcon, WatchIcon} from '../../icons';
+import {AdvancedIcon, HelpIcon, KeyboardIcon, ListIcon, SettingsIcon, WatchIcon} from '../../icons';
 import {AboutTab} from '../about/about-tab';
-import {ActivationTab} from '../activation/activation-tab';
 import {AdvancedTab} from '../advanced/advanced-tab';
 import {AutomationTab} from '../automation/automation-tab';
 import {GeneralTab} from '../general/general-tab';
@@ -30,7 +29,7 @@ export default function Body(props: BodyProps): Malevic.Child {
     return (
         <body>
             <header>
-                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
+                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Catppuccin Reader" />
                 <h1 id="title">Settings</h1>
             </header>
             <TabPanel activeTabId={store.activeTabId} onTabChange={onSettingsTabChange}>
@@ -45,9 +44,6 @@ export default function Body(props: BodyProps): Malevic.Child {
                 </TabPanel.Tab>
                 <TabPanel.Tab id="hotkeys" label="Hotkeys" icon={<KeyboardIcon />} iconClass="settings-icon-hotkeys">
                     <HotkeysTab {...props} />
-                </TabPanel.Tab>
-                <TabPanel.Tab id="activation" label="Activation" icon={<KeyIcon />} iconClass="settings-icon-activation">
-                    <ActivationTab {...props} />
                 </TabPanel.Tab>
                 <TabPanel.Tab id="advanced" label="Advanced" icon={<AdvancedIcon />} iconClass="settings-icon-advanced">
                     <AdvancedTab {...props} />

@@ -1,7 +1,6 @@
 import {m} from 'malevic';
 
 import type {ExtWrapper} from '../../../../definitions';
-import {DONATE_URL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
 import {Button, CheckBox, Shortcut} from '../../../controls';
 import {KeyboardIcon} from '../../../icons';
@@ -100,16 +99,6 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                 <p class="header__more-settings__description">
                     {getLocalMessage('website_toggle_shortcut')}
                 </p>
-                {data.uiHighlights.includes('anniversary') ? (
-                    <div class="header__more-settings__donate">
-                        <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                            <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
-                        </a>
-                        <p class="header__more-settings__description">
-                            {getLocalMessage('support_out_work')}
-                        </p>
-                    </div>
-                ) : null}
             </div>
         </div>
     );

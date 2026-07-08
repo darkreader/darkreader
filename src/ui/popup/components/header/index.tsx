@@ -89,7 +89,7 @@ function Header(props: HeaderProps) {
     return (
         <header class="header">
             <a class="header__logo" href={HOMEPAGE_URL} target="_blank" rel="noopener noreferrer">
-                Dark Reader
+                Catppuccin Reader
             </a>
             <div class="header__control header__site-toggle">
                 <SiteToggle

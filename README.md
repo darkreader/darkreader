@@ -1,17 +1,12 @@
-<p align="center"><img width="250" alt="Catppuccin" src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/logos/exports/1544x1544_circle.png"></p>
-<p align="center">Catppuccin Reader <strong>analyzes</strong> web pages and aims to <strong>reduce eyestrain</strong> while browsing the web — soothed with the <a href="https://github.com/catppuccin/catppuccin">Catppuccin</a> pastel palette.</p>
-<br/>
-<p align="center"><img alt="Catppuccin" src="https://img.shields.io/badge/Catppuccin-1e1e2e.svg?&style=for-the-badge&logo=catppuccin&logoColor=cba6f7">  <a rel="noreferrer noopener" href="https://github.com/ImFromKazakstan/darkreader"><img alt="Build from source" src="https://img.shields.io/badge/Build_from_source-1e1e2e.svg?&style=for-the-badge&logo=github&logoColor=cdd6f4"></a>  <img alt="License" src="https://img.shields.io/badge/MIT_License-1e1e2e.svg?&style=for-the-badge&logoColor=cdd6f4"></p>
-
 <h2 align="center">Catppuccin Reader</h2>
 <br/>
-<p align="center">Catppuccin Reader is a community fork of the open-source <a href="https://github.com/darkreader/darkreader">Dark Reader</a> <strong>browser extension</strong>, restyled with the <strong>Catppuccin</strong> palette. It <strong>analyzes</strong> web pages and generates a dark mode that aims to <strong>reduce eyestrain</strong>. Catppuccin Reader is <strong>feature-rich</strong> and customizable throughout the UI, including four selectable Catppuccin flavors: <strong>Latte</strong>, <strong>Frappé</strong>, <strong>Macchiato</strong>, and <strong>Mocha</strong>.</p>
+<p align="center">Catppuccin Reader is a community fork of the open-source Dark Reader browser extension, restyled with the Catppuccin palette. It <strong>analyzes</strong> web pages and generates a dark mode that aims to <strong>reduce eyestrain</strong>. Catppuccin Reader is <strong>feature-rich</strong> and customizable throughout the UI, including four selectable Catppuccin flavors: <strong>Latte</strong>, <strong>Frappé</strong>, <strong>Macchiato</strong>, and <strong>Mocha</strong>.</p>
 <br/>
 <br/>
 
 ## Questions
 
-Open up a new [discussion](https://github.com/ImFromKazakstan/darkreader/discussions) or [issue](https://github.com/ImFromKazakstan/darkreader/issues) if you have any questions. For general questions about the underlying dark-mode engine (inherited from Dark Reader), see [darkreader.org/help](https://darkreader.org/help/).
+Open an [issue on GitHub](https://github.com/ImFromKazakstan/darkreader/issues) if you have any questions.
 
 ## How to contribute
 
@@ -175,34 +170,14 @@ The option "Run on sites with restrictions", present for some extensions, is onl
 
 **The "quarantined domains" list** (controlled by the preferences `extensions.quarantinedDomains.enabled` and `extensions.quarantinedDomains.list`) contains domains that will run extensions normally, but if Firefox detects suspicious activity from a particular extension it will block that extension on those specific websites. The list is controlled by Mozilla, and, as of December 2024, the list only contains domains related to Internet banking in Brazil. For more information about quarantined domains, see "[Why are some add-ons not allowed on sites restricted by Mozilla?](https://support.mozilla.org/en-US/kb/quarantined-domains)".
 
-For Catppuccin Reader, the option "Run on sites with restrictions" is not shown because Catppuccin Reader is a [Recommended](https://support.mozilla.org/en-US/kb/recommended-extensions-program) extension by Mozilla. (The "Recommended" status is only relevant for "quarantined domains", and does not affect "restricted domains".)
+Note that this "Recommended" exemption applies to the official, Mozilla-reviewed Dark Reader listing, not to this self-built fork. Unless you submit and get Catppuccin Reader reviewed and listed as Recommended yourself, it will be subject to the "quarantined domains" list like any other unlisted extension, in addition to the "restricted domains" list.
 
-The fact that it is a Recommended extension means that it meets the "highest standards of security, functionality, and user experience". The quarantined domains are only related to extension security. Because Catppuccin Reader is considered secure by Mozilla, that option is not shown, meaning **it will always run even on quarantined domains** (but will still obey the "restricted domains" list if it is not empty).
-
-Regarding quarantined domains specifically, there is this [comment from Firefox's source code](https://searchfox.org/mozilla-central/rev/1838f847aa3bf909c3d34a94a8f0cd7e37fca086/toolkit/components/extensions/Extension.sys.mjs#3470-3471):
-
-```
-// Privileged extensions and any extensions with a recommendation state are
-// exempt from the quarantined domains.
-```
-
-A simple way to recapitulate all this information is: "restricted domains" exist to protect Mozilla-owned sites (no user-installed extension will run on them, without exceptions), while "quarantined domains" are meant to protect users from malicious extensions (and it doesn't apply to Catppuccin Reader because it is a Recommended extension).
+A simple way to recapitulate all this information is: "restricted domains" exist to protect Mozilla-owned sites (no user-installed extension will run on them, without exceptions), while "quarantined domains" are meant to protect users from malicious extensions.
 
 </details>
 
-<h2 align="center">Contributors</h2>
-<br/>
-<h3 align="center"><strong>Thank you to all our contributors! Catppuccin Reader exists thanks to you.</strong></h3>
-<br/>
-<br/>
-<p align="center"><a rel="noreferrer noopener" href="https://github.com/ImFromKazakstan/darkreader/graphs/contributors/">See the full contributors graph on GitHub</a></p>
+## Credits
 
-<h2 align="center">Thanks to</h2>
-<br/>
-<p align="center">
-Catppuccin Reader would not exist without:
+Catppuccin Reader is a fork of Dark Reader, restyled with the Catppuccin palette (a community effort, not officially affiliated with either project).
 
-- The [Dark Reader](https://github.com/darkreader/darkreader) team and community — this project is a fork of their excellent, MIT-licensed browser extension. If you want the original branding and official store listings, install <a href="https://darkreader.org">Dark Reader</a> directly.
-- The [Catppuccin](https://github.com/catppuccin/catppuccin) team and community for the soothing pastel palette used throughout this fork's own interface and as selectable color schemes (Latte, Frappé, Macchiato, Mocha).
-
-</p>
+Dark Reader is the original, MIT-licensed dark-mode engine this fork is built on. If you'd like to support its continued development, see [Dark Reader's support page](https://darkreader.org/support-us/).

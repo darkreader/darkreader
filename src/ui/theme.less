@@ -1,40 +1,51 @@
 // Catppuccin Mocha
 // https://github.com/catppuccin/catppuccin
+// Color roles follow the official style guide:
+// https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md
 @ctp-base: #1e1e2e;
 @ctp-mantle: #181825;
 @ctp-surface0: #313244;
-@ctp-surface1: #45475a;
 @ctp-surface2: #585b70;
-@ctp-overlay0: #6c7086;
 @ctp-overlay1: #7f849c;
 @ctp-text: #cdd6f4;
 @ctp-subtext1: #bac2de;
 @ctp-mauve: #cba6f7;
-@ctp-teal: #94e2d5;
 @ctp-red: #f38ba8;
 @ctp-green: #a6e3a1;
 
+// Background Pane: Base
 @color-back: @ctp-base;
-@color-fore: @ctp-teal;
+// Body Copy: Text
+@color-fore: @ctp-text;
 
+// Background Pane: Base
 @color-control-back: @ctp-base;
+// Surface Elements: Surface 0, Surface 2
 @color-control-hover: @ctp-surface0;
-@color-control-active: mix(@ctp-mauve, @ctp-base, 42%);
+@color-control-active: @ctp-surface2;
+// Body Copy: Text
 @color-control-fore: @ctp-text;
-@color-control-fore-inactive: @ctp-overlay0;
+// Subtle: Overlay 1
+@color-control-fore-inactive: @ctp-overlay1;
 
+// Secondary Panes: Mantle
 @color-input-back: @ctp-mantle;
 @color-input-hover: @ctp-surface0;
 @color-input-active: @ctp-surface0;
-@color-input-fore: @ctp-teal;
+// Sub-Headlines, Labels: Subtext 1
+@color-input-fore: @ctp-subtext1;
 @color-input-fore-active: @ctp-text;
 @color-input-fore-placeholder: @ctp-overlay1;
 
+// Surface Elements: Surface 2
 @color-border: @ctp-surface2;
 @color-heading: @ctp-mauve;
+// Errors: Red
 @color-error: @ctp-red;
+// Success: Green
 @color-ok: @ctp-green;
 @color-ok-fore: @ctp-green;
+// Accent: Mauve, On Accent: Base
 @color-selection-back: @ctp-mauve;
 @color-selection-fore: @ctp-base;
 

@@ -202,15 +202,16 @@ function deepWatchForInlineStyles(
             shadowRootDiscovered(n.shadowRoot!);
             deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });
-        variablesStore.matchVariablesAndDependents();
     }
 
     const treeObserver = createOptimizedTreeObserver(root, {
         onMinorMutations: (_root, {additions}) => {
             additions.forEach((added) => discoverNodes(added));
+            variablesStore.matchVariablesAndDependents();
         },
         onHugeMutations: () => {
             discoverNodes(root);
+            variablesStore.matchVariablesAndDependents();
         },
     });
     treeObservers.set(root, treeObserver);
@@ -299,11 +300,25 @@ function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {
     return shouldAnalyze;
 }
 
+let prevTheme: Theme | null = null;
+let themeKey = '';
+
+function getThemeKey(theme: Theme): string {
+    if (theme === prevTheme) {
+        return themeKey;
+    }
+    themeKey = '';
+    for (let i = 0; i < themeProps.length; i++) {
+        const prop = themeProps[i];
+        themeKey += `${prop}="${theme[prop]}" `;
+    }
+    prevTheme = theme;
+    return themeKey;
+}
+
 function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {
-    return INLINE_STYLE_ATTRS
-        .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
-        .concat(themeProps.map((prop) => `${prop}="${theme[prop]}"`))
-        .join(' ');
+    const attrKey = INLINE_STYLE_ATTRS.map((attr) => `${attr}="${el.getAttribute(attr)}"`);
+    return `${attrKey} ${getThemeKey(theme)}`;
 }
 
 function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boolean {

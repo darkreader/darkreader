@@ -392,6 +392,11 @@ export function checkImageSelectors(node: Element | Document | ShadowRoot): void
             callbacks.forEach((cb) => cb());
         }
     }
+    if (imageSelectorQueue.size === 0) {
+        classObserver?.disconnect();
+        classObserver = null;
+        return;
+    }
     if (!classObserver) {
         classObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {

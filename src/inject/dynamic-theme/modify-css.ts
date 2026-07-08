@@ -381,7 +381,6 @@ interface BgImageMatches {
 }
 
 const imageSelectorQueue = new Map<string, Array<() => void>>();
-const imageSelectorValues = new Map<string, string>();
 const imageSelectorNodeQueue = new Set<Element>();
 let imageSelectorQueueFrameId: number | null = null;
 let classObserver: MutationObserver | null = null;
@@ -516,7 +515,6 @@ export function getBgImageModifier(
                                 imageSelectorQueue.get(selector)!.push(resolve);
                             } else {
                                 imageSelectorQueue.set(selector, [resolve]);
-                                imageSelectorValues.set(selector, urlValue);
                             }
                         });
                     }

@@ -147,7 +147,7 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
             birthdayMessageSpec = (
                 <span>
                     {birthdayMessage.substring(0, index10)}
-                    <a href={`${HOMEPAGE_URL}/timeline/`} target="_blank" rel="noopener noreferrer">
+                    <a href={HOMEPAGE_URL} target="_blank" rel="noopener noreferrer">
                         {birthdayMessage.substring(index10, indexDot)}
                     </a>
                     {birthdayMessage.substring(indexDot)}
@@ -167,7 +167,7 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
                     <span class="ui-upgrade__message">
                         Support the development and get access to the latest features
                     </span>
-                    <a class="ui-upgrade__button" href={`${HOMEPAGE_URL}/plus/`} target="_blank" rel="noopener noreferrer">
+                    <a class="ui-upgrade__button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
                         <span class="ui-upgrade__button__text">
                             Upgrade
                         </span>

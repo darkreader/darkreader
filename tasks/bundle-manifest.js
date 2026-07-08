@@ -11,7 +11,7 @@ async function patchManifest(platform, debug, watch, test) {
     const manifestExtras = platform === PLATFORM.CHROMIUM_MV2_PLUS ? await readJSON(absolutePath(`src/plus/manifest.json`)) : {};
     const patched = {...manifest, ...manifestPatch, ...manifestExtras};
     if (debug && platform === PLATFORM.CHROMIUM_MV3) {
-        patched.name = 'Dark Reader MV3';
+        patched.name = 'Catppuccin Reader MV3';
     }
     if (platform === PLATFORM.CHROMIUM_MV3) {
         patched.browser_action = undefined;

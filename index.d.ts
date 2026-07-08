@@ -35,7 +35,7 @@ declare namespace DarkReader {
     function setFetchMethod(fetch: (url: string) => Promise<Response>): void;
 
     /**
-     * Returns the generated CSS by Dark Reader as a string.
+     * Returns the generated CSS by Catppuccin Reader as a string.
      */
     function exportGeneratedCSS(): Promise<string>;
 
@@ -154,12 +154,12 @@ declare namespace DarkReader {
         /**
          * A toggle to disable the proxying of `document.styleSheets`.
          * This is a API-Exclusive option, as it can break legitimate websites,
-         * who are using the Dark Reader API.
+         * who are using the Catppuccin Reader API.
          */
         disableStyleSheetsProxy: boolean;
         /**
          * List of stylesheet URL patterns to ignore.
-         * Stylesheets matching these patterns will not be processed by Dark Reader.
+         * Stylesheets matching these patterns will not be processed by Catppuccin Reader.
          * - Simple string: matches if URL contains the string (e.g., "crisp")
          * - Prefix with ^: matches if URL starts with pattern (e.g., "^https://client.crisp")
          * - Suffix with $: matches if URL ends with pattern (e.g., ".css$")

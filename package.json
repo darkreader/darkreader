@@ -1,7 +1,7 @@
 {
-  "name": "darkreader",
+  "name": "catppuccin-reader",
   "version": "4.9.128",
-  "description": "Dark mode for every website",
+  "description": "Dark mode for every website, soothed with the Catppuccin palette",
   "scripts": {
     "api": "node --max-old-space-size=3072 tasks/cli.js build --api",
     "build": "node --max-old-space-size=3072 tasks/cli.js build --release",
@@ -42,12 +42,12 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/darkreader/darkreader.git"
+    "url": "git+https://github.com/ImFromKazakstan/darkreader.git"
   },
-  "author": "Alexander Shutau <darkreaderapp@gmail.com> (https://darkreader.org/)",
+  "author": "Catppuccin Reader Contributors",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/darkreader/darkreader/issues"
+    "url": "https://github.com/ImFromKazakstan/darkreader/issues"
   },
   "keywords": [
     "dark-theme",
@@ -56,12 +56,13 @@
     "darkmode",
     "nightmode",
     "accessibility",
-    "eye-care"
+    "eye-care",
+    "catppuccin"
   ],
-  "homepage": "https://darkreader.org/",
+  "homepage": "https://github.com/ImFromKazakstan/darkreader",
   "funding": {
     "type": "opencollective",
-    "url": "https://opencollective.com/darkreader/donate"
+    "url": "https://opencollective.com/catppuccin"
   },
   "dependencies": {
     "malevic": "0.20.2"

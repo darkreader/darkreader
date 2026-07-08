@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "minimum_chrome_version": "106.0.0.0",
     "action": {
-        "default_title": "Dark Reader",
+        "default_title": "Catppuccin Reader",
         "default_icon": {
             "38": "icons/dr_active_38.png",
             "19": "icons/dr_active_19.png"
@@ -16,7 +16,7 @@
         "service_worker": "background/index.js"
     },
     "content_security_policy": {
-        "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src * data:; connect-src *; navigate-to 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://twitter.com/darkreaderapp; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
+        "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src * data:; connect-src *; navigate-to 'self' https://github.com/ImFromKazakstan/darkreader/* https://github.com/ImFromKazakstan/darkreader/blob/main/CONTRIBUTING.md https://github.com/ImFromKazakstan/darkreader https://github.com/catppuccin; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
     },
     "content_scripts": [
         {

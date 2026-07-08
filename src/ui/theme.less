@@ -1,26 +1,42 @@
-@color-back: #141e24;
-@color-fore: #53a1b3;
+// Catppuccin Mocha
+// https://github.com/catppuccin/catppuccin
+@ctp-base: #1e1e2e;
+@ctp-mantle: #181825;
+@ctp-surface0: #313244;
+@ctp-surface1: #45475a;
+@ctp-surface2: #585b70;
+@ctp-overlay0: #6c7086;
+@ctp-overlay1: #7f849c;
+@ctp-text: #cdd6f4;
+@ctp-subtext1: #bac2de;
+@ctp-mauve: #cba6f7;
+@ctp-teal: #94e2d5;
+@ctp-red: #f38ba8;
+@ctp-green: #a6e3a1;
 
-@color-control-back: #141e24;
-@color-control-hover: #193945;
-@color-control-active: #316e7d;
-@color-control-fore: #ffffff;
-@color-control-fore-inactive: #316e7d;
+@color-back: @ctp-base;
+@color-fore: @ctp-teal;
 
-@color-input-back: #141e24;
-@color-input-hover: #193945;
-@color-input-active: #193945;
-@color-input-fore: #53a1b3;
-@color-input-fore-active: #ffffff;
-@color-input-fore-placeholder: #316e7d;
+@color-control-back: @ctp-base;
+@color-control-hover: @ctp-surface0;
+@color-control-active: mix(@ctp-mauve, @ctp-base, 42%);
+@color-control-fore: @ctp-text;
+@color-control-fore-inactive: @ctp-overlay0;
 
-@color-border: #316e7d;
-@color-heading: #e96c4c;
-@color-error: #db4245;
-@color-ok: #317c4e;
-@color-ok-fore: #3bc077;
-@color-selection-back: #e96c4c;
-@color-selection-fore: #ffffff;
+@color-input-back: @ctp-mantle;
+@color-input-hover: @ctp-surface0;
+@color-input-active: @ctp-surface0;
+@color-input-fore: @ctp-teal;
+@color-input-fore-active: @ctp-text;
+@color-input-fore-placeholder: @ctp-overlay1;
+
+@color-border: @ctp-surface2;
+@color-heading: @ctp-mauve;
+@color-error: @ctp-red;
+@color-ok: @ctp-green;
+@color-ok-fore: @ctp-green;
+@color-selection-back: @ctp-mauve;
+@color-selection-fore: @ctp-base;
 
 @font-family: Open Sans, Segoe UI, Helvetica Neue, Ubuntu, sans-serif;
 

@@ -1,7 +1,7 @@
 {
     "applications": {
         "gecko": {
-            "id": "addon@darkreader.org",
+            "id": "addon@catppuccin-reader.github.io",
             "strict_min_version": "78.0a1"
         }
     },

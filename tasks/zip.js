@@ -64,7 +64,7 @@ async function zip({platforms, debug, version}) {
         const format = chromePlatforms.includes(platform) ? 'zip' : 'xpi';
         promises.push(archiveDirectory({
             dir: getDestDir({debug, platform}),
-            dest: `${releaseDir}/darkreader-${platform}${version}.${format}`,
+            dest: `${releaseDir}/catppuccin-reader-${platform}${version}.${format}`,
             date,
             // Reproducible builds: set permission flags on file like chmod 644 or -rw-r--r--
             // This is needed because the built file might have different flags on different systems

@@ -61,7 +61,7 @@ async function bundleAPIModule({debug, watch}, moduleType, dest) {
     });
     watchFiles = bundle.watchFiles;
     await bundle.write({
-        banner: `/**\n * Dark Reader v${await getVersion()}\n * https://darkreader.org/\n */\n`,
+        banner: `/**\n * Catppuccin Reader v${await getVersion()}\n * https://github.com/ImFromKazakstan/darkreader\n */\n`,
         // TODO: Consider removing next line
         esModule: true,
         file: dest,

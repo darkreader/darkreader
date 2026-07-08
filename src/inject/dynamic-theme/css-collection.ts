@@ -16,27 +16,13 @@ async function replaceBlobs(text: string) {
 }
 
 const banner = `/*
-                        _______
-                       /       \\
-                      .==.    .==.
-                     ((  ))==((  ))
-                    / "=="    "=="\\
-                   /____|| || ||___\\
-       ________     ____    ________  ___    ___
-       |  ___  \\   /    \\   |  ___  \\ |  |  /  /
-       |  |  \\  \\ /  /\\  \\  |  |  \\  \\|  |_/  /
-       |  |   )  /  /__\\  \\ |  |__/  /|  ___  \\
-       |  |__/  /  ______  \\|  ____  \\|  |  \\  \\
-_______|_______/__/ ____ \\__\\__|___\\__\\__|___\\__\\____
-|  ___  \\ |  ____/ /    \\   |  ___  \\ |  ____|  ___  \\
-|  |  \\  \\|  |___ /  /\\  \\  |  |  \\  \\|  |___|  |  \\  \\
-|  |__/  /|  ____/  /__\\  \\ |  |   )  |  ____|  |__/  /
-|  ____  \\|  |__/  ______  \\|  |__/  /|  |___|  ____  \\
-|__|   \\__\\____/__/      \\__\\_______/ |______|__|   \\__\\
-                https://darkreader.org
-*/
+ *  == == == == == == == == == == == == == == == ==
+ *   Catppuccin Reader — soothing pastel dark mode
+ *   https://github.com/ImFromKazakstan/darkreader
+ *  == == == == == == == == == == == == == == == ==
+ */
 
-/*! Dark reader generated CSS | Licensed under MIT https://github.com/darkreader/darkreader/blob/main/LICENSE */
+/*! Catppuccin Reader generated CSS | Licensed under MIT https://github.com/ImFromKazakstan/darkreader/blob/main/LICENSE */
 `;
 
 export async function collectCSS(): Promise<string> {

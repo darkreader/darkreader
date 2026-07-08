@@ -297,8 +297,7 @@ function onCSPError(err: SecurityPolicyViolationEvent) {
 
 document.addEventListener('securitypolicyviolation', onCSPError);
 
-const filteredImageURLs = new Map<string, string>();
-let prevTheme: Theme | null = null;
+const filteredImageURLs = new Map<string, {matrix: string; url: string}>();
 
 export function getFilteredImageURL({dataURL, width, height, useViewBox, src}: ImageDetails, theme: Theme): string {
     if (dataURL.startsWith('data:image/svg+xml')) {
@@ -321,15 +320,9 @@ export function getFilteredImageURL({dataURL, width, height, useViewBox, src}: I
         return `data:image/svg+xml;base64,${btoa(svg)}`;
     }
 
-    if (theme !== prevTheme) {
-        filteredImageURLs.forEach((url) => URL.revokeObjectURL(url));
-        filteredImageURLs.clear();
-        prevTheme = theme;
-    }
-
     const cached = filteredImageURLs.get(src);
-    if (cached) {
-        return cached;
+    if (cached && cached.matrix === matrix) {
+        return cached.url;
     }
 
     const bytes = new Uint8Array(svg.length);
@@ -338,7 +331,10 @@ export function getFilteredImageURL({dataURL, width, height, useViewBox, src}: I
     }
     const blob = new Blob([bytes], {type: 'image/svg+xml'});
     const objectURL = URL.createObjectURL(blob);
-    filteredImageURLs.set(src, objectURL);
+    if (cached) {
+        URL.revokeObjectURL(cached.url);
+    }
+    filteredImageURLs.set(src, {matrix, url: objectURL});
     return objectURL;
 }
 
@@ -415,9 +411,8 @@ export async function tryConvertDataURLToBlobURL(dataURL: string): Promise<strin
 export function cleanImageProcessingCache(): void {
     imageManager && imageManager.stop();
     removeCanvas();
-    filteredImageURLs.forEach((url) => URL.revokeObjectURL(url));
+    filteredImageURLs.forEach(({url}) => URL.revokeObjectURL(url));
     filteredImageURLs.clear();
-    prevTheme = null;
     dataURLBlobURLs.forEach((u) => URL.revokeObjectURL(u));
     dataURLBlobURLs.clear();
 }

@@ -279,6 +279,7 @@ export function stopWatchingForInlineStyles(): void {
     attrObservers.forEach((o) => o.disconnect());
     treeObservers.clear();
     attrObservers.clear();
+    inlineStringValueCache.clear();
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();

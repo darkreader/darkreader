@@ -43,6 +43,7 @@ export class VariablesStore {
     private unstableVarValues = new Map<string, string>();
     private varFilterTypes = new Map<string, FilterType>();
     private notifyingVarFilterTypes = new Set<string>();
+    private varsChanged = false;
     private onRootVariableDefined: () => void;
 
     clear(): void {
@@ -83,9 +84,13 @@ export class VariablesStore {
         }
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
+        this.varsChanged = false;
         this.collectRootVariables();
         this.collectVariablesAndVarDep();
         this.collectRootVarDependents();
+        if (!this.varsChanged) {
+            return;
+        }
 
         this.varRefs.forEach((refs, v) => {
             refs.forEach((r) => {
@@ -458,13 +463,17 @@ export class VariablesStore {
         this.unstableVarValues.set(varName, value);
 
         if (isVarDependant(value) && isConstructedColorVar(value)) {
-            this.unknownColorVars.add(varName);
+            if (!this.unknownColorVars.has(varName)) {
+                this.unknownColorVars.add(varName);
+                this.varsChanged = true;
+            }
             this.definedVars.add(varName);
         }
         if (this.definedVars.has(varName)) {
             return;
         }
         this.definedVars.add(varName);
+        this.varsChanged = true;
 
         // Check if the value is either a raw value or a value that can be parsed
         // e.g. rgb, hsl.
@@ -492,6 +501,13 @@ export class VariablesStore {
             this.changedTypeVars.add(varName);
             this.undefinedVars.delete(varName);
         }
+        if (
+            newType !== currentType ||
+            this.unknownColorVars.has(varName) ||
+            this.unknownBgVars.has(varName)
+        ) {
+            this.varsChanged = true;
+        }
         this.unknownColorVars.delete(varName);
         this.unknownBgVars.delete(varName);
     }
@@ -513,7 +529,11 @@ export class VariablesStore {
                 if (!this.varRefs.has(property)) {
                     this.varRefs.set(property, new Set());
                 }
-                this.varRefs.get(property)!.add(ref);
+                const refs = this.varRefs.get(property)!;
+                if (!refs.has(ref)) {
+                    refs.add(ref);
+                    this.varsChanged = true;
+                }
             });
         } else if (property === 'background-color' || property === 'box-shadow') {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BG_COLOR));
@@ -535,8 +555,9 @@ export class VariablesStore {
                 this.iterateVarRefs(v, (ref) => {
                     if (isBgColor) {
                         this.resolveVariableType(ref, VAR_TYPE_BG_COLOR);
-                    } else {
+                    } else if (!this.unknownBgVars.has(ref)) {
                         this.unknownBgVars.add(ref);
+                        this.varsChanged = true;
                     }
                 });
             });

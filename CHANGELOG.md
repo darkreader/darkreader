@@ -1,3 +1,10 @@
+# 4.9.129 (July 14, 2026)
+
+- Improved performance when handling variables references.
+- Improved image inversion, color and inline style caching.
+- Fixed high CPU usage when doing unnecessary variable matching (ChatGPT issue).
+- Fixed circular @import references.
+
 # 4.9.128 (June 19, 2026)
 
 - Firefox: Improved adopted style sheets handling performance.

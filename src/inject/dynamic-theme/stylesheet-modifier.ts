@@ -1,6 +1,5 @@
 import type {Theme} from '../../definitions';
 import {isChromium} from '../../utils/platform';
-import {getHashCode} from '../../utils/text';
 import {createAsyncTasksQueue} from '../../utils/throttle';
 
 import {iterateCSSRules, iterateCSSDeclarations, isMediaRule, isLayerRule, isStyleRule} from './css-rules';
@@ -43,22 +42,36 @@ export interface CSSBuilder {
     };
 }
 
+let cssTextCounter = 0;
+const cssTextIds = new Map<string, string>();
+
+function getCSSTextKey(cssText: string) {
+    const existing = cssTextIds.get(cssText);
+    if (existing) {
+        return existing;
+    }
+    cssTextCounter++;
+    const key = String(cssTextCounter);
+    cssTextIds.set(cssText, key);
+    return key;
+}
+
 export function createStyleSheetModifier(): StyleSheetModifier {
     let renderId = 0;
 
-    function getStyleRuleHash(rule: CSSStyleRule) {
-        let cssText = rule.cssText;
+    function getStyleRuleKey(rule: CSSStyleRule) {
+        let key = getCSSTextKey(rule.cssText);
         if (isMediaRule(rule.parentRule)) {
-            cssText = `${rule.parentRule.media.mediaText} { ${cssText} }`;
+            key = `${getCSSTextKey(rule.parentRule.media.mediaText)}{${key}}`;
         }
         if (isLayerRule(rule.parentRule)) {
-            cssText = `${rule.parentRule.name} { ${cssText} }`;
+            key = `${getCSSTextKey(rule.parentRule.name)}{${key}}`;
         }
-        return getHashCode(cssText);
+        return key;
     }
 
-    const rulesTextCache = new Set<number>();
-    const rulesModCache = new Map<number, ModifiableCSSRule>();
+    const rulesTextCache = new Set<string>();
+    const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string | null = null;
     let hasNonLoadedLink = false;
@@ -82,19 +95,19 @@ export function createStyleSheetModifier(): StyleSheetModifier {
 
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            const hash = getStyleRuleHash(rule);
+            const key = getStyleRuleKey(rule);
             let textDiffersFromPrev = false;
 
-            notFoundCacheKeys.delete(hash);
-            if (!rulesTextCache.has(hash)) {
-                rulesTextCache.add(hash);
+            notFoundCacheKeys.delete(key);
+            if (!rulesTextCache.has(key)) {
+                rulesTextCache.add(key);
                 textDiffersFromPrev = true;
             }
 
             if (textDiffersFromPrev) {
                 rulesChanged = true;
             } else {
-                modRules.push(rulesModCache.get(hash)!);
+                modRules.push(rulesModCache.get(key)!);
                 return;
             }
 
@@ -119,7 +132,7 @@ export function createStyleSheetModifier(): StyleSheetModifier {
                 modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
                 modRules.push(modRule);
             }
-            rulesModCache.set(hash, modRule!);
+            rulesModCache.set(key, modRule!);
         }, () => {
             hasNonLoadedLink = true;
         });

@@ -80,7 +80,9 @@ const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.ma
 
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void): void {
     const cssText = style.cssText;
-    if (cssText.includes('var(')) {
+    // 1 Better CSS variable detection - handles spaces and multiple vars
+    // Changed from simple string.includes('var(') to regex that checks for actual CSS custom properties
+    if (/var\s*\(\s*--/.test(cssText)) {
         if (isSafari) {
             // Safari doesn't show shorthand properties' values
             shorthandVarDepPropRegexps!.forEach(([prop, regexp]) => {
@@ -93,7 +95,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         } else {
             shorthandVarDependantProperties.forEach((prop) => {
                 const val = style.getPropertyValue(prop);
-                if (val && val.includes('var(')) {
+                if (val && /var\s*\(\s*--/.test(val)) {
                     iterate(prop, val);
                 }
             });
@@ -127,6 +129,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
 // but will only work for <style> elements and
 // there is a chance of multiple matches.
 // https://issues.chromium.org/issues/40252592
+// 2 Use non-greedy regex to prevent matching across multiple CSS rules
 function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {
     const parentRule = style.parentRule;
     if (isStyleRule(parentRule)) {
@@ -135,10 +138,11 @@ function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, ite
             let escapedSelector = escapeRegExpSpecialChars(parentRule.selectorText);
             escapedSelector = escapedSelector.replaceAll(/\s+/g, '\\s*'); // Space count can differ
             escapedSelector = escapedSelector.replaceAll(/::/g, '::?'); // ::before can be :before
-            const regexp = new RegExp(`${escapedSelector}\\s*{[^}]*${shorthand}:\\s*([^;}]+)`);
+            // Non-greedy [^}]*? to match only until first closing brace (not across multiple rules)
+            const regexp = new RegExp(`${escapedSelector}\\s*{[^}]*?${shorthand}:\\s*([^;}]+)`, 'i');
             const match = sourceCSSText.match(regexp);
             if (match) {
-                iterate(shorthand, match[1]);
+                iterate(shorthand, match[1].trim());
             }
         } else if (shorthand === 'background') {
             iterate('background-color', '#ffffff');
@@ -150,12 +154,35 @@ function handleEmptyShorthand(shorthand: string, style: CSSStyleDeclaration, ite
 export const cssURLRegex = /url\((('.*?')|(".*?")|([^\)]*?))\)/g;
 export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? ?(screen)?;?/gi;
 
+// 3: Handle data URIs with parentheses and complex URLs correctly
 // First try to extract the CSS URL value. Then do some post fixes, like unescaping
 // backslashes in the URL. (Chromium don't handle this natively). Remove all newlines
 // beforehand, otherwise `.` will fail matching the content within the url, as it
 // doesn't match any linebreaks.
 export function getCSSURLValue(cssURL: string): string {
-    return cssURL.trim().replace(/[\n\r\\]+/g, '').replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1').replace(/(?:\\(.))/g, '$1');
+    let cleaned = cssURL.trim().replace(/[\n\r]+/g, '');
+    
+    // Handle data URIs separately to preserve internal parentheses
+    // Data URIs can contain unescaped parens: url(data:image/svg+xml;utf8,<svg></svg>)
+    if (cleaned.includes('data:')) {
+        // Use non-greedy match for data URIs to handle nested parens correctly
+        const dataMatch = cleaned.match(/^url\(['"]?(data:[^'"]*?)['"]?\)$/i);
+        if (dataMatch) {
+            return dataMatch[1];
+        }
+    }
+    
+    // Regular URLs: remove url() wrapper and quotes
+    // Handle escaped characters and clean up the URL
+    cleaned = cleaned
+        .replace(/^url\(['"]?/, '')
+        .replace(/['"]?\)$/, '')
+        .trim()
+        .replace(/^"(.*)"$/, '$1')
+        .replace(/^'(.*)'$/, '$1')
+        .replace(/\\(.)/g, '$1');
+    
+    return cleaned;
 }
 
 export function getCSSBaseBath(url: string): string {
@@ -205,11 +232,9 @@ export function isStyleRule(rule: CSSRule | null): rule is CSSStyleRule {
     return false;
 }
 
+// 4: Simplified type guard - removed redundant cross-checks
 export function isImportRule(rule: CSSRule | null): rule is CSSImportRule {
     if (!rule) {
-        return false;
-    }
-    if (styleRules.has(rule)) {
         return false;
     }
     if (importRules.has(rule)) {
@@ -226,9 +251,6 @@ export function isMediaRule(rule: CSSRule | null): rule is CSSMediaRule {
     if (!rule) {
         return false;
     }
-    if (styleRules.has(rule)) {
-        return false;
-    }
     if (mediaRules.has(rule)) {
         return true;
     }
@@ -243,9 +265,6 @@ export function isSupportsRule(rule: CSSRule | null): rule is CSSSupportsRule {
     if (!rule) {
         return false;
     }
-    if (styleRules.has(rule)) {
-        return false;
-    }
     if (supportsRules.has(rule)) {
         return true;
     }
@@ -258,9 +277,6 @@ export function isSupportsRule(rule: CSSRule | null): rule is CSSSupportsRule {
 
 export function isLayerRule(rule: CSSRule | null): rule is CSSLayerBlockRule {
     if (!rule) {
-        return false;
-    }
-    if (styleRules.has(rule)) {
         return false;
     }
     if (layerRules.has(rule)) {

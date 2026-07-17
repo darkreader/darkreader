@@ -47,11 +47,15 @@ const cssTextIds = new Map<string, string>();
 
 function getCSSTextKey(cssText: string) {
     const existing = cssTextIds.get(cssText);
-    if (existing) {
+    if (existing !== undefined) {
         return existing;
     }
-    cssTextCounter++;
-    const key = String(cssTextCounter);
+    let n = ++cssTextCounter;
+    let key = '';
+    do {
+        key = String.fromCharCode(n & 0xFFFF) + key;
+        n >>>= 16;
+    } while (n > 0);
     cssTextIds.set(cssText, key);
     return key;
 }

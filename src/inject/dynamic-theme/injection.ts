@@ -9,14 +9,14 @@ const hostsBreakingOnStylePosition = [
     'zhale.me',
 ];
 
-const mode = hostsBreakingOnStylePosition.includes(location.hostname) ? 'away' : 'next'
+const mode = hostsBreakingOnStylePosition.includes(location.hostname) ? 'away' : 'next';
 
 export function getStyleInjectionMode() {
     return mode;
 }
 
 const stylesWaitingForBody = new Set<HTMLStyleElement | SVGStyleElement>();
-let bodyObserver: MutationObserver | null;
+let bodyObserver: MutationObserver | null = null;
 
 export function injectStyleAway(styleElement: HTMLStyleElement | SVGStyleElement) {
     if (!document.body) {
@@ -30,6 +30,7 @@ export function injectStyleAway(styleElement: HTMLStyleElement | SVGStyleElement
                     stylesWaitingForBody.clear();
                 }
             });
+            bodyObserver.observe(document, {childList: true, subtree: true});
         }
         return;
     }
@@ -66,6 +67,8 @@ let containerObserver: MutationObserver;
 
 export function removeStyleContainer() {
     bodyObserver?.disconnect();
+    bodyObserver = null;
+    stylesWaitingForBody.clear();
     containerObserver?.disconnect();
     document.querySelector('.darkreader-style-container')?.remove();
 }

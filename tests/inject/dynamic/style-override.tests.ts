@@ -55,8 +55,8 @@ describe('STYLE ELEMENTS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('span')!!).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('a')!!).color).toBe('rgb(51, 145, 255)');
+        expect(getComputedStyle(container.querySelector('span')!).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('a')!).color).toBe('rgb(51, 145, 255)');
     });
 
     it('should override static style', async () => {

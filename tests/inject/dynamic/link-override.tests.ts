@@ -1,6 +1,5 @@
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {isSafari} from '../../../src/utils/platform';
 import {resetChromeRuntimeMessageStub, stubBackgroundFetchResponse, stubChromeRuntimeMessage} from '../support/background-stub';
 import {getCSSEchoURL} from '../support/echo-client';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';

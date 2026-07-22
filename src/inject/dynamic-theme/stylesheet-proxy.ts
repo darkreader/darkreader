@@ -1,6 +1,3 @@
-declare const __FIREFOX_MV2__: boolean;
-declare const __THUNDERBIRD__: boolean;
-
 type OverrideFactory<T, P extends keyof T> = (native: T[P] & ((...args: any[]) => any)) => (this: T, ...args: Parameters<typeof native>) => ReturnType<typeof native>;
 
 export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {

@@ -347,7 +347,7 @@ function getSVGElementRoot(svgElement: SVGElement): SVGSVGElement | null {
     }
 
     if (svgNodesRoots.has(svgElement)) {
-        return svgNodesRoots.get(svgElement)!
+        return svgNodesRoots.get(svgElement)!;
     }
 
     if (svgElement instanceof SVGSVGElement) {
@@ -556,7 +556,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
                             isSVGSmall = svgRootSizeTestResults.get(root)!;
                         } else {
                             const svgBounds = root.getBoundingClientRect();
-                            isSVGSmall = svgBounds.width * svgBounds.height <= Math.pow(SMALL_SVG_THRESHOLD, 2);
+                            isSVGSmall = svgBounds.width * svgBounds.height <= SMALL_SVG_THRESHOLD ** 2;
                             svgRootSizeTestResults.set(root, isSVGSmall);
                         }
                         let isBg: boolean;

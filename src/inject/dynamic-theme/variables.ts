@@ -846,10 +846,9 @@ function handleRawColorValue(
             return (
                 outputInRGB ? (
                     Number.isNaN(outputInRGB.a) || outputInRGB.a === 1 ?
-                    `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` :
-                    `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}, ${outputInRGB.a}`
-                ) :
-                outputColor
+                        `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` :
+                        `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}, ${outputInRGB.a}`
+                ) : outputColor
             );
         }
         return outputColor;

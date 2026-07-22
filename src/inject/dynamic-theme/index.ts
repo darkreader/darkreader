@@ -167,7 +167,7 @@ function setInversionStyleValue(invertStyle: HTMLStyleElement) {
     };
 
     if ((fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) || filterSelectors.invert.size > 0) {
-        const extraInversionSelectors = [...filterSelectors.invert]
+        const extraInversionSelectors = [...filterSelectors.invert];
         const invertSelectors = [...(fixes?.invert ?? []), ...extraInversionSelectors];
         const invertFilter = getCSSFilterValue({
             ...theme,
@@ -871,7 +871,7 @@ function setupDocumentPiPFontFix(): void {
             }
             injectFontCSS(fontCSS);
         });
-        observer.observe(pipDoc, {childList: true, subtree: true})
+        observer.observe(pipDoc, {childList: true, subtree: true});
         cleaners.push(() => observer.disconnect());
         (docPiP.window as Window).addEventListener('unload', () => observer.disconnect());
     }

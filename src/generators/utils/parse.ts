@@ -113,7 +113,7 @@ export function indexSitesFixesConfig(text: string): SiteFixesIndex {
     const {urls, offsets: offsetsGrouped} = extractURLsFromSiteFixesConfig(text);
     const offsetMap = new Map<string, [number, number]>();
     const templates: string[] = [];
-    const offsets: Array<[number, number]> = []
+    const offsets: Array<[number, number]> = [];
     urls.forEach((block, i) => {
         block.forEach((u) => {
             templates.push(u);

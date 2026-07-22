@@ -105,7 +105,7 @@ export function getManageableStyles(node: Node | null, results: StyleElement[] =
         );
         if (
             deep && (
-                (node as Element).children?.length > 0 || 
+                (node as Element).children?.length > 0 ||
                 (node as Element).shadowRoot
             )
         ) {
@@ -140,7 +140,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
     }
 
-    let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> | null = null;
+    const corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> | null = null;
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> | null = null;
 
     let cancelAsyncOperations = false;

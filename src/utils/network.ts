@@ -20,7 +20,8 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string): P
         return response;
     }
 
-    if (mimeType && !(response.headers.get('Content-Type') === mimeType || response.headers.get('Content-Type')!.startsWith(`${mimeType};`))) {
+    const contentType = response.headers.get('Content-Type');
+    if (mimeType && !(contentType === mimeType || contentType?.startsWith(`${mimeType};`))) {
         throw new Error(`Mime type mismatch when loading ${url}`);
     }
 

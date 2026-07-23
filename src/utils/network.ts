@@ -48,9 +48,10 @@ export async function loadAsBlob(url: string, mimeType?: string): Promise<Blob> 
 
 export async function readResponseAsDataURL(response: Response): Promise<string> {
     const blob = await response.blob();
-    const dataURL = await (new Promise<string>((resolve) => {
+    const dataURL = await (new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
         reader.readAsDataURL(blob);
     }));
     return dataURL;

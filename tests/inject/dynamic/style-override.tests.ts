@@ -47,6 +47,37 @@ describe('STYLE ELEMENTS', () => {
         expect((override.cssRules[1] as CSSStyleRule).style.getPropertyValue('color')).toBe('var(--darkreader-text-000000, #ffffff)');
     });
 
+    it('should not flatten background-color: currentcolor with nested color-mix', () => {
+        const style = document.createElement('style');
+        style.textContent = multiline(
+            '.bg-current\\/10 {',
+            '  background-color: currentcolor;',
+            '  @supports (color: color-mix(in lab, red, red)) {',
+            '    background-color: color-mix(currentcolor 10%, transparent);',
+            '  }',
+            '}',
+            '.text-red { color: red; }',
+        );
+        container.append(style);
+
+        const modifier = createStyleSheetModifier();
+        const overrideStyle = document.createElement('style');
+        container.append(overrideStyle);
+        const override = overrideStyle.sheet!;
+        modifier.modifySheet({
+            theme,
+            sourceCSSRules: style.sheet!.cssRules,
+            ignoreImageAnalysis: [],
+            force: false,
+            prepareSheet: () => override,
+            isAsyncCancelled: () => false,
+        });
+
+        const selectors = Array.from(override.cssRules).map((rule) => (rule as CSSStyleRule).selectorText);
+        expect(selectors).not.toContain('.bg-current\\/10');
+        expect(selectors).toContain('.text-red');
+    });
+
     it('should override User Agent style', async () => {
         container.innerHTML = multiline(
             '<span>Text</span>',

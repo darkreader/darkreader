@@ -8,7 +8,6 @@ import {isMobile} from '../../../utils/platform';
 import {Overlay} from '../../controls';
 import {openExtensionPage} from '../../utils';
 import MainPage from '../main-page';
-import NewsSection from '../news-section';
 import {Page, PageViewer} from '../page-viewer';
 import ThemePage from '../theme/page';
 
@@ -100,17 +99,41 @@ function Pages(props: ViewProps) {
 }
 
 function DonateGroup() {
+    let birthdayMessage = getLocalMessage('we_celebrate_10_years');
+    let birthdayMessageSpec = <span>{birthdayMessage}</span>;
+    try {
+        const index10 = birthdayMessage.indexOf('10');
+        const indexDot = birthdayMessage.indexOf('.', index10);
+        if (index10 >= 0 && indexDot > index10) {
+            const timePassed = Date.now() - (new Date(2014, 6, 7)).getTime();
+            let years = Math.abs((new Date(timePassed)).getFullYear() - 1970);
+            years = Math.max(10, years);
+            birthdayMessageSpec = (
+                <span>
+                    {birthdayMessage.startsWith('Dark Reader') ? <strong class="birthday-message-darkreader">Dark Reader</strong> : null}
+                    {birthdayMessage.substring(birthdayMessage.startsWith('Dark Reader') ? 11 : 0, index10)}
+                    <a href={`${HOMEPAGE_URL}/timeline/`} target="_blank" rel="noopener noreferrer">
+                        {`${years}${birthdayMessage.substring(index10 + 2, indexDot)}`}
+                    </a>
+                    {birthdayMessage.substring(indexDot)}
+                </span>
+            );
+        }
+    } catch (err) {
+        console.error(err);
+    }
+
     return (
         <div class="m-donate-group">
-            <a class="m-donate-button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                <span class="m-donate-button__icon"></span>
-                <span class="m-donate-button__text">
-                    {getLocalMessage('donate')}
+            <div class="birthday-container m-birthday">
+                <i class="birthday-icon">🎉</i>
+                <span class="birthday-message">
+                    {birthdayMessageSpec}
                 </span>
-            </a>
-            <label class="m-donate-description">
-                This project is sponsored by you
-            </label>
+                <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                    <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
+                </a>
+            </div>
         </div>
     );
 }
@@ -129,15 +152,11 @@ export default function Body(props: ViewProps) {
     return (
         <body>
             <section class="m-section">
-                <Logo />
+                {props.data.uiHighlights.includes('anniversary') ? <DonateGroup /> : <Logo />}
             </section>
             <section class="m-section pages-section">
                 <Pages {...props} />
             </section>
-            <section class="m-section">
-                <DonateGroup />
-            </section>
-            <NewsSection {...props} />
             <Overlay />
         </body>
     );

@@ -241,6 +241,13 @@ footer {
         }
     }
 
+    .birthday-message-darkreader {
+        color: @color-heading;
+        font-weight: bold;
+        text-transform: uppercase;
+        -webkit-text-stroke: 0.0625rem;
+    }
+
     .donate-link {
         background-color: transparent;
         background-image: linear-gradient(to right, fadeout(@color-control-hover, 50%), mix(@color-control-hover, @color-control-active), fadeout(@color-control-hover, 50%));
@@ -254,6 +261,16 @@ footer {
             background-color: mix(@color-control-hover, @color-control-active);
             box-shadow: none;
         }
+    }
+}
+
+.m-birthday {
+    .birthday-icon {
+        margin-top: 0;
+    }
+    .birthday-message {
+        height: 2rem;
+        margin-bottom: 0.5rem;
     }
 }
 

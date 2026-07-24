@@ -144,11 +144,14 @@ function Body(props: BodyProps & {fonts: string[]} & {installation: {date: numbe
         const index10 = birthdayMessage.indexOf('10');
         const indexDot = birthdayMessage.indexOf('.', index10);
         if (index10 >= 0 && indexDot > index10) {
+            const timePassed = Date.now() - (new Date(2014, 6, 7)).getTime();
+            let years = Math.abs((new Date(timePassed)).getFullYear() - 1970);
+            years = Math.max(10, years);
             birthdayMessageSpec = (
                 <span>
                     {birthdayMessage.substring(0, index10)}
                     <a href={`${HOMEPAGE_URL}/timeline/`} target="_blank" rel="noopener noreferrer">
-                        {birthdayMessage.substring(index10, indexDot)}
+                        {`${years}${birthdayMessage.substring(index10 + 2, indexDot)}`}
                     </a>
                     {birthdayMessage.substring(indexDot)}
                 </span>

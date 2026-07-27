@@ -99,41 +99,20 @@ function Pages(props: ViewProps) {
 }
 
 function DonateGroup() {
-    const birthdayMessage = getLocalMessage('we_celebrate_10_years');
-    let birthdayMessageSpec = <span>{birthdayMessage}</span>;
-    try {
-        const index10 = birthdayMessage.indexOf('10');
-        const indexDot = birthdayMessage.indexOf('.', index10);
-        if (index10 >= 0 && indexDot > index10) {
-            const timePassed = Date.now() - (new Date(2014, 6, 7)).getTime();
-            let years = Math.abs((new Date(timePassed)).getFullYear() - 1970);
-            years = Math.max(10, years);
-            birthdayMessageSpec = (
-                <span>
-                    {birthdayMessage.startsWith('Dark Reader') ? <strong class="birthday-message-darkreader">Dark Reader</strong> : null}
-                    {birthdayMessage.substring(birthdayMessage.startsWith('Dark Reader') ? 11 : 0, index10)}
-                    <a href={`${HOMEPAGE_URL}/timeline/`} target="_blank" rel="noopener noreferrer">
-                        {`${years}${birthdayMessage.substring(index10 + 2, indexDot)}`}
-                    </a>
-                    {birthdayMessage.substring(indexDot)}
-                </span>
-            );
-        }
-    } catch (err) {
-        console.error(err);
-    }
-
+    const timePassed = Date.now() - (new Date(2014, 6, 7)).getTime();
+    let years = Math.abs((new Date(timePassed)).getFullYear() - 1970);
+    years = Math.max(10, years);
     return (
         <div class="m-donate-group">
-            <div class="birthday-container m-birthday">
-                <i class="birthday-icon">🎉</i>
-                <span class="birthday-message">
-                    {birthdayMessageSpec}
+            <a class="m-donate-button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                <span class="m-donate-button__icon"></span>
+                <span class="m-donate-button__text">
+                    Pay for using <strong class="m-donate-button__darkreader">Dark Reader</strong>
                 </span>
-                <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                    <span class="donate-link__text">{getLocalMessage('pay_for_using')}</span>
-                </a>
-            </div>
+            </a>
+            <label class="m-donate-description">
+                Please support our work
+            </label>
         </div>
     );
 }

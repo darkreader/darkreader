@@ -3,7 +3,6 @@ import {getContext} from 'malevic/dom';
 
 import type {ViewProps} from '../../../definitions';
 import {DONATE_URL, HOMEPAGE_URL} from '../../../utils/links';
-import {getLocalMessage} from '../../../utils/locales';
 import {isMobile} from '../../../utils/platform';
 import {Overlay} from '../../controls';
 import {openExtensionPage} from '../../utils';

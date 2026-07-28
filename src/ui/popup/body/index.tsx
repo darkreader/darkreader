@@ -98,9 +98,6 @@ function Pages(props: ViewProps) {
 }
 
 function DonateGroup() {
-    const timePassed = Date.now() - (new Date(2014, 6, 7)).getTime();
-    let years = Math.abs((new Date(timePassed)).getFullYear() - 1970);
-    years = Math.max(10, years);
     return (
         <div class="m-donate-group">
             <a class="m-donate-button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">

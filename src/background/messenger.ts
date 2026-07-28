@@ -52,9 +52,10 @@ export default class Messenger {
         ];
         if (
             allowedSenderURL.includes(sender.url!) || (
-                __PLUS__ &&
-                message.type === MessageTypeUItoBG.CHANGE_SETTINGS &&
-                sender.url?.startsWith(`${HOMEPAGE_URL}/plus/activate/`)
+                message.type === MessageTypeUItoBG.CHANGE_SETTINGS && (
+                    sender.url?.startsWith(`${HOMEPAGE_URL}/activate/`) ||
+                    (__PLUS__ && sender.url?.startsWith(`${HOMEPAGE_URL}/plus/activate/`))
+                )
             )
         ) {
             Messenger.onUIMessage(message as MessageUItoBG, sendResponse);

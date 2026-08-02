@@ -132,7 +132,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
     private collectState() {
         const state = {} as T;
         for (const key of Object.keys(this.defaults) as Array<keyof T>) {
-            state[key] = this.parent[key] || this.defaults[key];
+            state[key] = this.parent[key] ?? this.defaults[key];
         }
         return state;
     }

@@ -129,10 +129,9 @@ export class Extension {
         if (isDark === null) {
             // Attempt to restore data from storage
             return Extension.systemColorStateManager.loadState();
-        } else if (Extension.wasLastColorSchemeDark !== isDark) {
-            Extension.wasLastColorSchemeDark = isDark;
-            return Extension.systemColorStateManager.saveState();
         }
+        Extension.wasLastColorSchemeDark = isDark;
+        return Extension.systemColorStateManager.saveState();
     }
 
     private static alarmListener = (alarm: chrome.alarms.Alarm): void => {

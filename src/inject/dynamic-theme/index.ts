@@ -4,7 +4,7 @@ import {createTextStyle} from '../../generators/text-style';
 import {forEach, push, toArray} from '../../utils/array';
 import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
 import {clamp} from '../../utils/math';
-import {isFirefox} from '../../utils/platform';
+import {isChromium, isFirefox, isMobile} from '../../utils/platform';
 import {throttle} from '../../utils/throttle';
 import {generateUID} from '../../utils/uid';
 import {parsedURLCache} from '../../utils/url';
@@ -652,15 +652,31 @@ function tryInvertChromePDF() {
         return;
     }
 
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync('[type="application/pdf"] { filter: invert(1) contrast(0.9); }');
-    root.adoptedStyleSheets.push(sheet);
-    cleaners.push(() => {
-        const index = root.adoptedStyleSheets.indexOf(sheet);
-        if (index >= 0) {
-            root.adoptedStyleSheets.splice(index, 1);
-        }
-    });
+    if (isChromium && !isMobile) {
+        const overlay = document.createElement('div');
+        overlay.classList.add('darkreader');
+        overlay.classList.add('darkreader--pdf-overlay');
+        overlay.style.backdropFilter = 'invert(100%) contrast(90%)';
+        overlay.style.position = 'fixed';
+        overlay.style.left = '0px';
+        overlay.style.right = '0px';
+        overlay.style.bottom = '0px';
+        overlay.style.top = '56px';
+        root.append(overlay);
+        cleaners.push(() => {
+            overlay.remove();
+        });
+    } else {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync('[type="application/pdf"] { filter: invert(1) contrast(0.9); }');
+        root.adoptedStyleSheets.push(sheet);
+        cleaners.push(() => {
+            const index = root.adoptedStyleSheets.indexOf(sheet);
+            if (index >= 0) {
+                root.adoptedStyleSheets.splice(index, 1);
+            }
+        });
+    }
 }
 
 /**

@@ -657,6 +657,7 @@ function tryInvertChromePDF() {
         overlay.classList.add('darkreader');
         overlay.classList.add('darkreader--pdf-overlay');
         overlay.style.backdropFilter = 'invert(100%) contrast(90%)';
+        overlay.style.pointerEvents = 'none';
         overlay.style.position = 'fixed';
         overlay.style.left = '0px';
         overlay.style.right = '0px';

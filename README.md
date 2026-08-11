@@ -20,9 +20,9 @@ Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.
 
 ## Building for use
 
-Dark Reader build script requires a JavaScript runtime, either NodeJS or Deno. We recommend using NodeJS, Deno support is experimental.
+Dark Reader build script requires a JavaScript runtime, either Node.js or Deno. We recommend using Node.js, Deno support is experimental.
 
-### Building with NodeJS
+### Building with Node.js
 
 You can install the extension from a file.
 Install [Node.js](https://nodejs.org/) (we recommend LTS or higher, but any version at or above 15 will work). Download the source code (or check out from git).

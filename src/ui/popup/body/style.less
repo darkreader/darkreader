@@ -91,6 +91,7 @@
         align-items: center;
         background-color: black;
         border: @size-border solid @color-border;
+        box-sizing: border-box;
         display: inline-flex;
         height: @size-control-inner + 2 * @size-border;
         isolation: isolate;
@@ -188,6 +189,12 @@
     @import "../theme/controls/mode.less";
     @import "../theme/page/style.less";
     @import "../theme/preset-picker/style.less";
+}
+
+.preview {
+    .m-body-short {
+        height: @popup-content-height - 2.5rem;
+    }
 }
 
 .mobile.firefox {

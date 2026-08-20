@@ -125,13 +125,22 @@ export default function Body(props: ViewProps) {
     });
 
     return (
-        <body>
+        <body
+            class={{
+                'm-body-short': !props.data.uiHighlights.includes('anniversary')
+            }}
+        >
             <section class="m-section">
-                {props.data.uiHighlights.includes('anniversary') ? <DonateGroup /> : <Logo />}
+                <Logo />
             </section>
             <section class="m-section pages-section">
                 <Pages {...props} />
             </section>
+            {props.data.uiHighlights.includes('anniversary') ? (
+                <section class="m-section">
+                    <DonateGroup />
+                </section>
+            ): null}
             <Overlay />
         </body>
     );

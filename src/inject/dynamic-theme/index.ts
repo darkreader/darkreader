@@ -4,7 +4,7 @@ import {createTextStyle} from '../../generators/text-style';
 import {forEach, push, toArray} from '../../utils/array';
 import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
 import {clamp} from '../../utils/math';
-import {isChromium, isFirefox, isMobile} from '../../utils/platform';
+import {isChromium, isEdge, isFirefox, isMobile} from '../../utils/platform';
 import {throttle} from '../../utils/throttle';
 import {generateUID} from '../../utils/uid';
 import {parsedURLCache} from '../../utils/url';
@@ -373,7 +373,7 @@ function createDynamicStyleOverrides() {
     handleAdoptedStyleSheets(document);
     variablesStore.matchVariablesAndDependents();
 
-    tryInvertChromePDF();
+    isEdge ? tryInvertEdgePDF() : tryInvertChromePDF();
 }
 
 let loadingStylesCounter = 0;
@@ -642,6 +642,42 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[] | null)
     return relevantFixIndex ? combineFixes([fixes[0], fixes[relevantFixIndex]]) : fixes[0];
 }
 
+function createPDFOverlay(parent: ParentNode) {
+    const overlay = document.createElement('div');
+    overlay.classList.add('darkreader');
+    overlay.classList.add('darkreader--pdf-overlay');
+    overlay.style.backdropFilter = 'invert(100%) contrast(90%)';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.position = 'fixed';
+    overlay.style.left = '0px';
+    overlay.style.right = '0px';
+    overlay.style.bottom = '0px';
+    overlay.style.top = '56px';
+    parent.append(overlay);
+    cleaners.push(() => {
+        overlay.remove();
+    });
+
+    if (isEdge) {
+        overlay.style.top = '';
+        const style = document.createElement('style');
+        style.classList.add('darkreader');
+        style.classList.add('darkreader--pdf-overlay-style');
+        document.head.append(style);
+        style.textContent = [
+            '.darkreader--pdf-overlay {',
+            '    top: 41px;',
+            '}',
+            'html:fullscreen .darkreader--pdf-overlay {',
+            '    top: 0px;',
+            '}',
+        ].join('\n');
+        cleaners.push(() => {
+            style.remove();
+        });
+    }
+}
+
 function tryInvertChromePDF() {
     if (!document.body || !chrome.dom) {
         return;
@@ -653,20 +689,7 @@ function tryInvertChromePDF() {
     }
 
     if (isChromium && !isMobile) {
-        const overlay = document.createElement('div');
-        overlay.classList.add('darkreader');
-        overlay.classList.add('darkreader--pdf-overlay');
-        overlay.style.backdropFilter = 'invert(100%) contrast(90%)';
-        overlay.style.pointerEvents = 'none';
-        overlay.style.position = 'fixed';
-        overlay.style.left = '0px';
-        overlay.style.right = '0px';
-        overlay.style.bottom = '0px';
-        overlay.style.top = '56px';
-        root.append(overlay);
-        cleaners.push(() => {
-            overlay.remove();
-        });
+        createPDFOverlay(root);
     } else {
         const sheet = new CSSStyleSheet();
         sheet.replaceSync('[type="application/pdf"] { filter: invert(1) contrast(0.9); }');
@@ -678,6 +701,15 @@ function tryInvertChromePDF() {
             }
         });
     }
+}
+
+function tryInvertEdgePDF() {
+    let embedded: HTMLElement | null;
+    if (!document.body || !(embedded = document.querySelector('embed[type="application/pdf"'))) {
+        return;
+    }
+    (embedded as HTMLElement).style.filter = 'none';
+    createPDFOverlay(document.body);
 }
 
 /**

@@ -462,7 +462,8 @@ export class VariablesStore {
     private inspectVariable(varName: string, value: string) {
         this.unstableVarValues.set(varName, value);
 
-        if (isVarDependant(value) && isConstructedColorVar(value)) {
+        const hasVar = isVarDependant(value);
+        if (hasVar && isConstructedColorVar(value)) {
             if (!this.unknownColorVars.has(varName)) {
                 this.unknownColorVars.add(varName);
                 this.varsChanged = true;
@@ -475,18 +476,20 @@ export class VariablesStore {
         this.definedVars.add(varName);
         this.varsChanged = true;
 
+        const valueOrFallback = hasVar ? getVarFallback(value) : value;
+
         // Check if the value is either a raw value or a value that can be parsed
         // e.g. rgb, hsl.
         const isColor = Boolean(
-            getRGBValues(value) ||
-            parseColorWithCache(value)
+            getRGBValues(valueOrFallback) ||
+            parseColorWithCache(valueOrFallback)
         );
         if (isColor) {
             this.unknownColorVars.add(varName);
         } else if (
-            value.includes('url(') ||
-            value.includes('linear-gradient(') ||
-            value.includes('radial-gradient(')
+            valueOrFallback.includes('url(') ||
+            valueOrFallback.includes('linear-gradient(') ||
+            valueOrFallback.includes('radial-gradient(')
         ) {
             this.resolveVariableType(varName, VAR_TYPE_BG_IMG);
         }
@@ -734,6 +737,16 @@ export function replaceCSSVariablesNames(
     };
 
     return replaceVariablesMatches(value, matchReplacer);
+}
+
+function getVarFallback(value: string): string {
+    return replaceVariablesMatches(value, (match) => {
+        const {fallback} = getVariableNameAndFallback(match);
+        if (!fallback) {
+            return '';
+        }
+        return isVarDependant(fallback) ? getVarFallback(fallback) : fallback;
+    });
 }
 
 function iterateVarDependencies(value: string, iterator: (varName: string) => void) {

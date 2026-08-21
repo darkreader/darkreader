@@ -444,6 +444,20 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
+    it('should inspect fallback when variable is undefined', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        --bg: var(--undefined-var, red);',
+            '        background: var(--bg);',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(204, 0, 0)');
+    });
+
     it('should handle variables in constructed colors that refer to other vars', async () => {
         container.innerHTML = multiline(
             '<style>',

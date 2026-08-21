@@ -127,7 +127,7 @@ export default function Body(props: ViewProps) {
     return (
         <body
             class={{
-                'm-body-short': !props.data.uiHighlights.includes('anniversary')
+                'm-body-short': !props.data.uiHighlights.includes('anniversary'),
             }}
         >
             <section class="m-section">
@@ -140,7 +140,7 @@ export default function Body(props: ViewProps) {
                 <section class="m-section">
                     <DonateGroup />
                 </section>
-            ): null}
+            ) : null}
             <Overlay />
         </body>
     );

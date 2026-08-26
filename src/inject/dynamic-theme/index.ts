@@ -659,21 +659,15 @@ function createPDFOverlay(parent: ParentNode) {
     });
 
     if (isEdge) {
-        overlay.style.top = '';
-        const style = document.createElement('style');
-        style.classList.add('darkreader');
-        style.classList.add('darkreader--pdf-overlay-style');
-        document.head.append(style);
-        style.textContent = [
-            '.darkreader--pdf-overlay {',
-            '    top: 41px;',
-            '}',
-            'html:fullscreen .darkreader--pdf-overlay {',
-            '    top: 0px;',
-            '}',
-        ].join('\n');
+        const updateOffset = () => {
+            const FULLSCREEN_GAP = 10;
+            const isFullscreen = screen.height - window.innerHeight < FULLSCREEN_GAP;
+            overlay.style.top = isFullscreen ? '0px' : '41px';
+        };
+        updateOffset();
+        window.addEventListener('resize', updateOffset);
         cleaners.push(() => {
-            style.remove();
+            window.removeEventListener('resize', updateOffset);
         });
     }
 }

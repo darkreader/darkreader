@@ -202,10 +202,18 @@ export function stopDarkThemeDetector(): void {
 let hintTargetObserver: MutationObserver;
 let hintMatchObserver: MutationObserver;
 
+function getHintSelectors(hint: DetectorHint): string[] {
+    const systemSpecific = isSystemDarkModeEnabled() ? hint.matchSystemDark : hint.matchSystemLight;
+    return (hint.match || []).concat(systemSpecific || []);
+}
+
 function detectUsingHint(hint: DetectorHint, success: () => void) {
     stopDetectingUsingHint();
 
-    const matchSelector = (hint.match || []).join(', ');
+    const matchSelector = getHintSelectors(hint).join(', ');
+    if (!matchSelector) {
+        return;
+    }
 
     function checkMatch(target: Element) {
         if (target.matches?.(matchSelector)) {

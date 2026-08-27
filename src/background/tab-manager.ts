@@ -449,6 +449,7 @@ export default class TabManager {
     // and not just that tab as Dark Reader currently doesn't have per-tab operations,
     // this should be the expected behavior.
     static async sendMessage(onlyUpdateActiveTab = false): Promise<void> {
+        await TabManager.waitUntilReady();
         TabManager.timestamp++;
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await TabManager.getActiveTabURL()) : null;

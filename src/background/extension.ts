@@ -497,7 +497,8 @@ export class Extension {
         Extension.handleAutomationCheck();
     };
 
-    private static handleAutomationCheck = () => {
+    private static handleAutomationCheck = async () => {
+        await Extension.waitUntilReady();
         Extension.updateAutoState();
 
         const isSwitchedOn = Extension.isExtensionSwitchedOn();
@@ -642,6 +643,7 @@ export class Extension {
     }
 
     private static async onSettingsChanged(onlyUpdateActiveTab = false) {
+        await Extension.waitUntilReady();
         await Extension.loadData();
         Extension.wasEnabledOnLastCheck = Extension.isExtensionSwitchedOn();
         TabManager.sendMessage(onlyUpdateActiveTab);

@@ -21,6 +21,7 @@ interface TabManagerOptions {
     getConnectionMessage: (tabURl: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) => Promise<MessageBGtoCS>;
     getTabMessage: (tabURL: string, url: string, isTopFrame: boolean) => MessageBGtoCS;
     onColorSchemeChange: (isDark: boolean) => void;
+    waitUntilReady: () => Promise<void>;
 }
 
 interface DocumentInfo {
@@ -63,14 +64,16 @@ export default class TabManager {
     private static fileLoader: FileLoader | null = null;
     private static onColorSchemeChange: TabManagerOptions['onColorSchemeChange'];
     private static getTabMessage: TabManagerOptions['getTabMessage'];
+    private static waitUntilReady: TabManagerOptions['waitUntilReady'];
     private static timestamp: TabManagerState['timestamp'];
     private static readonly LOCAL_STORAGE_KEY = 'TabManager-state';
 
-    static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions): void {
+    static init({getConnectionMessage, onColorSchemeChange, getTabMessage, waitUntilReady}: TabManagerOptions): void {
         TabManager.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0}, logWarn);
         TabManager.tabs = {};
         TabManager.onColorSchemeChange = onColorSchemeChange;
         TabManager.getTabMessage = getTabMessage;
+        TabManager.waitUntilReady = waitUntilReady;
 
         chrome.runtime.onMessage.addListener((message: MessageCStoBG | MessageUItoBG, sender, sendResponse): boolean => {
             if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
@@ -162,8 +165,9 @@ export default class TabManager {
                     const url = sender.url!;
                     const documentId: string | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId! || null);
                     const isTopFrame: boolean = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
-                    TabManager.stateManager.loadState().then(() => {
+                    TabManager.stateManager.loadState().then(async () => {
                         if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
+                            await TabManager.waitUntilReady();
                             const response = TabManager.getTabMessage(tabURL, url, isTopFrame);
                             response.scriptId = message.scriptId!;
                             TabManager.sendDocumentMessage(tabId, documentId!, response, frameId!);

@@ -135,9 +135,11 @@ export class Extension {
         return Extension.systemColorStateManager.saveState();
     }
 
-    private static alarmListener = (alarm: chrome.alarms.Alarm): void => {
+    private static alarmListener = async (alarm: chrome.alarms.Alarm): Promise<void> => {
         if (alarm.name === Extension.ALARM_NAME) {
-            Extension.loadData().then(() => Extension.handleAutomationCheck());
+            await Extension.waitUntilReady();
+            await Extension.loadData();
+            Extension.handleAutomationCheck();
         }
     };
 
@@ -284,6 +286,7 @@ export class Extension {
             startActivation: Extension.startActivation,
             resetActivation: Extension.resetActivation,
             hideHighlights: UIHighlights.hideHighlights,
+            waitUntilReady: Extension.waitUntilReady,
         };
     }
 
@@ -470,7 +473,6 @@ export class Extension {
     };
 
     private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) {
-        await Extension.waitUntilReady();
         await Extension.loadData();
         return Extension.getTabMessage(tabURL, url, isTopFrame, topFrameHasDarkTheme);
     }
@@ -497,8 +499,7 @@ export class Extension {
         Extension.handleAutomationCheck();
     };
 
-    private static handleAutomationCheck = async () => {
-        await Extension.waitUntilReady();
+    private static handleAutomationCheck = () => {
         Extension.updateAutoState();
 
         const isSwitchedOn = Extension.isExtensionSwitchedOn();
@@ -643,7 +644,6 @@ export class Extension {
     }
 
     private static async onSettingsChanged(onlyUpdateActiveTab = false) {
-        await Extension.waitUntilReady();
         await Extension.loadData();
         Extension.wasEnabledOnLastCheck = Extension.isExtensionSwitchedOn();
         TabManager.sendMessage(onlyUpdateActiveTab);

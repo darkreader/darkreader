@@ -53,6 +53,10 @@ enum DocumentState {
     DISCARDED = 5
 }
 
+const stateIndependentMessages: Array<MessageTypeCStoBG | MessageTypeUItoBG> = [
+    MessageTypeCStoBG.FETCH,
+];
+
 /**
  * Note: On Chromium builds, we use documentId if it is available.
  * We avoid messaging using frameId entirely since when document is pre-rendered, it gets a temporary frameId
@@ -65,6 +69,7 @@ export default class TabManager {
     private static onColorSchemeChange: TabManagerOptions['onColorSchemeChange'];
     private static getTabMessage: TabManagerOptions['getTabMessage'];
     private static waitUntilReady: TabManagerOptions['waitUntilReady'];
+    private static ready = false;
     private static timestamp: TabManagerState['timestamp'];
     private static readonly LOCAL_STORAGE_KEY = 'TabManager-state';
 
@@ -75,10 +80,19 @@ export default class TabManager {
         TabManager.getTabMessage = getTabMessage;
         TabManager.waitUntilReady = waitUntilReady;
 
-        chrome.runtime.onMessage.addListener((message: MessageCStoBG | MessageUItoBG, sender, sendResponse): boolean => {
+        const onMessage = (message: MessageCStoBG | MessageUItoBG, sender: chrome.runtime.MessageSender, sendResponse: (response: any) => any) => {
             if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
                 return false;
             }
+
+            if (!stateIndependentMessages.includes(message.type) && !TabManager.ready) {
+                TabManager.waitUntilReady().then(() => {
+                    TabManager.ready = true;
+                    onMessage(message, sender, sendResponse);
+                });
+                return false;
+            }
+
             switch (message.type) {
                 case MessageTypeCStoBG.DOCUMENT_CONNECT: {
                     if (__CHROMIUM_MV3__ && isPanel(sender)) {
@@ -165,9 +179,8 @@ export default class TabManager {
                     const url = sender.url!;
                     const documentId: string | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId! || null);
                     const isTopFrame: boolean = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
-                    TabManager.stateManager.loadState().then(async () => {
+                    TabManager.stateManager.loadState().then(() => {
                         if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
-                            await TabManager.waitUntilReady();
                             const response = TabManager.getTabMessage(tabURL, url, isTopFrame);
                             response.scriptId = message.scriptId!;
                             TabManager.sendDocumentMessage(tabId, documentId!, response, frameId!);
@@ -254,7 +267,9 @@ export default class TabManager {
             }
 
             return false;
-        });
+        };
+
+        chrome.runtime.onMessage.addListener(onMessage);
 
         chrome.tabs.onRemoved.addListener(async (tabId) => TabManager.removeFrame(tabId, 0));
     }
@@ -449,7 +464,6 @@ export default class TabManager {
     // and not just that tab as Dark Reader currently doesn't have per-tab operations,
     // this should be the expected behavior.
     static async sendMessage(onlyUpdateActiveTab = false): Promise<void> {
-        await TabManager.waitUntilReady();
         TabManager.timestamp++;
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await TabManager.getActiveTabURL()) : null;

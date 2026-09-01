@@ -1,3 +1,16 @@
+# 4.9.130 (September 1, 2026)
+
+- Added support for @container queries.
+- Optimized CSS change hash.
+- One-click code activation.
+- Chrome, Edge: Improved PDF viewer panel theme.
+- Inspect undefined CSS variables with a fallback.
+- Fixed responsiveness when computer wakes up.
+- Fixed Google Sheets cell colors in Dynamic mode.
+- Fixed Data URL error handling.
+- FIxed color scheme state management.
+- Fixed style injection (bloomberg.com issue).
+
 # 4.9.129 (July 14, 2026)
 
 - Improved performance when handling variables references.

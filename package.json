@@ -64,31 +64,31 @@
     "url": "https://opencollective.com/darkreader/donate"
   },
   "dependencies": {
-    "malevic": "0.20.2"
+    "malevic": "0.20.3"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.0",
-    "@eslint/eslintrc": "3.3.6",
+    "@eslint/eslintrc": "3.3.7",
     "@eslint/js": "10.0.0",
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/plugin-typescript": "12.3.0",
     "@stylistic/eslint-plugin": "5.10.0",
-    "@types/chrome": "0.2.5",
+    "@types/chrome": "0.2.8",
     "@types/eslint": "9.6.1",
     "@types/jasmine": "6.0.0",
     "@types/jest": "30.0.0",
     "@types/karma": "6.3.9",
     "@types/karma-coverage": "2.0.3",
-    "@types/node": "26.1.2",
+    "@types/node": "26.4.1",
     "@types/ws": "8.18.1",
     "chokidar": "5.0.0",
     "eslint-plugin-compat": "7.0.2",
     "eslint-plugin-import": "2.32.0",
-    "globals": "17.9.0",
-    "globby": "16.2.2",
-    "jasmine-core": "6.3.0",
-    "jest": "30.4.2",
+    "globals": "17.12.0",
+    "globby": "16.2.4",
+    "jasmine-core": "7.0.2",
+    "jest": "30.5.1",
     "jest-extended": "7.0.0",
     "karma": "6.4.4",
     "karma-chrome-launcher": "3.2.0",
@@ -98,20 +98,20 @@
     "karma-rollup-preprocessor": "7.0.8",
     "karma-safari-launcher": "1.0.0",
     "karma-spec-reporter": "0.0.36",
-    "less": "4.8.1",
+    "less": "4.9.0",
     "prettier": "3.9.6",
-    "puppeteer-core": "25.4.0",
-    "rollup": "4.62.4",
+    "puppeteer-core": "25.9.0",
+    "rollup": "4.63.1",
     "rollup-plugin-istanbul": "5.0.0",
     "ts-jest": "29.4.12",
     "tslib": "2.8.1",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.65.0",
-    "ws": "8.21.1",
+    "typescript-eslint": "8.69.0",
+    "ws": "8.21.3",
     "yazl": "3.3.1"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.62.4",
-    "@rollup/rollup-win32-x64-msvc": "4.62.4"
+    "@rollup/rollup-linux-x64-gnu": "4.63.1",
+    "@rollup/rollup-win32-x64-msvc": "4.63.1"
   }
 }

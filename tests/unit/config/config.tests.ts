@@ -107,7 +107,7 @@ test('Detector Hints config', async () => {
 
     // selectors should have no comma
     const commaSelector = /\,(?![^\(|\"]*(\)|\"))/;
-    expect(hints.every(({target, match}) => ![target].concat(match).some((s) => commaSelector.test(s)))).toBe(true);
+    expect(hints.every(({target, match, matchSystemDark, matchSystemLight}) => ![target].concat(match, matchSystemDark, matchSystemLight).some((s) => commaSelector.test(s)))).toBe(true);
 
     // only a single selector is allowed for target
     expect(hints.every(({target, noDarkTheme, systemTheme}) => noDarkTheme || systemTheme || typeof target === 'string' && !target.includes('\n'))).toBe(true);
@@ -126,6 +126,12 @@ test('Detector Hints config', async () => {
         'MATCH', '.b', '#c',
         'UNSUPPORTED', 'c',
         '========',
+        'github.com',
+        'TARGET', 'html',
+        'MATCH', '[data-color-mode="dark"]',
+        'MATCH SYSTEM DARK', '[data-color-mode="auto"][data-dark-theme^="dark"]',
+        'MATCH SYSTEM LIGHT', '[data-color-mode="auto"][data-light-theme^="dark"]',
+        '========',
         'proton.me',
         'SYSTEM THEME',
         '========',
@@ -138,6 +144,7 @@ test('Detector Hints config', async () => {
         'NO DARK THEME',
     ].join('\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], target: 'a', match: ['.b', '#c']},
+        {url: ['github.com'], target: 'html', match: ['[data-color-mode="dark"]'], matchSystemDark: ['[data-color-mode="auto"][data-dark-theme^="dark"]'], matchSystemLight: ['[data-color-mode="auto"][data-light-theme^="dark"]']},
         {url: ['proton.me'], systemTheme: true},
         {url: ['twitter.com'], target: 'c', match: ['[d="e"]']},
         {url: ['wikipedia.org'], noDarkTheme: true},

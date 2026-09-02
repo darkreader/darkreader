@@ -9,6 +9,8 @@ import type {SiteFixesIndex, SitesFixesParserOptions} from './utils/parse';
 const detectorHintsCommands: { [key: string]: keyof DetectorHint } = {
     'TARGET': 'target',
     'MATCH': 'match',
+    'MATCH SYSTEM DARK': 'matchSystemDark',
+    'MATCH SYSTEM LIGHT': 'matchSystemLight',
     'NO DARK THEME': 'noDarkTheme',
     'SYSTEM THEME': 'systemTheme',
     'IFRAME': 'iframe',

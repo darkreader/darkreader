@@ -135,8 +135,8 @@ let readyStateListener: (() => void) | null;
 function canCheckForStyle() {
     if (!(
         document.body &&
-        document.body.scrollHeight > 0 &&
-        document.body.clientHeight > 0 &&
+        document.body.scrollHeight >= 32 &&
+        document.body.clientHeight >= 32 &&
         document.body.childElementCount > 0 &&
         hasSomeStyle()
     )) {

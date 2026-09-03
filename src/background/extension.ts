@@ -60,7 +60,8 @@ export class Extension {
     private static startBarrier: PromiseBarrier<void, void> | null = null;
     private static stateManager: StateManager<ExtensionState> | null = null;
 
-    private static readonly ALARM_NAME = 'auto-time-alarm';
+    private static readonly AUTOMATION_ALARM_NAME = 'auto-time-alarm';
+    private static readonly WAKEUP_ALARM_NAME = 'wakeup-alarm';
     private static readonly LOCAL_STORAGE_KEY = 'Extension-state';
 
     // Store system color theme
@@ -136,7 +137,12 @@ export class Extension {
     }
 
     private static alarmListener = async (alarm: chrome.alarms.Alarm): Promise<void> => {
-        if (alarm.name === Extension.ALARM_NAME) {
+        if (
+            alarm.name === Extension.AUTOMATION_ALARM_NAME || (
+                alarm.name === Extension.WAKEUP_ALARM_NAME &&
+                (Date.now() - alarm.scheduledTime > getDuration({seconds: 30}))
+            )
+        ) {
             await Extension.waitUntilReady();
             await Extension.loadData();
             Extension.handleAutomationCheck();
@@ -206,7 +212,7 @@ export class Extension {
             if (nextCheck < Date.now()) {
                 logWarn(`Alarm is set in the past: ${nextCheck}. The time is: ${new Date()}. ISO: ${(new Date()).toISOString()}`);
             } else {
-                chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+                chrome.alarms.create(Extension.AUTOMATION_ALARM_NAME, {when: nextCheck});
             }
         }
     }
@@ -214,6 +220,11 @@ export class Extension {
     private static wakeInterval: number = -1;
 
     private static runWakeDetector() {
+        if (__CHROMIUM_MV3__) {
+            chrome.alarms.create(Extension.WAKEUP_ALARM_NAME, {periodInMinutes: 1});
+            return;
+        }
+
         const WAKE_CHECK_INTERVAL = getDuration({minutes: 1});
         const WAKE_CHECK_INTERVAL_ERROR = getDuration({seconds: 10});
         if (this.wakeInterval >= 0) {

@@ -86,6 +86,7 @@ export default function Body({data, actions}: ExtWrapper) {
                     Reset changes
                     {dialog}
                 </Button>
+                <!--one of the functions triggered by this button caused `TypeError: can't access property "url", fix is undefined`-->
                 <Button onclick={apply}>Apply</Button>
             </div>
             <Overlay />

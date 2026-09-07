@@ -363,6 +363,10 @@ function getSVGElementRoot(svgElement: SVGElement): SVGSVGElement | null {
 const inlineStringValueCache = new Map<string, Map<string, string>>();
 
 export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+    if (element.closest('[data-darkreader-ignore-inline]')) {
+        return;
+    }
+
     if (elementsLastChanges.has(element)) {
         if (Date.now() - elementsLastChanges.get(element)! < LOOP_DETECTION_THRESHOLD) {
             const cycles = elementsLoopCycles.get(element) ?? 0;

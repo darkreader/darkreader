@@ -320,7 +320,9 @@ function getThemeKey(theme: Theme): string {
 }
 
 function getInlineStyleCacheKey(el: HTMLElement, theme: Theme): string {
-    const attrKey = INLINE_STYLE_ATTRS.map((attr) => `${attr}="${el.getAttribute(attr)}"`);
+    const attrKey = INLINE_STYLE_ATTRS
+        .filter((attr) => el.hasAttribute(attr))
+        .map((attr) => `${attr}="${el.getAttribute(attr)}"`);
     return `${attrKey} ${getThemeKey(theme)}`;
 }
 

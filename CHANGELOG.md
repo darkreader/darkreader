@@ -8,7 +8,7 @@
 - Fixed responsiveness when computer wakes up.
 - Fixed Google Sheets cell colors in Dynamic mode.
 - Fixed Data URL error handling.
-- FIxed color scheme state management.
+- Fixed color scheme state management.
 - Fixed style injection (bloomberg.com issue).
 
 # 4.9.129 (July 14, 2026)

@@ -123,7 +123,7 @@ IGNORE IMAGE ANALYSIS
 
 ### URL
 
-The fix starts with the domain name, like `example.com`. The `www` part should be ommited.
+The fix starts with the domain name, like `example.com`. The `www` part should be omitted.
 
 If the fix affects a particular subdomain, this exact subdomain should be specified like `sub.domain.com`.
 

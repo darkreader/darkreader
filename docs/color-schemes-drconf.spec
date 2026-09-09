@@ -46,6 +46,6 @@ text: #eceff4
 
 LIGHT
 background: #eceff4
-text: 3b4252
+text: #3b4252
 
 ```

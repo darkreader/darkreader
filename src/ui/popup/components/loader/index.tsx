@@ -30,7 +30,7 @@ function Loader({complete = false}: LoaderProps) {
         clearTimeout(context.store.loaderTimeoutID);
     }
 
-    const labelMessage = state.errorOccured ? "A unknown error has occured, the UI couldn't be loaded" : getLocalMessage('loading_please_wait');
+    const labelMessage = state.errorOccured ? "An unknown error has occurred, the UI couldn't be loaded" : getLocalMessage('loading_please_wait');
 
     return (
         <div

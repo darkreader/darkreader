@@ -38,6 +38,41 @@ describe('INLINE STYLES', () => {
         expect(getComputedStyle(span).color).toBe('rgb(140, 255, 140)');
     });
 
+    for (const attribute of ['data-darkreader-ignore-inline', 'data-darkreader-ignore-inline="true"']) {
+        it(`should not mutate inline styles in a subtree with ${attribute}`, async () => {
+            container.innerHTML = multiline(
+                `<div ${attribute} style="color: red;">`,
+                '    <div><span style="color: red;">Editor content</span></div>',
+                '    <svg><path fill="red" d="M0 0h10v10z" /></svg>',
+                '</div>',
+                '<span style="color: red;">Outside editor</span>',
+            );
+            const editor = container.firstElementChild as HTMLElement;
+            const originalHTML = editor.outerHTML;
+            createOrUpdateDynamicTheme(theme, null, false);
+            await timeout(0);
+            expect(editor.outerHTML).toBe(originalHTML);
+            expect(getComputedStyle(container.lastElementChild!).color).toBe('rgb(255, 26, 26)');
+
+            editor.querySelector('span')!.style.color = 'green';
+            editor.firstElementChild!.insertAdjacentHTML('beforeend', '<span style="color: blue;">New content</span>');
+            const updatedHTML = editor.outerHTML;
+            await timeout(0);
+            expect(editor.outerHTML).toBe(updatedHTML);
+        });
+    }
+
+    it('should ignore inline styles in a dynamically inserted opted-out subtree', async () => {
+        createOrUpdateDynamicTheme(theme, null, false);
+        const element = document.createElement('div');
+        element.setAttribute('data-darkreader-ignore-inline', '');
+        element.innerHTML = '<div><span style="color: red;">New content</span></div>';
+        const originalHTML = element.outerHTML;
+        container.appendChild(element);
+        await timeout(0);
+        expect(element.outerHTML).toBe(originalHTML);
+    });
+
     it('should override only a single inline style property', async () => {
         container.innerHTML = multiline(
             '<style>.bg-gray { background: gray; }</style>',

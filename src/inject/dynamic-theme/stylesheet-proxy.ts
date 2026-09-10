@@ -151,7 +151,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
             let elements = getCurrentElementValue();
             const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
                 get: function (_: NodeListOf<HTMLElement>, property: string) {
-                    return getCurrentElementValue()[Number(property) || property];
+                    return getCurrentElementValue()[property];
                 },
             };
             elements = new Proxy(elements, nodeListBehavior);

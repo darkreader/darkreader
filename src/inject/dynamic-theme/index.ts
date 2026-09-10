@@ -333,8 +333,6 @@ function cleanFallbackStyle() {
 }
 
 function createDynamicStyleOverrides() {
-    cancelRendering();
-
     const allStyles = getManageableStyles(document);
 
     const newManagers = allStyles
@@ -429,16 +427,6 @@ function removeManager(element: StyleElement) {
         styleManagers.delete(element);
     }
 }
-
-const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(theme!, ignoredImageAnalysisSelectors));
-    adoptedStyleManagers.forEach((manager) => manager.render(theme!, ignoredImageAnalysisSelectors));
-    callback && callback();
-});
-
-const cancelRendering = function () {
-    throttledRenderAllStyles.cancel();
-};
 
 function onDOMReady() {
     if (loadingStyles.size === 0) {
@@ -975,7 +963,6 @@ export function cleanDynamicThemeCache(): void {
     parsedURLCache.clear();
     cleanFilterSelectors();
     removeDocumentVisibilityListener();
-    cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();
     clearColorCache();

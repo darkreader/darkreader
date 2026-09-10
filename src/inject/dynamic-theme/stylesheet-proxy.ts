@@ -227,21 +227,40 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
     if (enableStyleSheetsProxy) {
         overrideProperty(Document, 'styleSheets', {
             get: (native) => function () {
-                const getCurrentValue = () => {
-                    const docSheets: StyleSheetList = native.call(this);
-                    const filteredSheets = [...docSheets].filter((styleSheet) => styleSheet.ownerNode && !isDRSheet(styleSheet));
-                    (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
-                    return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
+                let filteredSheetsCache: any = null;
+                let docSheets: CSSStyleSheet[] | null = null;
+
+                const didChange = (newSheets: StyleSheetList) => {
+                    if (!filteredSheetsCache || !docSheets || docSheets.length !== newSheets.length) {
+                        return true;
+                    }
+                    for (let i = 0; i < docSheets.length; i++) {
+                        if (docSheets[i] !== newSheets[i]) {
+                            return true;
+                        }
+                    }
+                    return false;
                 };
 
-                let elements = getCurrentValue();
+                const getCurrentValue = () => {
+                    const nativeDocSheets: StyleSheetList = native.call(this);
+                    if (!didChange(nativeDocSheets)) {
+                        return filteredSheetsCache;
+                    }
+                    docSheets = Array.from(nativeDocSheets);
+                    const filteredSheets = docSheets.filter((styleSheet) => styleSheet.ownerNode && !isDRSheet(styleSheet));
+                    (filteredSheets as unknown as StyleSheetList).item = (item: number) => filteredSheets[item];
+                    filteredSheetsCache = Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
+                    return filteredSheetsCache;
+                };
+
                 const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
                     get: function (_: StyleSheetList, property: string) {
                         return getCurrentValue()[property];
                     },
                 };
-                elements = new Proxy(elements, styleSheetListBehavior);
-                return elements;
+
+                return new Proxy(getCurrentValue() as StyleSheetList, styleSheetListBehavior);
             },
         });
     }

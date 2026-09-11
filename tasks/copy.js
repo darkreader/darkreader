@@ -6,7 +6,7 @@ import {createTask} from './task.js';
 import {pathExists, copyFile, getPaths} from './utils.js';
 
 /** @typedef {import('chokidar').FSWatcher} FSWatcher */
-/** @typedef {import('./types').CopyEntry} CopyEntry */
+/** @typedef {import('./types.d.ts').CopyEntry} CopyEntry */
 
 /** @type {CopyEntry[]} */
 const copyEntries = [
@@ -30,7 +30,7 @@ const copyEntries = [
     {
         path: 'plus/assets',
         reloadType: reload.UI,
-        platforms: [PLATFORM.CHROMIUM_MV2_PLUS],
+        platforms: [PLATFORM.CHROMIUM_MV2_PLUS, PLATFORM.CHROMIUM_MV3_PLUS],
     },
 ];
 

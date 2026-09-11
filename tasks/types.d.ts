@@ -1,4 +1,4 @@
-import type {PLATFORM} from './platform';
+import type {PLATFORM} from './platform.js';
 
 type PlatformId = (typeof PLATFORM)[keyof (typeof PLATFORM)];
 
@@ -7,7 +7,7 @@ export interface JSEntry {
     dest: string;
     reloadType: string;
     watchFiles?: string[];
-    platform?: PlatformId;
+    platforms?: PlatformId[];
 }
 
 export interface CSSEntry {

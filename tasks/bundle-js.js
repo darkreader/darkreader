@@ -34,7 +34,7 @@ const jsEntries = [
         src: 'src/inject/dynamic-theme/mv3-proxy.ts',
         dest: 'inject/proxy.js',
         reloadType: reload.FULL,
-        platform: PLATFORM.CHROMIUM_MV3,
+        platforms: [PLATFORM.CHROMIUM_MV3, PLATFORM.CHROMIUM_MV3_PLUS],
     },
     {
         src: 'src/inject/fallback.ts',
@@ -45,7 +45,7 @@ const jsEntries = [
         src: 'src/inject/color-scheme-watcher.ts',
         dest: 'inject/color-scheme-watcher.js',
         reloadType: reload.FULL,
-        platform: PLATFORM.CHROMIUM_MV3,
+        platforms: [PLATFORM.CHROMIUM_MV3, PLATFORM.CHROMIUM_MV3_PLUS],
     },
     {
         src: 'src/ui/devtools/index.tsx',
@@ -88,6 +88,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             };
             break;
         case PLATFORM.CHROMIUM_MV3:
+        case PLATFORM.CHROMIUM_MV3_PLUS:
             replace = {
                 'chrome.browserAction.setIcon': 'chrome.action.setIcon',
                 'chrome.browserAction.setBadgeBackgroundColor': 'chrome.action.setBadgeBackgroundColor',
@@ -133,7 +134,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                 rootDir: absolutePath('.'),
                 typescript,
                 tsconfig: absolutePath('src/tsconfig.json'),
-                compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
+                compilerOptions: (platform === PLATFORM.CHROMIUM_MV3 || platform === PLATFORM.CHROMIUM_MV3_PLUS) ? {
                     target: 'ES2022',
                 } : undefined,
                 noImplicitAny: debug ? false : true,
@@ -145,7 +146,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                 inlineSources: debug ? true : false,
                 noEmitOnError: watch ? false : true,
                 outDir,
-                paths: platform === PLATFORM.CHROMIUM_MV2_PLUS ? {
+                paths: (platform === PLATFORM.CHROMIUM_MV2_PLUS || platform === PLATFORM.CHROMIUM_MV3_PLUS) ? {
                     '@plus/*': ['./plus/*'],
                 } : {
                     '@plus/*': ['./stubs/*'],
@@ -157,10 +158,10 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                 ...replace,
                 __DEBUG__: debug,
                 __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV2_PLUS,
-                __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
+                __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3 || platform === PLATFORM.CHROMIUM_MV3_PLUS,
                 __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
                 __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
-                __PLUS__: platform === PLATFORM.CHROMIUM_MV2_PLUS,
+                __PLUS__: platform === PLATFORM.CHROMIUM_MV2_PLUS || platform === PLATFORM.CHROMIUM_MV3_PLUS,
                 __PORT__: watch ? String(PORT) : '-1',
                 __TEST__: test,
                 __WATCH__: watch,
@@ -199,7 +200,7 @@ export function createBundleJSTask(jsEntries) {
     const bundleEachPlatform = async ({platforms, debug, watch, log, test}, entries) => {
         const allPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API);
         for (const entry of (entries || jsEntries)) {
-            const possiblePlatforms = entry.platform ? [entry.platform] : allPlatforms;
+            const possiblePlatforms = entry.platforms || allPlatforms;
             const targetPlatforms = possiblePlatforms.filter((platform) => platforms[platform]);
             for (const platform of targetPlatforms) {
                 await bundleJS(entry, platform, debug, watch, log, test);
@@ -216,6 +217,7 @@ export function createBundleJSTask(jsEntries) {
             platforms.chrome = initialPlatforms.chrome;
             platforms['chrome-mv3'] = initialPlatforms['chrome-mv3'];
             platforms['chrome-plus'] = initialPlatforms['chrome-plus'];
+            platforms['chrome-mv3-plus'] = initialPlatforms['chrome-mv3-plus'];
         }
         if (connectedBrowsers.includes('firefox')) {
             platforms.firefox = true;

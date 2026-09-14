@@ -64,7 +64,7 @@ export async function loadAsText(url: string, mimeType?: string, origin?: string
 
 const MAX_CORS_HOSTS = 16;
 const corsHosts = new Set<string>();
-const checkedHosts = new Set<string>();
+const checkedOrigins = new Set<string>();
 const localAliases = [
     '127-0-0-1.org.uk',
     '42foo.com',
@@ -119,7 +119,7 @@ export function shouldIgnoreCors(url: URL) {
     if (!corsHosts.has(host)) {
         corsHosts.add(host);
     }
-    if (checkedHosts.has(host)) {
+    if (checkedOrigins.has(url.origin)) {
         return false;
     }
     if (
@@ -132,6 +132,6 @@ export function shouldIgnoreCors(url: URL) {
     ) {
         return true;
     }
-    checkedHosts.add(host);
+    checkedOrigins.add(url.origin);
     return false;
 }

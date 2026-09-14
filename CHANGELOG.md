@@ -1,3 +1,13 @@
+# 4.9.131 (September 14, 2026)
+
+- Edge: Manifest V3 build.
+- Improved responsiveness after computer wakes up.
+- Improved dark theme detection.
+- Fixed infinite loop when attribute change causes DOM rebuilding.
+- Stricter cross-origin request limitations.
+- Optimized document.styleSheets override.
+- Fixed CSS cache memory leak.
+
 # 4.9.130 (September 1, 2026)
 
 - Added support for @container queries.

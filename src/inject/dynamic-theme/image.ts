@@ -30,7 +30,7 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
     return new Promise<ImageDetails>(async (resolve, reject) => {
         try {
             let dataURL = url.startsWith('data:') ? url : await getDataURL(url);
-            const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadAsBlob(url);
+            const blob = tryConvertDataURLToBlobSync(dataURL) ?? await loadAsBlob(url, undefined, location.origin);
             let image: ImageBitmap | HTMLImageElement;
             let useViewBox = false;
             if (dataURL.startsWith('data:image/svg+xml')) {
@@ -89,7 +89,7 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
 async function getDataURL(url: string): Promise<string> {
     const parsedURL = new URL(url);
     if (parsedURL.origin === location.origin) {
-        return await loadAsDataURL(url);
+        return await loadAsDataURL(url, undefined, location.origin);
     }
     return await bgFetch({url, responseType: 'data-url', origin: location.origin});
 }

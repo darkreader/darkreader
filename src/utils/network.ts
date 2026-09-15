@@ -12,7 +12,7 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string): P
     const sameOrigin = origin && url.startsWith(`${origin}/`);
     const credentials = sameOrigin ? undefined : 'omit';
     const redirect = mimeType === 'text/css' ? undefined : 'error';
-    const targetAddressSpace = sameOrigin ? undefined : 'public';
+    // const targetAddressSpace = sameOrigin ? undefined : 'public';
     const response = await fetch(
         url,
         {
@@ -20,7 +20,7 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string): P
             credentials,
             referrer: origin,
             redirect,
-            targetAddressSpace,
+            // targetAddressSpace,
         },
     );
 

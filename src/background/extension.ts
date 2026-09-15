@@ -484,6 +484,7 @@ export class Extension {
     };
 
     private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean, topFrameHasDarkTheme?: boolean) {
+        await Extension.waitUntilReady();
         await Extension.loadData();
         return Extension.getTabMessage(tabURL, url, isTopFrame, topFrameHasDarkTheme);
     }

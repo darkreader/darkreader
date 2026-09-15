@@ -40,6 +40,7 @@ jobs:
         with:
           files: |
             build/release/darkreader-*
+            CHANGELOG.md
 
       - name: Upload built artifact
         uses: actions/upload-artifact@v4

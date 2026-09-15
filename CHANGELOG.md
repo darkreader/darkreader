@@ -1,3 +1,7 @@
+# 4.9.132 (September 15, 2026)
+
+- Chrome, Edge: Fixed errors for proxy server users.
+
 # 4.9.131 (September 14, 2026)
 
 - Edge: Manifest V3 build.

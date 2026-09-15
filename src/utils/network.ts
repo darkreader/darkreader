@@ -2,17 +2,10 @@ import {isFirefox} from './platform';
 
 declare const __TEST__: boolean;
 
-declare global {
-    interface RequestInit {
-        targetAddressSpace?: string;
-    }
-}
-
 async function getOKResponse(url: string, mimeType?: string, origin?: string): Promise<Response> {
     const sameOrigin = origin && url.startsWith(`${origin}/`);
     const credentials = sameOrigin ? undefined : 'omit';
     const redirect = mimeType === 'text/css' ? undefined : 'error';
-    const targetAddressSpace = sameOrigin ? undefined : 'public';
     const response = await fetch(
         url,
         {
@@ -20,7 +13,6 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string): P
             credentials,
             referrer: origin,
             redirect,
-            targetAddressSpace,
         },
     );
 

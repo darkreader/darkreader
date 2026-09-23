@@ -30,8 +30,15 @@ declare function cloneInto<T>(obj: T, scope: Window): T;
 // Identifier for this particular script instance. It is used as an alternative to chrome.runtime.MessageSender.documentId
 const scriptId = generateUID();
 
+const CONNECTION_TIMEOUT = 1000;
+const CONNECTION_RETRIES = 10;
+let didConnect = false;
+let connectionRetries = 0;
+let connectionTimeoutId = 0;
+
 function cleanup() {
     unloaded = true;
+    stopConnectionRetry();
     removeEventListener('pagehide', onPageHide);
     removeEventListener('freeze', onFreeze);
     removeEventListener('resume', onResume);
@@ -94,6 +101,11 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
 
     if ((message as MessageBGtoCS).scriptId !== scriptId && message.type !== MessageTypeUItoCS.EXPORT_CSS) {
         return;
+    }
+
+    if ((message as MessageBGtoCS).scriptId === scriptId) {
+        didConnect = true;
+        stopConnectionRetry();
     }
 
     logInfoCollapsed(`onMessage[${message.type}]`, message);
@@ -181,12 +193,36 @@ function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT 
         });
 }
 
+function scheduleConnectionRetry() {
+    stopConnectionRetry();
+    if (didConnect || unloaded || connectionRetries >= CONNECTION_RETRIES) {
+        return;
+    }
+    connectionTimeoutId = setTimeout(() => {
+        connectionTimeoutId = 0;
+        if (didConnect || unloaded) {
+            return;
+        }
+        connectionRetries++;
+        sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);
+        scheduleConnectionRetry();
+    }, CONNECTION_TIMEOUT);
+}
+
+function stopConnectionRetry() {
+    if (connectionTimeoutId) {
+        clearTimeout(connectionTimeoutId);
+        connectionTimeoutId = 0;
+    }
+}
+
 runColorSchemeChangeDetector((isDark) =>
     sendMessage({type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE, data: {isDark}})
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
 sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);
+scheduleConnectionRetry();
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {

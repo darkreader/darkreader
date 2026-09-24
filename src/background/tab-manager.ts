@@ -144,6 +144,10 @@ export default class TabManager {
                     const documentId: string | null = __CHROMIUM_MV3__ ? sender.documentId! : (sender.documentId || null);
 
                     TabManager.stateManager.loadState().then(() => {
+                        const existingFrame = TabManager.tabs[tabId]?.[frameId!];
+                        if (existingFrame && existingFrame.scriptId === scriptId && existingFrame.documentId === documentId) {
+                            return;
+                        }
                         TabManager.addFrame(tabId, frameId!, documentId, scriptId, url, isTopFrame);
                         const topFrameHasDarkTheme = isTopFrame ? false : TabManager.tabs[tabId]?.[0]?.darkThemeDetected;
                         reply(tabURL, url, isTopFrame, topFrameHasDarkTheme);

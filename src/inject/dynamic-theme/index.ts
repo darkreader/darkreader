@@ -36,7 +36,7 @@ const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
 let theme: Theme | null = null;
-let fixes: DynamicThemeFix | null = null;
+let fixes: Partial<DynamicThemeFix> | null = null;
 let isIFrame: boolean | null = null;
 let ignoredImageAnalysisSelectors: string[] = [];
 let ignoredInlineSelectors: string[] = [];
@@ -708,14 +708,14 @@ export function createOrUpdateDynamicTheme(theme: Theme, dynamicThemeFixes: Dyna
 }
 
 let prevTheme: Theme | null = null;
-let prevFixes: DynamicThemeFix | null = null;
+let prevFixes: Partial<DynamicThemeFix> | null = null;
 
 /**
  * Note: This function should be directly used only in API builds, it is exported by this fle
  * only for use in src/api/enable() for backwards compatibility,
  * extension should use only createOrUpdateDynamicTheme()
  */
-export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicThemeFixes: DynamicThemeFix | null, iframe: boolean): void {
+export function createOrUpdateDynamicThemeInternal(themeConfig: Theme, dynamicThemeFixes: Partial<DynamicThemeFix> | null, iframe: boolean): void {
     theme = themeConfig;
     fixes = dynamicThemeFixes;
 

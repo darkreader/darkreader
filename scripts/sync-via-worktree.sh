@@ -44,7 +44,7 @@ sync_enable_verify_hook
 
 sync_log "🔍 Syncing $branch onto main inside worktree..."
 set +e
-just --justfile "$main_repo/justfile" sync-internal
+just --justfile "$main_repo/justfile" --working-directory "$worktree_path" sync-internal
 sync_status=$?
 set -e
 
@@ -52,7 +52,7 @@ if [[ "$sync_status" -eq 0 ]]; then
     # post-rewrite hook runs verify and calls sync-finalize.sh on success.
     if [[ -f "$(sync_marker_path)" ]]; then
         sync_log_error "Rebase finished but verify hook did not run — running verify manually."
-        if just --justfile "$main_repo/justfile" verify; then
+        if just --justfile "$main_repo/justfile" --working-directory "$worktree_path" verify; then
             "$script_dir/sync-finalize.sh" success
         else
             git reset --hard ORIG_HEAD

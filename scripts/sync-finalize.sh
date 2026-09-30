@@ -28,9 +28,12 @@ case "$mode" in
             exit 1
         fi
         new_head="$(git -C "$WORKTREE_PATH" rev-parse HEAD)"
-        git -C "$MAIN_REPO" branch -f "$BRANCH" "$new_head"
         if [[ "$(git -C "$MAIN_REPO" branch --show-current)" == "$BRANCH" ]]; then
+            # git refuses `branch -f` on a branch checked out in any worktree
+            # (including this one); reset --hard moves both HEAD and the ref.
             git -C "$MAIN_REPO" reset --hard "$new_head"
+        else
+            git -C "$MAIN_REPO" branch -f "$BRANCH" "$new_head"
         fi
         sync_teardown_sync_worktree "$MAIN_REPO" "$WORKTREE_PATH" "$SYNC_WORKTREE_BRANCH"
         sync_disable_verify_hook

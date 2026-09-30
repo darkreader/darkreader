@@ -27,6 +27,7 @@
         "strictPropertyInitialization": false,
         "paths": {
             "@plus/*": ["../../src/stubs/*"],
+            "background/*": ["../../src/background/*"],
             "definitions": ["../../src/definitions"],
             "utils/*": ["../../src/utils/*"]
         },

@@ -287,10 +287,11 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 return;
             }
             await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
-            if (global.product === 'edge') {
-                const page = await this.getChromiumMV2BackgroundPage();
-                await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
-            }
+            // Switching Edge to MV3
+            // if (global.product === 'edge') {
+            //     const page = await this.getChromiumMV2BackgroundPage();
+            //     await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
+            // }
         };
 
         global.loadTestPage = async (paths, gotoOptions) => {

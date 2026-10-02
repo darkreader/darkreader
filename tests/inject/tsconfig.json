@@ -25,10 +25,9 @@
         "inlineSources": true,
         "noEmitOnError": true,
         "strictPropertyInitialization": false,
+        "baseUrl": "../../src",
         "paths": {
-            "@plus/*": ["../../src/stubs/*"],
-            "definitions": ["../../src/definitions"],
-            "utils/*": ["../../src/utils/*"]
+            "@plus/*": ["stubs/*"]
         },
         "ignoreDeprecations": "6.0",
     },

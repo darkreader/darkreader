@@ -1,0 +1,304 @@
+{
+
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "schemeVersion": {
+      "type": "integer"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "fetchNews": {
+      "type": "boolean"
+    },
+    "theme": {
+      "$ref": "Theme"
+    },
+    "presets": {
+      "type": "array",
+      "items": {
+        "$ref": "ThemePreset"
+      }
+    },
+    "customThemes": {
+      "type": "array",
+      "items": {
+        "$ref": "CustomSiteConfig"
+      }
+    },
+    "enabledByDefault": {
+      "type": "boolean"
+    },
+    "enabledFor": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "disabledFor": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "changeBrowserTheme": {
+      "type": "boolean"
+    },
+    "syncSettings": {
+      "type": "boolean"
+    },
+    "syncSitesFixes": {
+      "type": "boolean"
+    },
+    "automation": {
+      "$ref": "Automation"
+    },
+    "time": {
+      "$ref": "TimeSettings"
+    },
+    "location": {
+      "$ref": "LocationSettings"
+    },
+    "previewNewDesign": {
+      "type": "boolean"
+    },
+    "previewNewestDesign": {
+      "type": "boolean"
+    },
+    "enableForPDF": {
+      "type": "boolean"
+    },
+    "enableForProtectedPages": {
+      "type": "boolean"
+    },
+    "enableContextMenus": {
+      "type": "boolean"
+    },
+    "detectDarkTheme": {
+      "type": "boolean"
+    },
+    // Chrome's JSON schema format is weird and doesn't support `definitions` property and thus `#/definitions` references
+    // https://datatracker.ietf.org/doc/html/draft-zyp-json-schema-03
+    // This "property" mimics it
+    "definitions": {
+      "type": "object",
+      "properties": {
+        "Theme": {
+          "id": "Theme",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "$ref": "FilterMode"
+            },
+            "brightness": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 200
+            },
+            "contrast": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 200
+            },
+            "grayscale": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "sepia": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "useFont": {
+              "type": "boolean"
+            },
+            "fontFamily": {
+              "type": "string",
+              "minLength": 1
+            },
+            "textStroke": {
+              "type": "number"
+            },
+            "engine": {
+              "type": "string",
+              "enum": [
+                "cssFilter",
+                "svgFilter",
+                "staticTheme",
+                "dynamicTheme"
+              ]
+            },
+            "stylesheet": {
+              "type": "string"
+            },
+            "darkSchemeBackgroundColor": {
+              "$ref": "HexColor"
+            },
+            "darkSchemeTextColor": {
+              "$ref": "HexColor"
+            },
+            "lightSchemeBackgroundColor": {
+              "$ref": "HexColor"
+            },
+            "lightSchemeTextColor": {
+              "$ref": "HexColor"
+            },
+            "scrollbarColor": {
+              "$ref": "HexColorOrAuto"
+            },
+            "selectionColor": {
+              "$ref": "HexColorOrAuto"
+            },
+            "styleSystemControls": {
+              "type": "boolean"
+            },
+            "lightColorScheme": {
+              "type": "string",
+              "minLength": 1
+            },
+            "darkColorScheme": {
+              "type": "string",
+              "minLength": 1
+            },
+            "immediateModify": {
+              "type": "boolean"
+            }
+          }
+        },
+        "HexColor": {
+          "id": "HexColor",
+          "type": "string",
+          "pattern": "^[0-9a-f]{6}$"
+        },
+        "HexColorOrAuto": {
+          "id": "HexColorOrAuto",
+          "type": "string",
+          "pattern": "^([0-9a-f]{6}|auto)$"
+        },
+        "FilterMode": {
+          "id": "FilterMode",
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "ThemePreset": {
+          "id": "ThemePreset",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "urls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "theme": {
+              "$ref": "Theme"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "urls",
+            "theme"
+          ]
+        },
+        "CustomSiteConfig": {
+          "id": "CustomSiteConfig",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "theme": {
+              "$ref": "Theme"
+            },
+            "builtin": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "url",
+            "theme"
+          ]
+        },
+        "Automation": {
+          "id": "Automation",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "mode": {
+              "$ref": "AutomationMode"
+            },
+            "behavior": {
+              "type": "string",
+              "enum": [
+                "OnOff",
+                "Scheme"
+              ]
+            }
+          }
+        },
+        "AutomationMode": {
+          "id": "AutomationMode",
+          "type": "string",
+          "enum": [
+            "",
+            "time",
+            "system",
+            "location"
+          ]
+        },
+        "TimeSettings": {
+          "id": "TimeSettings",
+          "type": "object",
+          "properties": {
+            "activation": {
+              "$ref": "Time"
+            },
+            "deactivation": {
+              "$ref": "Time"
+            }
+          }
+        },
+        "Time": {
+          "id": "Time",
+          "type": "string",
+          "pattern": "^((0?[0-9])|(1[0-9])|(2[0-3])):([0-5][0-9])$"
+        },
+        "LocationSettings": {
+          "id": "LocationSettings",
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

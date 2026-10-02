@@ -15,6 +15,10 @@ import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {createSheetWatcher} from './watch/sheet-changes';
 
+import {prepareExtendedOverrideSheet, removeExtendedOverrideSheet} from '@plus/dynamic/inject';
+
+declare const __PLUS__: boolean;
+
 declare global {
     interface Document {
         adoptedStyleSheets: CSSStyleSheet[];
@@ -397,6 +401,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         function prepareOverridesSheet(): CSSStyleSheet {
+            if (__PLUS__) {
+                return prepareExtendedOverrideSheet(element);
+            }
+
             if (!syncStyle) {
                 createSyncStyle();
             }
@@ -440,7 +448,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 force,
                 isAsyncCancelled,
             });
-            isOverrideEmpty = !syncStyle!.sheet || syncStyle!.sheet!.cssRules.length === 0;
+            isOverrideEmpty = __PLUS__ ? false : (!syncStyle!.sheet || syncStyle!.sheet!.cssRules.length === 0);
             if (sheetModifier.shouldRebuildStyle()) {
                 // "update" function schedules rebuilding the style
                 // ideally to wait for link loading, because some sites put links any time,
@@ -499,6 +507,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             const reject = rejectorsForLoadingLinks.get(loadingLinkId);
             rejectorsForLoadingLinks.delete(loadingLinkId);
             reject && reject();
+        }
+        if (__PLUS__) {
+            removeExtendedOverrideSheet(element);
         }
     }
 

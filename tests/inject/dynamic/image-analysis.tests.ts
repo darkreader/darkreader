@@ -44,11 +44,13 @@ const images = {
     darkIcon: multiline(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="8" height="8">',
         '    <rect fill="black" width="100%" height="100%" />',
+        '    <rect fill="#444" width="50%" height="50%" />',
         '</svg>',
     ),
     lightIcon: multiline(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="8" height="8">',
         '    <rect fill="white" width="100%" height="100%" />',
+        '    <rect fill="#aaa" width="50%" height="50%" />',
         '</svg>',
     ),
     darkTransparentIcon: multiline(
@@ -64,11 +66,13 @@ const images = {
     largeDarkImage: multiline(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="1024" height="1024">',
         '    <rect fill="black" width="100%" height="100%" />',
+        '    <rect fill="#444" width="50%" height="50%" />',
         '</svg>',
     ),
     largeLightImage: multiline(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="1024" height="1024">',
         '    <rect fill="white" width="100%" height="100%" />',
+        '    <rect fill="#aaa" width="50%" height="50%" />',
         '</svg>',
     ),
 };

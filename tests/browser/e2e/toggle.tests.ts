@@ -25,6 +25,21 @@ async function loadBasicPage(header: string) {
     });
 }
 
+async function readTabFrames(url: string) {
+    const {'TabManager-state': state} = await backgroundUtils.getChromeStorage('local', ['TabManager-state']);
+    const frames = Object.values<any>(state?.tabs ?? {}).find((tab) => tab[0]?.url === url) ?? {};
+    return {count: Object.keys(frames).length, bytes: JSON.stringify(state ?? {}).length};
+}
+
+async function waitForFrameCount(url: string, count: number) {
+    let frames = await readTabFrames(url);
+    for (let i = 0; i < 30 && frames.count !== count; i++) {
+        await timeout(100);
+        frames = await readTabFrames(url);
+    }
+    return frames.count;
+}
+
 describe('Toggling the extension', () => {
     const automationMenuSelector = '.header__more-settings-button';
     const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
@@ -242,6 +257,64 @@ describe('Toggling the extension', () => {
 
         await emulateColorScheme('dark');
     });
+
+    it('should forget removed subframes', async () => {
+        if ((await backgroundUtils.getManifest()).manifest_version !== 3) {
+            return;
+        }
+        await loadBasicPage('Removed subframes');
+        const url = await pageUtils.evaluateScript(() => location.href);
+
+        await pageUtils.evaluateScript(() => {
+            for (let i = 0; i < 10; i++) {
+                document.body.append(document.createElement('iframe'));
+            }
+        });
+        expect(await waitForFrameCount(url, 11)).toBe(11);
+
+        await pageUtils.evaluateScript(() => document.querySelectorAll('iframe').forEach((frame) => frame.remove()));
+        expect(await waitForFrameCount(url, 1)).toBe(1);
+    }, 15000);
+
+    it('should not grow while a page keeps replacing subframes', async () => {
+        if ((await backgroundUtils.getManifest()).manifest_version !== 3) {
+            return;
+        }
+        await loadTestPage({
+            '/': multiline(
+                '<!DOCTYPE html>',
+                '<html>',
+                '<body>',
+                '    <h1>Replaced subframes</h1>',
+                '</body>',
+                '</html>',
+            ),
+            '/frame.html': multiline(
+                '<!DOCTYPE html>',
+                '<html>',
+                '<body>Frame</body>',
+                '</html>',
+            ),
+        });
+        const url = await pageUtils.evaluateScript(() => location.href);
+
+        let largestBytes = 0;
+        for (let round = 0; round < 3; round++) {
+            await pageUtils.evaluateScript(() => Promise.all(Array.from({length: 10}, () => new Promise((resolve) => {
+                const frame = document.createElement('iframe');
+                frame.onload = resolve;
+                frame.src = `/frame.html#${'x'.repeat(100000)}`;
+                document.body.append(frame);
+            }))));
+            await waitForFrameCount(url, 11);
+            largestBytes = Math.max(largestBytes, (await readTabFrames(url)).bytes);
+            await pageUtils.evaluateScript(() => document.querySelectorAll('iframe').forEach((frame) => frame.remove()));
+            await waitForFrameCount(url, 1);
+        }
+
+        expect((await readTabFrames(url)).bytes).toBeLessThan(10000);
+        expect(largestBytes).toBeGreaterThan(1000000);
+    }, 60000);
 
     it('should have new design button on desktop', async () => {
         await devtoolsUtils.click('.settings-tab-panel__button:nth-child(4)');

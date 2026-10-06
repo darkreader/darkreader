@@ -329,7 +329,9 @@ export default class TabManager {
         // because sub-frames color scheme can be overridden by style with prefers-color-scheme
         // TODO(MV3): instead of dropping these messages, consider making a query to an authoritative source
         // like offscreen document
-        if (sender && sender.frameId === 0) {
+        // Document Picture-in-Picture windows are top-level, but their color scheme
+        // does not follow the system one
+        if (sender && sender.frameId === 0 && !message.data.isPictureInPicture) {
             TabManager.onColorSchemeChange(message.data.isDark);
         }
     }

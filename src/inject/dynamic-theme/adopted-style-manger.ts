@@ -42,7 +42,7 @@ function isDarkReaderSheet(sheet: CSSStyleSheet): boolean {
     result = Boolean(
         sheet &&
         sheet.cssRules.length > 0 &&
-        sheet.cssRules[0].cssText.startsWith('#__darkreader'),
+        (sheet.cssRules[0] as CSSStyleRule).selectorText?.startsWith('#__darkreader'),
     );
     drSheetCheckResults.set(sheet, result);
     return result;

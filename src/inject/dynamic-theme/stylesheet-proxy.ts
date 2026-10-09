@@ -278,7 +278,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         if (adoptedSheetOverrideCache.has(sheet)) {
             return true;
         }
-        if (sheet.cssRules.length > 0 && sheet.cssRules[0].cssText.startsWith('#__darkreader')) {
+        if (sheet.cssRules.length > 0 && (sheet.cssRules[0] as CSSStyleRule).selectorText?.startsWith('#__darkreader')) {
             adoptedSheetOverrideCache.add(sheet);
             return true;
         }

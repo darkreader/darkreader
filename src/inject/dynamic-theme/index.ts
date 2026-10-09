@@ -30,7 +30,7 @@ import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 
 export {createFallbackFactory} from './modify-css';
 
-import {createExtendedStaticStyleInjector, removeExtendedFallback, removeExtendedStaticOverrides, reuseStaticStyleOverrides} from '@plus/dynamic/inject';
+import {createExtendedStaticStyleInjector, removeExtendedFallback, removeExtendedStaticOverrides, reuseStaticStyleOverrides, updateExtendedStaticStyle} from '@plus/dynamic/inject';
 
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -143,6 +143,12 @@ function createStaticStyleInjector() {
 let staticStyleInjector: StaticStyleInjector | null;
 
 const scheduleInversionStyleUpdate = throttle(() => {
+    if (__PLUS__) {
+        const cssText = getInversionStyleValue();
+        updateExtendedStaticStyle('invert', cssText);
+        return;
+    }
+
     const invertStyle = document.head?.querySelector<HTMLStyleElement>('.darkreader--invert');
     if (invertStyle) {
         invertStyle.textContent = getInversionStyleValue();

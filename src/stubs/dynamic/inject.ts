@@ -7,6 +7,9 @@ export function createExtendedStaticStyleInjector(_root: Document | ShadowRoot):
     return null as any;
 }
 
+export function updateExtendedStaticStyle(_id: string, _text: string) {
+}
+
 export function reuseStaticStyleOverrides(_root: ShadowRoot) {
 }
 

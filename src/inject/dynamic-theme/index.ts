@@ -323,9 +323,7 @@ function delayedCreateShadowStaticStyleOverrides(root: ShadowRoot): void {
 
 function createShadowStaticStyleOverrides(root: ShadowRoot) {
     if (__PLUS__) {
-        if (staticStyleInjector) {
-            reuseStaticStyleOverrides(staticStyleInjector, root);
-        }
+        reuseStaticStyleOverrides(root);
         return;
     }
 
@@ -993,8 +991,8 @@ export function removeDynamicTheme(): void {
     cleaners.forEach((clean) => clean());
     cleaners.splice(0);
 
-    if (__PLUS__ && staticStyleInjector) {
-        removeExtendedStaticOverrides(staticStyleInjector);
+    if (__PLUS__) {
+        removeExtendedStaticOverrides();
     }
 }
 

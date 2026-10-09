@@ -7,13 +7,13 @@ export function createExtendedStaticStyleInjector(_root: Document | ShadowRoot):
     return null as any;
 }
 
-export function reuseStaticStyleOverrides(_injector: StaticStyleInjector, _root: ShadowRoot) {
+export function reuseStaticStyleOverrides(_root: ShadowRoot) {
 }
 
 export function removeExtendedFallback() {
 }
 
-export function removeExtendedStaticOverrides(_injector: StaticStyleInjector) {
+export function removeExtendedStaticOverrides() {
 }
 
 export function prepareExtendedOverrideSheet(_sourceStyle: HTMLStyleElement | SVGStyleElement): CSSStyleSheet {
@@ -21,4 +21,7 @@ export function prepareExtendedOverrideSheet(_sourceStyle: HTMLStyleElement | SV
 }
 
 export function removeExtendedOverrideSheet(_sourceStyle: HTMLStyleElement | SVGStyleElement) {
+}
+
+export function setInlineStyleValue(_element: Element, _attr: string, _srcProp: string, _overrideProp: string, _srcValue: string, _overrideValue: string) {
 }

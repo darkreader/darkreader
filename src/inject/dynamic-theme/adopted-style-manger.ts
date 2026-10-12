@@ -111,7 +111,8 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         if (count === 1) {
             // MS Copilot issue, where there is an empty `:root {}` style at the beginning.
             // Counting all the rules for all the shadow DOM elements can be expensive.
-            const rule = getAdoptedSheets(node)[0].cssRules[0];
+            const sourceSheet = getAdoptedSheets(node).find((s) => !overrides.has(s) && !isDarkReaderSheet(s));
+            const rule = sourceSheet?.cssRules[0];
             return rule instanceof CSSStyleRule ? rule.style.length : count;
         }
         return count;

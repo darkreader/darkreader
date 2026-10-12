@@ -34,11 +34,11 @@ declare global {
         emulateColorScheme: (colorScheme: ColorScheme) => Promise<void>;
     };
     const pageUtils: {
-        evaluateScript: (script: () => any) => Promise<any>;
+        evaluateScript: (script: (...artgs: any[]) => any, ...args: any[]) => Promise<any>;
     };
     const emulateColorScheme: (value: ColorScheme) => Promise<void>;
     const awaitForEvent: (uuid: string) => Promise<void>;
     const expectPageStyles: (expect: jest.Expect, expectations: StyleExpectations) => Promise<void>;
     const getColorScheme: () => Promise<ColorScheme>;
-    const product: 'firefox';
+    const product: 'chrome-mv3' | 'firefox' | 'edge';
 }

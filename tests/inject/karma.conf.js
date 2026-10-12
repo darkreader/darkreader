@@ -31,6 +31,7 @@ export function configureKarma(config, env) {
             'tests/inject/support/customize.ts',
             'tests/inject/support/polyfills.ts',
             {pattern: 'tests/inject/**/*.tests.ts', watched: false},
+            {pattern: 'src/**/*.{ts,tsx}', included: false, served: false, watched: true},
         ],
         plugins: [
             'karma-chrome-launcher',

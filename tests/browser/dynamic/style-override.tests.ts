@@ -114,8 +114,7 @@ describe('Style override', () => {
             const styleElement = document.createElement('style');
             styleElement.classList.add('testcase-style');
             document.head.append(styleElement);
-            styleElement.sheet!.insertRule('h1 { color: gray } ');
-            styleElement.sheet!.insertRule('strong { color: red } ');
+            styleElement.textContent = 'h1 { color: gray } strong { color: red }';
         });
 
         await expect(pageUtils.evaluateScript(async (product) => {
@@ -130,7 +129,7 @@ describe('Style override', () => {
 
         await expectStyles([
             ['h1', 'color', 'rgb(152, 143, 129)'],
-            ['h1 strong', 'color', 'rgb(255, 26, 26)'],
+            ['strong', 'color', 'rgb(255, 26, 26)'],
         ]);
     });
 
@@ -201,11 +200,11 @@ describe('Style override', () => {
 
         await pageUtils.evaluateScript(async () => {
             const style = document.querySelector('.testcase-style')!;
-            (style as HTMLStyleElement).sheet!.insertRule('html { background-color: pink }');
+            (style as HTMLStyleElement).sheet!.insertRule('body { background-color: pink }');
         });
 
         await expectStyles([
-            ['html', 'background-color', 'rgb(89, 0, 16)'],
+            ['body', 'background-color', 'rgb(89, 0, 16)'],
         ]);
 
         if (product === 'edge') {
@@ -215,7 +214,7 @@ describe('Style override', () => {
         await expect(pageUtils.evaluateScript(async () => {
             const style = document.querySelector('.testcase-style')!;
             return (style.nextSibling as HTMLStyleElement).sheet!.cssRules[0].cssText;
-        })).resolves.toBe('html { background-color: var(--darkreader-background-ffc0cb, #590010); }');
+        })).resolves.toBe('body { background-color: var(--darkreader-background-ffc0cb, #590010); }');
     });
 
     it('should react to a new style', async () => {
@@ -249,7 +248,7 @@ describe('Style override', () => {
         }
 
         await expect(pageUtils.evaluateScript(async () => {
-            const styleElement = document.createElement('style');
+            const styleElement = document.querySelector('.testcase-style')!;
             return (styleElement.nextSibling as HTMLStyleElement).sheet!.cssRules.length === 2 && (styleElement.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);
     });

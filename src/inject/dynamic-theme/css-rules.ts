@@ -116,7 +116,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
 
     forEach(style, (property) => {
         const value = style.getPropertyValue(property).trim();
-        if (!value && !property.startsWith('--')) {
+        if (!value) {
             return;
         }
         iterate(property, value);

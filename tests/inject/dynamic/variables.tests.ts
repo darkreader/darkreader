@@ -1331,4 +1331,19 @@ describe('CSS VARIABLES OVERRIDE', () => {
         const elementStyle = getComputedStyle(container.querySelector('h1')!);
         expect(elementStyle.backgroundColor).toBe('rgb(204, 0, 0)');
     });
+
+    it('should preserve empty custom property that overrides non-empty', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    .non-empty { --grow: 1; }',
+            '    .empty { --grow: ; }',
+            '</style>',
+            '<div class="non-empty empty"></div>',
+        );
+        const el = container.querySelector('.empty') as HTMLElement;
+        expect(getComputedStyle(el).getPropertyValue('--grow')).toBe('');
+
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(el).getPropertyValue('--grow')).toBe('');
+    });
 });

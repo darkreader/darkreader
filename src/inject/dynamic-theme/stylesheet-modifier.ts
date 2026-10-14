@@ -203,7 +203,7 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             let ruleText = `${selectorText} {`;
             for (const dec of declarations) {
                 const {property, value, important} = dec;
-                if (value) {
+                if (value != null && (value !== '' || property.startsWith('--'))) {
                     ruleText += ` ${property}: ${value}${important ? ' !important' : ''};`;
                 }
             }

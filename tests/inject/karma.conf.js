@@ -1,4 +1,4 @@
-/** @typedef {import('karma').Config & {headless: boolean, debug: boolean, ci: boolean, coverage: boolean}} LocalConfig */
+/** @typedef {import('karma').Config & {headless: boolean, debug: boolean, ci: boolean, coverage: boolean, plus: boolean}} LocalConfig */
 /** @typedef {import('karma').ConfigOptions} ConfigOptions */
 
 import fs from 'node:fs';
@@ -20,6 +20,7 @@ import {createEchoServer} from './support/echo-server.js';
  */
 export function configureKarma(config, env) {
     const headless = config.headless || Boolean(env.KARMA_HEADLESS) || false;
+    const plus = Boolean(config.plus);
 
     /** @type {ConfigOptions} */
     const options = {
@@ -31,7 +32,6 @@ export function configureKarma(config, env) {
             'tests/inject/support/customize.ts',
             'tests/inject/support/polyfills.ts',
             {pattern: 'tests/inject/**/*.tests.ts', watched: false},
-            {pattern: 'src/**/*.{ts,tsx}', included: false, served: false, watched: true},
         ],
         plugins: [
             'karma-chrome-launcher',
@@ -52,6 +52,9 @@ export function configureKarma(config, env) {
                     outDir: 'build/tests',
                     tsconfig: absolutePath('tests/inject/tsconfig.json'),
                     cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
+                    paths: {
+                        '@plus/*': [plus ? 'plus/*' : 'stubs/*'],
+                    },
                 }),
                 rollupPluginReplace({
                     preventAssignment: true,
@@ -60,7 +63,7 @@ export function configureKarma(config, env) {
                     __CHROMIUM_MV2__: false,
                     __CHROMIUM_MV3__: false,
                     __THUNDERBIRD__: false,
-                    __PLUS__: false,
+                    __PLUS__: plus,
                     __PORT__: '-1',
                     __TEST__: true,
                     __WATCH__: false,
@@ -84,6 +87,10 @@ export function configureKarma(config, env) {
         singleRun: true,
         concurrency: 1,
     };
+
+    if (plus) {
+        options.browsers = ['Chrome'];
+    }
 
     if (config.debug) {
         options.browsers = ['Chrome'];

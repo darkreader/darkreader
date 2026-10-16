@@ -293,4 +293,33 @@ describe('Style override', () => {
             [['custom-element', 'p'], 'color', 'rgb(255, 160, 177)'],
         ]);
     });
+
+    it('should not override variable set inside nested @media', async () => {
+        await loadTestPage({
+            '/': multiline(
+                '<!DOCTYPE html>',
+                '<html>',
+                '<head>',
+                '    <style>',
+                '        :root { --size: 16px; }',
+                '        .nested {',
+                '            --width: 64px;',
+                '            margin-left: var(--width);',
+                '            @media (min-width: 1px) {',
+                '                --width: calc(2 * var(--size));',
+                '            }',
+                '        }',
+                '    </style>',
+                '</head>',
+                '<body>',
+                '    <div class="nested">Nested</div>',
+                '</body>',
+                '</html>',
+            ),
+        });
+
+        await expectStyles([
+            ['.nested', 'margin-left', '32px'],
+        ]);
+    });
 });

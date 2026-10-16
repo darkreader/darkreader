@@ -4,6 +4,8 @@ import {resetChromeRuntimeMessageStub, stubBackgroundFetchResponse, stubChromeRu
 import {getCSSEchoURL} from '../support/echo-client';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';
 
+declare const __PLUS__: boolean;
+
 const theme = {
     ...DEFAULT_THEME,
     darkSchemeBackgroundColor: 'black',
@@ -157,10 +159,18 @@ describe('LINK STYLES', () => {
         createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(50);
-        expect(selectTestStyleLink().nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+        const h1 = document.querySelector('h1')!;
+        expect(getComputedStyle(h1).backgroundColor).toBe('rgb(102, 102, 102)');
+        if (!__PLUS__) {
+            expect(selectTestStyleLink().nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+        }
         link.disabled = true;
         await timeout(0);
-        expect(selectTestStyleLink().nextElementSibling!.classList.contains('darkreader--sync')).toBe(false);
+        if (__PLUS__) {
+            expect(getComputedStyle(h1).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        } else {
+            expect(selectTestStyleLink().nextElementSibling!.classList.contains('darkreader--sync')).toBe(false);
+        }
     });
     it("Shouldn't wait on link that won't be loaded", async () => {
         const link = createStyleLink(null);
@@ -179,7 +189,9 @@ describe('LINK STYLES', () => {
         await timeout(50);
         const h1 = document.querySelector('h1')!;
         expect(getComputedStyle(h1).backgroundColor).toBe('rgb(102, 102, 102)');
-        expect(document.querySelector('.darkreader--fallback')!.textContent).toBe('');
+        if (!__PLUS__) {
+            expect(document.querySelector('.darkreader--fallback')!.textContent).toBe('');
+        }
     });
 
     it('should handle styles with @import "..." screen;', async () => {

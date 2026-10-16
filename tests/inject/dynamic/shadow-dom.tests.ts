@@ -4,6 +4,8 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/injec
 import {isFirefox, isSafari} from '../../../src/utils/platform';
 import {multiline, timeout} from '../support/test-utils';
 
+declare const __PLUS__: boolean;
+
 const theme = {
     ...DEFAULT_THEME,
     darkSchemeBackgroundColor: 'black',
@@ -29,6 +31,10 @@ describe('SHADOW DOM', () => {
         document.querySelector('.shadow-dom-wrapper')!.attachShadow({mode: 'open'});
         createOrUpdateDynamicTheme(theme, null, false);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper')!.shadowRoot!;
+        if (__PLUS__) {
+            expect(shadowRoot.adoptedStyleSheets.length).toBeGreaterThan(0);
+            return;
+        }
         expect(shadowRoot.firstElementChild!.classList.contains('darkreader--inline')).toBe(true);
         expect(shadowRoot.firstElementChild!.nextElementSibling!.classList.contains('darkreader--override')).toBe(true);
         expect(shadowRoot.firstElementChild!.nextElementSibling!.nextElementSibling!.classList.contains('darkreader--invert')).toBe(true);
@@ -44,12 +50,19 @@ describe('SHADOW DOM', () => {
         shadow.appendChild(style);
         style.sheet!.insertRule('h1 { color: gray }');
         style.sheet!.insertRule('strong { color: red }');
+        const h1 = document.createElement('h1');
+        h1.appendChild(document.createElement('strong'));
+        shadow.appendChild(h1);
         createOrUpdateDynamicTheme(theme, null, false);
 
         const shadowRoot = document.querySelector('.shadow-dom-wrapper')!.shadowRoot!;
-        const testCase = shadowRoot.querySelector('.test-case-style')!;
-        expect(testCase.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
-        expect((testCase.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        expect(getComputedStyle(shadowRoot.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
+        expect(getComputedStyle(shadowRoot.querySelector('strong')!).color).toBe('rgb(255, 26, 26)');
+        if (!__PLUS__) {
+            const testCase = shadowRoot.querySelector('.test-case-style')!;
+            expect(testCase.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+            expect((testCase.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        }
     });
 
     it('should react to DOM changes', async () => {
@@ -64,14 +77,21 @@ describe('SHADOW DOM', () => {
         shadow.appendChild(style);
         style.sheet!.insertRule('h1 { color: gray }');
         style.sheet!.insertRule('strong { color: red }');
+        const h1 = document.createElement('h1');
+        h1.appendChild(document.createElement('strong'));
+        shadow.appendChild(h1);
 
         await timeout(0);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper')!.shadowRoot!;
-        const testCase = shadowRoot.querySelector('.test-case-style')!;
-        expect(shadowRoot.firstElementChild!.classList.contains('darkreader--inline')).toBe(true);
-        expect(shadowRoot.firstElementChild!.nextElementSibling!.classList.contains('darkreader--override')).toBe(true);
-        expect(testCase.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
-        expect((testCase.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        expect(getComputedStyle(shadowRoot.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
+        expect(getComputedStyle(shadowRoot.querySelector('strong')!).color).toBe('rgb(255, 26, 26)');
+        if (!__PLUS__) {
+            const testCase = shadowRoot.querySelector('.test-case-style')!;
+            expect(shadowRoot.firstElementChild!.classList.contains('darkreader--inline')).toBe(true);
+            expect(shadowRoot.firstElementChild!.nextElementSibling!.classList.contains('darkreader--override')).toBe(true);
+            expect(testCase.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+            expect((testCase.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        }
     });
 
     it('should override inline styles', async () => {
@@ -168,11 +188,13 @@ describe('SHADOW DOM', () => {
         createOrUpdateDynamicTheme(theme, null, false);
 
         const shadowRoot = document.querySelector('.shadow-dom-wrapper')!.shadowRoot!;
-        const testCase = shadowRoot.querySelector('.test-case-style')!;
         const darkendH1 = shadowRoot.querySelector('h1')!;
-        expect(testCase.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
-        expect((testCase.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(1);
-        expect(shadowRoot.adoptedStyleSheets.length).toBe(2);
+        if (!__PLUS__) {
+            const testCase = shadowRoot.querySelector('.test-case-style')!;
+            expect(testCase.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+            expect((testCase.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(1);
+            expect(shadowRoot.adoptedStyleSheets.length).toBe(2);
+        }
         expect(getComputedStyle(darkendH1).color).toBe('rgb(255, 26, 26)');
     });
 });

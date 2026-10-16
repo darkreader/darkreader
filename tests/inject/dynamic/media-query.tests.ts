@@ -3,6 +3,8 @@ import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../support/test-utils';
 
+declare const __PLUS__: boolean;
+
 const theme = {
     ...DEFAULT_THEME,
     darkSchemeBackgroundColor: 'black',
@@ -56,7 +58,9 @@ describe('MEDIA QUERIES', () => {
         expect((document.querySelector('.testcase-style') as HTMLStyleElement).media).toBe('screen');
         expect(getComputedStyle(document.querySelector('h1')!).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')!).color).toBe('rgb(255, 174, 26)');
-        expect(document.querySelector('.testcase-style')!.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+        if (!__PLUS__) {
+            expect(document.querySelector('.testcase-style')!.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+        }
     });
 
     it('should check for CSS support', async () => {
@@ -96,7 +100,9 @@ describe('MEDIA QUERIES', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')!).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect((document.querySelector('.testcase-style')!.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        if (!__PLUS__) {
+            expect((document.querySelector('.testcase-style')!.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        }
     });
 
     it('should check for nested CSS @media', async () => {
@@ -116,7 +122,9 @@ describe('MEDIA QUERIES', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')!).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect((document.querySelector('.testcase-style')!.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        if (!__PLUS__) {
+            expect((document.querySelector('.testcase-style')!.nextElementSibling as HTMLStyleElement).sheet!.cssRules.length).toBe(2);
+        }
     });
 
     it('should style print/media query', () => {
@@ -134,7 +142,9 @@ describe('MEDIA QUERIES', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(document.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
-        expect(document.querySelector('.testcase-style-2')!.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+        if (!__PLUS__) {
+            expect(document.querySelector('.testcase-style-2')!.nextElementSibling!.classList.contains('darkreader--sync')).toBe(true);
+        }
     });
 
     it('should handle same cssText but different media rule', () => {

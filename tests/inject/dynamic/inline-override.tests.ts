@@ -3,6 +3,8 @@ import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../support/test-utils';
 
+declare const __PLUS__: boolean;
+
 const theme = {
     ...DEFAULT_THEME,
     darkSchemeBackgroundColor: 'black',
@@ -58,12 +60,18 @@ describe('INLINE STYLES', () => {
         container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);
         const span = document.querySelector('span')!;
-        expect(span.getAttribute('style')!.startsWith('color: red; --darkreader-inline-color:')).toBeTrue();
-        expect(span.getAttribute('style')!.includes('--darkreader-inline-color: var(--darkreader-text-ff0000, #ff1a1a);')).toBe(true);
+        expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
+        if (!__PLUS__) {
+            expect(span.getAttribute('style')!.startsWith('color: red; --darkreader-inline-color:')).toBeTrue();
+            expect(span.getAttribute('style')!.includes('--darkreader-inline-color: var(--darkreader-text-ff0000, #ff1a1a);')).toBe(true);
+        }
 
         span.style.color = '';
         await timeout(0);
-        expect(span.getAttribute('style')).toBe('');
+        expect(getComputedStyle(span).color).toBe('rgb(255, 255, 255)');
+        if (!__PLUS__) {
+            expect(span.getAttribute('style')).toBe('');
+        }
     });
 
     it(`shouldn't touch rel="mask-icon"`, async () => {

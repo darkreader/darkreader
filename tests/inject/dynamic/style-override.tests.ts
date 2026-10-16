@@ -4,6 +4,8 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/injec
 import {createStyleSheetModifier} from '../../../src/inject/dynamic-theme/stylesheet-modifier';
 import {multiline, timeout} from '../support/test-utils';
 
+declare const __PLUS__: boolean;
+
 const theme = {
     ...DEFAULT_THEME,
     darkSchemeBackgroundColor: 'black',
@@ -120,10 +122,12 @@ describe('STYLE ELEMENTS', () => {
         expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
         expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
 
-        const style = document.querySelector('.testcase-style')!;
-        style.nextSibling!.remove();
-        await timeout(0);
-        expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
+        if (!__PLUS__) {
+            const style = document.querySelector('.testcase-style')!;
+            style.nextSibling!.remove();
+            await timeout(0);
+            expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
+        }
         expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
         expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
     });
@@ -143,7 +147,9 @@ describe('STYLE ELEMENTS', () => {
         const style = document.querySelector('.testcase-style')!;
         container.append(style);
         await timeout(0);
-        expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
+        if (!__PLUS__) {
+            expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
+        }
         expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
     });
@@ -158,11 +164,13 @@ describe('STYLE ELEMENTS', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         const style = document.querySelector('.testcase-style')!;
-        const sibling = style.nextSibling!;
+        const sibling = __PLUS__ ? null : style.nextSibling!;
         style.remove();
         await timeout(0);
-        expect(sibling.isConnected).toBe(false);
-        expect(document.querySelector('.darkreader--sync')).toBe(null);
+        if (!__PLUS__) {
+            expect(sibling!.isConnected).toBe(false);
+            expect(document.querySelector('.darkreader--sync')).toBe(null);
+        }
         expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 255, 255)');
     });
@@ -179,7 +187,9 @@ describe('STYLE ELEMENTS', () => {
         style.sheet!.insertRule('strong { color: red }');
         style.sheet!.insertRule('body { background-color: pink }');
         await timeout(0);
-        expect((style.nextSibling as HTMLStyleElement).sheet!.cssRules[0].cssText).toBe('body { background-color: var(--darkreader-background-ffc0cb, #320009); }');
+        if (!__PLUS__) {
+            expect((style.nextSibling as HTMLStyleElement).sheet!.cssRules[0].cssText).toBe('body { background-color: var(--darkreader-background-ffc0cb, #320009); }');
+        }
         expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(141, 141, 141)');
         expect(getComputedStyle(container.querySelector('h1 strong')!).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(50, 0, 9)');
@@ -213,10 +223,12 @@ describe('STYLE ELEMENTS', () => {
         style.sheet!.insertRule('strong { color: orange }');
 
         await timeout(0);
-        const newStyle: HTMLStyleElement = document.querySelector('.testcase-style')!;
-        const nextSibling = newStyle.nextSibling as HTMLStyleElement;
-        expect(nextSibling.sheet!.cssRules.length).toBe(2);
-        expect(nextSibling.classList.contains('darkreader--sync')).toBe(true);
+        if (!__PLUS__) {
+            const newStyle: HTMLStyleElement = document.querySelector('.testcase-style')!;
+            const nextSibling = newStyle.nextSibling as HTMLStyleElement;
+            expect(nextSibling.sheet!.cssRules.length).toBe(2);
+            expect(nextSibling.classList.contains('darkreader--sync')).toBe(true);
+        }
         expect(getComputedStyle(document.querySelector('h1')!).color).toBe('rgb(255, 198, 208)');
         expect(getComputedStyle(document.querySelector('h1 strong')!).color).toBe('rgb(255, 174, 26)');
     });
@@ -237,11 +249,13 @@ describe('STYLE ELEMENTS', () => {
 
         const styleContainer = document.querySelector('.style-container')!;
         const style = styleContainer.querySelector('.testcase-style')!;
-        const override = style.nextElementSibling as HTMLStyleElement;
+        const override = __PLUS__ ? null : style.nextElementSibling as HTMLStyleElement;
         container.append(styleContainer);
         await timeout(0);
-        expect(style.nextElementSibling).toBe(override);
-        expect(override.sheet!.cssRules.length).toBe(2);
+        if (!__PLUS__) {
+            expect(style.nextElementSibling).toBe(override);
+            expect(override!.sheet!.cssRules.length).toBe(2);
+        }
         expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')!).color).toBe('rgb(140, 255, 140)');
     });

@@ -372,6 +372,16 @@ function cleanFallbackStyle() {
     }
 }
 
+function updateRootVars() {
+    if (__PLUS__) {
+        updateExtendedStaticStyle('root-vars', variablesStore.getRootVarsText(theme!));
+        return;
+    }
+
+    const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    variablesStore.putRootVars(rootVarsStyle, theme!);
+}
+
 function createDynamicStyleOverrides() {
     const allStyles = getManageableStyles(document);
 
@@ -386,12 +396,8 @@ function createDynamicStyleOverrides() {
         });
 
     variablesStore.matchVariablesAndDependents();
-    variablesStore.setOnRootVariableChange(() => {
-        const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-        variablesStore.putRootVars(rootVarsStyle, theme!);
-    });
-    const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-    variablesStore.putRootVars(rootVarsStyle, theme!);
+    variablesStore.setOnRootVariableChange(() => updateRootVars());
+    updateRootVars();
 
     styleManagers.forEach((manager) => manager.render(theme!, ignoredImageAnalysisSelectors!));
     if (loadingStyles.size === 0) {
@@ -548,8 +554,7 @@ function watchForUpdates() {
             const styleAttr = element.getAttribute('style') || '';
             if (styleAttr.includes('--')) {
                 variablesStore.matchVariablesAndDependents();
-                const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
-                variablesStore.putRootVars(rootVarsStyle, theme!);
+                updateRootVars();
             }
         }
     }, (root) => {

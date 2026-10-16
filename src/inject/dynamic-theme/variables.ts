@@ -606,7 +606,7 @@ export class VariablesStore {
         this.onRootVariableDefined = callback;
     }
 
-    putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
+    getRootVarsText(theme: Theme): string {
         const declarations = new Map<string, string>();
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVariable(property)) {
@@ -628,7 +628,11 @@ export class VariablesStore {
             cssLines.push(`    ${property}: ${value};`);
         }
         cssLines.push('}');
-        const cssText = cssLines.join('\n');
+        return cssLines.join('\n');
+    }
+
+    putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
+        const cssText = this.getRootVarsText(theme);
         const sheet = styleElement.sheet;
         if (sheet) {
             if (sheet.cssRules.length > 0) {

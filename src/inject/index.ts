@@ -179,6 +179,11 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
     }
 }
 
+// Document Picture-in-Picture windows (e.g. opened by Google Meet) may match
+// prefers-color-scheme: dark regardless of the system color scheme,
+// so their color scheme should not affect automation
+const isPictureInPicture = matchMedia('(display-mode: picture-in-picture)').matches;
+
 function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT | MessageTypeCStoBG.DOCUMENT_RESUME) {
     sendMessage(
         {
@@ -187,6 +192,7 @@ function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.DOCUMENT_CONNECT 
             data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? {
                 isDark: isSystemDarkModeEnabled(),
                 isTopFrame: window === window.top,
+                isPictureInPicture,
             } : {
                 isDark: isSystemDarkModeEnabled(),
             },
@@ -216,9 +222,11 @@ function stopConnectionRetry() {
     }
 }
 
-runColorSchemeChangeDetector((isDark) =>
-    sendMessage({type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE, data: {isDark}})
-);
+if (!isPictureInPicture) {
+    runColorSchemeChangeDetector((isDark) =>
+        sendMessage({type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE, data: {isDark}})
+    );
+}
 
 chrome.runtime.onMessage.addListener(onMessage);
 sendConnectionOrResumeMessage(MessageTypeCStoBG.DOCUMENT_CONNECT);

@@ -322,4 +322,39 @@ describe('Style override', () => {
             ['.nested', 'margin-left', '32px'],
         ]);
     });
+
+    it('should keep style proxy after theme rebuild', async () => {
+        if (product === 'firefox') {
+            return;
+        }
+        await loadTestPage({
+            '/': multiline(
+                '<!DOCTYPE html>',
+                '<html>',
+                '<head>',
+                '    <style class="testcase-style"></style>',
+                '</head>',
+                '<body>',
+                '    <div class="target">Proxy</div>',
+                '</body>',
+                '</html>',
+            ),
+        });
+
+        await pageUtils.evaluateScript(() => {
+            document.dispatchEvent(new CustomEvent('__darkreader__cleanUp'));
+            document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {
+                detail: {enableStyleSheetsProxy: true, enableCustomElementRegistryProxy: true},
+            }));
+        });
+
+        await pageUtils.evaluateScript(() => {
+            const style = document.querySelector('.testcase-style') as HTMLStyleElement;
+            style.sheet!.insertRule('.target { background-color: white; }');
+        });
+
+        await expectStyles([
+            ['.target', 'background-color', 'rgb(24, 26, 27)'],
+        ]);
+    });
 });

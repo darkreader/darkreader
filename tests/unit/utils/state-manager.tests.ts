@@ -69,7 +69,7 @@ describe('State manager utility', () => {
         const stateManager = new StateManagerImpl(key, parent, {
             fromParent: 'fromDefault',
             fromStorage: 'fromDefault',
-        }, {get, set}, noop, noop);
+        }, {get, set}, noop);
 
         expect(getMock).not.toHaveBeenCalled();
         expect(setMock).not.toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromStorage',
-        }, {get, set: setMock}, noop, noop);
+        }, {get, set: setMock}, noop);
 
         expect(setMock).not.toHaveBeenCalled();
         expect(parent).toEqual({
@@ -182,7 +182,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             count: 0,
-        }, {get, set}, noop, noop);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             noSync: true,
@@ -266,7 +266,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             count: 0,
-        }, {get, set}, noop, noop);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             noSync: true,
@@ -347,7 +347,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromDefault',
-        }, {get, set}, noop, noop);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -415,7 +415,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromDefault',
-        }, {get, set}, noop, noop);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -493,152 +493,6 @@ describe('State manager utility', () => {
         resolveSet();
 
         await nextTick();
-        promises2.all('resolved');
-    });
-
-    test('State manager handles onChanged during saveState() and loadState()', async () => {
-        const key = 'key';
-        const storage: any = {};
-
-        let getCount = 0;
-        let getCallback: (() => void) | undefined;
-        const resolveGet = () => {
-            getCallback!();
-            getCallback = undefined;
-        };
-
-        const get = (storageKey: string, callback: (data: any) => void) => {
-            expect(storageKey).toEqual(key);
-            getCount++;
-            getCallback = () => {
-                callback({[storageKey]: storage[storageKey]});
-            };
-        };
-
-        let setCount = 0;
-        let setCallback: (() => void) | undefined;
-        const resolveSet = () => {
-            setCallback!();
-            setCallback = undefined;
-        };
-
-        const set = (items: any, callback: () => void) => {
-            setCount++;
-            setCallback = () => {
-                Object.assign(storage, items);
-                callback();
-            };
-        };
-
-        let onChangedListener: ((data: any) => void) | undefined;
-        const modifyInternalState = (data: any) => {
-            expect(onChangedListener).toBeTruthy();
-            const oldValue = storage[key];
-            storage[key] = data;
-            onChangedListener!({
-                [key]: {
-                    oldValue,
-                    newValue: data,
-                },
-            });
-        };
-
-        const parent: any = {
-            data: 'fromParent',
-        };
-
-        const stateManager = new StateManagerImpl(key, parent, {
-            data: 'fromDefault',
-        }, {get, set}, (listener) => onChangedListener = listener, noop);
-
-        const c1 = jest.fn();
-        stateManager.addChangeListener(c1);
-
-        expect(parent).toEqual({
-            data: 'fromParent',
-        });
-
-        const promises = new PromiseWrapper();
-        promises.add(stateManager.loadState());
-
-        expect(parent).toEqual({
-            data: 'fromParent',
-        });
-        expect(getCount).toEqual(1);
-        expect(setCount).toEqual(0);
-
-        await nextTick();
-        expect(getCount).toEqual(1);
-        expect(setCount).toEqual(0);
-        promises.all('pending');
-
-        expect(c1).not.toHaveBeenCalled();
-
-        modifyInternalState({
-            data: 'fromStorageChange',
-        });
-
-        resolveGet();
-
-        await nextTick();
-        expect(c1).toHaveBeenCalled();
-        expect(parent).toEqual({
-            data: 'fromStorageChange',
-        });
-        expect(getCount).toEqual(2);
-        expect(setCount).toEqual(0);
-        promises.all('resolved');
-
-        expect(stateManager.getStateForTesting()).toEqual('Ready');
-
-        const c2 = jest.fn();
-        stateManager.addChangeListener(c2);
-
-        parent.data = 'new';
-        await stateManager.loadState();
-        expect(parent).toEqual({
-            data: 'new',
-        });
-        expect(getCount).toEqual(2);
-        expect(setCount).toEqual(0);
-        expect(stateManager.getStateForTesting()).toEqual('Ready');
-
-        const promises2 = new PromiseWrapper;
-        promises2.add(stateManager.saveState());
-
-        modifyInternalState({
-            data: 'fromStorageChange2',
-        });
-        expect(getCount).toEqual(2);
-        expect(setCount).toEqual(1);
-        promises2.all('pending');
-
-        // During data race the JS-world data does not get overwriten
-        expect(parent).toEqual({
-            data: 'new',
-        });
-
-        resolveSet();
-
-        await nextTick();
-        expect(parent).toEqual({
-            data: 'new',
-        });
-        expect(getCount).toEqual(3);
-        expect(setCount).toEqual(1);
-        promises2.all('pending');
-
-        expect(c2).not.toHaveBeenCalled();
-
-        resolveGet();
-
-        await nextTick();
-        expect(c2).toHaveBeenCalled();
-        expect(parent).toEqual({
-            data: 'new',
-        });
-        expect(getCount).toEqual(3);
-        expect(setCount).toEqual(1);
         promises2.all('resolved');
     });
 });

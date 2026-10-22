@@ -12,20 +12,11 @@ export class StateManager<T extends Record<string, unknown>> {
 
     constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
         if (isNonPersistent) {
-            function addListener(listener: (data: T) => void) {
-                chrome.storage.local.onChanged.addListener((changes: Record<string, any>) => {
-                    if (localStorageKey in changes) {
-                        listener(changes[localStorageKey].newValue);
-                    }
-                });
-            }
-
             this.stateManager = new StateManagerImpl(
                 localStorageKey,
                 parent,
                 defaults,
                 chrome.storage.local,
-                addListener,
                 logWarn,
             );
         }

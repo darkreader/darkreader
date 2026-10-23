@@ -311,6 +311,12 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
         unparsableColors.has(value.toLowerCase()) &&
         !(prop === 'color' && value === 'initial')
     ) {
+        // CSSOM returns the currentcolor fallback for rules like Tailwind's bg-current/10,
+        // while the effective style comes from a nested @supports color-mix() block.
+        // Skipping modification preserves the original rule structure.
+        if (prop.includes('background') && value.toLowerCase() === 'currentcolor') {
+            return null;
+        }
         return value;
     }
     let rgb: RGBA | null = null;

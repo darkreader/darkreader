@@ -133,6 +133,12 @@ export default class TabManager {
                         return false;
                     }
 
+                    // https://www.google.com/search/warmup.html
+                    if (!sender.tab || typeof sender.tab.id !== 'number' || sender.tab.id < 0) {
+                        logWarn('Sender has invalid tab ID', message, sender);
+                        break;
+                    }
+
                     const {frameId} = sender;
                     const isTopFrame: boolean = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
                     const url = sender.url!;

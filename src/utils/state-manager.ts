@@ -62,6 +62,7 @@ export class StateManager<T extends Record<string, unknown>> {
         if (!this.saving) {
             try {
                 this.saving = this.runSaves();
+                await this.saving;
             } catch (err) {
                 this.logWarn('StateManager.saveState error', err);
             }

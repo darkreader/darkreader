@@ -93,7 +93,7 @@ describe('Toggling the extension', () => {
             ['a', 'color', 'rgb(0, 0, 238)'],
         ]);
         if ((await backgroundUtils.getManifest()).manifest_version === 3) {
-            expect(await backgroundUtils.getChromeStorage('local', ['system-color-state'])).toEqual({
+            expect(await backgroundUtils.getChromeStorage('session', ['system-color-state'])).toEqual({
                 'system-color-state': {wasLastColorSchemeDark: false},
             });
         }

@@ -25,14 +25,14 @@ type TestMessage = {
 } | {
     type: 'getChromeStorage';
     data: {
-        region: 'local' | 'sync';
+        region: 'local' | 'sync' | 'session';
         keys: string | string[];
     };
     id: number;
 } | {
     type: 'changeChromeStorage';
     data: {
-        region: 'local' | 'sync';
+        region: 'local' | 'sync' | 'session';
         data: {[key: string]: any};
     };
     id: number;

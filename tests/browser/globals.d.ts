@@ -25,9 +25,9 @@ declare global {
     const backgroundUtils: {
         changeSettings: (settings: Partial<UserSettings>) => Promise<void>;
         collectData: () => Promise<ExtensionData>;
-        changeChromeStorage: (region: 'local' | 'sync', data: {[key: string]: any}) => Promise<void>;
+        changeChromeStorage: (region: 'local' | 'sync' | 'session', data: {[key: string]: any}) => Promise<void>;
         getColorScheme: () => Promise<ColorScheme>;
-        getChromeStorage: (region: 'local' | 'sync', keys: string[]) => Promise<{[key: string]: any}>;
+        getChromeStorage: (region: 'local' | 'sync' | 'session', keys: string[]) => Promise<{[key: string]: any}>;
         getManifest: () => Promise<chrome.runtime.Manifest>;
         setNews: (news: News[] | null) => Promise<void>;
         onDownload: (callback: (p: {ok: boolean}) => void) => void;

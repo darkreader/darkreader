@@ -84,6 +84,17 @@ describe('INLINE STYLES', () => {
         expect(getComputedStyle(container.querySelector('#start')!).color).toBe('rgba(255, 26, 26, 0.87)');
     });
 
+    it('should override inline styles after disabling and enabling', () => {
+        container.innerHTML = '<span style="color: red;">Toggle inline style</span>';
+        createOrUpdateDynamicTheme(theme, null, false);
+        const span = container.querySelector('span')!;
+        expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
+
+        removeDynamicTheme();
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
+    });
+
     it('should clean up the customProp after originial is gone', async () => {
         container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);

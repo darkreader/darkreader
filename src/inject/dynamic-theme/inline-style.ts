@@ -283,12 +283,15 @@ export function stopWatchingForInlineStyles(): void {
     treeObservers.clear();
     attrObservers.clear();
     inlineStringValueCache.clear();
+    inlineStyleCache = new WeakMap();
+    svgInversionCache = new WeakSet();
+    svgAnalysisConditionCache = new WeakMap();
     resetInlineStyleLoopDetection();
 }
 
-const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const svgInversionCache = new WeakSet<SVGSVGElement>();
-const svgAnalysisConditionCache = new WeakMap<SVGSVGElement, boolean>();
+let inlineStyleCache = new WeakMap<HTMLElement, string>();
+let svgInversionCache = new WeakSet<SVGSVGElement>();
+let svgAnalysisConditionCache = new WeakMap<SVGSVGElement, boolean>();
 const themeProps: Array<keyof Theme> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
 function shouldAnalyzeSVGAsImage(svg: SVGSVGElement) {

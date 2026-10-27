@@ -1,14 +1,25 @@
 const emptyPseudoClasses = [':before', ':after', ':empty'];
 
-export const filterSelectors = {
-    invert: new Set<string>(),
-    dim: new Set<string>(),
-    none: new Set<string>(),
+export type FilterSelectorsCollection = {
+    invert: Set<string>;
+    dim: Set<string>;
+    none: Set<string>;
 };
 
-export function addFilterSelector(selector: string, type: keyof typeof filterSelectors) {
+export const mediaFilterSelectors = new Map<string, FilterSelectorsCollection>();
+
+export function addFilterSelector(selector: string, type: keyof FilterSelectorsCollection, media = '') {
     if (!selector) {
         return;
+    }
+    let filterSelectors = mediaFilterSelectors.get(media);
+    if (!filterSelectors) {
+        filterSelectors = {
+            invert: new Set(),
+            dim: new Set(),
+            none: new Set(),
+        };
+        mediaFilterSelectors.set(media, filterSelectors);
     }
     const selectors = filterSelectors[type];
     let changed = false;
@@ -65,7 +76,5 @@ export function isSelectorWithin(sub: string, parent: string): boolean {
 }
 
 export function cleanFilterSelectors() {
-    filterSelectors.invert.clear();
-    filterSelectors.dim.clear();
-    filterSelectors.none.clear();
+    mediaFilterSelectors.clear();
 }

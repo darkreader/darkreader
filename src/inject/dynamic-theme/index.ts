@@ -21,7 +21,8 @@ import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-t
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from './modify-colors';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor, setFilterSelectorHandler} from './modify-css';
 import {clearColorPalette, getColorPalette, registerVariablesSheet, releaseVariablesSheet} from './palette';
-import {filterSelectors, cleanFilterSelectors, addFilterSelector} from './selectors';
+import {mediaFilterSelectors, cleanFilterSelectors, addFilterSelector} from './selectors';
+import type {FilterSelectorsCollection} from './selectors';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks, setIgnoredCSSURLs} from './style-manager';
 import {injectProxy} from './stylesheet-proxy';
@@ -161,8 +162,8 @@ const scheduleInversionStyleUpdate = throttle(() => {
     });
 });
 
-setFilterSelectorHandler((selector, type) => {
-    const changed = addFilterSelector(selector, type);
+setFilterSelectorHandler((selector, type, media) => {
+    const changed = addFilterSelector(selector, type, media);
     if (changed) {
         scheduleInversionStyleUpdate();
     }
@@ -175,22 +176,22 @@ function getInversionStyleValue(): string {
 
     const rules: string[] = [];
 
-    const appendRule = (selectors: string[], filter: string | null) => {
+    const appendRule = (target: string[], selectors: string[], filter: string | null) => {
         if (!filter || selectors.length === 0) {
             return;
         }
-        rules.push([
+        target.push([
             `${selectors.join(', ')} {`,
             `    filter: ${filter} !important;`,
             '}',
         ].join('\n'));
     };
 
-    const appendCounterInversion = (selectors: string[]) => {
+    const appendCounterInversion = (target: string[], selectors: string[]) => {
         if (theme!.mode === 0 || selectors.length === 0) {
             return;
         }
-        rules.push([
+        target.push([
             `${selectors.join(', ')} {`,
             `    color: black !important;`,
             '}',
@@ -200,11 +201,11 @@ function getInversionStyleValue(): string {
         ].join('\n'));
     };
 
-    const appendInversionCancellation = (selectors: string[]) => {
+    const appendInversionCancellation = (target: string[], selectors: string[]) => {
         if (theme!.mode === 0 || selectors.length === 0) {
             return;
         }
-        rules.push([
+        target.push([
             `${selectors.join(', ')} {`,
             `    filter: none !important;`,
             `    color: var(--darkreader-neutral-text) !important;`,
@@ -215,34 +216,62 @@ function getInversionStyleValue(): string {
         ].join('\n'));
     };
 
-    if ((fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) || filterSelectors.invert.size > 0) {
-        const extraInversionSelectors = [...filterSelectors.invert];
-        const invertSelectors = [...(fixes?.invert ?? []), ...extraInversionSelectors];
+    const buildGroupRules = (media: string): string[] => {
+        const group: string[] = [];
+        const configSelectors = media === '' && fixes && Array.isArray(fixes.invert) ? fixes.invert : [];
+        const filterSelectors = mediaFilterSelectors.get(media);
+
+        if (configSelectors.length > 0 || (filterSelectors && filterSelectors.invert.size > 0)) {
+            buildInversionRules(group, configSelectors, filterSelectors, theme!);
+        }
+        if (filterSelectors && filterSelectors.dim.size > 0) {
+            buildDimRules(group, filterSelectors, theme!);
+        }
+        return group;
+    };
+
+    const buildInversionRules = (group: string[], configSelectors: string[], filterSelectors: FilterSelectorsCollection | undefined, theme: Theme) => {
+        const extraInversionSelectors = filterSelectors ? [...filterSelectors.invert] : [];
+        const invertSelectors = [...configSelectors, ...extraInversionSelectors];
         const invertFilter = getCSSFilterValue({
             ...theme,
             contrast: theme.mode === 0 ? theme.contrast : clamp(theme.contrast - 10, 0, 100),
         });
-        appendRule(invertSelectors, invertFilter);
-        appendCounterInversion(extraInversionSelectors);
-        if (filterSelectors.none.size > 0) {
+        appendRule(group, invertSelectors, invertFilter);
+        appendCounterInversion(group, extraInversionSelectors);
+        if (filterSelectors && filterSelectors.none.size > 0) {
             const noneSelectors = [...filterSelectors.none];
-            appendInversionCancellation(noneSelectors);
-            if (theme.mode === 1) {
+            appendInversionCancellation(group, noneSelectors);
+            if (theme!.mode === 1) {
                 const invertedChildSelectors: string[] = [];
                 noneSelectors.forEach((parent) => {
                     extraInversionSelectors.forEach((child) => invertedChildSelectors.push(`${parent} > ${child}`));
                 });
-                appendRule(invertedChildSelectors, invertFilter);
+                appendRule(group, invertedChildSelectors, invertFilter);
             }
         }
-    }
-    if (filterSelectors.dim.size > 0) {
-        appendRule([...filterSelectors.dim], getCSSFilterValue({
+    };
+
+    const buildDimRules = (group: string[], filterSelectors: FilterSelectorsCollection, theme: Theme) => {
+        appendRule(group, [...filterSelectors.dim], getCSSFilterValue({
             ...theme,
             brightness: clamp(theme.brightness - 10, 5, 200),
             sepia: clamp(theme.sepia + 10, 0, 100),
         }));
-    }
+    };
+
+    const mediaKeys = new Set(['', ...mediaFilterSelectors.keys()]);
+    mediaKeys.forEach((media) => {
+        const group = buildGroupRules(media);
+        if (group.length === 0) {
+            return;
+        }
+        if (media) {
+            rules.push(`@media ${media} {\n${group.join('\n')}\n}`);
+        } else {
+            rules.push(...group);
+        }
+    });
 
     return rules.join('\n');
 }

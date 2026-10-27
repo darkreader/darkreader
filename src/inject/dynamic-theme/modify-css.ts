@@ -10,7 +10,7 @@ import {getAbsoluteURL} from '../../utils/url';
 import {readImageDetailsCache, writeImageDetailsCache} from '../cache';
 import {logWarn, logInfo} from '../utils/log';
 
-import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
+import {cssURLRegex, getCSSURLValue, getCSSBaseBath, getRuleMediaText} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageURL, getSolidColorImageURL, cleanImageProcessingCache, requestBlobURLCheck, isBlobURLCheckResultReady, tryConvertDataURLToBlobURL} from './image';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from './modify-colors';
@@ -106,8 +106,9 @@ export function getModifiableCSSDeclaration(
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         const selectorText = rule.selectorText;
+        const media = getRuleMediaText(rule);
         const pushFilter = selectorText
-            ? (type: FilterType) => pushFilterSelector(selectorText, type)
+            ? (type: FilterType) => pushFilterSelector(selectorText, type, media)
             : null;
         modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled, pushFilter);
     } else if (property.includes('shadow')) {
@@ -278,15 +279,15 @@ export function createFallbackFactory(fn: (colors: typeof colorModifiers) => Fal
 
 export type FilterType = 'invert' | 'dim' | 'none';
 
-let addFilterSelector: ((selector: string, type: FilterType) => void) | null = null;
+let addFilterSelector: ((selector: string, type: FilterType, media: string) => void) | null = null;
 
-export function setFilterSelectorHandler(fn: (selector: string, type: FilterType) => void): void {
+export function setFilterSelectorHandler(fn: (selector: string, type: FilterType, media: string) => void): void {
     addFilterSelector = fn;
 }
 
-export function pushFilterSelector(selector: string, type: FilterType): void {
+export function pushFilterSelector(selector: string, type: FilterType, media = ''): void {
     if (selector && addFilterSelector) {
-        addFilterSelector(selector, type);
+        addFilterSelector(selector, type, media);
     }
 }
 

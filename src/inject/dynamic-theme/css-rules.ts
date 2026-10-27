@@ -292,3 +292,15 @@ export function isContainerRule(rule: CSSRule | null): rule is CSSContainerRule 
     }
     return false;
 }
+
+export function getRuleMediaText(rule: CSSRule): string {
+    const media: string[] = [];
+    let parent = rule.parentRule;
+    while (parent) {
+        if (isMediaRule(parent)) {
+            media.unshift(parent.media.mediaText);
+        }
+        parent = parent.parentRule;
+    }
+    return media.join(' and ');
+}

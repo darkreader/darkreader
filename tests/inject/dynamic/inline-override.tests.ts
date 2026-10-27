@@ -84,6 +84,16 @@ describe('INLINE STYLES', () => {
         expect(getComputedStyle(container.querySelector('#start')!).color).toBe('rgba(255, 26, 26, 0.87)');
     });
 
+    it('should override inline shorthand properties', () => {
+        container.innerHTML = '<span style="border-color: red; border-style: solid; border-width: 1px">inline border shorthand</span>';
+        createOrUpdateDynamicTheme(theme, null, false);
+        const span = container.querySelector('span')!;
+        expect(getComputedStyle(span).borderTopColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(span).borderBottomColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(span).borderLeftColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(span).borderRightColor).toBe('rgb(179, 0, 0)');
+    });
+
     it('should override inline styles after disabling and enabling', () => {
         container.innerHTML = '<span style="color: red;">Toggle inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);

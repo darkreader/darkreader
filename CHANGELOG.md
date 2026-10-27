@@ -1,3 +1,11 @@
+# 4.9.134 (September 27, 2026)
+
+- Edge: Optimized style injection.
+- Handle @media for inversion selectors (Gmail icons issue).
+- Optimized storing extension's state.
+- Fixed overriding undefined CSS variables.
+- Chrome: Fixed theme detection for Picture-In-Picture mode.
+
 # 4.9.133 (September 24, 2026)
 
 - Fixed HTTP 431 error on Salesforce.

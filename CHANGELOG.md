@@ -1,4 +1,4 @@
-# 4.9.134 (September 27, 2026)
+# 4.9.134 (October 27, 2026)
 
 - Edge: Optimized style injection.
 - Handle @media for inversion selectors (Gmail icons issue).

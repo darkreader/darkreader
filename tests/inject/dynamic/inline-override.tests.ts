@@ -67,6 +67,23 @@ describe('INLINE STYLES', () => {
         }
     });
 
+    it('should override inline style with unformatted values', () => {
+        container.innerHTML = '<span style="color:rgb(255,0,0,.87)">Unformatted inline style</span>';
+        createOrUpdateDynamicTheme(theme, null, false);
+        const span = container.querySelector('span')!;
+        expect(getComputedStyle(span).color).toBe('rgba(255, 26, 26, 0.87)');
+    });
+
+    it('should override inline value regardless of its position', () => {
+        container.innerHTML = [
+            '<span id="mid" style="font-size:10px;color:rgb(255,0,0,.87)">mid</span>',
+            '<span id="start" style="color:rgb(255,0,0,.87)">start</span>',
+        ].join('\n');
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('#mid')!).color).toBe('rgba(255, 26, 26, 0.87)');
+        expect(getComputedStyle(container.querySelector('#start')!).color).toBe('rgba(255, 26, 26, 0.87)');
+    });
+
     it('should clean up the customProp after originial is gone', async () => {
         container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);

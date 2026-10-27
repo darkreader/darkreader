@@ -56,6 +56,17 @@ describe('INLINE STYLES', () => {
         expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
     });
 
+    it('should override the bgcolor attribute', () => {
+        container.innerHTML = '<table><tr><td bgcolor="red">Cell with bgcolor</td></tr></table>';
+        createOrUpdateDynamicTheme(theme, null, false);
+        const td = container.querySelector('td')!;
+        expect(getComputedStyle(td).backgroundColor).not.toBe('rgb(255, 0, 0)');
+        if (!__PLUS__) {
+            expect(td.hasAttribute('data-darkreader-inline-bgcolor')).toBe(true);
+            expect(td.style.getPropertyValue('--darkreader-inline-bgcolor')).not.toBe('');
+        }
+    });
+
     it('should clean up the customProp after originial is gone', async () => {
         container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);

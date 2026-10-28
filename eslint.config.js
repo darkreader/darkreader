@@ -4,7 +4,6 @@ import {fixupPluginRules} from '@eslint/compat';
 import eslint from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import * as eslintPluginCompat from 'eslint-plugin-compat';
-import * as eslintPluginImport from 'eslint-plugin-import';
 import globals from 'globals';
 import tslint from 'typescript-eslint';
 import {localRules} from './eslint-plugin-local.js';
@@ -26,21 +25,12 @@ export default tslint.config({
     extends: [
         eslint.configs.recommended,
         tslint.configs.recommended,
-        eslintPluginImport.flatConfigs?.recommended,
-        eslintPluginImport.flatConfigs?.typescript,
     ],
     plugins: {
         '@stylistic': stylistic,
         local: fixupPluginRules({
             rules: localRules,
         }),
-    },
-    settings: {
-        'import/resolver': {
-            node: {
-                extensions: ['.js', '.jsx', '.ts', '.tsx'],
-            },
-        },
     },
     rules: {
         'array-bracket-spacing': ['error', 'never'],
@@ -72,6 +62,7 @@ export default tslint.config({
         'no-implicit-coercion': 'error',
         'no-prototype-builtins': 'off',
         'no-redeclare': 'error',
+        'no-useless-assignment': 'off',
         'no-useless-concat': 'error',
         'no-useless-escape': 'off',
         'no-useless-return': 'error',
@@ -145,22 +136,9 @@ export default tslint.config({
             avoidEscape: true,
         }],
 
-        'import/no-duplicates': 'error',
+        'no-duplicate-imports': ['error', {allowSeparateTypeImports: true}],
 
-        /*
-        'import/no-unresolved': ['error', {
-            ignore: [
-                '^generators\/',
-                '^malevic\/',
-                '^plus\/',
-                '^ui\/',
-                '^utils\/',
-            ],
-        }],
-        */
-        'import/no-unresolved': 'off',
-
-        'import/no-restricted-paths': ['error', {
+        'local/no-restricted-paths': ['error', {
             zones: [{
                 target: './src/inject/',
                 from: './src/background/',

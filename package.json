@@ -67,13 +67,18 @@
     "type": "opencollective",
     "url": "https://opencollective.com/darkreader/donate"
   },
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "fsevents": true,
+    "unrs-resolver": true
+  },
   "dependencies": {
     "malevic": "0.20.3"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",
     "@eslint/eslintrc": "3.3.7",
-    "@eslint/js": "10.0.0",
+    "@eslint/js": "10.0.1",
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/plugin-typescript": "12.3.1",
@@ -88,7 +93,6 @@
     "@types/ws": "8.18.2",
     "chokidar": "6.0.0",
     "eslint-plugin-compat": "7.0.2",
-    "eslint-plugin-import": "2.32.0",
     "globals": "17.13.0",
     "globby": "16.2.4",
     "jasmine-core": "7.0.2",

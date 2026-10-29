@@ -740,7 +740,12 @@ function tryInvertChromePDF() {
     }
 
     const root = chrome.dom.openOrClosedShadowRoot(document.body);
-    if (!root || !root.querySelector('link[href$="/pdf_embedder.css"]')) {
+    if (
+        !root || (
+            !root.querySelector('link[href$="/pdf_embedder.css"]') &&
+            !root.querySelector('iframe[type="application/pdf"]')
+        )
+    ) {
         return;
     }
 

@@ -7,7 +7,7 @@ import {clamp} from '../../utils/math';
 import {isChromium, isEdge, isFirefox, isMobile} from '../../utils/platform';
 import {throttle} from '../../utils/throttle';
 import {generateUID} from '../../utils/uid';
-import {parsedURLCache} from '../../utils/url';
+import {isPDF, parsedURLCache} from '../../utils/url';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
@@ -734,13 +734,71 @@ function createPDFOverlay(parent: ParentNode) {
     }
 }
 
+function tryInvertPdfIframe(root: ShadowRoot): boolean {
+    const applyInversion = (): boolean => {
+        if (!root.querySelector('iframe[type="application/pdf"]')) {
+            return false;
+        }
+        const css = 'iframe[type="application/pdf"] { filter: invert(100%) contrast(90%) !important; }';
+        if (isChromium && !isMobile) {
+            const style = document.createElement('style');
+            style.textContent = css;
+            root.append(style);
+            cleaners.push(() => {
+                style.remove();
+            });
+        } else {
+            const sheet = new CSSStyleSheet();
+            sheet.replaceSync(css);
+            root.adoptedStyleSheets.push(sheet);
+            cleaners.push(() => {
+                const index = root.adoptedStyleSheets.indexOf(sheet);
+                if (index >= 0) {
+                    root.adoptedStyleSheets.splice(index, 1);
+                }
+            });
+        }
+        return true;
+    };
+
+    if (applyInversion()) {
+        return true;
+    }
+    // The viewer iframe is created asynchronously, watch for it.
+    const observer = new MutationObserver(() => {
+        if (applyInversion()) {
+            observer.disconnect();
+        }
+    });
+    observer.observe(root, {childList: true, subtree: true});
+    cleaners.push(() => {
+        observer.disconnect();
+    });
+    return false;
+}
+
 function tryInvertChromePDF() {
     if (!document.body || !chrome.dom) {
         return;
     }
 
     const root = chrome.dom.openOrClosedShadowRoot(document.body);
-    if (!root || !root.querySelector('link[href$="/pdf_embedder.css"]')) {
+    if (!root) {
+        return;
+    }
+
+    // Recent Chrome versions (e.g. 157) render the full-page PDF viewer as an
+    // out-of-process iframe inside the closed shadow root of document.body, and
+    // pdf_embedder.css is no longer used. Page stylesheets cannot reach the
+    // iframe, so a style filtering the iframe element is injected into the
+    // shadow root.
+    if (isPDF(document.location.href) && tryInvertPdfIframe(root)) {
+        return;
+    }
+
+    // Older Chrome versions render the plugin inside the shadow root and load
+    // pdf_embedder.css there.
+    if (!root.querySelector('link[href$="/pdf_embedder.css"]')) {
         return;
     }
 

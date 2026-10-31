@@ -71,6 +71,16 @@ const images = {
         '    <circle fill="white" cx="4" cy="4" r="3" />',
         '</svg>',
     ),
+    viewBoxOnlyIcon: multiline(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">',
+        '    <circle fill="black" cx="4" cy="4" r="3" />',
+        '</svg>',
+    ),
+    viewBoxOnlyStrokeIcon: multiline(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" stroke="black" stroke-width="1">',
+        '    <circle fill="none" cx="4" cy="4" r="3" />',
+        '</svg>',
+    ),
     largeDarkImage: multiline(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="1024" height="1024">',
         '    <rect fill="black" width="100%" height="100%" />',
@@ -163,6 +173,46 @@ describe('IMAGE ANALYSIS', () => {
         expect(details.isLight).toBe(false);
         expect(details.isTransparent).toBe(true);
         expect(details.isLarge).toBe(false);
+    });
+
+    it('should use viewBox size for SVG without width and height', async () => {
+        const details = await getImageDetails(svgToDataURL(images.viewBoxOnlyIcon));
+        expect(details.useViewBox).toBe(true);
+        expect(details.width).toBe(8);
+        expect(details.height).toBe(8);
+    });
+
+    it('should use viewBox size for SVG with XML declaration', async () => {
+        const details = await getImageDetails(svgToDataURL(`<?xml version="1.0" encoding="UTF-8"?>\n${images.viewBoxOnlyIcon}`));
+        expect(details.useViewBox).toBe(true);
+        expect(details.width).toBe(8);
+        expect(details.height).toBe(8);
+    });
+
+    it('should use viewBox size for SVG with leading comment', async () => {
+        const details = await getImageDetails(svgToDataURL(`<!-- icon -->\n${images.viewBoxOnlyIcon}`));
+        expect(details.useViewBox).toBe(true);
+        expect(details.width).toBe(8);
+        expect(details.height).toBe(8);
+    });
+
+    it('should use viewBox size for SVG with leading whitespace', async () => {
+        const details = await getImageDetails(svgToDataURL(`\n${images.viewBoxOnlyIcon}`));
+        expect(details.useViewBox).toBe(true);
+        expect(details.width).toBe(8);
+        expect(details.height).toBe(8);
+    });
+
+    it('should use viewBox size for SVG with stroke-width on root element', async () => {
+        const details = await getImageDetails(svgToDataURL(images.viewBoxOnlyStrokeIcon));
+        expect(details.useViewBox).toBe(true);
+        expect(details.width).toBe(8);
+        expect(details.height).toBe(8);
+    });
+
+    it('should not use viewBox size for SVG with width and height', async () => {
+        const details = await getImageDetails(svgToDataURL(images.darkTransparentIcon));
+        expect(details.useViewBox).toBe(false);
     });
 
     it('should not analyze large image', async () => {

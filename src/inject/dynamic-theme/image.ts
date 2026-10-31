@@ -46,21 +46,26 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                     } else if (svgText.startsWith('%3c')) {
                         svgText = decodeURIComponent(svgText);
                     }
-                    if (svgText.startsWith('<svg ')) {
-                        const closingIndex = svgText.indexOf('>');
-                        const svgOpening = svgText.slice(0, closingIndex + 1).toLocaleLowerCase();
-                        if (svgOpening.includes('viewbox=') && !svgOpening.includes('width=') && !svgOpening.includes('height=')) {
+                    // The root tag can come after an XML declaration, comments, or whitespace
+                    const svgTagIndex = svgText.search(/<svg[\s>]/);
+                    if (svgTagIndex >= 0) {
+                        const closingIndex = svgText.indexOf('>', svgTagIndex);
+                        const svgOpening = svgText.slice(svgTagIndex, closingIndex + 1).toLocaleLowerCase();
+                        // Leading whitespace prevents matches like "stroke-width="
+                        if (/\sviewbox=/.test(svgOpening) && !/\s(width|height)=/.test(svgOpening)) {
                             useViewBox = true;
 
                             // Explicitly set size due to unexpected drawImage() behavior
-                            const viewboxIndex = svgOpening.indexOf('viewbox=');
+                            const viewboxIndex = svgOpening.search(/\sviewbox=/) + 1;
                             const quote = svgOpening[viewboxIndex + 8];
                             const viewboxCloseIndex = svgOpening.indexOf(quote, viewboxIndex + 9);
                             const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex).split(' ').map((x) => parseFloat(x));
                             if (viewBox.length === 4 && !viewBox.some((x) => isNaN(x))) {
                                 const width = viewBox[2] - viewBox[0];
                                 const height = viewBox[3] - viewBox[1];
-                                dataURL = `data:image/svg+xml;base64,${btoa(`<svg width="${width}" height="${height}" ${svgText.slice(5)}`)}`;
+                                const svgPrefix = svgText.slice(0, svgTagIndex);
+                                const svgRest = svgText.slice(svgTagIndex + 5);
+                                dataURL = `data:image/svg+xml;base64,${btoa(`${svgPrefix}<svg width="${width}" height="${height}" ${svgRest}`)}`;
                             }
                         }
                     }

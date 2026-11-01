@@ -34,6 +34,21 @@ lock.name = 'darkreader-lock';
 document.head.appendChild(lock);
 ```
 
+### Preventing inline style changes within a component
+
+Add `data-darkreader-ignore-inline` to prevent Dynamic mode from rewriting inline
+styles and color attributes throughout a subtree, including future descendants:
+
+```html
+<div data-darkreader-ignore-inline>
+    <span style="color: red">Editor content</span>
+</div>
+```
+
+Set the attribute before Dark Reader processes the component; it does not undo
+existing overrides or support live toggling. Stylesheet rules and inherited colors
+still apply. Mark containers inside shadow roots separately.
+
 ## Adding a website that is already dark
 
 If a website is **already dark** and meets the following requirements:

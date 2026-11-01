@@ -4,7 +4,7 @@ declare namespace DarkReader {
      * @param theme Theme options.
      * @param fixes Fixes for the generated theme.
      */
-    function enable(theme: Partial<Theme>, fixes?: DynamicThemeFix): void;
+    function enable(theme: Partial<Theme>, fixes?: Partial<DynamicThemeFix>): void;
 
     /**
      * Disables dark mode for current web page.
@@ -16,7 +16,7 @@ declare namespace DarkReader {
      * @param theme Theme options.
      * @param fixes Fixes for the generated theme.
      */
-    function auto(theme: Partial<Theme> | false, fixes?: DynamicThemeFix): void;
+    function auto(theme: Partial<Theme> | false, fixes?: Partial<DynamicThemeFix>): void;
 
     /**
      * Stops watching for system color scheme.

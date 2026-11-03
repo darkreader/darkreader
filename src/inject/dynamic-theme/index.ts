@@ -4,7 +4,7 @@ import {createTextStyle} from '../../generators/text-style';
 import {forEach, push, toArray} from '../../utils/array';
 import {clearColorCache, getSRGBLightness, parseColorWithCache} from '../../utils/color';
 import {clamp} from '../../utils/math';
-import {isChromium, isEdge, isFirefox, isMobile} from '../../utils/platform';
+import {isChromium, isEdge, isFirefox, isMobile, isLayerRuleSupported} from '../../utils/platform';
 import {throttle} from '../../utils/throttle';
 import {generateUID} from '../../utils/uid';
 import {parsedURLCache} from '../../utils/url';
@@ -279,6 +279,14 @@ function getInversionStyleValue(): string {
 function createStaticStyleOverrides() {
     if (!staticStyleInjector) {
         staticStyleInjector = createStaticStyleInjector();
+    }
+
+    if (isLayerRuleSupported) {
+        const layersStyle = createOrUpdateStyle('darkreader-layers', document);
+        layersStyle.textContent = '@layer darkreader';
+        if (document.head.firstChild !== layersStyle) {
+            document.head.insertBefore(layersStyle, document.head.firstChild);
+        }
     }
 
     staticStyleInjector.begin();

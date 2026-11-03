@@ -184,7 +184,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(getModifiedSelectionStyle(theme));
     }
     if (isLayerRuleSupported) {
-        lines.unshift('@layer {');
+        lines.unshift(`@layer darkreader {`);
         lines.push('}');
     }
     return lines.join('\n');

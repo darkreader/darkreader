@@ -67,6 +67,28 @@ export function watchForStylePositions(
     function handleStyleOperations(root: Document | ShadowRoot, operations: {createdStyles: Set<StyleElement>; movedStyles: Set<StyleElement>; removedStyles: Set<StyleElement>}) {
         const {createdStyles, removedStyles, movedStyles} = operations;
 
+        createdStyles.forEach((s) => {
+            if (removedStyles.has(s)) {
+                if (s.isConnected) {
+                    removedStyles.delete(s);
+                } else {
+                    createdStyles.delete(s);
+                }
+            }
+        });
+        movedStyles.forEach((s) => {
+            if (createdStyles.has(s)) {
+                createdStyles.delete(s);
+            }
+            if (removedStyles.has(s)) {
+                if (s.isConnected) {
+                    removedStyles.delete(s);
+                } else {
+                    movedStyles.delete(s);
+                }
+            }
+        });
+
         createdStyles.forEach((s) => saveStylePosition(s));
         movedStyles.forEach((s) => saveStylePosition(s));
         removedStyles.forEach((s) => forgetStylePosition(s));

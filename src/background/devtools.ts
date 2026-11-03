@@ -113,14 +113,17 @@ export default class DevTools {
 
     private static async loadConfigOverrides(): Promise<void> {
         const [
+            detectorHints,
             dynamicThemeFixes,
             inversionFixes,
             staticThemes,
         ] = await Promise.all([
+            DevTools.getSavedDetectorHints(),
             DevTools.getSavedDynamicThemeFixes(),
             DevTools.getSavedInversionFixes(),
             DevTools.getSavedStaticThemes(),
         ]);
+        ConfigManager.overrides.detectorHints = detectorHints || null;
         ConfigManager.overrides.dynamicThemeFixes = dynamicThemeFixes || null;
         ConfigManager.overrides.inversionFixes = inversionFixes || null;
         ConfigManager.overrides.staticThemes = staticThemes || null;

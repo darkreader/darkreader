@@ -1,3 +1,14 @@
+# 4.9.135 (November 6, 2026)
+
+- Edge iOS: Update user interface.
+- Edge: Fixed not updating a page when picking a theme.
+- Fixed infinite loop when style element is added and moved immediately.
+- Chrome: Fixed PDF inversion.
+- API: Allow partial theme options.
+- Fixed CSS layers order.
+- Fixed handling SVG color attributes.
+- Fixed Dev Tools detector hints config not being applied after restart.
+
 # 4.9.134 (October 27, 2026)
 
 - Edge: Optimized style injection.

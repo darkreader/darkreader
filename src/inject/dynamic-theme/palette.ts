@@ -28,14 +28,32 @@ let variablesSheet: CSSStyleSheet | null;
 
 const registeredColors = new Map<string, RegisteredColor>();
 
+function getVariablesRule() {
+    if (!variablesSheet) {
+        return null;
+    }
+    const rules = variablesSheet.cssRules;
+    for (let i = 0; i < rules.length; i++) {
+        const rule = rules[i] as CSSStyleRule;
+        if (rule.selectorText === ':root' && rule.style) {
+            return rule;
+        }
+    }
+    return null;
+}
+
 export function registerVariablesSheet(sheet: CSSStyleSheet): void {
     variablesSheet = sheet;
+    const rule = getVariablesRule();
+    if (!rule) {
+        return;
+    }
     const types: ColorType[] = ['background', 'text', 'border'];
     registeredColors.forEach((registered) => {
         types.forEach((type) => {
             if (registered[type]) {
                 const {variable, value} = registered[type];
-                (variablesSheet?.cssRules[0] as CSSStyleRule)?.style.setProperty(variable, value);
+                rule.style.setProperty(variable, value);
             }
         });
     });
@@ -73,9 +91,7 @@ export function registerColor(type: ColorType, parsed: RGBA, value: string): str
 
     const variable = `--darkreader-${type}-${hex.replace('#', '')}`;
     registered[type] = {variable, value};
-    if ((variablesSheet?.cssRules[0] as CSSStyleRule)?.style) {
-        (variablesSheet?.cssRules[0] as CSSStyleRule).style.setProperty(variable, value);
-    }
+    getVariablesRule()?.style.setProperty(variable, value);
 
     return getRegisteredVariableValue(type, registered);
 }

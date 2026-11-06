@@ -1,4 +1,5 @@
 import '../support/polyfills';
+import type {DynamicThemeFix} from '../../../src/definitions';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline} from '../support/test-utils';
@@ -121,5 +122,34 @@ describe('COLOR PARSING', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')!).backgroundImage).toBe('linear-gradient(rgb(27, 29, 30), calc(100% - 3px), rgba(0, 0, 0, 0)), linear-gradient(-90deg, rgb(204, 116, 0), rgb(193, 2, 82) 50%, rgb(0, 17, 146))');
+    });
+
+    it('should update when colors change', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-color: rgb(255, 255, 255); }',
+            '</style>',
+            '<h1>Colors update</h1>',
+        );
+        const h1 = container.querySelector('h1')!;
+
+        const fixes: DynamicThemeFix[] = [{
+            url: ['*'],
+            invert: [],
+            css: '',
+            ignoreInlineStyle: [],
+            ignoreImageAnalysis: [],
+            ignoreCSSUrl: [],
+            disableStyleSheetsProxy: false,
+            disableCustomElementRegistryProxy: false,
+        }];
+
+        createOrUpdateDynamicTheme({...theme, darkSchemeBackgroundColor: '#111111'}, fixes, false);
+        const firstColor = getComputedStyle(h1).backgroundColor;
+        expect(firstColor).toBe('rgb(17, 17, 17)');
+
+        createOrUpdateDynamicTheme({...theme, darkSchemeBackgroundColor: '#111213'}, fixes, false);
+        const secondColor = getComputedStyle(h1).backgroundColor;
+        expect(secondColor).toBe('rgb(17, 18, 19)');
     });
 });

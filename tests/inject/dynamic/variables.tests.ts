@@ -204,6 +204,23 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
+    it('should update background variable when it resolves later', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background: var(--bg, white);',
+            '    }',
+            '</style>',
+            '<h1>Background with lately defined variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const style = document.createElement('style');
+        style.textContent = ':root { --bg: red; }';
+        container.append(style);
+        await timeout(0);
+        expect(getComputedStyle(container.querySelector('h1')!).backgroundColor).toBe('rgb(204, 0, 0)');
+    });
+
     it('should handle multi-type vars with deep color refs', () => {
         container.innerHTML = multiline(
             '<style>',

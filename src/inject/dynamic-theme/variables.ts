@@ -304,7 +304,7 @@ export class VariablesStore {
         if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
             return (theme) => {
                 const unknownVars = new Set<string>();
-                const modify = () => {
+                const modify = (wrapUnknownVars = false) => {
                     const variableReplaced = replaceCSSVariablesNames(
                         sourceValue,
                         (v) => {
@@ -315,7 +315,7 @@ export class VariablesStore {
                                 return wrapBgImgVariableName(v);
                             }
                             unknownVars.add(v);
-                            return v;
+                            return wrapUnknownVars ? wrapBgColorVariableName(v) : v;
                         },
                         (fallback) => tryModifyBgColor(fallback, theme),
                     );
@@ -333,9 +333,8 @@ export class VariablesStore {
                 const modified = modify();
                 if (unknownVars.size > 0) {
                     // web.dev and voice.google.com issue where the variable is never defined, but the fallback is.
-                    // TODO: Return a fallback value along with a way to subscribe for a change.
                     if (isFallbackResolved(modified)) {
-                        return modified;
+                        return modify(true);
                     }
                     return new Promise<string>((resolve) => {
                         for (const unknownVar of unknownVars.values()) {

@@ -160,4 +160,14 @@ describe('INLINE STYLES', () => {
         const stop = container.querySelector('stop')!;
         expect(getComputedStyle(stop).stopColor).toBe('rgb(0, 0, 0)');
     });
+
+    it('should resolve variable type in SVG stroke attribute', () => {
+        container.innerHTML = multiline(
+            '<style>:root { --accent: red; }</style>',
+            '<svg><path d="M0,0 L10,10" stroke="var(--accent)" fill="none" /></svg>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const path = container.querySelector('path')!;
+        expect(getComputedStyle(path).stroke).toBe('rgb(255, 26, 26)');
+    });
 });

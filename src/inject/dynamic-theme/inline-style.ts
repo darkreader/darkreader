@@ -426,6 +426,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreIn
     const unsetProps = new Set(Object.keys(overrides));
 
     function overrideValue(sourceAttr: string, sourceCSSProp: string, targetCSSProp: string, modifierCSSProp: string, srcVal: string, cssVal: string) {
+        if (sourceAttr !== 'style' && cssVal.includes('var(')) {
+            variablesStore.addVarDependantForMatching(modifierCSSProp, cssVal);
+        }
+
         const cachedStringValue = inlineStringValueCache.get(modifierCSSProp)?.get(cssVal);
         if (cachedStringValue) {
             setStaticValue(cachedStringValue);

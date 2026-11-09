@@ -32,6 +32,7 @@ export class VariablesStore {
     private varTypes = new Map<string, number>();
     private rulesQueue = new Set<CSSRuleList | CSSRule[]>();
     private inlineStyleQueue: CSSStyleDeclaration[] = [];
+    private varDependantQueue: Array<{property: string; value: string}> = [];
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
     private unknownColorVars = new Set<string>();
@@ -50,6 +51,7 @@ export class VariablesStore {
         this.varTypes.clear();
         this.rulesQueue.clear();
         this.inlineStyleQueue.splice(0);
+        this.varDependantQueue.splice(0);
         this.definedVars.clear();
         this.varRefs.clear();
         this.unknownColorVars.clear();
@@ -78,8 +80,16 @@ export class VariablesStore {
         this.inlineStyleQueue.push(style);
     }
 
+    addVarDependantForMatching(property: string, value: string): void {
+        this.varDependantQueue.push({property, value});
+    }
+
     matchVariablesAndDependents(): void {
-        if (this.rulesQueue.size === 0 && this.inlineStyleQueue.length === 0) {
+        if (
+            this.rulesQueue.size === 0 &&
+            this.inlineStyleQueue.length === 0 &&
+            this.varDependantQueue.length === 0
+        ) {
             return;
         }
         this.changedTypeVars.clear();
@@ -426,8 +436,12 @@ export class VariablesStore {
         this.inlineStyleQueue.forEach((style) => {
             this.collectVarsFromCSSDeclarations(style);
         });
+        this.varDependantQueue.forEach(({property, value}) => {
+            this.inspectVarDependant(property, value);
+        });
         this.rulesQueue.clear();
         this.inlineStyleQueue.splice(0);
+        this.varDependantQueue.splice(0);
     }
 
     private collectVarsFromCSSDeclarations(style: CSSStyleDeclaration) {

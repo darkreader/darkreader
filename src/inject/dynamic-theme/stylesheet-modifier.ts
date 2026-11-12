@@ -9,8 +9,6 @@ import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
 import type {CSSVariableModifier} from './variables';
 
-import {commitSheetChanges} from '@plus/dynamic/inject';
-
 function getThemeKey(theme: Theme) {
     let resultKey = '';
     themeCacheKeys.forEach((key) => {
@@ -393,18 +391,15 @@ export function createStyleSheetModifier(): StyleSheetModifier {
             target.deleteRule(index);
             setRule(target, index, rule);
             asyncDeclarations.delete(key);
-            commitSheetChanges(sheet as CSSStyleSheet);
         }
 
         function rebuildVarRule(key: number) {
             const {rule, target, index} = varDeclarations.get(key)!;
             target.deleteRule(index);
             setRule(target, index, rule);
-            commitSheetChanges(sheet as CSSStyleSheet);
         }
 
         buildStyleSheet();
-        commitSheetChanges(sheet as CSSStyleSheet);
     }
 
     return {modifySheet, shouldRebuildStyle};

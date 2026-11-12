@@ -90,6 +90,9 @@ export function configureKarma(config, env) {
 
     if (plus) {
         options.browsers = ['Chrome'];
+        if (process.platform === 'darwin') {
+            options.browsers.push('Safari');
+        }
     }
 
     if (config.debug) {

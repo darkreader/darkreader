@@ -28,3 +28,6 @@ export function removeExtendedOverrideSheet(_sourceStyle: HTMLStyleElement | SVG
 
 export function setInlineStyleValue(_element: Element, _attr: string, _srcProp: string, _overrideProp: string, _srcValue: string, _overrideValue: string) {
 }
+
+export function commitSheetChanges(_sheet: CSSStyleSheet) {
+}

@@ -242,7 +242,10 @@ export function cleanReadyStateCompleteListeners(): void {
     readyStateCompleteListeners.clear();
 }
 
-if (!isDOMReady()) {
+// Listen until readyState is "complete", so that readyStateCompleteListeners
+// are flushed even when this module is initialized at readyState "interactive"
+// (e.g. when the API is enabled from a deferred script)
+if (!isReadyStateComplete()) {
     const onReadyStateChange = () => {
         if (isDOMReady()) {
             readyStateListeners.forEach((listener) => listener());

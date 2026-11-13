@@ -97,6 +97,19 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
     });
 }
 
+export async function readManagedStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+    return new Promise<T>((resolve) => {
+        chrome.storage.managed.get(defaults, (managed: T) => {
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError.message);
+                resolve(defaults);
+                return;
+            }
+            resolve(managed);
+        });
+    });
+}
+
 function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: string]: any} {
     for (const key in values) {
         const value = values[key];

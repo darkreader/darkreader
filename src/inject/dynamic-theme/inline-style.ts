@@ -409,6 +409,10 @@ function resetInlineStyleLoopDetection() {
 }
 
 export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
+    if (element.closest('[data-darkreader-ignore-inline]')) {
+        return;
+    }
+
     if (parentHadTeardown(element)) {
         return;
     }

@@ -2,6 +2,7 @@ const hostsBreakingOnStylePosition = [
     'chat.google.com',
     'gogoprivate.com',
     'gprivate.com',
+    'levtech.jp',
     'www.berlingske.dk',
     'www.bloomberg.com',
     'www.diffusioneshop.com',

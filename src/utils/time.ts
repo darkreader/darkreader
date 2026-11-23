@@ -238,101 +238,101 @@ function getSunsetSunriseUTCTime(
 }
 
 function getSunsetSunriseUTCTimeWithOffset(
-	latitude: number,
-	longitude: number,
-	date: Date,
-	offset: number,
+    latitude: number,
+    longitude: number,
+    date: Date,
+    offset: number,
 ) {
-	const time = getSunsetSunriseUTCTime(latitude, longitude, date);
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
 
-	if (time.alwaysDay || time.alwaysNight) {
-		return time;
-	}
+    if (time.alwaysDay || time.alwaysNight) {
+        return time;
+    }
 
-	const oneDay = getDuration({ days: 1 });
-	const offsetTime = Math.round(offset * 60) * getDuration({ minutes: 1 });
-	const daylightDuration = (time.sunsetTime - time.sunriseTime + oneDay) % oneDay;
+    const oneDay = getDuration({days: 1});
+    const offsetTime = Math.round(offset * 60) * getDuration({minutes: 1});
+    const daylightDuration = (time.sunsetTime - time.sunriseTime + oneDay) % oneDay;
 
-	if (offsetTime * 2 >= daylightDuration) {
-		return {
-			...time,
-			alwaysDay: false,
-			alwaysNight: true,
-			sunriseTime: 0,
-			sunsetTime: 0,
-		};
-	}
+    if (offsetTime * 2 >= daylightDuration) {
+        return {
+            ...time,
+            alwaysDay: false,
+            alwaysNight: true,
+            sunriseTime: 0,
+            sunsetTime: 0,
+        };
+    }
 
-	return {
-		...time,
-		sunriseTime: (time.sunriseTime + offsetTime) % oneDay,
-		sunsetTime: (time.sunsetTime - offsetTime + oneDay) % oneDay,
-	};
+    return {
+        ...time,
+        sunriseTime: (time.sunriseTime + offsetTime) % oneDay,
+        sunsetTime: (time.sunsetTime - offsetTime + oneDay) % oneDay,
+    };
 }
 
 export function isNightAtLocation(
-	latitude: number,
-	longitude: number,
-	date: Date = new Date(),
-	offset: number = 1,
+    latitude: number,
+    longitude: number,
+    date: Date = new Date(),
+    offset: number = 0,
 ): boolean {
-	const time = getSunsetSunriseUTCTimeWithOffset(latitude, longitude, date, offset);
+    const time = getSunsetSunriseUTCTimeWithOffset(latitude, longitude, date, offset);
 
-	if (time.alwaysDay) {
-		return false;
-	} else if (time.alwaysNight) {
-		return true;
-	}
+    if (time.alwaysDay) {
+        return false;
+    } else if (time.alwaysNight) {
+        return true;
+    }
 
-	const sunriseTime = time.sunriseTime;
-	const sunsetTime = time.sunsetTime;
-	const currentTime = (
-		date.getUTCHours() * getDuration({ hours: 1 }) +
-		date.getUTCMinutes() * getDuration({ minutes: 1 }) +
-		date.getUTCSeconds() * getDuration({ seconds: 1 }) +
-		date.getUTCMilliseconds()
-	);
+    const sunriseTime = time.sunriseTime;
+    const sunsetTime = time.sunsetTime;
+    const currentTime = (
+        date.getUTCHours() * getDuration({hours: 1}) +
+        date.getUTCMinutes() * getDuration({minutes: 1}) +
+        date.getUTCSeconds() * getDuration({seconds: 1}) +
+        date.getUTCMilliseconds()
+    );
 
-	return isInTimeIntervalUTC(sunsetTime, sunriseTime, currentTime);
+    return isInTimeIntervalUTC(sunsetTime, sunriseTime, currentTime);
 }
 
 export function nextTimeChangeAtLocation(
-	latitude: number,
-	longitude: number,
-	date: Date = new Date(),
-	offset: number = 1,
+    latitude: number,
+    longitude: number,
+    date: Date = new Date(),
+    offset: number = 0,
 ): number {
-	const time = getSunsetSunriseUTCTimeWithOffset(latitude, longitude, date, offset);
+    const time = getSunsetSunriseUTCTimeWithOffset(latitude, longitude, date, offset);
 
-	if (time.alwaysDay || time.alwaysNight) {
-		return date.getTime() + getDuration({ days: 1 });
-	}
+    if (time.alwaysDay || time.alwaysNight) {
+        return date.getTime() + getDuration({days: 1});
+    }
 
-	const [firstTimeOnDay, lastTimeOnDay] = time.sunriseTime < time.sunsetTime ? [time.sunriseTime, time.sunsetTime] : [time.sunsetTime, time.sunriseTime];
-	const currentTime = (
-		date.getUTCHours() * getDuration({ hours: 1 }) +
-		date.getUTCMinutes() * getDuration({ minutes: 1 }) +
-		date.getUTCSeconds() * getDuration({ seconds: 1 }) +
-		date.getUTCMilliseconds()
-	);
+    const [firstTimeOnDay, lastTimeOnDay] = time.sunriseTime < time.sunsetTime ? [time.sunriseTime, time.sunsetTime] : [time.sunsetTime, time.sunriseTime];
+    const currentTime = (
+        date.getUTCHours() * getDuration({hours: 1}) +
+        date.getUTCMinutes() * getDuration({minutes: 1}) +
+        date.getUTCSeconds() * getDuration({seconds: 1}) +
+        date.getUTCMilliseconds()
+    );
 
-	if (currentTime <= firstTimeOnDay!) {
-		// Timeline:
-		// --- firstTimeOnDay <---> lastTimeOnDay ---
-		//  ^
-		// Current time
-		return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, firstTimeOnDay);
-	}
-	if (currentTime <= lastTimeOnDay!) {
-		// Timeline:
-		// --- firstTimeOnDay <---> lastTimeOnDay ---
-		//                      ^
-		//                 Current time
-		return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, lastTimeOnDay);
-	}
-	// Timeline:
-	// --- firstTimeOnDay <---> lastTimeOnDay ---
-	//                                         ^
-	//                                    Current time
-	return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, firstTimeOnDay);
+    if (currentTime <= firstTimeOnDay!) {
+        // Timeline:
+        // --- firstTimeOnDay <---> lastTimeOnDay ---
+        //  ^
+        // Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, firstTimeOnDay);
+    }
+    if (currentTime <= lastTimeOnDay!) {
+        // Timeline:
+        // --- firstTimeOnDay <---> lastTimeOnDay ---
+        //                      ^
+        //                 Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, lastTimeOnDay);
+    }
+    // Timeline:
+    // --- firstTimeOnDay <---> lastTimeOnDay ---
+    //                                         ^
+    //                                    Current time
+    return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, firstTimeOnDay);
 }

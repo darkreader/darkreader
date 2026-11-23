@@ -26,7 +26,7 @@ export function SunMoonIcon({date, latitude, longitude, offset}: SunMoonIconProp
         );
     }
 
-	if (isNightAtLocation(latitude, longitude, date, offset)) {
+    if (isNightAtLocation(latitude, longitude, date, offset)) {
         // moon icon
         return (
             <svg viewBox="0 0 16 16">

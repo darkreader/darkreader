@@ -126,7 +126,7 @@ export interface TimeSettings {
 export interface LocationSettings {
     latitude: number | null;
     longitude: number | null;
-	offset: number;
+    offset: number;
 }
 
 export interface TabInfo {

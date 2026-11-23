@@ -194,6 +194,25 @@ describe('LINK STYLES', () => {
         }
     });
 
+    it(`Shouldn't wait for an empty href link to load`, async () => {
+        const link = createStyleLink(null);
+        link.setAttribute('href', '');
+        container.innerHTML = multiline(
+            '<style>',
+            '   h1 { background: gray; }',
+            '</style>',
+            '<h1>Link <strong>with empty href</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(50);
+        const h1 = document.querySelector('h1')!;
+        expect(getComputedStyle(h1).backgroundColor).toBe('rgb(102, 102, 102)');
+        if (!__PLUS__) {
+            expect(document.querySelector('.darkreader--fallback')!.textContent).toBe('');
+        }
+    });
+
     it('should handle styles with @import "..." screen;', async () => {
         const importedCSS = 'h1 { background: gray; }';
         const importedURL = getCSSEchoURL(importedCSS);

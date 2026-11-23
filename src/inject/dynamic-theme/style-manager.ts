@@ -87,7 +87,7 @@ export function shouldManageStyle(element: Node | null): boolean {
                 element instanceof HTMLLinkElement &&
                 Boolean(element.rel) &&
                 element.rel.toLowerCase().includes('stylesheet') &&
-                Boolean(element.href) &&
+                Boolean(element.getAttribute('href')?.trim()) &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
                 !shouldIgnoreCSSURL(element.href)

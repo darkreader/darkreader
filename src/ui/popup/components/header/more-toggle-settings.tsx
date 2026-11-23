@@ -131,6 +131,27 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                             }
                         }}
                     />
+					<TextBox
+						class="header__more-settings__location__offset"
+						type="number"
+						min="0"
+						max="6"
+						step="any"
+						style={{width: '35px',textAlign: 'right',flex: '0 0 35px',}}
+						placeholder="Offset"
+						value={String(locationSettings.offset)}
+						onchange={(e) => {
+							const value = Number(e.target.value);
+							if (e.target.value !== '' && Number.isFinite(value) && value >= 0 && value <= 6) {
+								actions.changeSettings({location: {...locationSettings, offset: value}});
+							}
+						}}
+						onkeypress={(e) => {
+							if (e.key === 'Enter') {
+								(e.target as HTMLInputElement).blur();
+							}
+						}}
+					/>
                 </div>
                 <p class="header__more-settings__location-description">
                     {getLocalMessage('set_location')}

@@ -128,7 +128,7 @@ function Header(props: HeaderProps) {
                     {(isTimeAutomation
                         ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
                         : (isLocationAutomation
-                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude!} longitude={data.settings.location.longitude!} />)
+                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude!} longitude={data.settings.location.longitude!} offset={data.settings.location.offset} />)
                             : <SystemIcon />))}
                 </span>
             </div>

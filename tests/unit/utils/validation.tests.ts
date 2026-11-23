@@ -198,8 +198,8 @@ test('Settings Validation', () => {
         },
         location: {
             latitude: 59,
-			longitude: 53,
-			offset: 1,
+            longitude: 53,
+            offset: 0,
         },
         previewNewDesign: true,
         previewNewestDesign: false,

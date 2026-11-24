@@ -47,16 +47,19 @@ export async function getImageDetails(url: string): Promise<ImageDetails> {
                         svgText = decodeURIComponent(svgText);
                     }
                     // The root tag can come after an XML declaration, comments, or whitespace
-                    const svgTagIndex = svgText.search(/<svg[\s>]/);
+                    const svgTagIndex = svgText.indexOf('<svg ');
                     if (svgTagIndex >= 0) {
                         const closingIndex = svgText.indexOf('>', svgTagIndex);
                         const svgOpening = svgText.slice(svgTagIndex, closingIndex + 1).toLocaleLowerCase();
-                        // Leading whitespace prevents matches like "stroke-width="
-                        if (/\sviewbox=/.test(svgOpening) && !/\s(width|height)=/.test(svgOpening)) {
+                        if (
+                            svgOpening.includes(' viewbox') &&
+                            !svgOpening.includes(' width') &&
+                            !svgOpening.includes(' height')
+                        ) {
                             useViewBox = true;
 
                             // Explicitly set size due to unexpected drawImage() behavior
-                            const viewboxIndex = svgOpening.search(/\sviewbox=/) + 1;
+                            const viewboxIndex = svgOpening.indexOf(' viewbox=') + 1;
                             const quote = svgOpening[viewboxIndex + 8];
                             const viewboxCloseIndex = svgOpening.indexOf(quote, viewboxIndex + 9);
                             const viewBox = svgOpening.slice(viewboxIndex + 9, viewboxCloseIndex).split(' ').map((x) => parseFloat(x));

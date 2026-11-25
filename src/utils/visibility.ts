@@ -47,7 +47,7 @@ function stopWatchingForDocumentVisibility(): void {
 }
 
 export function setDocumentVisibilityListener(callback: () => void): void {
-    const alreadyWatching = Boolean(documentVisibilityListener);
+    stopWatchingForDocumentVisibility();
     documentVisibilityListener = () => {
         if (!document.hidden) {
             removeDocumentVisibilityListener();
@@ -55,9 +55,7 @@ export function setDocumentVisibilityListener(callback: () => void): void {
             documentIsVisible_ = true;
         }
     };
-    if (!alreadyWatching) {
-        watchForDocumentVisibility();
-    }
+    watchForDocumentVisibility();
 }
 
 export function removeDocumentVisibilityListener(): void {

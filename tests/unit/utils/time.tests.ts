@@ -89,6 +89,9 @@ test('Nigth check', () => {
     // Places where sunset comes before sunrise (in UTC)
     expect(isNightAtLocation(0, 180, utcDate(2019, 8, 9, 0, 0), 0)).toEqual(false);
     expect(isNightAtLocation(0, 180, utcDate(2019, 8, 9, 7, 0), 0)).toEqual(true);
+
+    // 30-minute offset
+    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 5, 30), 30)).toEqual(true);
 });
 
 test('Sunrise/sunset', () => {
@@ -125,4 +128,8 @@ test('Sunrise/sunset', () => {
     // Places where sunset comes before sunrise (in UTC)
     expect(nextTimeChangeAtLocation(0, 180, utcDate(2019, 8, 9, 0, 0), 0)).toEqual(Date.UTC(2019, 8, 9, 6, 0, 50, 152));
     expect(nextTimeChangeAtLocation(0, 180, utcDate(2019, 8, 9, 7, 0), 0)).toEqual(Date.UTC(2019, 8, 9, 17, 54, 18, 610));
+
+    // 30-minute offset
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 5, 30), 30)).toEqual(Date.UTC(2019, 8, 9, 5, 54, 2, 501));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 17, 0), 30)).toEqual(Date.UTC(2019, 8, 9, 17, 59, 46, 448));
 });

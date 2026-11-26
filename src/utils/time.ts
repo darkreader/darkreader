@@ -250,7 +250,7 @@ function getSunsetSunriseUTCTimeWithOffset(
     }
 
     const oneDay = getDuration({days: 1});
-    const offsetTime = Math.round(offset * 60) * getDuration({minutes: 1});
+    const offsetTime = Math.round(offset) * getDuration({minutes: 1});
     const daylightDuration = (time.sunsetTime - time.sunriseTime + oneDay) % oneDay;
 
     if (offsetTime * 2 >= daylightDuration) {

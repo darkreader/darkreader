@@ -133,23 +133,24 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                     />
                     <TextBox
                         class="header__more-settings__location__offset"
-                        type="number"
-                        min="0"
-                        max="6"
-                        step="any"
-                        style={{width: '35px', textAlign: 'right', flex: '0 0 35px'}}
-                        placeholder="Offset"
-                        value={String(locationSettings.offset)}
+                        type="text"
+                        style={{width: '35px', flex: '0 0 35px'}}
+                        oncreate={(node) => (node as HTMLInputElement).value = String(locationSettings.offset)}
+                        title={getLocalMessage('offsetMinutes')}
                         onchange={(e) => {
-                            const value = Number(e.target.value);
-                            if (e.target.value !== '' && Number.isFinite(value) && value >= 0 && value <= 6) {
-                                actions.changeSettings({location: {...locationSettings, offset: value}});
+                            const input = e.target;
+                            let num = Math.floor(Number(input.value));
+                            if (isNaN(num)) {
+                                num = 0;
+                            } else if (num > 360) {
+                                num = 360;
+                            } else if (num < 0) {
+                                num = 0;
                             }
-                        }}
-                        onkeypress={(e) => {
-                            if (e.key === 'Enter') {
-                                (e.target as HTMLInputElement).blur();
-                            }
+                            input.value = String(num);
+                            actions.changeSettings({
+                                location: {...locationSettings, offset: num},
+                            });
                         }}
                     />
                 </div>

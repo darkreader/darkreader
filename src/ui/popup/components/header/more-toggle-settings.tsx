@@ -131,6 +131,28 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                             }
                         }}
                     />
+                    <TextBox
+                        class="header__more-settings__location__offset"
+                        type="text"
+                        style={{width: '35px', flex: '0 0 35px'}}
+                        oncreate={(node) => (node as HTMLInputElement).value = String(locationSettings.offset)}
+                        title={getLocalMessage('offsetMinutes')}
+                        onchange={(e) => {
+                            const input = e.target;
+                            let num = Math.floor(Number(input.value));
+                            if (isNaN(num)) {
+                                num = 0;
+                            } else if (num > 360) {
+                                num = 360;
+                            } else if (num < 0) {
+                                num = 0;
+                            }
+                            input.value = String(num);
+                            actions.changeSettings({
+                                location: {...locationSettings, offset: num},
+                            });
+                        }}
+                    />
                 </div>
                 <p class="header__more-settings__location-description">
                     {getLocalMessage('set_location')}

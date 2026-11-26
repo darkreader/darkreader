@@ -175,6 +175,13 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
         const isValidLoc = (x: any) => x === null || isNumber(x);
         locValidator.validateProperty(location, 'latitude', isValidLoc, location);
         locValidator.validateProperty(location, 'longitude', isValidLoc, location);
+        if (location.offset === undefined) {
+            location.offset = DEFAULT_SETTINGS.location.offset;
+        }
+        locValidator.validateProperty(location, 'offset', (x) => isNumber(x) && x >= 0 && x <= 360, {
+            ...location,
+            offset: DEFAULT_SETTINGS.location.offset,
+        });
         return locValidator.errors.length === 0;
     }, DEFAULT_SETTINGS);
 

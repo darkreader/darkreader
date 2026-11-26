@@ -187,10 +187,10 @@ export class Extension {
                 }
                 break;
             case AutomationMode.LOCATION: {
-                const {latitude, longitude} = UserStorage.settings.location;
+                const {latitude, longitude, offset} = UserStorage.settings.location;
                 if (latitude != null && longitude != null) {
-                    isAutoDark = isNightAtLocation(latitude, longitude);
-                    nextCheck = nextTimeChangeAtLocation(latitude, longitude);
+                    isAutoDark = isNightAtLocation(latitude, longitude, undefined, offset);
+                    nextCheck = nextTimeChangeAtLocation(latitude, longitude, undefined, offset);
                 }
                 break;
             }

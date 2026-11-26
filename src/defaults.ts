@@ -100,6 +100,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     location: {
         latitude: null,
         longitude: null,
+        offset: 0,
     },
     previewNewDesign: false,
     previewNewestDesign: false,

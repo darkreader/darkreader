@@ -237,12 +237,46 @@ function getSunsetSunriseUTCTime(
     };
 }
 
+function getSunsetSunriseUTCTimeWithOffset(
+    latitude: number,
+    longitude: number,
+    date: Date,
+    offset: number,
+) {
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
+
+    if (time.alwaysDay || time.alwaysNight) {
+        return time;
+    }
+
+    const oneDay = getDuration({days: 1});
+    const offsetTime = Math.round(offset) * getDuration({minutes: 1});
+    const daylightDuration = (time.sunsetTime - time.sunriseTime + oneDay) % oneDay;
+
+    if (offsetTime * 2 >= daylightDuration) {
+        return {
+            ...time,
+            alwaysDay: false,
+            alwaysNight: true,
+            sunriseTime: 0,
+            sunsetTime: 0,
+        };
+    }
+
+    return {
+        ...time,
+        sunriseTime: (time.sunriseTime + offsetTime) % oneDay,
+        sunsetTime: (time.sunsetTime - offsetTime + oneDay) % oneDay,
+    };
+}
+
 export function isNightAtLocation(
     latitude: number,
     longitude: number,
     date: Date = new Date(),
+    offset: number = 0,
 ): boolean {
-    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
+    const time = getSunsetSunriseUTCTimeWithOffset(latitude, longitude, date, offset);
 
     if (time.alwaysDay) {
         return false;
@@ -266,12 +300,11 @@ export function nextTimeChangeAtLocation(
     latitude: number,
     longitude: number,
     date: Date = new Date(),
+    offset: number = 0,
 ): number {
-    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
+    const time = getSunsetSunriseUTCTimeWithOffset(latitude, longitude, date, offset);
 
-    if (time.alwaysDay) {
-        return date.getTime() + getDuration({days: 1});
-    } else if (time.alwaysNight) {
+    if (time.alwaysDay || time.alwaysNight) {
         return date.getTime() + getDuration({days: 1});
     }
 

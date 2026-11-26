@@ -199,6 +199,7 @@ test('Settings Validation', () => {
         location: {
             latitude: 59,
             longitude: 53,
+            offset: 0,
         },
         previewNewDesign: true,
         previewNewestDesign: false,
@@ -211,4 +212,12 @@ test('Settings Validation', () => {
     validation = validateSettings(validSet);
     expect(validation.errors).toEqual([]);
     expect(validSet).toEqual(validSetCopy);
+
+    const legacySet = JSON.parse(JSON.stringify(validSet));
+    delete legacySet.location.offset;
+
+    validation = validateSettings(legacySet);
+
+    expect(validation.errors).toEqual([]);
+    expect(legacySet.location.offset).toBe(DEFAULT_SETTINGS.location.offset);
 });

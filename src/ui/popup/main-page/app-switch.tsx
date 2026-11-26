@@ -80,7 +80,7 @@ export default function AppSwitch(props: ViewProps) {
                         {(isTimeAutomation
                             ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
                             : (isLocationAutomation
-                                ? (<SunMoonIcon date={now} latitude={props.data.settings.location.latitude!} longitude={props.data.settings.location.longitude!} />)
+                                ? (<SunMoonIcon date={now} latitude={props.data.settings.location.latitude!} longitude={props.data.settings.location.longitude!} offset={props.data.settings.location.offset} />)
                                 : <SystemIcon />))}
                     </span>
                 </MultiSwitch>
